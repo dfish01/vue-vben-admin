@@ -12,6 +12,7 @@ export enum LoginStateEnum {
   REGISTER,
   RESET_PASSWORD,
   MOBILE,
+  EMAIL,
   QR_CODE,
 }
 
@@ -53,14 +54,41 @@ export function useFormValid<T extends Object = any>(formRef: Ref<FormInstance>)
 export function useFormRules(formData?: Recordable) {
   const { t } = useI18n();
 
-  const getAccountFormRule = computed(() => createRule(t('sys.login.accountPlaceholder')));
+  const getNickNameFormRule = computed(() => createRule(t('sys.login.nickNamePlaceholder')));
   const getPasswordFormRule = computed(() => createRule(t('sys.login.passwordPlaceholder')));
   const getSmsFormRule = computed(() => createRule(t('sys.login.smsPlaceholder')));
-  const getMobileFormRule = computed(() => createRule(t('sys.login.mobilePlaceholder')));
+  // const getMobileFormRule = computed(() => createRule(t('sys.login.mobilePlaceholder')));
+  // const getEmailFormRule = computed(() => createRule(t('sys.login.emailPlaceholder')));
+  const getMobileFormRule = computed(() => [
+    {
+      required: true,
+      message: t('sys.login.mobilePlaceholder'),
+      trigger: 'change',
+    },
+    { validator: validateMobile, trigger: 'change' },
+  ]);
+
+  const getEmailFormRule = computed(() => [{ validator: validateEmail, trigger: 'change' }]);
 
   const validatePolicy = async (_: RuleObject, value: boolean) => {
     return !value ? Promise.reject(t('sys.login.policyPlaceholder')) : Promise.resolve();
   };
+
+  function validateMobile(_: RuleObject, value: string) {
+    const pattern = /^1[3-9]\d{9}$/;
+    if (pattern.test(value)) {
+      return Promise.resolve();
+    }
+    return Promise.reject(t('sys.login.phoneValidPlaceholder'));
+  }
+
+  function validateEmail(_: RuleObject, value: string) {
+    const pattern = /\S+@\S+\.\S+/;
+    if (pattern.test(value)) {
+      return Promise.resolve();
+    }
+    return Promise.reject(t('sys.login.emailValidPlaceholder'));
+  }
 
   const validateConfirmPassword = (password: string) => {
     return async (_: RuleObject, value: string) => {
@@ -75,21 +103,27 @@ export function useFormRules(formData?: Recordable) {
   };
 
   const getFormRules = computed((): { [k: string]: ValidationRule | ValidationRule[] } => {
-    const accountFormRule = unref(getAccountFormRule);
+    const nickNameFormRule = unref(getNickNameFormRule);
     const passwordFormRule = unref(getPasswordFormRule);
     const smsFormRule = unref(getSmsFormRule);
     const mobileFormRule = unref(getMobileFormRule);
+    const emailFormRule = unref(getEmailFormRule);
 
     const mobileRule = {
-      sms: smsFormRule,
+      code: smsFormRule,
       mobile: mobileFormRule,
+    };
+    const emailRule = {
+      code: smsFormRule,
+      email: emailFormRule,
     };
     switch (unref(currentState)) {
       // register form rules
       case LoginStateEnum.REGISTER:
         return {
-          account: accountFormRule,
+          nickName: nickNameFormRule,
           password: passwordFormRule,
+          email: emailFormRule,
           confirmPassword: [
             { validator: validateConfirmPassword(formData?.password), trigger: 'change' },
           ],
@@ -100,18 +134,23 @@ export function useFormRules(formData?: Recordable) {
       // reset password form rules
       case LoginStateEnum.RESET_PASSWORD:
         return {
-          account: accountFormRule,
-          ...mobileRule,
+          password: passwordFormRule,
+          email: emailFormRule,
+          confirmPassword: [
+            { validator: validateConfirmPassword(formData?.password), trigger: 'change' },
+          ],
+          code: smsFormRule,
         };
 
       // mobile form rules
       case LoginStateEnum.MOBILE:
         return mobileRule;
-
+      case LoginStateEnum.EMAIL:
+        return emailRule;
       // login form rules
       default:
         return {
-          account: accountFormRule,
+          email: emailFormRule,
           password: passwordFormRule,
         };
     }
@@ -119,7 +158,7 @@ export function useFormRules(formData?: Recordable) {
   return { getFormRules };
 }
 
-function createRule(message: string): ValidationRule[] {
+function createRule(message: string) {
   return [
     {
       required: true,

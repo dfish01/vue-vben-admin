@@ -8,11 +8,11 @@
     v-show="getShow"
     @keypress.enter="handleLogin"
   >
-    <FormItem name="account" class="enter-x">
+    <FormItem name="email" class="enter-x">
       <Input
         size="large"
-        v-model:value="formData.account"
-        :placeholder="t('sys.login.userName')"
+        v-model:value="formData.email"
+        :placeholder="t('sys.login.email')"
         class="fix-auto-fill"
       />
     </FormItem>
@@ -52,18 +52,18 @@
         {{ t('sys.login.registerButton') }}
       </Button> -->
     </FormItem>
-    <ARow class="enter-x" :gutter="[16, 16]">
+    <ARow class="enter-x">
       <ACol :md="8" :xs="24">
-        <Button block @click="setLoginState(LoginStateEnum.MOBILE)">
-          {{ t('sys.login.mobileSignInFormTitle') }}
+        <Button block @click="setLoginState(LoginStateEnum.EMAIL)">
+          {{ t('sys.login.emailSignInFormTitle') }}
         </Button>
       </ACol>
-      <ACol :md="8" :xs="24">
-        <Button block @click="setLoginState(LoginStateEnum.QR_CODE)">
+      <ACol :md="8" :xs="24" class="!my-2 !md:my-0 xs:mx-0 md:mx-2">
+        <Button block @click="setLoginState(LoginStateEnum.QR_CODE)" disabled>
           {{ t('sys.login.qrSignInFormTitle') }}
         </Button>
       </ACol>
-      <ACol :md="8" :xs="24">
+      <ACol :md="6" :xs="24">
         <Button block @click="setLoginState(LoginStateEnum.REGISTER)">
           {{ t('sys.login.registerButton') }}
         </Button>
@@ -119,8 +119,8 @@
   const rememberMe = ref(false);
 
   const formData = reactive({
-    account: 'vben',
-    password: '123456',
+    email: '',
+    password: '',
   });
 
   const { validForm } = useFormValid(formRef);
@@ -136,13 +136,13 @@
       loading.value = true;
       const userInfo = await userStore.login({
         password: data.password,
-        username: data.account,
+        email: data.email,
         mode: 'none', //不要默认的错误提示
       });
       if (userInfo) {
         notification.success({
           message: t('sys.login.loginSuccessTitle'),
-          description: `${t('sys.login.loginSuccessDesc')}: ${userInfo.realName}`,
+          description: `${t('sys.login.loginSuccessDesc')}: ${userInfo.nickName}`,
           duration: 3,
         });
       }

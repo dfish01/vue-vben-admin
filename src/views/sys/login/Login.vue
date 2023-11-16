@@ -39,31 +39,62 @@
             <LoginForm />
             <ForgetPasswordForm />
             <RegisterForm />
+            <EmailForm />
             <MobileForm />
             <QrCodeForm />
           </div>
         </div>
       </div>
     </div>
+    <!-- ...原有的代码... -->
+    <div
+      class="absolute bottom-4 left-0 w-full text-center"
+      style="display: flex; flex-direction: column"
+    >
+      <span class="text-sm">
+        Copyright © 2023-现在 自绘记录 |
+        <a href="https://beian.miit.gov.cn/" target="_blank"> 闽ICP备2023010181号-1</a>
+      </span>
+      <span class="text-sm">
+        本网站由<a
+          href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral"
+          target="_blank"
+        >
+          <img :src="ypyImg" alt="Upyun Logo" width="60" />
+        </a>
+        提供CDN加速/云存储服务
+      </span>
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
-  import { computed } from 'vue';
+  import { computed, onMounted } from 'vue';
   import { AppLogo, AppLocalePicker, AppDarkModeToggle } from '/@/components/Application';
   import LoginForm from './LoginForm.vue';
   import ForgetPasswordForm from './ForgetPasswordForm.vue';
   import RegisterForm from './RegisterForm.vue';
   import MobileForm from './MobileForm.vue';
+  import EmailForm from './EmailForm.vue';
   import QrCodeForm from './QrCodeForm.vue';
   import { useGlobSetting } from '/@/hooks/setting';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { useLocaleStore } from '/@/store/modules/locale';
+  import { useRoute } from 'vue-router';
+  import { SvgIcon } from '/@/components/Icon';
+  import ypyImg from '/@/assets/images/又拍云_logo5.png';
 
+  const route = useRoute();
   defineProps({
     sessionTimeout: {
       type: Boolean,
     },
+  });
+
+  onMounted(() => {
+    // 获取 URL 参数
+    const queryParam = route.query.someParam;
+    console.log('Query Parameter2:', queryParam);
   });
 
   const globSetting = useGlobSetting();

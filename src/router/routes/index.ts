@@ -4,6 +4,7 @@ import { PAGE_NOT_FOUND_ROUTE, REDIRECT_ROUTE } from '/@/router/routes/basic';
 
 import { mainOutRoutes } from './mainOut';
 import { PageEnum } from '/@/enums/pageEnum';
+import { ExceptionEnum } from '/@/enums/exceptionEnum';
 import { t } from '/@/hooks/web/useI18n';
 
 // import.meta.glob() 直接引入所有的模块 Vite 独有的功能
@@ -38,10 +39,23 @@ export const LoginRoute: AppRouteRecordRaw = {
   },
 };
 
+export const VerifyRoute: AppRouteRecordRaw = {
+  path: '/verify',
+  name: 'Verify',
+  component: () => import('/@/views/sys/exception/Exception.vue'),
+  props: {
+    status: ExceptionEnum.REGISTER_VERIFY_FAIL,
+  },
+  meta: {
+    title: t('routes'),
+  },
+};
+
 // Basic routing without permission
 // 未经许可的基本路由
 export const basicRoutes = [
   LoginRoute,
+  VerifyRoute,
   RootRoute,
   ...mainOutRoutes,
   REDIRECT_ROUTE,

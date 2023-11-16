@@ -16,6 +16,10 @@ export enum ExceptionEnum {
 
   // No data on the page. In fact, it is not an exception page
   PAGE_NOT_DATA = 10100,
+
+  //注册验证
+  REGISTER_VERIFY_FAIL = 9999,
+  REGISTER_VERIFY_SUCCESS = 0,
 }
 
 export enum ErrorTypeEnum {

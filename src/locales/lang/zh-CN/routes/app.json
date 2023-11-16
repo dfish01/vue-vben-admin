@@ -1,0 +1,43 @@
+{
+  "account": {
+    "pageTitle": "帐户管理"
+  },
+  "app": {
+    "discord": {
+      "pageTitle": ""
+    }
+  },
+  "collect": {
+    "pageTitle": "收藏"
+  },
+  "example": {
+    "pageTitle": "案例"
+  },
+  "goods": {
+    "pageTitle": "商品"
+  },
+  "gpt": {
+    "pageTitle": "AI对话"
+  },
+  "jobList": {
+    "pageTitle": "任务列表"
+  },
+  "mj": {
+    "pageTitle": "MJ画图"
+  },
+  "public": {
+    "pageTitle": "广场"
+  },
+  "setting": {
+    "pageTitle": "设置"
+  },
+  "shop": {
+    "pageTitle": "集市"
+  },
+  "trade": {
+    "pageTitle": "交易记录"
+  },
+  "xhongs": {
+    "pageTitle": "XHS原图"
+  }
+}

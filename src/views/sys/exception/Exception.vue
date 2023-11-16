@@ -105,6 +105,20 @@
         handler: () => redo(),
         icon: netWorkSvg,
       });
+      unref(statusMapRef).set(ExceptionEnum.REGISTER_VERIFY_FAIL, {
+        title: '验证失败',
+        status: `${ExceptionEnum.ERROR}`,
+        subTitle: '如果无法继续获取邮件，请联系管理员！',
+        btnText: backHomeI18n,
+        handler: () => go(),
+      });
+      unref(statusMapRef).set(ExceptionEnum.REGISTER_VERIFY_SUCCESS, {
+        title: '恭喜，你的账号已验证成功',
+        status: `${ExceptionEnum.REGISTER_VERIFY_SUCCESS}`,
+        subTitle: '请登录账号感受AI的世界吧~！',
+        btnText: backHomeI18n,
+        handler: () => go(),
+      });
 
       return () => {
         const { title, subTitle, btnText, icon, handler, status } = unref(getMapValue) || {};

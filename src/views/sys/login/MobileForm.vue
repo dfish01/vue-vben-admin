@@ -14,7 +14,8 @@
         <CountdownInput
           size="large"
           class="fix-auto-fill"
-          v-model:value="formData.sms"
+          v-model:value="formData.code"
+          :sendCodeApi="sendPhoneCode"
           :placeholder="t('sys.login.smsCode')"
         />
       </FormItem>
@@ -37,27 +38,66 @@
   import LoginFormTitle from './LoginFormTitle.vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useLoginState, useFormRules, useFormValid, LoginStateEnum } from './useLogin';
+  import { VerifyCodeParams } from '/@/api/df/model/UtilModel';
+  import { sendCode } from '/@/api/df/utils';
+  import { useUserStore } from '/@/store/modules/user';
+  import { useMessage } from '/@/hooks/web/useMessage';
 
   const FormItem = Form.Item;
   const { t } = useI18n();
   const { handleBackLogin, getLoginState } = useLoginState();
   const { getFormRules } = useFormRules();
+  const userStore = useUserStore();
 
   const formRef = ref();
   const loading = ref(false);
 
   const formData = reactive({
     mobile: '',
-    sms: '',
+    code: '',
   });
 
   const { validForm } = useFormValid(formRef);
-
+  const { notification, createErrorModal } = useMessage();
   const getShow = computed(() => unref(getLoginState) === LoginStateEnum.MOBILE);
+
+  async function sendPhoneCode(): Promise<boolean> {
+    const codeParams: VerifyCodeParams = {
+      verifyType: 'P',
+      scene: 'login',
+      toSend: formData.mobile,
+    };
+    const response = await sendCode(codeParams);
+    console.log('sendEmailCode ' + response);
+    return true;
+  }
 
   async function handleLogin() {
     const data = await validForm();
     if (!data) return;
     console.log(data);
+    try {
+      loading.value = true;
+      const userInfo = await userStore.loginByPhone({
+        phone: data.mobile,
+        code: data.sms,
+        mode: 'none', //不要默认的错误提示
+      });
+      if (userInfo) {
+        notification.success({
+          message: t('sys.login.loginSuccessTitle'),
+          description: `${t('sys.login.loginSuccessDesc')}: ${userInfo.nickName}`,
+          duration: 3,
+        });
+      }
+    } catch (error) {
+      createErrorModal({
+        title: t('sys.api.errorTip'),
+        content: (error as unknown as Error).message || t('sys.api.networkExceptionMsg'),
+        getContainer: () => document.body,
+      });
+    } finally {
+      loading.value = false;
+    }
   }
 </script>

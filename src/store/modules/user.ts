@@ -1,13 +1,26 @@
-import type { UserInfo } from '/#/store';
+import type { UserInfo, PersonalSetting } from '/#/store';
 import type { ErrorMessageMode } from '/#/axios';
 import { defineStore } from 'pinia';
 import { store } from '/@/store';
 import { RoleEnum } from '/@/enums/roleEnum';
 import { PageEnum } from '/@/enums/pageEnum';
-import { ROLES_KEY, TOKEN_KEY, USER_INFO_KEY } from '/@/enums/cacheEnum';
+import { ROLES_KEY, TOKEN_KEY, USER_INFO_KEY, PERSONAL_SETTING_KEY } from '/@/enums/cacheEnum';
 import { getAuthCache, setAuthCache } from '/@/utils/auth';
-import { GetUserInfoModel, LoginParams } from '/@/api/sys/model/userModel';
-import { doLogout, getUserInfo, loginApi } from '/@/api/sys/user';
+import {
+  GetUserInfoModel,
+  LoginParams,
+  RegisterParams,
+  LoginByPhoneParams,
+  LoginByEmailParams,
+} from '/@/api/df/model/userModel';
+import {
+  doLogout,
+  getUserInfo,
+  loginApi,
+  registerApi,
+  loginByPhone,
+  loginByEmail,
+} from '/@/api/df/user';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { router } from '/@/router';
@@ -23,6 +36,7 @@ interface UserState {
   roleList: RoleEnum[];
   sessionTimeout?: boolean;
   lastUpdateTime: number;
+  personalSetting: Nullable<PersonalSetting>;
 }
 
 export const useUserStore = defineStore({
@@ -38,10 +52,14 @@ export const useUserStore = defineStore({
     sessionTimeout: false,
     // Last fetch time
     lastUpdateTime: 0,
+    personalSetting: null,
   }),
   getters: {
     getUserInfo(state): UserInfo {
       return state.userInfo || getAuthCache<UserInfo>(USER_INFO_KEY) || {};
+    },
+    getPersonalSetting(state): PersonalSetting {
+      return state.personalSetting || getAuthCache<PersonalSetting>(PERSONAL_SETTING_KEY) || {};
     },
     getToken(state): string {
       return state.token || getAuthCache<string>(TOKEN_KEY);
@@ -70,6 +88,11 @@ export const useUserStore = defineStore({
       this.lastUpdateTime = new Date().getTime();
       setAuthCache(USER_INFO_KEY, info);
     },
+    setPersonalSetting(info: PersonalSetting | null) {
+      this.personalSetting = info;
+      this.lastUpdateTime = new Date().getTime();
+      setAuthCache(PERSONAL_SETTING_KEY, info);
+    },
     setSessionTimeout(flag: boolean) {
       this.sessionTimeout = flag;
     },
@@ -79,6 +102,78 @@ export const useUserStore = defineStore({
       this.roleList = [];
       this.sessionTimeout = false;
     },
+
+    /**
+     * @description: 注册
+     */
+    async register(
+      params: RegisterParams & {
+        goHome?: boolean;
+        mode?: ErrorMessageMode;
+      },
+    ): Promise<GetUserInfoModel | null> {
+      try {
+        const { goHome = true, ...registerParams } = params;
+        console.log(registerParams);
+        const noneMode: ErrorMessageMode = 'none';
+        const data = await registerApi(registerParams, noneMode);
+        const { token } = data;
+        // save token
+        this.setToken(token);
+        return this.afterLoginAction(goHome);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    },
+
+    /**
+     * @description: 个性化设置
+     */
+    async syncSetting(params: PersonalSetting): Promise<void> {
+      try {
+        const oldSetting = await this.getSetting();
+        for (const key in oldSetting) {
+          if (key in params && params[key] !== undefined && params[key] !== null) {
+            oldSetting[key] = params[key];
+          }
+        }
+        this.setPersonalSetting(oldSetting);
+        console.log('syncSetting ' + this.getPersonalSetting);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    },
+    async getSetting(): Promise<PersonalSetting> {
+      let oldSetting = this.getPersonalSetting;
+      if (oldSetting === null || Object.keys(oldSetting).length === 0) {
+        oldSetting = {
+          mode: 'relax',
+          userAccountId: '',
+          userAccountName: '',
+          spaceId: '',
+          spaceName: '',
+          useUpImage: 'N',
+          usePersonNet: 'N',
+          taskRefresh: 'N',
+          exampleQuery: {
+            categoryCode: 'huihua',
+            key: '',
+            nextCursorId: '',
+            preNextCursorId: '',
+          },
+          publicQuery: {
+            tagName: null,
+            upscaleFlag: 'Y',
+            state: '',
+            nextCursorId: '',
+            preNextCursorId: '',
+          },
+        };
+      }
+      console.log('getSetting:', oldSetting);
+      return oldSetting;
+    },
+
     /**
      * @description: login
      */
@@ -91,6 +186,48 @@ export const useUserStore = defineStore({
       try {
         const { goHome = true, mode, ...loginParams } = params;
         const data = await loginApi(loginParams, mode);
+        const { token } = data;
+
+        // save token
+        this.setToken(token);
+        return this.afterLoginAction(goHome);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    },
+    /**
+     * @description: login
+     */
+    async loginByPhone(
+      params: LoginByPhoneParams & {
+        goHome?: boolean;
+        mode?: ErrorMessageMode;
+      },
+    ): Promise<GetUserInfoModel | null> {
+      try {
+        const { goHome = true, mode, ...loginByPhoneParams } = params;
+        const data = await loginByPhone(loginByPhoneParams, mode);
+        const { token } = data;
+
+        // save token
+        this.setToken(token);
+        return this.afterLoginAction(goHome);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    },
+    /**
+     * @description: login
+     */
+    async loginByEmail(
+      params: LoginByEmailParams & {
+        goHome?: boolean;
+        mode?: ErrorMessageMode;
+      },
+    ): Promise<GetUserInfoModel | null> {
+      try {
+        const { goHome = true, mode, ...loginByEmailParams } = params;
+        const data = await loginByEmail(loginByEmailParams, mode);
         const { token } = data;
 
         // save token

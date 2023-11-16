@@ -1,0 +1,43 @@
+{
+  "account": {
+    "pageTitle": "Account Management"
+  },
+  "app": {
+    "discord": {
+      "pageTitle": "Account Management"
+    }
+  },
+  "collect": {
+    "pageTitle": "Collect"
+  },
+  "example": {
+    "pageTitle": "Case"
+  },
+  "goods": {
+    "pageTitle": "Goods"
+  },
+  "gpt": {
+    "pageTitle": "Chatgpt"
+  },
+  "jobList": {
+    "pageTitle": "Task List"
+  },
+  "mj": {
+    "pageTitle": "Midjourney"
+  },
+  "public": {
+    "pageTitle": "Public"
+  },
+  "setting": {
+    "pageTitle": "Setting"
+  },
+  "shop": {
+    "pageTitle": "Market"
+  },
+  "trade": {
+    "pageTitle": "Orders"
+  },
+  "xhongs": {
+    "pageTitle": "Tools"
+  }
+}

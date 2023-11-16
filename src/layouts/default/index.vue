@@ -1,15 +1,24 @@
 <template>
   <Layout :class="prefixCls" v-bind="lockEvents">
-    <LayoutFeatures />
-    <LayoutHeader fixed v-if="getShowFullHeaderRef" />
-    <Layout :class="[layoutClass, `${prefixCls}-out`]">
-      <LayoutSideBar v-if="getShowSidebar || getIsMobile" />
-      <Layout :class="`${prefixCls}-main`">
-        <LayoutMultipleHeader />
-        <LayoutContent />
-        <LayoutFooter />
-      </Layout>
-    </Layout>
+    <div v-if="getIsMobile">
+      <ButtomIndex fixed v-if="getIsMobile" />
+      <LayoutContent />
+      <LayoutFooter />
+    </div>
+    <div v-else>
+      <LayoutFeatures />
+      <LayoutHeader fixed v-if="getShowFullHeaderRef" />
+      <div>
+       <Layout :class="[layoutClass, `${prefixCls}-out`]">
+          <LayoutSideBar v-if="getShowSidebar || getIsMobile" />
+          <Layout :class="`${prefixCls}-main`">
+            <LayoutMultipleHeader />
+            <LayoutContent />
+            <LayoutFooter />
+          </Layout>
+        </Layout>
+      </div>
+    </div>
   </Layout>
 </template>
 
@@ -22,7 +31,7 @@
   import LayoutContent from './content/index.vue';
   import LayoutSideBar from './sider/index.vue';
   import LayoutMultipleHeader from './header/MultipleHeader.vue';
-
+  import ButtomIndex from './buttom/index.vue';
   import { useHeaderSetting } from '/@/hooks/setting/useHeaderSetting';
   import { useMenuSetting } from '/@/hooks/setting/useMenuSetting';
   import { useDesign } from '/@/hooks/web/useDesign';
@@ -41,6 +50,7 @@
       LayoutContent,
       LayoutSideBar,
       LayoutMultipleHeader,
+      ButtomIndex,
       Layout,
     },
     setup() {
