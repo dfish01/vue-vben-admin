@@ -17,7 +17,7 @@ import {
 
 // ! You need to clear the browser cache after the change
 const setting: ProjectConfig = {
-  showSettingButton: true,
+  showSettingButton: false,
   showDarkModeToggle: true,
   settingButtonPosition: 'auto',
   //permissionMode: 'ROUTE_MAPPING',
@@ -38,10 +38,10 @@ const setting: ProjectConfig = {
     theme: 'light',
     useLockPage: true,
     showFullScreen: true,
-    showDoc: true,
-    showNotice: true,
-    showSearch: true,
-    showApi: true,
+    showDoc: false,
+    showNotice: false,
+    showSearch: false,
+    showApi: false,
   },
   menuSetting: {
     bgColor: '#001529',
