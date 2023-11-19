@@ -8,8 +8,26 @@
     :model="textToImgForm"
     :rules="rules"
   >
-    <div :style="{ height: `calc(${contentHeight}px - 15px`, overflow: 'auto' }">
-      <a-form-item name="command" style="resize: none">
+    <div :style="{ height: `calc(${contentHeight}px - 1px`, overflow: 'auto' }">
+      <a-card
+        size="small"
+        :bordered="true"
+        :bodyStyle="{ padding: '5px' }"
+        class="ar-card2"
+        style="margin-top: 0"
+      >
+        <template #title>
+          <div class="ar-card2-title">
+            <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
+              >关键词
+              <a-tooltip
+                title="这里输入相关的描述。你可以输入主体Prompt然后选择相关的配置、也可以自己输入完整的prompt、另外你也可以以 “/imagine:”开头输入相关的prompt。 “/imagine:”支持多条输入，记得换行哈~ "
+              >
+                <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
+            ></span>
+          </div>
+        </template>
+        <!-- <a-form-item name="command" style="margin-bottom: 1px; resize: none"> -->
         <a-textarea
           style="width: 99%"
           :rows="10"
@@ -20,69 +38,60 @@
           :maxlength="2000"
           :auto-size="{ minRows: 10, maxRows: 10 }"
         />
-      </a-form-item>
+        <!-- </a-form-item> -->
+      </a-card>
       <!-- 垫图 B-->
-      <a-collapse>
-        <a-collapse-panel key="1">
-          <template #header>
-            <div class="ar-card2-title">
-              <span style="font-weight: bold">垫图w</span>
+      <a-card size="small" :bordered="true" :bodyStyle="{ padding: '5px' }" class="ar-card2">
+        <template #title>
+          <div class="ar-card2-title">
+            <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
+              >垫图
               <a-tooltip
                 title="这里上传图片，和Prompt里面带上的图片只能二选一。并且是这里的为准！如果有图片连接的话建议直接图片连接~"
               >
-                <ExclamationCircleOutlined style="margin-left: 5px; cursor: pointer" />
-              </a-tooltip>
-            </div>
-          </template>
-          <div>
-            <a-row style="margin-top: 10px">
-              <a-col span="24" class="clearfix">
-                <a-upload
-                  v-model:file-list="fileList"
-                  :before-upload="beforeUpload"
-                  list-type="picture-card"
-                  class="no-preview-icon"
-                  @change="handleChange"
-                  style="
-                    display: flex;
-                    flex-direction: row;
-                    justify-content: left;
-                    width: 75px;
-                    height: 75px;
-                  "
-                >
-                  <div v-if="fileList.length < 5">
-                    <plus-outlined />
-                    <div style="margin-top: 8px">上传图片</div>
-                  </div>
-                </a-upload>
-              </a-col>
-            </a-row>
-            <a-row class="row-wapper" v-if="paramDataValue.version != 'v 4'">
-              <a-col span="6" style="display: flex; align-items: center; justify-content: start">
-                <span class="quality-tag"
-                  >权重
-                  <a-tooltip title="--iw 值越高，上传的图像对最终效果的影响就越大">
-                    <ExclamationCircleOutlined class="icon-hint" />
-                  </a-tooltip>
-                </span>
-              </a-col>
-              <a-col :span="18">
-                <a-slider
-                  @change="onChangeIw"
-                  style="margin-left: 3px"
-                  v-model:value="paramDataValue.iw"
-                  :min="0.25"
-                  :step="0.05"
-                  :max="2"
-                />
-              </a-col>
-            </a-row>
+                <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
+            ></span>
           </div>
-        </a-collapse-panel>
-      </a-collapse>
+        </template>
+        <a-row>
+          <a-col span="24">
+            <a-upload
+              v-model:file-list="fileList"
+              :before-upload="beforeUpload"
+              list-type="picture-card"
+              @preview="handlePreview"
+              @change="handleChange"
+              style="display: flex; align-items: flex-start; justify-content: flex-start"
+            >
+              <div v-if="fileList.length < 5">
+                <plus-outlined />
+                <div style="margin-top: 8px">上传图片</div>
+              </div>
+            </a-upload>
+          </a-col>
+        </a-row>
+        <a-row class="row-wapper" v-if="paramDataValue.version != 'v 4'">
+          <a-col span="6" style="display: flex; align-items: center; justify-content: start">
+            <span class="quality-tag"
+              >权重
+              <a-tooltip title="--iw 值越高，上传的图像对最终效果的影响就越大">
+                <ExclamationCircleOutlined class="icon-hint" />
+              </a-tooltip>
+            </span>
+          </a-col>
+          <a-col :span="18">
+            <a-slider
+              @change="onChangeIw"
+              style="margin-left: 3px"
+              v-model:value="paramDataValue.iw"
+              :min="0.25"
+              :step="0.05"
+              :max="2"
+            />
+          </a-col>
+        </a-row>
+      </a-card>
       <!-- 垫图 E-->
-
       <!-- 辅助工具 B-->
       <a-card size="small" :bordered="true" :bodyStyle="{ padding: '5px' }" class="ar-card2">
         <template #title>
@@ -117,7 +126,7 @@
       <a-card size="small" :bordered="true" :bodyStyle="{ padding: '5px' }" class="ar-card2">
         <template #title>
           <div class="ar-card2-title">
-            <span style="font-weight: bold" class="quality-tag"
+            <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
               >添加标签
               <a-tooltip
                 title="用于对批次任务的标记，方便管理图片。多个标签'空格'隔开,最多5个标签。每个标签长度不超过16个字。~"
@@ -262,23 +271,48 @@
             <div
               v-if="isEditing && option.id === 90"
               class="border-wapper"
-              style="flex-flow: column; align-items: center; justify-content: center; padding: 6px"
+              style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 6px;
+              "
             >
-              <a-row style="flex-flow: row; align-items: center; justify-content: center">
-                <a-col :span="10">
-                  <a-input-number id="inputNumber" size="small" v-model:value="option.X" :min="1" />
-                </a-col>
-                <a-col :span="2">
-                  <span>:</span>
-                </a-col>
-                <a-col :span="10">
-                  <a-input-number size="small" v-model:value="option.Y" :min="1" />
-                </a-col>
-              </a-row>
-              <a-row :gutter="8" style="justify-content: center; margin-top: 2px">
+              <a-input-group size="small">
+                <a-row style="justify-content: center">
+                  <a-col :span="9">
+                    <a-input
+                      v-model:value="option.X"
+                      @input="
+                        option.X =
+                          option.X.replace(/\D/g, '') === '' || +option.X <= 1
+                            ? '1'
+                            : parseInt(option.X.replace(/\D/g, ''), 10) || 1
+                      "
+                    />
+                  </a-col>
+                  <a-col :span="2">
+                    <span>:</span>
+                  </a-col>
+                  <a-col :span="9">
+                    <a-input
+                      v-model:value="option.Y"
+                      @input="
+                        option.Y =
+                          option.Y.replace(/\D/g, '') === '' || +option.Y <= 1
+                            ? '1'
+                            : parseInt(option.Y.replace(/\D/g, ''), 10) || 1
+                      "
+                    />
+                  </a-col>
+                </a-row>
+              </a-input-group>
+
+              <a-row :gutter="8" style="justify-content: center; width: 100%; margin-top: 2px">
                 <a-col :span="21">
                   <a-button style="width: 100%" @click="onCustomerOption(option)" size="small"
-                    >确认自定义比例</a-button
+                    >确认比例</a-button
                   >
                 </a-col>
               </a-row>
@@ -293,7 +327,6 @@
               {{ option.X }}:{{ option.Y }}<br />{{ option.label }}
             </a-tag>
           </a-col>
-          <a-col :span="12" />
         </a-row>
       </a-card>
       <!-- 图片比例 E-->
@@ -1159,6 +1192,11 @@
         </a-spin>
       </a-modal>
     </div>
+
+    <!-- 上传图片预览 -->
+    <a-modal :open="previewVisible" :title="previewTitle" :footer="null" @cancel="handleCancel">
+      <img alt="example" style="width: 100%" :src="previewImage" />
+    </a-modal>
   </a-form>
 </template>
 <script lang="ts" setup>
@@ -1183,7 +1221,7 @@
   import { availableList } from '/@/api/df/account';
   import { SvgIcon } from '/@/components/Icon';
   import type { UploadFile } from 'ant-design-vue/es/upload/interface';
-  import { message, UploadProps } from 'ant-design-vue';
+  import { message, UploadProps, Upload } from 'ant-design-vue';
   import { useRoute } from 'vue-router';
   import { useUserStore } from '/@/store/modules/user';
 
@@ -1406,6 +1444,15 @@
 
   const onSubmit = () => {
     console.log(textToImgForm);
+    if (
+      textToImgForm.command === null ||
+      textToImgForm.command === '' ||
+      textToImgForm.command === undefined
+    ) {
+      message.error('请输入关键词~');
+      return false;
+    }
+
     formRef.value
       .validate()
       .then(async () => {
@@ -1440,7 +1487,6 @@
       })
       .catch((error) => {
         console.log('error', error);
-        emit('endLoading');
       });
   };
 
@@ -1473,7 +1519,7 @@
   const options = ref([
     { id: 10, value: '1:1', X: 1, Y: 1, label: '应用头像', span: 6, color: 'default' },
     { id: 20, value: '1:2', X: 1, Y: 2, label: '手机壁纸', span: 6, color: 'default' },
-    { id: 30, value: '16:9', X: 16, Y: 19, label: '电脑壁纸', span: 6, color: 'default' },
+    { id: 30, value: '16:9', X: 16, Y: 9, label: '电脑壁纸', span: 6, color: 'default' },
     { id: 40, value: '9:16', X: 9, Y: 16, label: '宣传海报', span: 6, color: 'default' },
     { id: 50, value: '4:3', X: 4, Y: 3, label: '文章配图', span: 6, color: 'default' },
     { id: 60, value: '3:4', X: 3, Y: 4, label: '媒体配图', span: 6, color: 'default' },
@@ -1653,7 +1699,24 @@
   };
 
   /** ************************************上传图片******************************* */
-  const fileList = ref<UploadProps['fileList']>([]);
+
+  const previewVisible = ref(false);
+  const previewImage = ref('');
+  const previewTitle = ref('');
+  const handleCancel = () => {
+    previewVisible.value = false;
+    previewTitle.value = '';
+  };
+  const handlePreview = async (file: UploadProps['fileList'][number]) => {
+    if (!file.url && !file.preview) {
+      file.preview = (await getBase64(file.originFileObj)) as string;
+    }
+    previewImage.value = file.url || file.preview;
+    previewVisible.value = true;
+    previewTitle.value = file.name || file.url.substring(file.url.lastIndexOf('/') + 1);
+  };
+
+  const fileList = ref([]);
   const base64Images = ref<{ base64Content: string; height: number; width: number; uid: string }[]>(
     [],
   );
@@ -1673,7 +1736,6 @@
   }
   function getBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
-      console.log('-----------------');
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => {
@@ -1690,6 +1752,17 @@
 
   const beforeUpload = async (file: File) => {
     try {
+      // 判断是否为图片
+      const isImage = file.type.startsWith('image/');
+      if (!isImage) {
+        throw new Error('只能上传图片文件！');
+      }
+      // 获取图片文件的大小
+      const isLt5M = file.size / 1024 / 1024 < 5;
+      if (!isLt5M) {
+        throw new Error('图片大小不能超过5MB！');
+      }
+
       const base64 = await getBase64(file);
       // 获取并存储图片的尺寸
       const dimensions = await getImageDimensions(base64);
@@ -1701,8 +1774,11 @@
       });
     } catch (error) {
       console.error('Error converting to Base64:', error);
+      // 弹出异常消息
+      message.error(error.message);
+      //移除这个文件
+      return Upload.LIST_IGNORE;
     }
-    // Return false to prevent actual upload
     return false;
   };
 
@@ -1722,20 +1798,6 @@
       right: 20px;
       width: auto;
     }
-  }
-
-  .no-preview-icon >>> .ant-upload-list-item-actions .anticon-eye {
-    display: none;
-  }
-
-  .no-preview-icon >>> .ant-upload-list-picture-card-container {
-    width: 90px;
-    height: 90px;
-  }
-
-  .no-preview-icon >>> .ant-upload.ant-upload-select-picture-card {
-    width: 90px;
-    height: 90px;
   }
 
   /* 滚动条轨道 */
@@ -1771,7 +1833,7 @@
   }
 
   .ar-card2 {
-    margin-top: 10px;
+    margin-top: 5px;
   }
 
   .ar-card2 >>> .ant-card-head {
@@ -1784,7 +1846,7 @@
     width: 100%;
 
     /* background: #f0f0f0; */
-    height: 6vh;
+    height: 53px;
   }
 
   .ar-item {
@@ -1886,10 +1948,36 @@
     padding: 5px;
   }
 
+  .ant-collapse-content-box {
+    padding: 5px !important;
+  }
+
+  .ant-collapse .ant-collapse-content >>> .ant-collapse-content-box {
+    padding: 0;
+  }
+
+  .a-collapse-panel {
+    padding: 0 !important;
+  }
+
+  ::v-deep .collapse-body >>> ant-collapse-content-box {
+    padding: 5px;
+  }
+
   .tags-container {
     display: flex;
     flex-wrap: wrap; /* 允许标签在容器宽度超出时换行 */
     width: 100%; /* 可以根据需要调整 */
     padding: 2px;
+  }
+
+  .ant-upload-select-picture-card i {
+    color: #999;
+    font-size: 32px;
+  }
+
+  .ant-upload-select-picture-card .ant-upload-text {
+    margin-top: 8px;
+    color: #666;
   }
 </style>

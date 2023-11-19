@@ -93,7 +93,7 @@ ref="waterfallRef"
             style="border-radius: 10px;"
             :bodyStyle="{padding:0}"
             @click="showImage(item)"
-            class="bg-gray-900 rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-linear hover:shadow-lg hover:shadow-gray-600 group"
+            class="rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-linear hover:shadow-lg hover:shadow-gray-600 group"
           >
             <div class="overflow-hidden">
               <LazyImg

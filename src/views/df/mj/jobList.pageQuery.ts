@@ -272,14 +272,18 @@ export function jobOptionApi() {
   };
 
   //获取seed
-  const getSeed = async (id) => {
-    console.log('---------------------------------' + id);
+  const getSeed = async (id, infoFlag) => {
     const idReq: IdReq = { id: id };
     loadingRef.value = true;
     try {
-      console.log('---------------------------------');
       await getTaskSeed(idReq);
-      message.success('获取成功，请至详情页查看');
+      if (infoFlag) {
+        message.success('Seed获取成功，正在刷新详情数据');
+        const resp = await getTaskInfo({ id: id });
+        Object.assign(jobListQueryApiInstance.infoData, resp);
+      } else {
+        message.success('获取成功，请至详情页查看');
+      }
     } finally {
       loadingRef.value = false;
     }

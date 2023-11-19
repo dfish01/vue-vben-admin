@@ -1,5 +1,6 @@
 <template>
-  <div class="app" ref="formRef" v-loading="loadingRef">
+  <div class="app" ref="formRef">
+    <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
     <a-row style="height: 55px">
       <a-col :span="24">
         <a-card
@@ -56,15 +57,16 @@
     <div
       v-if="tableData.length === 0"
       style="display: flex; align-items: center; justify-content: center"
-      :style="{ height: `calc(${contentHeight}px - 11vh)`, overflow: 'auto' }"
+      :style="{ height: `calc(${contentHeight}px - 75px)`, overflow: 'auto' }"
     >
       <a-empty :image="simpleImage" />
     </div>
 
     <div
       class="cards"
+      v-else
       :style="{
-        height: `calc(${contentHeight}px -  11vh)`,
+        height: `calc(${contentHeight}px  - 75px)`,
         overflow: 'auto',
         padding: '0px 10px',
       }"
@@ -159,14 +161,19 @@
                 >
                   {{ card.defaultFlag === 'Y' ? '默认账号' : '设置默认' }}</a-button
                 >
+                <a-col :span="24">
+                  <a-divider
+                    style="width: 100%; margin-top: 8px; margin-bottom: 1px; margin-left: 0"
+                  />
+                </a-col>
               </a-row>
 
-              <a-row class="card-tags" style="margin-top: 10px" v-if="card.ownerFlag === 'Y'">
+              <a-row class="card-tags" style="margin-top: 5px" v-if="card.ownerFlag === 'Y'">
                 <a-col
                   :span="24"
                   style="display: flex; justify-content: center; align-item: center"
                 >
-                  <a-button-group style="width: 100%">
+                  <a-button-group type="text" style="width: 100%">
                     <a-popconfirm
                       title="是否确认删除账户？存在授权的账户无法删除！"
                       ok-text="Yes"
@@ -174,7 +181,7 @@
                       @confirm="deleteAccount(card.id)"
                     >
                       <a-tooltip title="删除账号">
-                        <a-button style="width: 100%">
+                        <a-button type="text" style="width: 100%">
                           <Icon
                             icon="material-symbols:delete-outline"
                             class="vel-icon icon"
@@ -185,7 +192,11 @@
                       </a-tooltip>
                     </a-popconfirm>
                     <a-tooltip title="授权列表">
-                      <a-button @click="showAuthorizationList(card.id)" style="width: 100%">
+                      <a-button
+                        type="text"
+                        @click="showAuthorizationList(card.id)"
+                        style="width: 100%"
+                      >
                         <Icon
                           icon="ph:user-list-bold"
                           class="vel-icon icon"
@@ -201,7 +212,7 @@
                       @confirm="showCreateAuth(card)"
                     >
                       <a-tooltip title="生成授权">
-                        <a-button style="width: 100%">
+                        <a-button type="text" style="width: 100%">
                           <Icon
                             icon="mdi:genie-lamp"
                             class="vel-icon icon"
@@ -213,7 +224,7 @@
                     </a-popconfirm>
 
                     <a-tooltip title="追加账号">
-                      <a-button @click="showAccountModified(card)" style="width: 100%">
+                      <a-button type="text" @click="showAccountModified(card)" style="width: 100%">
                         <Icon
                           icon="clarity:update-line"
                           class="vel-icon icon"
@@ -234,7 +245,7 @@
                     @confirm="deleteAccount(card.id)"
                   >
                     <a-tooltip title="删除账号">
-                      <a-button style="width: 100%">
+                      <a-button type="text" style="width: 100%">
                         <Icon
                           icon="material-symbols:delete-outline"
                           class="vel-icon icon"
@@ -284,130 +295,125 @@
         >
       </template>
       <a-card>
-        <a-spin :spinning="statisticsForm.loading">
-          <a-descriptions title="账户情况" bordered>
-            <a-descriptions-item label="账户名">{{
-              statisticsForm.formData.accountName
-            }}</a-descriptions-item>
-            <a-descriptions-item label="账号模式">{{
-              statisticsForm.formData.accMode === 'GROUP' ? '账号组' : '单账号'
-            }}</a-descriptions-item>
-            <a-descriptions-item label="账号权限">{{
-              statisticsForm.formData.ownerFlag === 'N' ? '授权' : '主账号'
-            }}</a-descriptions-item>
-            <a-descriptions-item :span="3" label="负载信息">
-              <span>
-                Discord账号数:
-                {{
-                  statisticsForm.formData.loadInfo ? statisticsForm.formData.loadInfo.numDiscord : 0
-                }}
-                <br />
-                队列数上限:
-                {{
-                  statisticsForm.formData.loadInfo ? statisticsForm.formData.loadInfo.numExecute : 0
-                }}
-                <br />
-                已用并发数:
-                {{
-                  statisticsForm.formData.loadInfo
-                    ? statisticsForm.formData.loadInfo.useConcurrency
-                    : 0
-                }}
-                <br />
-                最大并发数:
-                {{
-                  statisticsForm.formData.loadInfo
-                    ? statisticsForm.formData.loadInfo.maxConcurrency
-                    : 0
-                }}
-                <br />
-              </span>
-            </a-descriptions-item>
-            <a-descriptions-item
-              :span="3"
-              label="授权使用情况"
-              v-if="statisticsForm.formData.ownerFlag === 'N'"
-            >
-              <span>
-                turbo次数: {{ statisticsForm.formData.authUseInfo.turboTimes }} /
-                {{
-                  statisticsForm.formData.authUseInfo.totalTurboTimes
-                    ? statisticsForm.formData.authUseInfo.totalTurboTimes
-                    : ' ∞'
-                }}
-                <br />
-                快速次数: {{ statisticsForm.formData.authUseInfo.fastTimes }} /
-                {{
-                  statisticsForm.formData.authUseInfo.totalFastTimes
-                    ? statisticsForm.formData.authUseInfo.totalFastTimes
-                    : ' ∞'
-                }}
-                <br />
-                relax次数: {{ statisticsForm.formData.authUseInfo.relaxTimes }} /
-                {{
-                  statisticsForm.formData.authUseInfo.totalRelaxTimes
-                    ? statisticsForm.formData.authUseInfo.totalRelaxTimes
-                    : ' ∞'
-                }}
-                <br />
-                <!-- 成功次数:{{ statisticsForm.formData.authUseInfo.numSuccess }} -->
-                <br />
-                到期时间:{{ statisticsForm.formData.authUseInfo.expireTime }}
-              </span>
-            </a-descriptions-item>
-            <a-descriptions-item
-              :span="3"
-              label="授权账号概况"
-              v-if="statisticsForm.formData.ownerFlag === 'Y'"
-            >
-              <span>
-                总账号个数: {{ statisticsForm.formData.ownerInfo.countAccounts }}
-                <br />
-                总可用账号数:{{ statisticsForm.formData.ownerInfo.countNormalAccounts }}
-                <br />
-                总异常账号数:{{ statisticsForm.formData.ownerInfo.countErrorAccounts }}
-                <br />
-                到期账号数: {{ statisticsForm.formData.ownerInfo.countStopAccounts }}
-              </span>
-            </a-descriptions-item>
-            <a-descriptions-item
-              label="Discord账号情况"
-              :span="3"
-              v-if="statisticsForm.formData.ownerFlag === 'Y'"
-            >
-              <a-table :data-source="statisticsForm.formData.discordList" rowKey="email">
-                <a-table-column
-                  title="账号名"
-                  dataIndex="globalName"
-                  key="globalName"
-                  :width="200"
-                />
-                <a-table-column title="邮箱" dataIndex="email" key="email" />
-                <a-table-column
-                  title="Discord状态"
-                  dataIndex="discordState"
-                  key="discordState"
-                  :width="100"
-                >
-                  <template #default="{ text }">
-                    <a-badge
-                      :status="getDiscordStateContent(text).status"
-                      :text="getDiscordStateContent(text).text"
-                    />
-                  </template>
-                </a-table-column>
-                <a-table-column title="MJ状态" dataIndex="mjState" key="mjState" :width="100">
-                  <template #default="{ text }">
-                    <a-badge
-                      :status="getMjStateContent(text).status"
-                      :text="getMjStateContent(text).text"
-                    />
-                  </template>
-                </a-table-column>
-              </a-table>
-            </a-descriptions-item>
-          </a-descriptions>
-        </a-spin>
+        <Loading :loading="statisticsForm.loading" :absolute="true" tip="数据加载中..." />
+
+        <a-descriptions title="账户情况" bordered>
+          <a-descriptions-item label="账户名">{{
+            statisticsForm.formData.accountName
+          }}</a-descriptions-item>
+          <a-descriptions-item label="账号模式">{{
+            statisticsForm.formData.accMode === 'GROUP' ? '账号组' : '单账号'
+          }}</a-descriptions-item>
+          <a-descriptions-item label="账号权限">{{
+            statisticsForm.formData.ownerFlag === 'N' ? '授权' : '主账号'
+          }}</a-descriptions-item>
+          <a-descriptions-item :span="3" label="负载信息">
+            <span>
+              Discord账号数:
+              {{
+                statisticsForm.formData.loadInfo ? statisticsForm.formData.loadInfo.numDiscord : 0
+              }}
+              <br />
+              队列数上限:
+              {{
+                statisticsForm.formData.loadInfo ? statisticsForm.formData.loadInfo.numExecute : 0
+              }}
+              <br />
+              已用并发数:
+              {{
+                statisticsForm.formData.loadInfo
+                  ? statisticsForm.formData.loadInfo.useConcurrency
+                  : 0
+              }}
+              <br />
+              最大并发数:
+              {{
+                statisticsForm.formData.loadInfo
+                  ? statisticsForm.formData.loadInfo.maxConcurrency
+                  : 0
+              }}
+              <br />
+            </span>
+          </a-descriptions-item>
+          <a-descriptions-item
+            :span="3"
+            label="授权使用情况"
+            v-if="statisticsForm.formData.ownerFlag === 'N'"
+          >
+            <span>
+              turbo次数: {{ statisticsForm.formData.authUseInfo.turboTimes }} /
+              {{
+                statisticsForm.formData.authUseInfo.totalTurboTimes
+                  ? statisticsForm.formData.authUseInfo.totalTurboTimes
+                  : ' ∞'
+              }}
+              <br />
+              快速次数: {{ statisticsForm.formData.authUseInfo.fastTimes }} /
+              {{
+                statisticsForm.formData.authUseInfo.totalFastTimes
+                  ? statisticsForm.formData.authUseInfo.totalFastTimes
+                  : ' ∞'
+              }}
+              <br />
+              relax次数: {{ statisticsForm.formData.authUseInfo.relaxTimes }} /
+              {{
+                statisticsForm.formData.authUseInfo.totalRelaxTimes
+                  ? statisticsForm.formData.authUseInfo.totalRelaxTimes
+                  : ' ∞'
+              }}
+              <br />
+              <!-- 成功次数:{{ statisticsForm.formData.authUseInfo.numSuccess }} -->
+              <br />
+              到期时间:{{ statisticsForm.formData.authUseInfo.expireTime }}
+            </span>
+          </a-descriptions-item>
+          <a-descriptions-item
+            :span="3"
+            label="授权账号概况"
+            v-if="statisticsForm.formData.ownerFlag === 'Y'"
+          >
+            <span>
+              总账号个数: {{ statisticsForm.formData.ownerInfo.countAccounts }}
+              <br />
+              总可用账号数:{{ statisticsForm.formData.ownerInfo.countNormalAccounts }}
+              <br />
+              总异常账号数:{{ statisticsForm.formData.ownerInfo.countErrorAccounts }}
+              <br />
+              到期账号数: {{ statisticsForm.formData.ownerInfo.countStopAccounts }}
+            </span>
+          </a-descriptions-item>
+          <a-descriptions-item
+            label="Discord账号情况"
+            :span="3"
+            v-if="statisticsForm.formData.ownerFlag === 'Y'"
+          >
+            <a-table :data-source="statisticsForm.formData.discordList" rowKey="email">
+              <a-table-column title="账号名" dataIndex="globalName" key="globalName" :width="200" />
+              <a-table-column title="邮箱" dataIndex="email" key="email" />
+              <a-table-column
+                title="Discord状态"
+                dataIndex="discordState"
+                key="discordState"
+                :width="100"
+              >
+                <template #default="{ text }">
+                  <a-badge
+                    :status="getDiscordStateContent(text).status"
+                    :text="getDiscordStateContent(text).text"
+                  />
+                </template>
+              </a-table-column>
+              <a-table-column title="MJ状态" dataIndex="mjState" key="mjState" :width="100">
+                <template #default="{ text }">
+                  <a-badge
+                    :status="getMjStateContent(text).status"
+                    :text="getMjStateContent(text).text"
+                  />
+                </template>
+              </a-table-column>
+            </a-table>
+          </a-descriptions-item>
+        </a-descriptions>
       </a-card>
     </a-modal>
 
@@ -420,85 +426,84 @@
       :confirmLoading="accountForm.loading"
     >
       <a-card>
-        <a-spin :spinning="accountForm.loading">
-          <a-form :model="accountForm" layout="vertical" ref="accountFormRef">
-            <a-row gutter="24">
-              <a-col :span="24">
-                <a-form-item
-                  label="🐵账号名（账号多的时候方便记）"
-                  :rules="[
-                    {
-                      required: true,
-                      message: '账号名名称是必填项',
-                    },
-                  ]"
-                  name="accountName"
-                >
-                  <a-input v-model:value="accountForm.accountName" placeholder="输入账号名" />
-                </a-form-item>
-              </a-col>
-              <a-col :span="24">
-                <a-form-item
-                  label="🐧分配Discord账号"
-                  :rules="[
-                    {
-                      required: true,
-                      message: 'discord账号是必填项',
-                    },
-                  ]"
-                  name="discordUserId"
-                >
-                  <a-select
-                    @change="onSelectDiscordUser"
-                    style="width: 100%; height: 32px"
-                    v-model:value="accountForm.discordUserId"
-                    :options="accountForm.discordUserOptions"
-                    placeholder="请选择Discord账号"
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="24">
-                <a-form-item
-                  label="🍵执行服务器"
-                  :rules="[
-                    {
-                      required: true,
-                      message: '执行服务器是必填项',
-                    },
-                  ]"
-                  name="guildId"
-                >
-                  <a-select
-                    @change="onSelectGuild"
-                    style="width: 100%; height: 32px"
-                    v-model:value="accountForm.guildId"
-                    :options="accountForm.guildOptions"
-                    placeholder="请选择执行的服务器"
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="24">
-                <a-form-item
-                  label="🍙默认频道"
-                  :rules="[
-                    {
-                      required: true,
-                      message: '默认频道是必填项',
-                    },
-                  ]"
-                  name="channelId"
-                >
-                  <a-select
-                    v-model:value="accountForm.channelId"
-                    style="width: 100%"
-                    placeholder="请选择默认频道"
-                    :options="accountForm.channelOptions"
-                  />
-                </a-form-item>
-              </a-col>
-            </a-row>
-          </a-form>
-        </a-spin>
+        <Loading :loading="accountForm.loading" :absolute="true" tip="正在提交..." />
+        <a-form :model="accountForm" layout="vertical" ref="accountFormRef">
+          <a-row gutter="24">
+            <a-col :span="24">
+              <a-form-item
+                label="🐵账号名（账号多的时候方便记）"
+                :rules="[
+                  {
+                    required: true,
+                    message: '账号名名称是必填项',
+                  },
+                ]"
+                name="accountName"
+              >
+                <a-input v-model:value="accountForm.accountName" placeholder="输入账号名" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="🐧分配Discord账号"
+                :rules="[
+                  {
+                    required: true,
+                    message: 'discord账号是必填项',
+                  },
+                ]"
+                name="discordUserId"
+              >
+                <a-select
+                  @change="onSelectDiscordUser"
+                  style="width: 100%; height: 32px"
+                  v-model:value="accountForm.discordUserId"
+                  :options="accountForm.discordUserOptions"
+                  placeholder="请选择Discord账号"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="🍵执行服务器"
+                :rules="[
+                  {
+                    required: true,
+                    message: '执行服务器是必填项',
+                  },
+                ]"
+                name="guildId"
+              >
+                <a-select
+                  @change="onSelectGuild"
+                  style="width: 100%; height: 32px"
+                  v-model:value="accountForm.guildId"
+                  :options="accountForm.guildOptions"
+                  placeholder="请选择执行的服务器"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="🍙默认频道"
+                :rules="[
+                  {
+                    required: true,
+                    message: '默认频道是必填项',
+                  },
+                ]"
+                name="channelId"
+              >
+                <a-select
+                  v-model:value="accountForm.channelId"
+                  style="width: 100%"
+                  placeholder="请选择默认频道"
+                  :options="accountForm.channelOptions"
+                />
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
       </a-card>
     </a-modal>
 
@@ -511,33 +516,32 @@
       :confirmLoading="accountModifiedForm.loading"
     >
       <a-card>
-        <a-spin :spinning="accountModifiedForm.loading">
-          <a-form :model="accountModifiedForm" layout="vertical" ref="accountModifiedFormRef">
-            <a-row gutter="24">
-              <a-col :span="24">
-                <a-form-item label="🐵账号名" name="accountName">
-                  <a-input
-                    v-model:value="accountModifiedForm.accountName"
-                    disabled
-                    placeholder="输入账号名"
-                  />
-                </a-form-item>
-              </a-col>
+        <Loading :loading="accountModifiedForm.loading" :absolute="true" tip="正在提交..." />
+        <a-form :model="accountModifiedForm" layout="vertical" ref="accountModifiedFormRef">
+          <a-row gutter="24">
+            <a-col :span="24">
+              <a-form-item label="🐵账号名" name="accountName">
+                <a-input
+                  v-model:value="accountModifiedForm.accountName"
+                  disabled
+                  placeholder="输入账号名"
+                />
+              </a-form-item>
+            </a-col>
 
-              <a-col :span="24">
-                <a-form-item label="账户组账号">
-                  <a-select
-                    v-model:value="accountModifiedForm.discordUserIds"
-                    mode="multiple"
-                    style="width: 100%"
-                    placeholder="请勾选账号组账号"
-                    :options="accountModifiedForm.discordFilterUserOptions"
-                  />
-                </a-form-item>
-              </a-col>
-            </a-row>
-          </a-form>
-        </a-spin>
+            <a-col :span="24">
+              <a-form-item label="账户组账号">
+                <a-select
+                  v-model:value="accountModifiedForm.discordUserIds"
+                  mode="multiple"
+                  style="width: 100%"
+                  placeholder="请勾选账号组账号"
+                  :options="accountModifiedForm.discordFilterUserOptions"
+                />
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
       </a-card>
     </a-modal>
 
@@ -551,105 +555,104 @@
       :confirmLoading="createAuthForm.loading"
     >
       <a-card>
-        <a-spin :spinning="createAuthForm.loading">
-          <a-form layout="vertical" :model="createAuthForm" ref="createAuthFormRef">
-            <a-row gutter="24">
-              <a-col :span="24">
-                <a-form-item
-                  label="生成授权数量(1~50)"
-                  name="num"
-                  :rules="[{ required: true, message: '请输入生成授权码的数量!' }]"
+        <Loading :loading="createAuthForm.loading" :absolute="true" tip="正在生成中..." />
+        <a-form layout="vertical" :model="createAuthForm" ref="createAuthFormRef">
+          <a-row gutter="24">
+            <a-col :span="24">
+              <a-form-item
+                label="生成授权数量(1~50)"
+                name="num"
+                :rules="[{ required: true, message: '请输入生成授权码的数量!' }]"
+              >
+                <a-input-number
+                  v-model:value="createAuthForm.num"
+                  placeholder="请输入生成授权码的数量~"
+                  min="1"
+                  max="50"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="授权类型"
+                name="authWay"
+                :rules="[{ required: true, message: '请输入生成授权码的数量!' }]"
+              >
+                <a-select
+                  v-model:value="createAuthForm.authWay"
+                  @change="changeAuthWay"
+                  placeholder="授权方式"
                 >
-                  <a-input-number
-                    v-model:value="createAuthForm.num"
-                    placeholder="请输入生成授权码的数量~"
-                    min="1"
-                    max="50"
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="24">
-                <a-form-item
-                  label="授权类型"
-                  name="authWay"
-                  :rules="[{ required: true, message: '请输入生成授权码的数量!' }]"
-                >
-                  <a-select
-                    v-model:value="createAuthForm.authWay"
-                    @change="changeAuthWay"
-                    placeholder="授权方式"
-                  >
-                    <a-select-option value="DAY">按天计算</a-select-option>
-                    <a-select-option value="TIME">指定到期时间</a-select-option>
-                  </a-select>
-                </a-form-item>
-              </a-col>
+                  <a-select-option value="DAY">按天计算</a-select-option>
+                  <a-select-option value="TIME">指定到期时间</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
 
-              <a-col :span="24" v-if="createAuthForm.authWay === 'DAY'">
-                <a-form-item label="授权天数（0~365）" name="authDays">
-                  <a-input-number
-                    v-model:value="createAuthForm.authDays"
-                    placeholder="请输入授权天数，为空则是永久~"
-                    min="0"
-                    max="365"
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="24" v-if="createAuthForm.authWay === 'TIME'">
-                <a-form-item label="到期时间">
-                  <a-date-picker
-                    show-time
-                    style="width: 100%"
-                    width="100%"
-                    v-model:value="createAuthForm.authExpireTimes"
-                    placeholder="到期时间，为空则是永久~"
-                    @change="onChangePicker"
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="24">
-                <a-form-item label="TURBO模式次数（0~9999）" name="turboTimes">
-                  <a-input-number
-                    v-model:value="createAuthForm.otherInfo.turboTimes"
-                    placeholder="请输入TURBO次数，为空则是永久~"
-                    min="0"
-                    max="9999"
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="24">
-                <a-form-item label="FAST模式次数（0~9999）" name="fastTimes">
-                  <a-input-number
-                    v-model:value="createAuthForm.otherInfo.fastTimes"
-                    placeholder="请输入Fast次数，为空则是永久~"
-                    min="0"
-                    max="365"
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="24">
-                <a-form-item label="Relax模式次数（0~9999）" name="relaxTimes">
-                  <a-input
-                    v-model:value="createAuthForm.otherInfo.relaxTimes"
-                    placeholder="请输入Relax次数，为空则是永久~"
-                    min="0"
-                    max="9999"
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="24">
-                <a-form-item label="提交任务数" name="numExecute">
-                  <a-input-number
-                    v-model:value="createAuthForm.otherInfo.numExecute"
-                    placeholder="请输提交任务数，为空则上限为主账号上限~"
-                    min="1"
-                    :max="createAuthForm.maxNumExecute"
-                  />
-                </a-form-item>
-              </a-col>
-            </a-row>
-          </a-form>
-        </a-spin>
+            <a-col :span="24" v-if="createAuthForm.authWay === 'DAY'">
+              <a-form-item label="授权天数（0~365）" name="authDays">
+                <a-input-number
+                  v-model:value="createAuthForm.authDays"
+                  placeholder="请输入授权天数，为空则是永久~"
+                  min="0"
+                  max="365"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24" v-if="createAuthForm.authWay === 'TIME'">
+              <a-form-item label="到期时间">
+                <a-date-picker
+                  show-time
+                  style="width: 100%"
+                  width="100%"
+                  v-model:value="createAuthForm.authExpireTimes"
+                  placeholder="到期时间，为空则是永久~"
+                  @change="onChangePicker"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item label="TURBO模式次数（0~9999）" name="turboTimes">
+                <a-input-number
+                  v-model:value="createAuthForm.otherInfo.turboTimes"
+                  placeholder="请输入TURBO次数，为空则是永久~"
+                  min="0"
+                  max="9999"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item label="FAST模式次数（0~9999）" name="fastTimes">
+                <a-input-number
+                  v-model:value="createAuthForm.otherInfo.fastTimes"
+                  placeholder="请输入Fast次数，为空则是永久~"
+                  min="0"
+                  max="365"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item label="Relax模式次数（0~9999）" name="relaxTimes">
+                <a-input
+                  v-model:value="createAuthForm.otherInfo.relaxTimes"
+                  placeholder="请输入Relax次数，为空则是永久~"
+                  min="0"
+                  max="9999"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item label="提交任务数" name="numExecute">
+                <a-input-number
+                  v-model:value="createAuthForm.otherInfo.numExecute"
+                  placeholder="请输提交任务数，为空则上限为主账号上限~"
+                  min="1"
+                  :max="createAuthForm.maxNumExecute"
+                />
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
       </a-card>
     </a-modal>
 
@@ -678,19 +681,18 @@
       <template #footer>
         <a-button key="submit" type="primary" @click="closeAuthModal">已知晓</a-button>
       </template>
-      <a-spin :spinning="authListForm.loading">
-        <div style="width: 100%; overflow-x: auto">
-          <a-table :dataSource="authListTableData" class="a-table" :scroll="{ x: 'max-content' }">
-            <a-table-column
-              v-for="column in authColumns"
-              :v-if="!column.hidden"
-              :key="column.key"
-              :title="column.title"
-              :dataIndex="column.dataIndex"
-            />
-          </a-table>
-        </div>
-      </a-spin>
+      <Loading :loading="authListForm.loading" :absolute="true" tip="数加载中..." />
+      <div style="width: 100%; overflow-x: auto">
+        <a-table :dataSource="authListTableData" class="a-table" :scroll="{ x: 'max-content' }">
+          <a-table-column
+            v-for="column in authColumns"
+            :v-if="!column.hidden"
+            :key="column.key"
+            :title="column.title"
+            :dataIndex="column.dataIndex"
+          />
+        </a-table>
+      </div>
     </a-modal>
 
     <!-- 账号组 -->
@@ -718,6 +720,7 @@
 
 <script lang="ts" setup>
   import { ref, onMounted, computed, unref } from 'vue';
+  import { Loading } from '/@/components/Loading';
   import {
     ListQueryParams,
     AccountListItem,
@@ -824,9 +827,9 @@
     onSearch();
   }
 
-  const loadingRef = ref(false);
+  const globalLoading = ref(false);
   const onSearch = async () => {
-    loadingRef.value = true;
+    globalLoading.value = true;
     try {
       const params: ListQueryParams = search.value;
       params.current = pagination.value.current;
@@ -836,7 +839,7 @@
       tableData.value = response.records;
       pagination.value.total = response.total;
     } finally {
-      loadingRef.value = false;
+      globalLoading.value = false;
     }
   };
 
@@ -926,22 +929,22 @@
 
   const deleteAccount = async (id) => {
     // 删除账户
-    loadingRef.value = true;
+    globalLoading.value = true;
     const param: IdReq = { id: id };
     try {
       await del(param);
       onSearch();
     } finally {
-      loadingRef.value = false;
+      globalLoading.value = false;
     }
   };
 
   const doSetDefault = async (id) => {
-    loadingRef.value = true;
+    globalLoading.value = true;
     try {
       await setDefault({ id: id });
     } finally {
-      loadingRef.value = false;
+      globalLoading.value = false;
     }
   };
 
@@ -1148,12 +1151,6 @@
 </script>
 
 <style scoped>
-  /* .a-table {
-    width: 100%;
-    height: calc(80vh - 95px);
-    padding: 10px;
-    overflow: auto;
-  } */
   .quality-tag {
     display: flex;
     align-items: center;
@@ -1170,14 +1167,6 @@
     height: 100%;
 
     /* overflow-y: auto; */
-  }
-
-  .search-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 10vh;
-    padding: 20px;
   }
 
   .cards {
@@ -1219,7 +1208,7 @@
     display: flex;
     align-content: center;
     align-items: center; /* 垂直居中 */
-    height: 9vh;
+    height: 53px;
 
     /* padding: 20px; */
   }
@@ -1295,12 +1284,6 @@
   .card-date {
     color: #8c8c8c;
     font-size: 0.8em;
-  }
-
-  .search-card {
-    height: 10vh;
-    padding: 10px;
-    border-radius: 4px;
   }
 
   .search-row {

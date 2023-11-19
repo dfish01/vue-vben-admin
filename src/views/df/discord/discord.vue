@@ -199,9 +199,10 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, onMounted, defineProps } from 'vue';
+  import { ref, unref, onMounted, defineProps } from 'vue';
   import { discordAddToken, discordList, discordInfo, getValidResult } from '/@/api/df/discord';
   import { useMessage } from '/@/hooks/web/useMessage';
+  import { copyText as doCopyText } from '/@/utils/copyTextToClipboard';
 
   const { createMessage, createSuccessModal, createErrorModal, createInfoModal } = useMessage();
   const props = defineProps({
@@ -301,13 +302,12 @@
   });
 
   const copyText = async (text) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      createMessage.success('内容已复制到剪切版~');
-    } catch (err) {
-      createMessage.warning('抱歉！复制失败了，请手动复制下~');
-      console.log('复制失败', err);
+    const value = unref(text);
+    if (!value) {
+      createMessage.warning('请输入要拷贝的内容！');
+      return;
     }
+    doCopyText(value);
   };
 
   const getDiscordStateContent = (state) => {

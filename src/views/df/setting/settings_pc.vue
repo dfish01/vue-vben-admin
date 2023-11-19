@@ -395,6 +395,7 @@
   import { VerifyCodeParams } from '/@/api/df/model/UtilModel';
   import { CountdownInput } from '/@/components/CountDown';
   import type { Rule } from 'ant-design-vue/es/form';
+  import { copyText as doCopyText } from '/@/utils/copyTextToClipboard';
 
   /** 页面高度计算开始 */
   const formRef = ref();
@@ -617,13 +618,12 @@
   };
 
   const copyText = async (text) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      message.success('内容已复制到剪切版~');
-    } catch (err) {
-      message.warning('抱歉！复制失败了，请手动复制下~');
-      console.log('复制失败', err);
+    const value = unref(text);
+    if (!value) {
+      message.warning('请输入要拷贝的内容！');
+      return;
     }
+    doCopyText(value);
   };
 
   /****************************** 列表渲染 ******************************** */

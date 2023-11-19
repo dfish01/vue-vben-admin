@@ -1,7 +1,7 @@
 import { defineComponent, unref, ref,onMounted,onUnmounted } from 'vue';
 import { message } from 'ant-design-vue';
 import { listCategory, queryDrawingSample } from '/@/api/df/drawingSample';
-import { useCopyToClipboard } from '/@/hooks/web/useCopyToClipboard';
+import { copyText as doCopyText } from '/@/utils/copyTextToClipboard';
 import { useGo } from '/@/hooks/web/usePage';
 
 export function useDrawCard() {
@@ -22,17 +22,13 @@ export function useDrawCard() {
   };
 
   //复制数据
-  const { clipboardRef, copiedRef } = useCopyToClipboard();
   const copyText = (prompt) => {
     const value = unref(prompt);
-      if (!value) {
-        message.warning('请输入要拷贝的内容！');
-        return;
-      }
-      clipboardRef.value = value;
-      if (unref(copiedRef)) {
-        message.success('copy success！');
-      }
+    if (!value) {
+      message.warning('请输入要拷贝的内容！');
+      return;
+    }
+    doCopyText(value);
   };
 
   //画同款

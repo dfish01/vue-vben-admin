@@ -1,12 +1,13 @@
 <template>
   <div style="text-align: left" ref="formRef">
-    <div :style="{ height: `calc(${contentHeight}px - 15px`, overflow: 'auto' }">
+    <div :style="{ height: `calc(${contentHeight}px `, overflow: 'auto' }">
       <div style="height: 112px">
         <a-upload
-          class="no-preview-icon"
           v-model:file-list="fileList"
           :before-upload="beforeUpload"
           list-type="picture-card"
+          @preview="handlePreview"
+          style="display: flex; align-items: flex-start; justify-content: flex-start"
         >
           <div v-if="fileList.length < 1">
             <plus-outlined />
@@ -72,13 +73,17 @@
         >开始解析任务</a-button
       >
     </div>
+    <!-- 上传图片预览 -->
+    <a-modal :open="previewVisible" :title="previewTitle" :footer="null" @cancel="handleCancel">
+      <img alt="example" style="width: 100%" :src="previewImage" />
+    </a-modal>
   </div>
 </template>
 
 <script lang="ts" setup>
   import { ref, reactive, computed, unref, onMounted, toRefs } from 'vue';
   import { PlusOutlined } from '@ant-design/icons-vue';
-  import { message, UploadProps } from 'ant-design-vue';
+  import { message, UploadProps, Upload } from 'ant-design-vue';
   import { addDrawTask } from '/@/api/df/drawTask';
   import { AddDrawTaskParams } from '/@/api/df/model/drawTaskModel';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
@@ -164,6 +169,22 @@
     }
   });
   const emit = defineEmits(['startLoading', 'endLoading']);
+  const previewVisible = ref(false);
+  const previewImage = ref('');
+  const previewTitle = ref('');
+  const handleCancel = () => {
+    previewVisible.value = false;
+    previewTitle.value = '';
+  };
+  const handlePreview = async (file: UploadProps['fileList'][number]) => {
+    if (!file.url && !file.preview) {
+      file.preview = (await getBase64(file.originFileObj)) as string;
+    }
+    previewImage.value = file.url || file.preview;
+    previewVisible.value = true;
+    previewTitle.value = file.name || file.url.substring(file.url.lastIndexOf('/') + 1);
+  };
+
   const fileList = ref<UploadProps['fileList']>([]);
   const base64Images = ref<{ base64Content: string; height: number; width: number }[]>([]);
 
@@ -228,10 +249,20 @@
       img.src = base64;
     });
   }
+
   const beforeUpload = async (file: File) => {
     try {
+      // 判断是否为图片
+      const isImage = file.type.startsWith('image/');
+      if (!isImage) {
+        throw new Error('只能上传图片文件！');
+      }
+      // 获取图片文件的大小
+      const isLt5M = file.size / 1024 / 1024 < 5;
+      if (!isLt5M) {
+        throw new Error('图片大小不能超过5MB！');
+      }
       const base64 = await getBase64(file);
-
       // 获取并存储图片的尺寸
       const dimensions = await getImageDimensions(base64);
       base64Images.value = [
@@ -242,9 +273,12 @@
         },
       ];
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error converting to Base64:', error);
+      // 弹出异常消息
+      message.error(error.message);
+      //移除这个文件
+      return Upload.LIST_IGNORE;
     }
-    // Return false to prevent actual upload
     return false;
   };
 
@@ -298,7 +332,7 @@
     width: 100%;
 
     /* background: #f0f0f0; */
-    height: 6vh;
+    height: 53px;
   }
 
   .description {
@@ -311,7 +345,7 @@
     bottom: 0;
     left: 0;
     width: 10%;
-    height: 10vh;
+    height: 53px;
     text-align: left;
   }
 

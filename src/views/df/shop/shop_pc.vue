@@ -1,6 +1,7 @@
 <template>
-  <div class="app" ref="formRef" v-loading="loadingRef">
-    <a-row style="height: 55px">
+  <a-layout class="app" style="overflow-y: hidden">
+    <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
+    <a-row ref="formRef" style="height: 52px">
       <a-col :span="24">
         <a-card
           style="display: flex; align-items: center; height: 100%"
@@ -29,16 +30,18 @@
     <div
       v-if="tableData.length === 0"
       style="display: flex; align-items: center; justify-content: center"
-      :style="{ height: `calc(${contentHeight}px - 11vh)`, overflow: 'auto' }"
+      :style="{
+        height: `calc(${contentHeight}px - 53px - 9px )`,
+      }"
     >
       <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" />
     </div>
     <div
       class="cards"
       :style="{
-        height: `calc(${contentHeight}px -  11vh)`,
+        height: `calc(${contentHeight}px - 53px - 9px )`,
         overflow: 'auto',
-        padding: '0px 10px',
+        padding: '0px 10px 5px 10px',
       }"
     >
       <div v-for="card in tableData" :key="card.id" :trigger="['contextmenu']">
@@ -348,146 +351,146 @@
       :confirmLoading="shopFormOther.loading"
     >
       <a-card>
-        <a-spin :spinning="shopFormOther.loading">
-          <a-form :model="shopForm" layout="vertical" ref="accountFormRef">
-            <a-row gutter="24">
-              <a-col :span="24" v-if="shopForm.id">
-                <a-form-item label="🍥店铺编号" name="shopNo">
-                  <a-input v-model:value="shopForm.shopNo" placeholder="输入登录邮箱" disabled />
-                </a-form-item>
-              </a-col>
+        <Loading :loading="shopFormOther.loading" :absolute="true" tip="数据发送中..." />
+        <a-form :model="shopForm" layout="vertical" ref="accountFormRef">
+          <a-row gutter="24">
+            <a-col :span="24" v-if="shopForm.id">
+              <a-form-item label="🍥店铺编号" name="shopNo">
+                <a-input v-model:value="shopForm.shopNo" placeholder="输入登录邮箱" disabled />
+              </a-form-item>
+            </a-col>
 
-              <a-col :span="24">
-                <a-form-item
-                  label="🍚店铺名"
-                  :rules="[
-                    {
-                      required: true,
-                      message: '店铺名是必填项',
-                    },
-                  ]"
-                  name="shopName"
-                >
-                  <a-textarea
-                    v-model:value="shopForm.shopName"
-                    placeholder="输入店铺名"
-                    :maxlength="32"
-                    show-count
-                    auto-size
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="24">
-                <a-form-item
-                  label="🍨店铺LOGO"
-                  :rules="[
-                    {
-                      required: true,
-                      message: '店铺Logo是必填项',
-                    },
-                  ]"
-                  name="shopIcon"
-                >
-                  <div style="height: 112px">
-                    <a-upload
-                      class="no-preview-icon"
-                      v-model:file-list="shopFormOther.fileList"
-                      :before-upload="beforeUpload"
-                      list-type="picture-card"
-                      show-upload-list="false"
-                    >
-                      <div v-if="shopFormOther.fileList.length < 1">
-                        <plus-outlined />
-                        <div style="margin-top: 8px">上传图片</div>
-                      </div>
-                    </a-upload>
-                  </div>
-                </a-form-item>
-              </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="🍚店铺名"
+                :rules="[
+                  {
+                    required: true,
+                    message: '店铺名是必填项',
+                  },
+                ]"
+                name="shopName"
+              >
+                <a-textarea
+                  v-model:value="shopForm.shopName"
+                  placeholder="输入店铺名"
+                  :maxlength="32"
+                  show-count
+                  auto-size
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="🍨店铺LOGO"
+                :rules="[
+                  {
+                    required: true,
+                    message: '店铺Logo是必填项',
+                  },
+                ]"
+                name="shopIcon"
+              >
+                <div style="height: 112px">
+                  <a-upload
+                    class="no-preview-icon"
+                    v-model:file-list="shopFormOther.fileList"
+                    :before-upload="beforeUpload"
+                    list-type="picture-card"
+                    show-upload-list="false"
+                  >
+                    <div v-if="shopFormOther.fileList.length < 1">
+                      <plus-outlined />
+                      <div style="margin-top: 8px">上传图片</div>
+                    </div>
+                  </a-upload>
+                </div>
+              </a-form-item>
+            </a-col>
 
-              <a-col :span="24">
-                <a-form-item
-                  label="🍵店铺描述"
-                  :rules="[
-                    {
-                      required: true,
-                      message: '店铺描述是必填项',
-                    },
-                  ]"
-                  name="describeInfo"
-                >
-                  <a-textarea
-                    v-model:value="shopForm.describeInfo"
-                    placeholder="输入店铺描述"
-                    show-count
-                    :maxlength="125"
-                    :rows="4"
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="24">
-                <a-form-item
-                  label="🍝店铺连接"
-                  :rules="[
-                    {
-                      required: true,
-                      message: '店铺连接是必填项',
-                    },
-                  ]"
-                  name="linkUrl"
-                >
-                  <a-input v-model:value="shopForm.linkUrl" placeholder="输入店铺连接" />
-                </a-form-item>
-              </a-col>
-              <a-col :span="24">
-                <a-form-item
-                  label="🥗店铺标签"
-                  :rules="[
-                    {
-                      required: true,
-                      message: '店铺标签是必填项',
-                    },
-                  ]"
-                  name="tagList"
-                >
-                  <a-select
-                    v-model:value="shopForm.tagList"
-                    :options="shopFormOther.tagOptions"
-                    mode="multiple"
-                    placeholder="请选择店铺标签"
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="24">
-                <a-form-item
-                  label="🍗加入原因"
-                  :rules="[
-                    {
-                      required: true,
-                      message: '加入原因是必填项',
-                    },
-                  ]"
-                  name="applyReason"
-                >
-                  <a-textarea
-                    v-model:value="shopForm.applyReason"
-                    placeholder="输入加入原因"
-                    show-count
-                    :maxlength="256"
-                    :rows="4"
-                  />
-                </a-form-item>
-              </a-col>
-            </a-row>
-          </a-form>
-        </a-spin>
+            <a-col :span="24">
+              <a-form-item
+                label="🍵店铺描述"
+                :rules="[
+                  {
+                    required: true,
+                    message: '店铺描述是必填项',
+                  },
+                ]"
+                name="describeInfo"
+              >
+                <a-textarea
+                  v-model:value="shopForm.describeInfo"
+                  placeholder="输入店铺描述"
+                  show-count
+                  :maxlength="125"
+                  :rows="4"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="🍝店铺连接"
+                :rules="[
+                  {
+                    required: true,
+                    message: '店铺连接是必填项',
+                  },
+                ]"
+                name="linkUrl"
+              >
+                <a-input v-model:value="shopForm.linkUrl" placeholder="输入店铺连接" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="🥗店铺标签"
+                :rules="[
+                  {
+                    required: true,
+                    message: '店铺标签是必填项',
+                  },
+                ]"
+                name="tagList"
+              >
+                <a-select
+                  v-model:value="shopForm.tagList"
+                  :options="shopFormOther.tagOptions"
+                  mode="multiple"
+                  placeholder="请选择店铺标签"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="🍗加入原因"
+                :rules="[
+                  {
+                    required: true,
+                    message: '加入原因是必填项',
+                  },
+                ]"
+                name="applyReason"
+              >
+                <a-textarea
+                  v-model:value="shopForm.applyReason"
+                  placeholder="输入加入原因"
+                  show-count
+                  :maxlength="256"
+                  :rows="4"
+                />
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
       </a-card>
     </a-modal>
-  </div>
+  </a-layout>
 </template>
 
 <script lang="ts" setup>
   import { ref, onMounted, computed, unref } from 'vue';
+  import { Loading } from '/@/components/Loading';
   import {
     ShopListReq,
     ShopCreateReq,
@@ -509,7 +512,7 @@
   /** 页面高度计算开始 */
   const button = ref(null);
   const substractSpaceRefs = ref([]);
-  const upwardSpace = computed(() => 0);
+  const upwardSpace = computed(() => 10);
   const offsetHeightRef = ref(0);
   const subtractHeightRefs = ref([button]);
   const formRef = ref();
@@ -573,9 +576,9 @@
     onSearch();
   }
 
-  const loadingRef = ref(false);
+  const globalLoading = ref(false);
   const onSearch = async () => {
-    loadingRef.value = true;
+    globalLoading.value = true;
     try {
       const params: ShopListReq = searchForm.value;
       params.current = pagination.value.current;
@@ -585,7 +588,7 @@
       tableData.value = response.records;
       pagination.value.total = response.total;
     } finally {
-      loadingRef.value = false;
+      globalLoading.value = false;
     }
   };
 
@@ -876,7 +879,7 @@
     display: flex;
     align-content: center;
     align-items: center; /* 垂直居中 */
-    height: 9vh;
+    height: 53px;
 
     /* padding: 20px; */
   }

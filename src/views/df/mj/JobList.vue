@@ -1,6 +1,6 @@
 <template>
   <div class="jobList-app" ref="formRef">
-    <Loading :loading="loadingRef" :absolute="false" tip="加载中" />
+    <Loading :loading="loadingRef" :absolute="false" tip="数据加载中..." />
     <a-card class="search-card">
       <!-- 在移动端使用 -->
       <a-row v-if="getIsMobile" align="middle" class="search-row">
@@ -219,17 +219,17 @@
     <div
       v-if="cards.length === 0"
       style="display: flex; align-items: center; justify-content: center"
-      :style="{ height: `calc(${contentHeight}px - 11vh)`, overflow: 'auto' }"
+      :style="{ height: `calc(${contentHeight}px - 50px)`, overflow: 'auto' }"
     >
       <a-empty :image="simpleImage" />
     </div>
     <div
       v-else
       class="cards"
-      :style="{ height: `calc(${contentHeight}px - 53px)`, overflow: 'auto' }"
+      :style="{ height: `calc(${contentHeight}px - 50px)`, overflow: 'auto' }"
     >
       <a-dropdown v-for="card in cards" :key="card.id" :trigger="['contextmenu']">
-        <a-card :bodyStyle="{ padding: '0px' }" class="card" hoverable @click="showTaskInfo(card)">
+        <a-card :bodyStyle="{ padding: '0px' }" class="card" hoverable>
           <div v-if="card.state === 'QUEUED'" class="mask-queued label-front">
             <div
               style="
@@ -341,6 +341,7 @@
           </div>
           <div v-if="card.state === 'SUCCESS'">
             <img
+              @click="showTaskInfo(card)"
               v-lazy.container="
                 userSetting.useUpImage
                   ? userSetting.usePersonNet
@@ -807,7 +808,7 @@
                 >🚽从该空间移除</a-menu-item
               >
             </a-popconfirm>
-            <a-menu-item key="8" @click="() => getSeed(card.id)">🆔获取Seed</a-menu-item>
+            <a-menu-item key="8" @click="() => getSeed(card.id, false)">🆔获取Seed</a-menu-item>
           </a-menu>
         </template>
       </a-dropdown>
@@ -1075,23 +1076,23 @@
       @ok="doZoomCus()"
       :confirmLoading="remix.loading"
     >
-      <a-spin :spinning="remix.loading">
-        <a-row style="padding: 15px">
-          <a-col span="24">
-            <span>{{ remix.secTitle }}</span>
-          </a-col>
-          <a-col span="24">
-            <a-textarea
-              style="width: 100%"
-              v-model:value="remix.prompt"
-              placeholder="请输入相关的文本~"
-              allow-clear
-              :maxlength="2000"
-              :auto-size="{ minRows: 5, maxRows: 8 }"
-            />
-          </a-col>
-        </a-row>
-      </a-spin>
+      <Loading :loading="remix.loading" :absolute="true" tip="数据发送中..." />
+
+      <a-row style="padding: 15px">
+        <a-col span="24">
+          <span>{{ remix.secTitle }}</span>
+        </a-col>
+        <a-col span="24">
+          <a-textarea
+            style="width: 100%"
+            v-model:value="remix.prompt"
+            placeholder="请输入相关的文本~"
+            allow-clear
+            :maxlength="2000"
+            :auto-size="{ minRows: 5, maxRows: 8 }"
+          />
+        </a-col>
+      </a-row>
     </a-modal>
   </div>
   <!-- 标签弹窗  -->
@@ -1106,25 +1107,25 @@
           >添加标签</a-button
         >
       </template>
-      <a-spin :spinning="drawTagForm.loading">
-        <a-row style="padding: 15px">
-          <a-col span="24">
-            <span style="font-size: 14"
-              >📌给你的任务添加相关的标签吧！打造属于你自己的图片系列管理！</span
-            >
-          </a-col>
-          <a-col span="24">
-            <a-mentions
-              style="width: 100%; text-align: left"
-              v-model:value="drawTagForm.tagName"
-              rows="3"
-              placeholder="用@可以触发最近使用的标签哦！多个标签'空格符'隔开,最多5个标签。每个标签长度不超过16个字。~"
-              :options="drawTagForm.tagNameOptions"
-              @select="onChangeLabel"
-            />
-          </a-col>
-        </a-row>
-      </a-spin>
+
+      <Loading :loading="drawTagForm.loading" :absolute="false" tip="数据发送中..." />
+      <a-row style="padding: 15px">
+        <a-col span="24">
+          <span style="font-size: 14"
+            >📌给你的任务添加相关的标签吧！打造属于你自己的图片系列管理！</span
+          >
+        </a-col>
+        <a-col span="24">
+          <a-mentions
+            style="width: 100%; text-align: left"
+            v-model:value="drawTagForm.tagName"
+            rows="3"
+            placeholder="用@可以触发最近使用的标签哦！多个标签'空格符'隔开,最多5个标签。每个标签长度不超过16个字。~"
+            :options="drawTagForm.tagNameOptions"
+            @select="onChangeLabel"
+          />
+        </a-col>
+      </a-row>
     </a-modal>
   </div>
 
@@ -1138,48 +1139,47 @@
       :confirmLoading="userSpaceTaskForm.loading"
     >
       <a-card>
-        <a-spin :spinning="userSpaceTaskForm.loading">
-          <a-form :model="userSpaceTaskForm" layout="vertical" ref="userSpaceTaskFormRef">
-            <a-row gutter="24">
-              <a-col :span="24">
-                <a-form-item
-                  label="工作空间"
-                  :rules="[
-                    {
-                      required: true,
-                      message: '工作空间不能为空',
-                    },
-                  ]"
-                  name="spaceId"
-                >
-                  <a-select
-                    v-model:value="userSpaceTaskForm.spaceId"
-                    style="width: 100%"
-                    placeholder="请选择导入空间"
-                    :options="userSpaceTaskForm.spaceOptions"
-                    @change="handleSpaceChange"
-                  />
-                </a-form-item>
-              </a-col>
-            </a-row>
-          </a-form>
-        </a-spin>
+        <Loading :loading="userSpaceTaskForm.loading" :absolute="true" tip="数据发送中..." />
+        <a-form :model="userSpaceTaskForm" layout="vertical" ref="userSpaceTaskFormRef">
+          <a-row gutter="24">
+            <a-col :span="24">
+              <a-form-item
+                label="工作空间"
+                :rules="[
+                  {
+                    required: true,
+                    message: '工作空间不能为空',
+                  },
+                ]"
+                name="spaceId"
+              >
+                <a-select
+                  v-model:value="userSpaceTaskForm.spaceId"
+                  style="width: 100%"
+                  placeholder="请选择导入空间"
+                  :options="userSpaceTaskForm.spaceOptions"
+                  @change="handleSpaceChange"
+                />
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
       </a-card>
     </a-modal>
   </div>
 
   <!-- 查看明细  -->
-  <a-modal v-model:visible="infoData.viewFlag" style="top: 10px; min-width: 720px">
+  <a-modal title="任务概况" v-model:visible="infoData.viewFlag" style="top: 10px; min-width: 720px">
     <template #footer>
       <a-button key="submit" type="primary" :loading="loadingRef" @click="closeTaskInfo"
         >已知晓</a-button
       >
     </template>
-    <a-card :bodyStyle="{ padding: '0px 0px 0px 0px' }" :bordered="false">
+    <a-card :bodyStyle="{ padding: '0px 5px' }" :bordered="false">
       <a-card-grid
         style="display: flex; justify-content: center; width: 100%; text-align: center"
         :bodyStyle="{ padding: '0px 0px 0px 0px' }"
-        :bordered="false"
+        bordered="true"
         :hoverable="false"
       >
         <div style="width: 50%">
@@ -1204,11 +1204,6 @@
                 alt=""
               />
             </a-card-grid>
-            <span style="font-size: 12px"> 📢点击上面的图片可以自定义查看大图！！！</span>
-            <a-button @click="handleDownloadByUrls(infoData.taskInfo.imageUrls)" size="small">
-              <Icon icon="bx:bxs-cloud-download" class="vel-icon icon" aria-hidden="true" />
-              下载图片
-            </a-button>
           </a-card>
           <a-card
             :bodyStyle="{ padding: '0px' }"
@@ -1231,17 +1226,14 @@
                 alt=""
               />
             </a-card-grid>
-            <span style="font-size: 12px"> 📢获取seed后显示4格图，点击可放大！！！</span>
-            <a-button @click="handleDownloadByUrls(infoData.taskInfo.imageUrls)">
-              <Icon
-                icon="bx:bxs-cloud-download"
-                class="vel-icon icon"
-                aria-hidden="true"
-                size="20"
-              />
+          </a-card>
+          <a-flex :style="{ width: '100%' }" justify="center" align="center">
+            <span style="font-size: 12px"> 📢获取seed后显示4格图,点击图片可查看大图！！！</span>
+            <a-button @click="handleDownloadByUrls(infoData.taskInfo.imageUrls)" size="small">
+              <Icon icon="bx:bxs-cloud-download" class="vel-icon icon" aria-hidden="true" />
               下载图片
             </a-button>
-          </a-card>
+          </a-flex>
         </div>
       </a-card-grid>
       <!-- <a-card-grid style="width: 100%; text-align: center" :hoverable="false" :bordered="false">
@@ -1304,7 +1296,7 @@
               {{ infoData.taskInfo.seed }}
             </div>
             <div v-else>
-              <a-button @click="getSeed(infoData.id)" size="small" :loading="loadingRef"
+              <a-button @click="getSeed(infoData.id, true)" size="small" :loading="loadingRef"
                 >🆔获取Seed
               </a-button>
             </div>
@@ -1415,24 +1407,24 @@
         >添加到官方案例</a-button
       >
     </template>
-    <a-spin :spinning="exampleForm.loading">
-      <a-card
-        :bordered="false"
-        :bodyStyle="{ padding: '1px 1px 1px 1px', width: '100%', 'align-items': 'center' }"
-      >
-        <a-row :gutter="[0, 2]" type="flex">
-          <a-col flex="auto">
-            <a-select
-              v-model:value="exampleForm.categoryCodes"
-              mode="multiple"
-              style="width: 100%"
-              placeholder="请选择分类"
-              :options="exampleForm.drawingSampleCategory"
-            />
-          </a-col>
-        </a-row>
-      </a-card>
-    </a-spin>
+
+    <Loading :loading="exampleForm.loading" :absolute="true" tip="数据发送中..." />
+    <a-card
+      :bordered="false"
+      :bodyStyle="{ padding: '1px 1px 1px 1px', width: '100%', 'align-items': 'center' }"
+    >
+      <a-row :gutter="[0, 2]" type="flex">
+        <a-col flex="auto">
+          <a-select
+            v-model:value="exampleForm.categoryCodes"
+            mode="multiple"
+            style="width: 100%"
+            placeholder="请选择分类"
+            :options="exampleForm.drawingSampleCategory"
+          />
+        </a-col>
+      </a-row>
+    </a-card>
   </a-modal>
 </template>
 
@@ -1553,7 +1545,7 @@
   //页面高度处理
   const button = ref(null);
   const substractSpaceRefs = ref([]);
-  const upwardSpace = computed(() => 0);
+  const upwardSpace = computed(() => 1);
   const offsetHeightRef = ref(0);
   const subtractHeightRefs = ref([button]);
   const formRef = ref();
@@ -1817,7 +1809,7 @@
     display: flex;
     align-content: center;
     align-items: center; /* 垂直居中 */
-    height: 9vh;
+    height: 53px;
   }
 
   .card-image img {

@@ -1,5 +1,6 @@
 <template>
-  <div class="app" ref="formRef" v-loading="loadingRef">
+  <div class="app" ref="formRef">
+    <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
     <a-row style="height: 55px">
       <a-col :span="24">
         <a-card
@@ -50,14 +51,15 @@
     <div
       v-if="tableData.length === 0"
       style="display: flex; align-items: center; justify-content: center"
-      :style="{ height: `calc(${contentHeight}px - 11vh)`, overflow: 'auto' }"
+      :style="{ height: `calc(${contentHeight}px - 75px)`, overflow: 'auto' }"
     >
       <a-empty :image="simpleImage" />
     </div>
     <div
+      v-else
       class="cards"
       :style="{
-        height: `calc(${contentHeight}px -  11vh)`,
+        height: `calc(${contentHeight}px - 75px)`,
         overflow: 'auto',
         padding: '0px 10px',
       }"
@@ -222,6 +224,11 @@
               >
                 账号置顶</a-button
               >
+              <a-col :span="24">
+                <a-divider
+                  style="width: 100%; margin-top: 8px; margin-bottom: 1px; margin-left: 0"
+                />
+              </a-col>
             </a-row>
 
             <a-row class="card-tags" style="margin-top: 10px" v-if="card.authType === 'O'">
@@ -234,7 +241,7 @@
                     @confirm="deleteAccount(card.id)"
                   >
                     <a-tooltip title="删除账号">
-                      <a-button style="width: 100%">
+                      <a-button type="text" style="width: 100%">
                         <Icon
                           icon="material-symbols:delete-outline"
                           class="vel-icon icon"
@@ -245,7 +252,11 @@
                     </a-tooltip>
                   </a-popconfirm>
                   <a-tooltip title="授权列表">
-                    <a-button @click="showAuthorizationList(card.chatGptId)" style="width: 100%">
+                    <a-button
+                      type="text"
+                      @click="showAuthorizationList(card.chatGptId)"
+                      style="width: 100%"
+                    >
                       <Icon
                         icon="ph:user-list-bold"
                         class="vel-icon icon"
@@ -261,7 +272,7 @@
                     @confirm="showCreateAuth(card)"
                   >
                     <a-tooltip title="生成授权">
-                      <a-button style="width: 100%">
+                      <a-button type="text" style="width: 100%">
                         <Icon
                           icon="mdi:genie-lamp"
                           class="vel-icon icon"
@@ -272,7 +283,7 @@
                     </a-tooltip>
                   </a-popconfirm>
                   <a-tooltip title="编辑账号">
-                    <a-button @click="onModified(card)" style="width: 100%">
+                    <a-button type="text" @click="onModified(card)" style="width: 100%">
                       <Icon
                         icon="material-symbols:edit-calendar-outline-sharp"
                         class="vel-icon icon"
@@ -293,7 +304,7 @@
                   @confirm="deleteAccount(card.id)"
                 >
                   <a-tooltip title="删除账号">
-                    <a-button style="width: 100%">
+                    <a-button type="text" style="width: 100%">
                       <Icon
                         icon="material-symbols:delete-outline"
                         class="vel-icon icon"
@@ -336,62 +347,61 @@
       :confirmLoading="accountForm.loading"
     >
       <a-card>
-        <a-spin :spinning="accountForm.loading">
-          <a-form :model="accountForm" layout="vertical" ref="accountFormRef">
-            <a-row gutter="24">
-              <a-col :span="24">
-                <a-form-item
-                  label="🐵登录邮箱"
-                  :rules="[
-                    {
-                      required: true,
-                      message: '登录邮箱是必填项',
-                    },
-                  ]"
-                  name="accountName"
-                >
-                  <a-input v-model:value="accountForm.accountName" placeholder="输入登录邮箱" />
-                </a-form-item>
-              </a-col>
-              <a-col :span="24">
-                <a-form-item
-                  label="🍵登录密码"
-                  :rules="[
-                    {
-                      required: true,
-                      message: '登录密码是必填项',
-                    },
-                  ]"
-                  name="password"
-                >
-                  <a-input v-model:value="accountForm.password" placeholder="输入登录密码" />
-                </a-form-item>
-              </a-col>
-              <a-col :span="24">
-                <a-form-item label="🍙MFA（二次验证密码-选填）">
-                  <a-input v-model:value="accountForm.mfaCode" placeholder="输入MFA" />
-                </a-form-item>
-              </a-col>
-              <a-col :span="24" v-if="accountForm.id">
-                <a-form-item label="🐥ACCESS-TOKEN（无法生成时，手动填写）">
-                  <a-input v-model:value="accountForm.accessToken" placeholder="输入ACCESS-TOKEN" />
-                </a-form-item>
-              </a-col>
-              <a-col :span="24" v-if="accountForm.id">
-                <a-form-item label="🐥ACCESS-TOKEN过期时间（填写ACCESS-TOKEN时，补充）">
-                  <a-date-picker
-                    show-time
-                    style="width: 100%"
-                    width="100%"
-                    v-model:value="accountForm.gmtAccessExpire"
-                    placeholder="请输入过期时间~"
-                    @change="onChangePicker"
-                  />
-                </a-form-item>
-              </a-col>
-            </a-row>
-          </a-form>
-        </a-spin>
+        <Loading :loading="accountForm.loading" :absolute="true" tip="数据发送中..." />
+        <a-form :model="accountForm" layout="vertical" ref="accountFormRef">
+          <a-row gutter="24">
+            <a-col :span="24">
+              <a-form-item
+                label="🐵登录邮箱"
+                :rules="[
+                  {
+                    required: true,
+                    message: '登录邮箱是必填项',
+                  },
+                ]"
+                name="accountName"
+              >
+                <a-input v-model:value="accountForm.accountName" placeholder="输入登录邮箱" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="🍵登录密码"
+                :rules="[
+                  {
+                    required: true,
+                    message: '登录密码是必填项',
+                  },
+                ]"
+                name="password"
+              >
+                <a-input v-model:value="accountForm.password" placeholder="输入登录密码" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item label="🍙MFA（二次验证密码-选填）">
+                <a-input v-model:value="accountForm.mfaCode" placeholder="输入MFA" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24" v-if="accountForm.id">
+              <a-form-item label="🐥ACCESS-TOKEN（无法生成时，手动填写）">
+                <a-input v-model:value="accountForm.accessToken" placeholder="输入ACCESS-TOKEN" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24" v-if="accountForm.id">
+              <a-form-item label="🐥ACCESS-TOKEN过期时间（填写ACCESS-TOKEN时，补充）">
+                <a-date-picker
+                  show-time
+                  style="width: 100%"
+                  width="100%"
+                  v-model:value="accountForm.gmtAccessExpire"
+                  placeholder="请输入过期时间~"
+                  @change="onChangePicker"
+                />
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
       </a-card>
     </a-modal>
 
@@ -425,65 +435,64 @@
       :confirmLoading="createAuthForm.loading"
     >
       <a-card>
-        <a-spin :spinning="createAuthForm.loading">
-          <a-form layout="vertical" :model="createAuthForm" ref="createAuthFormRef">
-            <a-row gutter="24">
-              <a-col :span="24">
-                <a-form-item
-                  label="生成授权数量(1~50)"
-                  name="num"
-                  :rules="[{ required: true, message: '请输入生成授权码的数量!' }]"
+        <Loading :loading="createAuthForm.loading" :absolute="true" tip="数据发送中..." />
+        <a-form layout="vertical" :model="createAuthForm" ref="createAuthFormRef">
+          <a-row gutter="24">
+            <a-col :span="24">
+              <a-form-item
+                label="生成授权数量(1~50)"
+                name="num"
+                :rules="[{ required: true, message: '请输入生成授权码的数量!' }]"
+              >
+                <a-input-number
+                  v-model:value="createAuthForm.num"
+                  placeholder="请输入生成授权码的数量~"
+                  min="1"
+                  max="50"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="授权类型"
+                name="authWay"
+                :rules="[{ required: true, message: '请输入生成授权码的数量!' }]"
+              >
+                <a-select
+                  v-model:value="createAuthForm.authWay"
+                  @change="changeAuthWay"
+                  placeholder="授权方式"
                 >
-                  <a-input-number
-                    v-model:value="createAuthForm.num"
-                    placeholder="请输入生成授权码的数量~"
-                    min="1"
-                    max="50"
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="24">
-                <a-form-item
-                  label="授权类型"
-                  name="authWay"
-                  :rules="[{ required: true, message: '请输入生成授权码的数量!' }]"
-                >
-                  <a-select
-                    v-model:value="createAuthForm.authWay"
-                    @change="changeAuthWay"
-                    placeholder="授权方式"
-                  >
-                    <a-select-option value="DAY">按天计算</a-select-option>
-                    <a-select-option value="TIME">指定到期时间</a-select-option>
-                  </a-select>
-                </a-form-item>
-              </a-col>
+                  <a-select-option value="DAY">按天计算</a-select-option>
+                  <a-select-option value="TIME">指定到期时间</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
 
-              <a-col :span="24" v-if="createAuthForm.authWay === 'DAY'">
-                <a-form-item label="授权天数（0~365）" name="authDays">
-                  <a-input-number
-                    v-model:value="createAuthForm.authDays"
-                    placeholder="请输入授权天数，为空则是永久~"
-                    min="0"
-                    max="365"
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="24" v-if="createAuthForm.authWay === 'TIME'">
-                <a-form-item label="到期时间">
-                  <a-date-picker
-                    show-time
-                    style="width: 100%"
-                    width="100%"
-                    v-model:value="createAuthForm.authExpireTimes"
-                    placeholder="到期时间，为空则是永久~"
-                    @change="onChangePicker"
-                  />
-                </a-form-item>
-              </a-col>
-            </a-row>
-          </a-form>
-        </a-spin>
+            <a-col :span="24" v-if="createAuthForm.authWay === 'DAY'">
+              <a-form-item label="授权天数（0~365）" name="authDays">
+                <a-input-number
+                  v-model:value="createAuthForm.authDays"
+                  placeholder="请输入授权天数，为空则是永久~"
+                  min="0"
+                  max="365"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24" v-if="createAuthForm.authWay === 'TIME'">
+              <a-form-item label="到期时间">
+                <a-date-picker
+                  show-time
+                  style="width: 100%"
+                  width="100%"
+                  v-model:value="createAuthForm.authExpireTimes"
+                  placeholder="到期时间，为空则是永久~"
+                  @change="onChangePicker"
+                />
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
       </a-card>
     </a-modal>
 
@@ -492,26 +501,26 @@
       <template #footer>
         <a-button key="submit" type="primary" @click="closeAuthModal">已知晓</a-button>
       </template>
-      <a-spin :spinning="authListForm.loading">
-        <div style="width: 100%; padding: 5px 10px; overflow-x: auto">
-          <a-table :dataSource="authListTableData" class="a-table" :scroll="{ x: 'max-content' }">
-            <a-table-column
-              v-for="column in authColumns"
-              :v-if="!column.hidden"
-              :key="column.key"
-              :title="column.title"
-              :dataIndex="column.dataIndex"
-              size="small"
-            />
-          </a-table>
-        </div>
-      </a-spin>
+      <Loading :loading="authListForm.loading" :absolute="true" tip="数据加载中..." />
+      <div style="width: 100%; padding: 5px 10px; overflow-x: auto">
+        <a-table :dataSource="authListTableData" class="a-table" :scroll="{ x: 'max-content' }">
+          <a-table-column
+            v-for="column in authColumns"
+            :v-if="!column.hidden"
+            :key="column.key"
+            :title="column.title"
+            :dataIndex="column.dataIndex"
+            size="small"
+          />
+        </a-table>
+      </div>
     </a-modal>
   </div>
 </template>
 
 <script lang="ts" setup>
   import { ref, onMounted, computed, unref } from 'vue';
+  import { Loading } from '/@/components/Loading';
   import {
     ActiveAccountReq,
     CreateAuthCodeReq,
@@ -597,9 +606,9 @@
     onSearch();
   }
 
-  const loadingRef = ref(false);
+  const globalLoading = ref(false);
   const onSearch = async () => {
-    loadingRef.value = true;
+    globalLoading.value = true;
     try {
       const params: ListQueryParams = searchForm.value;
       params.current = pagination.value.current;
@@ -609,7 +618,7 @@
       tableData.value = response.records;
       pagination.value.total = response.total;
     } finally {
-      loadingRef.value = false;
+      globalLoading.value = false;
     }
   };
 
@@ -676,32 +685,32 @@
 
   const deleteAccount = async (id) => {
     // 删除账户
-    loadingRef.value = true;
+    globalLoading.value = true;
     const param: IdReq = { id: id };
     try {
       await removeChatgptAccount(param);
       onSearch();
     } finally {
-      loadingRef.value = false;
+      globalLoading.value = false;
     }
   };
 
   const doSetTop = async (id) => {
-    loadingRef.value = true;
+    globalLoading.value = true;
     try {
       await setTop({ id: id });
       onSearch();
     } finally {
-      loadingRef.value = false;
+      globalLoading.value = false;
     }
   };
 
   const doRefreshToken = async (id) => {
-    loadingRef.value = true;
+    globalLoading.value = true;
     try {
       await refreshToken({ id: id });
     } finally {
-      loadingRef.value = false;
+      globalLoading.value = false;
     }
   };
   /************************************生成授权 & 激活********************************* */
@@ -827,12 +836,6 @@
 </script>
 
 <style scoped>
-  /* .a-table {
-    width: 100%;
-    height: calc(80vh - 95px);
-    padding: 10px;
-    overflow: auto;
-  } */
   .quality-tag {
     display: flex;
     align-items: center;
@@ -855,7 +858,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 10vh;
+    height: 53px;
     padding: 20px;
   }
 
@@ -898,7 +901,7 @@
     display: flex;
     align-content: center;
     align-items: center; /* 垂直居中 */
-    height: 9vh;
+    height: 53px;
 
     /* padding: 20px; */
   }
@@ -919,6 +922,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    height: 24px;
     margin-top: 5px;
     margin-right: 0;
     margin-left: 0;
@@ -974,12 +978,6 @@
   .card-date {
     color: #8c8c8c;
     font-size: 0.8em;
-  }
-
-  .search-card {
-    height: 10vh;
-    padding: 10px;
-    border-radius: 4px;
   }
 
   .search-row {

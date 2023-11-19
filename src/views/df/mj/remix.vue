@@ -68,6 +68,7 @@
 <script lang="ts" setup>
   import { SvgIcon } from '/@/components/Icon';
   import Icon from '/@/components/Icon/Icon.vue';
+  import { copyText as doCopyText } from '/@/utils/copyTextToClipboard';
   import {
     ref,
     onMounted,
@@ -145,12 +146,12 @@
   const loadingRef = ref(false);
 
   const copyText = async (text) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      message.success('内容已复制到剪切版~');
-    } catch (err) {
-      console.log('复制失败', err);
+    const value = unref(text);
+    if (!value) {
+      message.warning('请输入要拷贝的内容！');
+      return;
     }
+    doCopyText(value);
   };
 
   //初始化加载

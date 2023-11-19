@@ -1,6 +1,7 @@
 <template>
   <a-layout loading-tip="加载中...">
     <a-card :bodyStyle="{ padding: '0px 20px 0px 20px', height: `calc(${contentHeight}px)` }">
+      <!-- <a-card :bodyStyle="{ padding: '0px 20px 0px 20px', height: 'auto' }"> -->
       <a-tabs ref="formRef" v-model="activeKey">
         <a-tab-pane key="1">
           <template #tab>

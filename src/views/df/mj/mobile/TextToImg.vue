@@ -41,9 +41,9 @@
                   v-model:file-list="fileList"
                   :before-upload="beforeUpload"
                   list-type="picture-card"
-                  class="no-preview-icon"
+                  @preview="handlePreview"
                   @change="handleChange"
-                  style="display: flex; justify-content: left; width: 75px; height: 75px"
+                  style="display: flex; align-items: flex-start; justify-content: flex-start"
                 >
                   <div v-if="fileList.length < 5">
                     <plus-outlined />
@@ -255,23 +255,48 @@
             <div
               v-if="isEditing && option.id === 90"
               class="border-wapper"
-              style="flex-flow: column; align-items: center; justify-content: center; padding: 6px"
+              style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 6px;
+              "
             >
-              <a-row style="flex-flow: row; align-items: center; justify-content: center">
-                <a-col :span="10">
-                  <a-input-number id="inputNumber" size="small" v-model:value="option.X" :min="1" />
-                </a-col>
-                <a-col :span="2">
-                  <span>:</span>
-                </a-col>
-                <a-col :span="10">
-                  <a-input-number size="small" v-model:value="option.Y" :min="1" />
-                </a-col>
-              </a-row>
-              <a-row :gutter="8" style="justify-content: center; margin-top: 2px">
+              <a-input-group size="small">
+                <a-row style="justify-content: center">
+                  <a-col :span="9">
+                    <a-input
+                      v-model:value="option.X"
+                      @input="
+                        option.X =
+                          option.X.replace(/\D/g, '') === '' || +option.X <= 1
+                            ? '1'
+                            : parseInt(option.X.replace(/\D/g, ''), 10) || 1
+                      "
+                    />
+                  </a-col>
+                  <a-col :span="2">
+                    <span>:</span>
+                  </a-col>
+                  <a-col :span="9">
+                    <a-input
+                      v-model:value="option.Y"
+                      @input="
+                        option.Y =
+                          option.Y.replace(/\D/g, '') === '' || +option.Y <= 1
+                            ? '1'
+                            : parseInt(option.Y.replace(/\D/g, ''), 10) || 1
+                      "
+                    />
+                  </a-col>
+                </a-row>
+              </a-input-group>
+
+              <a-row :gutter="8" style="justify-content: center; width: 100%; margin-top: 2px">
                 <a-col :span="21">
                   <a-button style="width: 100%" @click="onCustomerOption(option)" size="small"
-                    >确认自定义比例</a-button
+                    >确认比例</a-button
                   >
                 </a-col>
               </a-row>
@@ -286,7 +311,6 @@
               {{ option.X }}:{{ option.Y }}<br />{{ option.label }}
             </a-tag>
           </a-col>
-          <a-col :span="12" />
         </a-row>
       </a-card>
       <!-- 图片比例 E-->
@@ -315,23 +339,31 @@
               <a-tab-pane key="niji5" tab="Niji 5">
                 <a-row style="justify-content: left">
                   <a-col span="24" class="style-radio">
-                    <a-radio-group size="small" v-model:value="versionParam.niji5.style">
+                    <a-radio-group
+                      size="small"
+                      style="width: 100%"
+                      v-model:value="versionParam.niji5.style"
+                    >
                       <a-tooltip title="默认的风格，效果很不错">
-                        <a-radio-button value="">Default</a-radio-button>
+                        <a-radio-button style="width: 20%" value="">Default</a-radio-button>
                       </a-tooltip>
 
                       <a-tooltip title=" 表现力风格，更精致的插图艺术风格">
-                        <a-radio-button value="expressive">Expressive</a-radio-button>
+                        <a-radio-button style="width: 20%" value="expressive"
+                          >Expressive</a-radio-button
+                        >
                       </a-tooltip>
                       <a-tooltip title="可爱风格，能创造出迷人可爱的角色、道具和场景">
-                        <a-radio-button value="cute">Cute</a-radio-button>
+                        <a-radio-button style="width: 20%" value="cute">Cute</a-radio-button>
                       </a-tooltip>
 
                       <a-tooltip title="景色风格，在奇幻环境下作出美丽的背景和电影般的角色时刻">
-                        <a-radio-button value="scenic">Scenic</a-radio-button>
+                        <a-radio-button style="width: 20%" value="scenic">Scenic</a-radio-button>
                       </a-tooltip>
                       <a-tooltip title="原始风格，在2023.5.26日之前的默认Niji5的风格">
-                        <a-radio-button value="original">Original</a-radio-button>
+                        <a-radio-button style="width: 20%" value="original"
+                          >Original</a-radio-button
+                        >
                       </a-tooltip>
                     </a-radio-group>
                   </a-col>
@@ -1237,6 +1269,10 @@
         </a-spin>
       </a-modal>
     </div>
+    <!-- 上传图片预览 -->
+    <a-modal :open="previewVisible" :title="previewTitle" :footer="null" @cancel="handleCancel">
+      <img alt="example" style="width: 100%" :src="previewImage" />
+    </a-modal>
   </a-form>
 </template>
 <script lang="ts" setup>
@@ -1257,11 +1293,10 @@
     PlusOutlined,
   } from '@ant-design/icons-vue';
   import Prompt from './Prompt.vue';
-  import { ListQueryParams, ListResultModel, AccountListItem } from '/@/api/df/model/accountModel';
   import { availableList } from '/@/api/df/account';
   import { SvgIcon } from '/@/components/Icon';
   import type { UploadFile } from 'ant-design-vue/es/upload/interface';
-  import { message, UploadProps } from 'ant-design-vue';
+  import { message, UploadProps, Upload } from 'ant-design-vue';
   import { useRoute } from 'vue-router';
   import { useUserStore } from '/@/store/modules/user';
 
@@ -1735,6 +1770,22 @@
   };
 
   /** ************************************上传图片******************************* */
+  const previewVisible = ref(false);
+  const previewImage = ref('');
+  const previewTitle = ref('');
+  const handleCancel = () => {
+    previewVisible.value = false;
+    previewTitle.value = '';
+  };
+  const handlePreview = async (file: UploadProps['fileList'][number]) => {
+    if (!file.url && !file.preview) {
+      file.preview = (await getBase64(file.originFileObj)) as string;
+    }
+    previewImage.value = file.url || file.preview;
+    previewVisible.value = true;
+    previewTitle.value = file.name || file.url.substring(file.url.lastIndexOf('/') + 1);
+  };
+
   const fileList = ref<UploadProps['fileList']>([]);
   const base64Images = ref<{ base64Content: string; height: number; width: number; uid: string }[]>(
     [],
@@ -1772,6 +1823,17 @@
 
   const beforeUpload = async (file: File) => {
     try {
+      // 判断是否为图片
+      const isImage = file.type.startsWith('image/');
+      if (!isImage) {
+        throw new Error('只能上传图片文件！');
+      }
+      // 获取图片文件的大小
+      const isLt5M = file.size / 1024 / 1024 < 5;
+      if (!isLt5M) {
+        throw new Error('图片大小不能超过5MB！');
+      }
+
       const base64 = await getBase64(file);
       // 获取并存储图片的尺寸
       const dimensions = await getImageDimensions(base64);
@@ -1783,8 +1845,11 @@
       });
     } catch (error) {
       console.error('Error converting to Base64:', error);
+      // 弹出异常消息
+      message.error(error.message);
+      //移除这个文件
+      return Upload.LIST_IGNORE;
     }
-    // Return false to prevent actual upload
     return false;
   };
 

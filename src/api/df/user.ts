@@ -19,7 +19,7 @@ enum Api {
   LoginByPhone = '/loginByPhone',
   Logout = '/logout',
   GetUserInfo = '/open/user/getUserInfo',
-  GetPermCode = '/getPermCode',
+  GetPermCode = '/open/user/getPermCode',
   TestRetry = '/testRetry',
   ResetPasswordByPhone = '/resetPasswordByPhone',
   ResetPasswordByEmail = '/resetPasswordByEmail',

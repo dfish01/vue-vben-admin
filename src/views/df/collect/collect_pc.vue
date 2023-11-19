@@ -1,5 +1,5 @@
 <template>
-  <a-layout class="jobList-app" ref="formRef">
+  <a-layout class="jobList-app">
     <Loading :loading="loadingRef" :absolute="false" tip="加载中" />
     <a-card class="search-card">
       <a-row align="middle" class="search-row" style="justify-content: space-between" :wrap="false">
@@ -27,7 +27,7 @@
           </a-row>
         </a-col>
         <a-col style="flex-wrap: nowrap">
-          <div>
+          <div ref="formRef">
             <a-dropdown-button :trigger="['click']">
               <a class="ant-dropdown-link" disable @click.prevent> 📜 </a>
               <template #overlay>
@@ -116,14 +116,14 @@
     <div
       v-if="cards.length === 0"
       style="display: flex; align-items: center; justify-content: center"
-      :style="{ height: `calc(${contentHeight}px - 11vh)`, overflow: 'auto' }"
+      :style="{ height: `calc(${contentHeight}px - 40px)`, overflow: 'auto' }"
     >
       <a-empty :image="simpleImage" />
     </div>
     <div
       v-else
       class="cards"
-      :style="{ height: `calc(${contentHeight}px - 51px)`, overflow: 'auto' }"
+      :style="{ height: `calc(${contentHeight}px - 40px)`, overflow: 'auto' }"
     >
       <a-dropdown v-for="card in cards" :key="card.id" :trigger="['contextmenu']">
         <a-card :bodyStyle="{ padding: '0px' }" class="card" hoverable>
@@ -1116,7 +1116,7 @@
     display: flex;
     align-content: center;
     align-items: center; /* 垂直居中 */
-    height: 9vh;
+    height: 53px;
   }
 
   .card-image img {

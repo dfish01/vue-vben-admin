@@ -98,7 +98,7 @@ ref="waterfallRef"
             :bodyStyle="{padding:0}"
             @mouseenter="doMouseenter(item)"
             @mouseleave="doMouseleave(item)"
-            class="bg-gray-900 rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-linear hover:shadow-lg hover:shadow-gray-600 group"
+            class="rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-linear hover:shadow-lg hover:shadow-gray-600 group"
           >
             <div class="overflow-hidden">
               <LazyImg
@@ -191,7 +191,7 @@ ref="waterfallRef"
   import { api as viewerApi } from "v-viewer"
   import 'viewerjs/dist/viewer.css';
   import loading from '/@/assets/images/loading_lazy.svg';
-  import error from '/@/assets/images/failed.svg';
+  import error from '/@/assets/images/loading_error.svg';
   import Icon from '/@/components/Icon/Icon.vue';
     import { useDrawCard } from './card';
     import { useUserStore } from '/@/store/modules/user';

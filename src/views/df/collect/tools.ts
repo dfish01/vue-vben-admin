@@ -1,6 +1,6 @@
 import { message } from 'ant-design-vue';
 import { unref } from 'vue';
-import { useCopyToClipboard } from '/@/hooks/web/useCopyToClipboard';
+import { copyText as doCopyText } from '/@/utils/copyTextToClipboard';
 import { downloadByOnlineUrl } from '/@/utils/file/download';
 
 export const handleDownloadByUrl = async (url: string) => {
@@ -22,27 +22,14 @@ export const downloadImage = (image) => {
 };
 
 //复制数据
-export const copyText = async (text) => {
-  try {
-    await navigator.clipboard.writeText(text);
-    message.success('内容已复制到剪切版~');
-  } catch (err) {
-    message.warning('抱歉！复制失败了，请手动复制下~');
-    console.log('复制失败', err);
+export function copyText(text) {
+  // const value = unref(text);
+  if (!text) {
+    message.warning('请输入要拷贝的内容！');
+    return;
   }
-};
-const { clipboardRef, copiedRef } = useCopyToClipboard();
-// export const copyText = (prompt) => {
-//   const value = unref(prompt);
-//   if (!value) {
-//     message.warning('请输入要拷贝的内容！');
-//     return;
-//   }
-//   clipboardRef.value = value;
-//   if (unref(copiedRef)) {
-//     message.success('copy success！');
-//   }
-// };
+  doCopyText(text);
+}
 
 //图片切割下载
 export function splitImage(card) {

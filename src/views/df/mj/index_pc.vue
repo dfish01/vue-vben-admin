@@ -24,87 +24,91 @@
 
       <div v-if="!isMobile && !showTabs" class="toggle-button-left" @click="toggleTabs">
         <a-button shape="circle" size="small">
-          <RightOutlined v-if="!showTabs" />
-          <LeftOutlined v-else />
+          <Icon
+            icon="bx:right-arrow"
+            class="vel-icon icon"
+            aria-hidden="true"
+            size="16"
+            v-if="!showTabs"
+          />
+          <Icon icon="bx:left-arrow" class="vel-icon icon" aria-hidden="true" size="16" v-else />
         </a-button>
       </div>
 
       <a-col v-show="!isMobile && showTabs" class="left-menu">
-        <a-sider theme="light">
-          <div class="toggle-button-right" @click="toggleTabs">
-            <a-button shape="circle" size="small">
-              <LeftOutlined />
-            </a-button>
-          </div>
-          <a-card
-            :bordered="true"
-            class="no-padding-header ar-card"
-            :bodyStyle="{ padding: '1px 10px 10px 10px' }"
-            :headStyle="{ padding: '0px' }"
-          >
-            <template #title>
+        <div class="toggle-button-right" @click="toggleTabs">
+          <a-button shape="circle" size="small" style="align-items: center">
+            <Icon icon="bx:left-arrow" class="vel-icon icon" aria-hidden="true" size="16" />
+          </a-button>
+        </div>
+        <a-card
+          :bordered="true"
+          class="no-padding-header ar-card"
+          :bodyStyle="{ padding: '0px 5px' }"
+          :headStyle="{ padding: '0px' }"
+        >
+          <template #title>
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                height: 45px;
+              "
+            >
+              <div style="margin-left: 10px">
+                <span style="font-weight: bold">🏢AI绘画工作区</span>-{{ currentSpace.title }}
+              </div>
               <div
                 style="
                   display: flex;
-                  align-items: center;
-                  justify-content: space-between;
-                  height: 45px;
+                  flex-direction: row;
+                  justify-content: right;
+                  margin-right: 10px;
+                  font-size: 15px;
                 "
-              >
-                <div style="margin-left: 10px">
-                  <span style="font-weight: bold">🏢AI绘画工作区</span>-{{ currentSpace.title }}
-                </div>
-                <div
-                  style="
-                    display: flex;
-                    flex-direction: row;
-                    justify-content: right;
-                    margin-right: 10px;
-                    font-size: 15px;
-                  "
-                  ><a-tooltip title="🍧导入DISCORD记录，可以将discord的图片导入进来进行管理哦~">
-                    <a-button @click="showImportView" style="padding: 0 5px; border-radius: 5px"
-                      ><Icon icon="mingcute:discord-line" size="22"
-                    /></a-button>
-                  </a-tooltip>
-                  <a-tooltip title="🥃工作空间管理，各空间数据隔离，后续可邀请好友加入你的空间~">
-                    <a-button
-                      @click="showWorkerSpace"
-                      style="margin-left: 5px; padding: 0 5px; border-radius: 5px"
-                      ><Icon icon="material-symbols:space-dashboard-outline" size="22"
-                    /></a-button>
-                  </a-tooltip>
-                </div>
+                ><a-tooltip title="🍧导入DISCORD记录，可以将discord的图片导入进来进行管理哦~">
+                  <a-button @click="showImportView" style="padding: 0 5px; border-radius: 5px"
+                    ><Icon icon="mingcute:discord-line" size="22"
+                  /></a-button>
+                </a-tooltip>
+                <a-tooltip title="🥃工作空间管理，各空间数据隔离，后续可邀请好友加入你的空间~">
+                  <a-button
+                    @click="showWorkerSpace"
+                    style="margin-left: 5px; padding: 0 5px; border-radius: 5px"
+                    ><Icon icon="material-symbols:space-dashboard-outline" size="22"
+                  /></a-button>
+                </a-tooltip>
               </div>
-            </template>
+            </div>
+          </template>
 
-            <a-tabs class="edit-tab" v-model="activeTab">
-              <a-tab-pane key="TextToImg" tab="🌕文生图">
-                <TextToImage
-                  style="text-align: center"
-                  @startLoading="startLoadingHandler"
-                  @endLoading="endLoadingHandler"
-                  :spaceId="currentSpace.id"
-                />
-              </a-tab-pane>
-              <a-tab-pane key="MixImage" tab="🌗混图">
-                <Blend
-                  @startLoading="startLoadingHandler"
-                  @endLoading="endLoadingHandler"
-                  :spaceId="currentSpace.id"
-                />
-              </a-tab-pane>
-              <a-tab-pane key="Describe" tab="🌑解析图">
-                <Describe
-                  @startLoading="startLoadingHandler"
-                  @endLoading="endLoadingHandler"
-                  :spaceId="currentSpace.id"
-                />
-              </a-tab-pane>
-              <a-tab-pane key="other" disabled tab="🎎其它" />
-            </a-tabs>
-          </a-card>
-        </a-sider>
+          <a-tabs class="edit-tab" v-model="activeTab">
+            <a-tab-pane key="TextToImg" tab="🌕文生图">
+              <TextToImage
+                style="text-align: center"
+                @startLoading="startLoadingHandler"
+                @endLoading="endLoadingHandler"
+                :spaceId="currentSpace.id"
+              />
+            </a-tab-pane>
+            <a-tab-pane key="MixImage" tab="🌗混图">
+              <Blend
+                @startLoading="startLoadingHandler"
+                @endLoading="endLoadingHandler"
+                :spaceId="currentSpace.id"
+              />
+            </a-tab-pane>
+            <a-tab-pane key="Describe" tab="🌑解析图">
+              <Describe
+                @startLoading="startLoadingHandler"
+                @endLoading="endLoadingHandler"
+                :spaceId="currentSpace.id"
+              />
+            </a-tab-pane>
+            <a-tab-pane key="other" disabled tab="🎎其它" />
+          </a-tabs>
+        </a-card>
       </a-col>
 
       <a-col class="right-content">
@@ -125,7 +129,7 @@
           >
         </template>
         <a-spin :spinning="compState.loading" tip="数据加载中...">
-          <a-card :bodyStyle="{ padding: '0px 10px 6px 10px' }">
+          <a-card :bodyStyle="{ padding: '0px 10px 6px ' }">
             <!-- <div style="width: 100%; overflow-x: auto"> -->
             <a-button
               type="primary"
@@ -571,7 +575,7 @@
 
   .left-menu {
     position: relative;
-    flex: 0 0 350px;
+    flex: 0 0 370px;
   }
 
   .right-content {

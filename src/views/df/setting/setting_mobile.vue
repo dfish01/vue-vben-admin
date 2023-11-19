@@ -432,9 +432,8 @@
   import { VerifyCodeParams } from '/@/api/df/model/UtilModel';
   import { CountdownInput } from '/@/components/CountDown';
   import type { Rule } from 'ant-design-vue/es/form';
-  import { useCopyToClipboard } from '/@/hooks/web/useCopyToClipboard';
+  import { copyText as doCopyText } from '/@/utils/copyTextToClipboard';
 
-  const { clipboardRef, copiedRef } = useCopyToClipboard();
   /** 页面高度计算开始 */
   const formRef = ref();
   //页面高度处理
@@ -661,15 +660,12 @@
   };
 
   const copyText = (text) => {
-    const valueUnref = text;
-    if (!valueUnref) {
-      createMessage.warning('请输入要拷贝的内容！');
+    const value = unref(text);
+    if (!value) {
+      message.warning('请输入要拷贝的内容！');
       return;
     }
-    clipboardRef.value = valueUnref;
-    if (unref(copiedRef)) {
-      createMessage.warning('内容已复制到剪切版！');
-    }
+    doCopyText(value);
   };
 </script>
 <style lang="less">

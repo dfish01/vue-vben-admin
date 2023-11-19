@@ -75,15 +75,17 @@
             v-if="url"
             @mouseenter="doMouseenter(item)"
             @mouseleave="doMouseleave(item)"
-            class="bg-gray-900 rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-linear hover:shadow-lg hover:shadow-gray-600 group"
+            class="rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-linear hover:shadow-lg hover:shadow-gray-600 group"
           >
             <div class="overflow-hidden">
-              <LazyImg
-                v-viewer
-                :url="url"
-                class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
-                @load="imageLoad(url)"
-              />
+              <a-card :bodyStyle="{ padding: '0px' }" class="lazyImag">
+                <LazyImg
+                  v-viewer
+                  :url="url"
+                  class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
+                  @load="imageLoad(url)"
+                />
+              </a-card>
               <div class="move-in" v-if="item.mouseenter">
                 <!-- 上面的 div，最多显示两行文本 -->
                 <div
@@ -154,7 +156,6 @@
 
 <script setup lang="ts">
   import { onMounted, onUnmounted, ref, reactive } from 'vue';
-  // import { LazyImg, Waterfall } from '../../lib/index'
   import { LazyImg, Waterfall } from 'vue-waterfall-plugin-next';
   import 'vue-waterfall-plugin-next/dist/style.css';
   import { Loading } from '/@/components/Loading';
@@ -168,8 +169,8 @@
   import 'viewerjs/dist/viewer.css';
   import { directive as viewer } from 'v-viewer';
   import { message } from 'ant-design-vue';
-  import loading from '/@/assets/images/loading_lazy.svg';
-  import error from '/@/assets/images/failed.svg';
+  import loading from '/@/assets/images/lazy-loading.svg';
+  import error from '/@/assets/images/lazy-error.svg';
   import { getRecentNotice } from '/@/api/df/utils';
 
   const { copyText, goDrawing, loadMore, initDrawingSampleCategory } = useDrawCard();
@@ -237,7 +238,7 @@
     if (scrollbarRef.value !== null) {
       console.log('handleScroll');
       const { scrollTop, scrollHeight, clientHeight } = scrollbarRef.value;
-      if (scrollTop + clientHeight >= scrollHeight - 50 && !loading.value) {
+      if (scrollTop + clientHeight >= scrollHeight - 50 && !doLoading.value) {
         handleLoadMore(500);
       }
     }
@@ -385,7 +386,7 @@
       },
     },
     // 动画效果
-    animationEffect: 'animate__fadeInUp',
+    animationEffect: 'fadeIn',
     // 动画时间
     animationDuration: 1000,
     // 动画延迟
@@ -616,5 +617,19 @@
 
   .no-border-button {
     border: 1px solid transparent !important;
+  }
+
+  .lazyImag ::v-deep .lazy__img[lazy='loading'] {
+    width: 100%;
+    padding: 5em 0;
+  }
+
+  .lazyImag ::v-deep .lazy__img[lazy='loaded'] {
+    width: 100%;
+  }
+
+  .lazyImag ::v-deep .lazy__img[lazy='error'] {
+    width: 100%;
+    padding: 5em 0;
   }
 </style>
