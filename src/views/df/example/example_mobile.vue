@@ -106,11 +106,13 @@
             class="rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-linear hover:shadow-lg hover:shadow-gray-600 group"
           >
             <div class="overflow-hidden">
-              <LazyImg
-                :url="url"
-                class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
-                @load="imageLoad(url)"
-              />
+              <a-card :bodyStyle="{ padding: '0px' }" class="lazyImag">
+                <LazyImg
+                  :url="url"
+                  class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
+                  @load="imageLoad(url)"
+                />
+              </a-card>
               <div class="move-in" v-if="item.mouseenter">
                 <!-- 上面的 div，最多显示两行文本 -->
                 <div
@@ -200,8 +202,8 @@
   // import { directive as viewer } from 'v-viewer';
   import { api as viewerApi } from 'v-viewer';
   import { message } from 'ant-design-vue';
-  import loading from '/@/assets/images/loading_lazy.svg';
-  import error from '/@/assets/images/failed.svg';
+  import loading from '/@/assets/images/lazy-loading.svg';
+  import error from '/@/assets/images/lazy-error.svg';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
   import { useRoute } from 'vue-router';
   import { useUserStore } from '/@/store/modules/user';
@@ -293,7 +295,7 @@
     if (scrollbarRef.value !== null) {
       console.log('handleScroll');
       const { scrollTop, scrollHeight, clientHeight } = scrollbarRef.value;
-      if (scrollTop + clientHeight >= scrollHeight - 50 && !loading.value) {
+      if (scrollTop + clientHeight >= scrollHeight - 50 && !doLoading.value) {
         handleLoadMore(1500);
       }
     }
@@ -706,5 +708,19 @@
 
   .no-border-button {
     border: 1px solid transparent !important;
+  }
+
+  .lazyImag ::v-deep .lazy__img[lazy='loading'] {
+    width: 100%;
+    padding: 5em 0;
+  }
+
+  .lazyImag ::v-deep .lazy__img[lazy='loaded'] {
+    width: 100%;
+  }
+
+  .lazyImag ::v-deep .lazy__img[lazy='error'] {
+    width: 100%;
+    padding: 5em 0;
   }
 </style>

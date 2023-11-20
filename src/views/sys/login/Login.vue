@@ -48,21 +48,27 @@
     </div>
     <!-- ...原有的代码... -->
     <div
-      class="absolute bottom-4 left-0 w-full text-center"
+      class="absolute bottom-4 left-0 w-full text-right"
       style="display: flex; flex-direction: column"
     >
-      <span class="text-sm">
-        Copyright © 2023-现在 自绘记录 |
-        <a href="https://beian.miit.gov.cn/" target="_blank"> 闽ICP备2023010181号-1</a>
-      </span>
-      <span class="text-sm">
-        本网站由<a
-          href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral"
-          target="_blank"
+      <span>
+        <a-tag color="#CE5A67" class="text-sm" style="font-size: 10px; font-weight: bold"
+          >Copyright © 2023 自绘记录</a-tag
         >
-          <img :src="ypyImg" alt="Upyun Logo" width="60" />
+
+        <a href="https://beian.miit.gov.cn/" target="_blank">
+          <a-tag color="#29ADB2" class="text-sm" style="font-size: 10px; font-weight: bold">
+            闽ICP备2023010181号-1
+          </a-tag>
         </a>
-        提供CDN加速/云存储服务
+        <span class="text-sm">
+          <a href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral" target="_blank"
+            ><a-tag color="#8B9A46" style="font-size: 10px; font-weight: bold">
+              本网站由<img :src="ypyImg" alt="Upyun Logo" width="40" />
+              提供CDN加速/云存储服务
+            </a-tag>
+          </a>
+        </span>
       </span>
     </div>
   </div>

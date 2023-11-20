@@ -101,6 +101,7 @@ ref="waterfallRef"
             class="rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-linear hover:shadow-lg hover:shadow-gray-600 group"
           >
             <div class="overflow-hidden">
+              <a-card :bodyStyle="{ padding: '0px' }" class="lazyImag">
               <LazyImg
                
                 @click="showImage(item)"
@@ -108,6 +109,7 @@ ref="waterfallRef"
                 class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
                 @load="imageLoad(url)"
               />
+            </a-card>
               <div class="move-in" v-if="item.mouseenter">
                 <!-- 上面的 div，最多显示两行文本 -->
                 <div
@@ -190,8 +192,8 @@ ref="waterfallRef"
   import 'vue-waterfall-plugin-next/dist/style.css';
   import { api as viewerApi } from "v-viewer"
   import 'viewerjs/dist/viewer.css';
-  import loading from '/@/assets/images/loading_lazy.svg';
-  import error from '/@/assets/images/loading_error.svg';
+  import loading from '/@/assets/images/lazy-loading.svg';
+  import error from '/@/assets/images/lazy-error.svg';
   import Icon from '/@/components/Icon/Icon.vue';
     import { useDrawCard } from './card';
     import { useUserStore } from '/@/store/modules/user';
@@ -749,5 +751,19 @@ const saveProcess = (): void => {
     background: rgb(130 124 124 / 70%);
     color: white;
     font-size: 15px;
+  }
+
+  .lazyImag ::v-deep .lazy__img[lazy='loading'] {
+    width: 100%;
+    padding: 5em 0;
+  }
+
+  .lazyImag ::v-deep .lazy__img[lazy='loaded'] {
+    width: 100%;
+  }
+
+  .lazyImag ::v-deep .lazy__img[lazy='error'] {
+    width: 100%;
+    padding: 5em 0;
   }
 </style>
