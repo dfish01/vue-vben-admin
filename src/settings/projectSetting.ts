@@ -17,7 +17,7 @@ import {
 
 // ! You need to clear the browser cache after the change
 const setting: ProjectConfig = {
-  showSettingButton: false,
+  showSettingButton: true,
   showDarkModeToggle: true,
   settingButtonPosition: 'auto',
   //permissionMode: 'ROUTE_MAPPING',

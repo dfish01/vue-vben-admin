@@ -27,6 +27,7 @@ import {
   DrawTaskListQueryReq,
   DrawTaskListResp,
   DrawTaskChangePublicReq,
+  DrawTaskInfoResp,
 } from '/@/api/df/model/drawTaskModel';
 import { IdReq } from '/@/api/model/baseModel';
 import { listCollects, removeCollect, createCollect } from '/@/api/df/drawCollect';
@@ -59,9 +60,9 @@ export function jobListQueryApi() {
   // 参数
   const searchForm = ref({
     tagName: null,
-    state: '',
-    commandType: '',
-    spaceId: '',
+    state: null,
+    commandType: null,
+    spaceId: null,
   });
   // 分页
   const pagination = ref({
@@ -94,6 +95,14 @@ export function jobListQueryApi() {
   }
 
   //查询
+  const onReset = () => {
+    searchForm.value.tagName = null;
+    searchForm.value.state = null;
+    searchForm.value.commandType = null;
+    searchForm.value.spaceId = null;
+  };
+
+  //查询
   const onSearch = async (current?: number) => {
     if (typeof current === 'undefined') {
       current = 1;
@@ -116,13 +125,67 @@ export function jobListQueryApi() {
     console.log(111111111111);
   };
 
+  /***********************************明细*************************** */
+  const infoData: DrawTaskInfoResp = reactive({
+    viewFlag: false,
+    tip: '正在处理中...',
+    card: null,
+    id: '',
+    taskInfo: {
+      imageUrls: [],
+      bootName: 'Boot1',
+      oriPrompt: '原始提示',
+      contentStripped: '剥离的内容',
+      commandTypeName: '命令类型1',
+      modeName: '模式1',
+      accountName: '账户1',
+      discordUserName: '用户1',
+      channelName: '频道1',
+      guildName: '公会1',
+      privacyMode: 'Y',
+    },
+    processList: [
+      { title: '任务创建', description: '2023-01-01 12:00:00' },
+      { title: '任务分配', description: '2023-01-02 12:00:00' },
+      { title: '开始执行', description: '2023-01-03 12:00:00' },
+      { title: '任务完成', description: '2023-01-04 12:00:00' },
+    ],
+    tagList: ['标签1', '标签2'],
+    taskSpaceList: [
+      { spaceId: 1, spaceName: '空间1' },
+      { spaceId: 2, spaceName: '空间2' },
+    ],
+  });
+
+  const showTaskInfo = async (card) => {
+    if (card.state != 'SUCCESS') {
+      return;
+    }
+    infoData.card = card;
+    loadingRef.value = true;
+    try {
+      const resp = await getTaskInfo({ id: card.id });
+      Object.assign(infoData, resp);
+      infoData.viewFlag = true;
+    } finally {
+      loadingRef.value = false;
+    }
+  };
+  const closeTaskInfo = async () => {
+    infoData.viewFlag = false;
+  };
+
   const api = {
+    closeTaskInfo,
+    showTaskInfo,
+    infoData,
     cards,
     searchForm,
     pagination,
     pageChange,
     pageSizeChange,
     onSearch,
+    onReset,
   };
   jobListQueryApiInstance = api;
   return api;

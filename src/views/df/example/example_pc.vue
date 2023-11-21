@@ -3,11 +3,13 @@
     <div>
       <a-card :bodyStyle="{ padding: '8px' }">
         <a-row :wrap="false" style="display: flex; align-items: center">
-          <a-tag
+          <a-button
+            type="text"
             v-if="categorySetting.showLeftButton"
             style="
               display: flex;
               align-items: center;
+              justify-content: center;
               width: 25px;
               height: 32px;
               font-size: 20px;
@@ -15,8 +17,8 @@
             "
             @click="scrollToLeft"
           >
-            <CaretLeftOutlined />
-          </a-tag>
+            <Icon class="vel-icon icon" icon="bytesize:caret-left" size="20" />
+          </a-button>
           <div
             class="horizontal-scroll-container"
             style="flex: 1; overflow: auto"
@@ -30,11 +32,13 @@
               >
             </div>
           </div>
-          <a-tag
+          <a-button
+            type="text"
             v-if="categorySetting.showRightButton"
             style="
               display: flex;
               align-items: center;
+              justify-content: center;
               width: 25px;
               height: 32px;
               font-size: 20px;
@@ -42,8 +46,8 @@
             "
             @click="scrollToRight"
           >
-            <CaretRightOutlined />
-          </a-tag>
+            <Icon class="vel-icon icon" icon="bytesize:caret-right" size="20" />
+          </a-button>
         </a-row>
       </a-card>
     </div>

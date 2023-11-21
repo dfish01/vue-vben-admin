@@ -1,116 +1,122 @@
 <template>
   <a-layout class="jobList-app">
     <Loading :loading="loadingRef" :absolute="false" tip="加载中" />
-    <a-card class="search-card">
-      <a-row align="middle" class="search-row" style="justify-content: space-between" :wrap="false">
-        <a-col flex="400px">
-          <a-row style="justify-content: left">
-            <a-col span="6">
-              <a-tag class="quality-tag" color="default">🍥任务类型 </a-tag>
-            </a-col>
-            <a-col span="5">
-              <a-select
-                v-model:value="searchForm.commandType"
-                class="mobile-select"
-                style="min-width: 100px; height: 32px"
-              >
-                <a-select-option value="">全部</a-select-option>
-                <a-select-option value="IMAGINE">文生图</a-select-option>
-                <a-select-option value="BLEND">混图</a-select-option>
-                <a-select-option value="DESCRIBE">解析图</a-select-option>
-                <a-select-option value="UPSCALE">放大</a-select-option>
-                <a-select-option value="VARIATION">变化</a-select-option>
-                <a-select-option value="PAN">填充</a-select-option>
-                <a-select-option value="ZOOM">缩放</a-select-option>
-              </a-select>
-            </a-col>
-          </a-row>
-        </a-col>
-        <a-col style="flex-wrap: nowrap">
-          <div ref="formRef">
-            <a-dropdown-button :trigger="['click']">
-              <a class="ant-dropdown-link" disable @click.prevent> 📜 </a>
-              <template #overlay>
-                <a-menu>
-                  <a-menu-item key="3" class="delete">
-                    <a-popconfirm
-                      title="请确认相关账号的remix状态，这里只是控制弹窗而已（暂时未接入实时控制Remix）。如果remix状态不匹配，会导致任务失败!"
-                      :ok-text="remix.enable_flag ? '关闭Remix' : '开启Remix'"
-                      cancel-text="取消"
-                      @confirm="changeRemix()"
-                    >
-                      📝{{ remix.enable_flag ? '关闭Remix' : '开启Remix' }}
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-item key="5">
-                    <a-popconfirm
-                      title="⚠️以卡片的方式进行预览，建议配合原图模式。"
-                      ok-text="立即预览"
-                      cancel-text="取消"
-                      @confirm="showAllImage(false)"
-                    >
-                      📺全量清晰预览
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-item key="5">
-                    <a-popconfirm
-                      title="⚠️以卡片的方式进行预览，建议配合原图模式。"
-                      ok-text="立即预览"
-                      cancel-text="取消"
-                      @confirm="showAllImage(true)"
-                    >
-                      📺全量高清预览
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-item key="5" disabled>
-                    <a-popconfirm
-                      title="⚠️要切割当前页所有4格图，页面会加载很久。"
-                      ok-text="确定切割"
-                      cancel-text="取消"
-                      @confirm="() => {}"
-                      disabled
-                    >
-                      ⚠️✂️全量切割
-                    </a-popconfirm>
-                  </a-menu-item>
+    <a-card ref="formRef" class="search-card">
+      <a-space>
+        <a-select
+          v-model:value="searchForm.commandType"
+          class="mobile-select"
+          placeholder="任务类型"
+          style="width: 100px; height: 32px"
+        >
+          <a-select-option value="">全部</a-select-option>
+          <a-select-option value="IMAGINE">文生图</a-select-option>
+          <a-select-option value="BLEND">混图</a-select-option>
+          <a-select-option value="DESCRIBE">解析图</a-select-option>
+          <a-select-option value="UPSCALE">放大</a-select-option>
+          <a-select-option value="VARIATION">变化</a-select-option>
+          <a-select-option value="PAN">填充</a-select-option>
+          <a-select-option value="ZOOM">缩放</a-select-option>
+        </a-select>
 
-                  <a-menu-divider />
-                  <a-menu-item key="4">
-                    <a-popconfirm
-                      title="该选项默认暂时未作存储，默认关闭状态，刷新就失效了！分割图场景适用~"
-                      :ok-text="userSetting.useUpImage ? '确认关闭' : '确认开启'"
-                      cancel-text="取消"
-                      @confirm="setUseUpImage()"
-                    >
-                      🍝{{ userSetting.useUpImage ? '开启缩略图' : '开启原图' }}
-                    </a-popconfirm>
-                  </a-menu-item>
+        <a-mentions
+          v-model:value="searchForm.tagName"
+          autofocus
+          placeholder="标签查询，可使用@提示~"
+          :options="drawTagForm.tagNameOptions"
+          @select="onChangeSearchLabel"
+          style="width: 220px"
+        />
 
-                  <a-menu-item key="5">
-                    <a-popconfirm
-                      title="我的网速无懈可击！！！"
-                      :ok-text="userSetting.usePersonNet ? '还是加速吧' : '就是要原连接'"
-                      cancel-text="取消"
-                      @confirm="setUsePersonNet()"
-                    >
-                      🏄{{ userSetting.usePersonNet ? '加速连接' : '使用原连接' }}
-                    </a-popconfirm>
-                  </a-menu-item>
-                </a-menu>
-              </template>
-            </a-dropdown-button>
-            <a-mentions
-              v-model:value="searchForm.tagName"
-              autofocus
-              placeholder="暂时只支持标签查询~"
-              :options="drawTagForm.tagNameOptions"
-              @select="onChangeSearchLabel"
-              style="width: 200px"
+        <a-button-group>
+          <a-button type="primary" @click="onSearch(1)">
+            <Icon icon="lucide:scan-search" class="vel-icon icon" aria-hidden="true" />查询
+          </a-button>
+
+          <a-button @click="onReset">
+            <Icon icon="tdesign:clear-formatting" class="vel-icon icon" aria-hidden="true" />
+            重置
+          </a-button>
+        </a-button-group>
+        <a-dropdown :trigger="['click']">
+          <a-button type="warning">
+            配置
+            <Icon
+              icon="icon-park-solid:setting-computer"
+              class="vel-icon icon"
+              aria-hidden="true"
             />
-            <a-button @click="onSearch(1)">🔍查询</a-button>
-          </div>
-        </a-col>
-      </a-row>
+          </a-button>
+          <template #overlay>
+            <a-menu>
+              <a-menu-item key="3" class="delete">
+                <a-popconfirm
+                  title="请确认相关账号的remix状态，这里只是控制弹窗而已（暂时未接入实时控制Remix）。如果remix状态不匹配，会导致任务失败!"
+                  :ok-text="remix.enable_flag ? '关闭Remix' : '开启Remix'"
+                  cancel-text="取消"
+                  @confirm="changeRemix()"
+                >
+                  📝{{ remix.enable_flag ? '关闭Remix' : '开启Remix' }}
+                </a-popconfirm>
+              </a-menu-item>
+              <a-menu-item key="5">
+                <a-popconfirm
+                  title="⚠️以卡片的方式进行预览，建议配合原图模式。"
+                  ok-text="立即预览"
+                  cancel-text="取消"
+                  @confirm="showAllImage(false)"
+                >
+                  📺全量清晰预览
+                </a-popconfirm>
+              </a-menu-item>
+              <a-menu-item key="5">
+                <a-popconfirm
+                  title="⚠️以卡片的方式进行预览，建议配合原图模式。"
+                  ok-text="立即预览"
+                  cancel-text="取消"
+                  @confirm="showAllImage(true)"
+                >
+                  📺全量高清预览
+                </a-popconfirm>
+              </a-menu-item>
+              <a-menu-item key="5" disabled>
+                <a-popconfirm
+                  title="⚠️要切割当前页所有4格图，页面会加载很久。"
+                  ok-text="确定切割"
+                  cancel-text="取消"
+                  @confirm="() => {}"
+                  disabled
+                >
+                  ⚠️✂️全量切割
+                </a-popconfirm>
+              </a-menu-item>
+
+              <a-menu-divider />
+              <a-menu-item key="4">
+                <a-popconfirm
+                  title="该选项默认暂时未作存储，默认关闭状态，刷新就失效了！分割图场景适用~"
+                  :ok-text="userSetting.useUpImage ? '确认关闭' : '确认开启'"
+                  cancel-text="取消"
+                  @confirm="setUseUpImage()"
+                >
+                  🍝{{ userSetting.useUpImage ? '开启缩略图' : '开启原图' }}
+                </a-popconfirm>
+              </a-menu-item>
+
+              <a-menu-item key="5">
+                <a-popconfirm
+                  title="我的网速无懈可击！！！"
+                  :ok-text="userSetting.usePersonNet ? '还是加速吧' : '就是要原连接'"
+                  cancel-text="取消"
+                  @confirm="setUsePersonNet()"
+                >
+                  🏄{{ userSetting.usePersonNet ? '加速连接' : '使用原连接' }}
+                </a-popconfirm>
+              </a-menu-item>
+            </a-menu>
+          </template>
+        </a-dropdown>
+      </a-space>
     </a-card>
 
     <div
@@ -906,9 +912,224 @@
       </a-modal>
     </div>
 
-    <a-modal v-model:visible="isModalVisible" width="80%">
-      <template #title> 图片查看 </template>
-      <img :src="currentImage" style="width: 100%; height: auto" />
+    <!-- 查看明细  -->
+    <a-modal
+      title="任务概况"
+      v-model:visible="infoData.viewFlag"
+      style="top: 10px; min-width: 720px"
+    >
+      <template #footer>
+        <a-button key="submit" type="primary" :loading="loadingRef" @click="closeTaskInfo"
+          >已知晓</a-button
+        >
+      </template>
+      <a-card :bodyStyle="{ padding: '0px 5px' }" :bordered="false">
+        <a-card-grid
+          style="display: flex; justify-content: center; width: 100%; text-align: center"
+          :bodyStyle="{ padding: '0px 0px 0px 0px' }"
+          bordered="true"
+          :hoverable="false"
+        >
+          <div style="width: 50%">
+            <a-card
+              :bodyStyle="{ padding: '0px' }"
+              style="width: 100%"
+              v-if="infoData.taskInfo.imageUrls.length > 1"
+              :bordered="false"
+              :hoverable="false"
+            >
+              <a-card-grid
+                v-for="url in infoData.taskInfo.imageUrls"
+                :key="url"
+                style="width: 49%; margin: 1px; padding: 0; border-radius: 15px; text-align: center"
+              >
+                <img
+                  @click="showInfoImage(url)"
+                  v-lazy.container="url"
+                  class="card-image img-box"
+                  :src="url"
+                  style="max-width: 100%; border-radius: 15px"
+                  alt=""
+                />
+              </a-card-grid>
+            </a-card>
+            <a-card
+              :bodyStyle="{ padding: '0px' }"
+              style="width: 100%"
+              :bordered="false"
+              :hoverable="false"
+              v-else
+            >
+              <a-card-grid
+                v-for="url in infoData.taskInfo.imageUrls"
+                :key="url"
+                style="width: 100%; padding: 0; border-radius: 15px; text-align: center"
+              >
+                <img
+                  @click="showTaskInfo(card)"
+                  v-lazy.container="url"
+                  class="card-image img-box"
+                  :src="url"
+                  style="max-width: 100%; border-radius: 15px"
+                  alt=""
+                />
+              </a-card-grid>
+            </a-card>
+            <a-flex :style="{ width: '100%' }" justify="center" align="center">
+              <span style="font-size: 12px"> 📢获取seed后显示4格图,点击图片可查看大图！！！</span>
+              <a-button @click="handleDownloadByUrls(infoData.taskInfo.imageUrls)" size="small">
+                <Icon icon="bx:bxs-cloud-download" class="vel-icon icon" aria-hidden="true" />
+                下载图片
+              </a-button>
+            </a-flex>
+          </div>
+        </a-card-grid>
+        <!-- <a-card-grid style="width: 100%; text-align: center" :hoverable="false" :bordered="false">
+          <a-row>
+            <a-col :span="24">
+              <a-button @click="showDrawTaskTagModel(infoData.card)" style="width: 33%"
+                >📛添加标签
+              </a-button>
+              <a-button @click="showUserSpaceTask(infoData.card)" style="width: 33%"
+                >♻添加到其他空间
+              </a-button>
+
+              <a-button @click="getSeed(infoData.id)" style="width: 33%">🆔获取Seed </a-button>
+            </a-col>
+          </a-row>
+        </a-card-grid> -->
+        <a-card-grid style="width: 100%; text-align: center" :hoverable="false">
+          <a-descriptions bordered size="small" :column="2">
+            <a-descriptions-item label="👨执行账户">{{
+              infoData.taskInfo.accountName
+            }}</a-descriptions-item>
+            <a-descriptions-item label="🍪任务类型">
+              <a-tag :color="stringToColor(infoData.taskInfo.commandTypeName)">{{
+                infoData.taskInfo.commandTypeName
+              }}</a-tag>
+            </a-descriptions-item>
+            <a-descriptions-item label="💎MJ账号">{{
+              infoData.taskInfo.discordUserName
+            }}</a-descriptions-item>
+
+            <a-descriptions-item label="🤖执行机器人">
+              <a-tag :color="infoData.taskInfo.bootName === 'niji' ? 'green' : ''"
+                >{{ infoData.taskInfo.bootName }} 机器人</a-tag
+              >
+            </a-descriptions-item>
+            <a-descriptions-item label="🍦服务器">{{
+              infoData.taskInfo.guildName
+            }}</a-descriptions-item>
+
+            <a-descriptions-item label="🍩运行模式" :span="1">
+              <a-tag
+                v-if="infoData.taskInfo.modeName"
+                :color="stringToColor(infoData.taskInfo.modeName)"
+                >{{ infoData.taskInfo.modeName }}</a-tag
+              >
+              <a-tag v-else>{{ '未定义' }}</a-tag>
+            </a-descriptions-item>
+            <a-descriptions-item label="🍯所在频道">{{
+              infoData.taskInfo.channelName
+            }}</a-descriptions-item>
+
+            <a-descriptions-item label="👁是否公开">
+              <a-tag :color="infoData.taskInfo.privacyMode === 'Y' ? 'blue' : ''"
+                >{{ infoData.taskInfo.privacyMode === 'Y' ? '公开' : '隐藏' }}
+              </a-tag>
+            </a-descriptions-item>
+
+            <a-descriptions-item label="🔢SEED" :span="2">
+              <div v-if="infoData.taskInfo.seed">
+                {{ infoData.taskInfo.seed }}
+              </div>
+              <div v-else>
+                <a-button @click="getSeed(infoData.id, true)" size="small" :loading="loadingRef"
+                  >🆔获取Seed
+                </a-button>
+              </div>
+            </a-descriptions-item>
+            <a-descriptions-item label="📔原始Prompt" :span="2">
+              {{ infoData.taskInfo.oriPrompt }}
+            </a-descriptions-item>
+            <a-descriptions-item label="📓执行Prompt" :span="2">
+              {{ infoData.taskInfo.contentStripped }}
+            </a-descriptions-item>
+          </a-descriptions>
+        </a-card-grid>
+        <a-card-grid style="width: 100%; text-align: left" :hoverable="false">
+          <a-descriptions bordered layout="vertical">
+            <a-descriptions-item :span="2">
+              <template #label>
+                <div style="display: flex; flex-direction: row; justify-content: space-between">
+                  <div>🦎任务空间 </div
+                  ><a-button size="small" @click="showUserSpaceTask(infoData.card)"
+                    >♻添加空间</a-button
+                  >
+                </div>
+              </template>
+              <a-tag
+                v-for="taskSpace in infoData.taskSpaceList"
+                :key="taskSpace.spaceId"
+                :bordered="false"
+                closable
+                @close="deleteSpaceCard(infoData.card, taskSpace.spaceId)"
+                :color="stringToColor(taskSpace.spaceName)"
+                >{{ taskSpace.spaceName }}
+              </a-tag>
+            </a-descriptions-item>
+          </a-descriptions>
+        </a-card-grid>
+        <a-card-grid style="width: 100%; text-align: left" :hoverable="false">
+          <a-descriptions bordered layout="vertical">
+            <a-descriptions-item :span="2" v-if="infoData.tagList && infoData.tagList.length > 0">
+              <template #label>
+                <div style="display: flex; flex-direction: row; justify-content: space-between">
+                  <div>🐍任务标签 </div
+                  ><a-button size="small" @click="showDrawTaskTagModel(infoData.card)"
+                    >📛添加标签</a-button
+                  >
+                </div>
+              </template>
+              <a-tag
+                v-for="tag in infoData.tagList"
+                @close="removeDrawTaskTag(infoData.id, tag)"
+                :color="stringToColor(tag)"
+                :key="tag"
+                :bordered="false"
+                closable
+                >{{ tag }}</a-tag
+              >
+            </a-descriptions-item>
+            <a-descriptions-item :span="2" v-else>
+              <template #label>
+                <div style="display: flex; flex-direction: row; justify-content: space-between">
+                  <div>🐍任务标签 </div
+                  ><a-button size="small" @click="showDrawTaskTagModel(infoData.card)"
+                    >📛添加标签</a-button
+                  >
+                </div>
+              </template>
+              <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" />
+            </a-descriptions-item>
+          </a-descriptions>
+        </a-card-grid>
+        <a-card-grid style="width: 100%; text-align: center" :hoverable="false">
+          <a-descriptions bordered layout="vertical">
+            <a-descriptions-item label="🐊任务进度">
+              <a-steps size="small" :current="infoData.processList.length">
+                <a-step
+                  v-for="process in infoData.processList"
+                  :key="process.title"
+                  :title="process.title"
+                  :description="process.description"
+                />
+              </a-steps>
+            </a-descriptions-item>
+          </a-descriptions>
+        </a-card-grid>
+      </a-card>
+      <Loading :loading="loadingRef" :absolute="false" :tip="infoData.tip" />
     </a-modal>
 
     <a-modal
@@ -964,7 +1185,18 @@
   import { Empty } from 'ant-design-vue';
 
   const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
-  const { cards, searchForm, pagination, pageChange, pageSizeChange, onSearch } = jobListQueryApi();
+  const {
+    closeTaskInfo,
+    showTaskInfo,
+    infoData,
+    cards,
+    searchForm,
+    pagination,
+    pageChange,
+    pageSizeChange,
+    onSearch,
+    onReset,
+  } = jobListQueryApi();
 
   const {
     // 方法

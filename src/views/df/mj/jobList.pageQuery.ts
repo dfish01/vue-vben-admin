@@ -89,9 +89,9 @@ export function jobListQueryApi() {
   // 参数
   const searchForm = ref({
     tagName: null,
-    state: '',
-    commandType: '',
-    spaceId: '',
+    state: null,
+    commandType: null,
+    spaceId: null,
   });
   // 分页
   const pagination = ref({
@@ -163,6 +163,14 @@ export function jobListQueryApi() {
       clearInterval(intervalId);
       intervalId = null;
     }
+  };
+  //重置
+
+  const onReset = () => {
+    searchForm.value.tagName = null;
+    searchForm.value.state = null;
+    searchForm.value.commandType = null;
+    searchForm.value.spaceId = null;
   };
 
   //查询
@@ -251,6 +259,7 @@ export function jobListQueryApi() {
     pageSizeChange,
     onSearchNoLoading,
     onSearch,
+    onReset,
     removeTimer,
   };
   jobListQueryApiInstance = api;

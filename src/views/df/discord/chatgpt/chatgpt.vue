@@ -80,14 +80,26 @@
                   类型： {{ card.authType === 'O' ? '主账号' : '授权' }}</span
                 ></span
               >
-              <a-button
-                :disabled="!card.url"
-                size="small"
-                style="font-size: 12px"
-                @click="goChatgpt(card.chatGptId)"
-              >
-                立即前往</a-button
-              >
+
+              <span>
+                <a-button
+                  v-if="card.state === 'Y'"
+                  size="small"
+                  style="
+                    align-items: center;
+                    background-color: #749bc2;
+                    color: #ffff;
+                    font-size: 12px;
+                  "
+                  @click="goChatgpt(card.id)"
+                  >立即前往<Icon
+                    icon="mdi:go-kart"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                    size="15"
+                  />
+                </a-button>
+              </span>
             </a-row>
             <a-row class="card-tags">
               <span>
@@ -789,7 +801,8 @@
   const go = useGo();
   const goChatgpt = async (id) => {
     const url = await getChatgptUrl({ id: id });
-    go('/chatgpt/index?openUrl=' + url);
+    window.open(url, '_blank');
+    // go('/chatgpt/index?openUrl=' + url);
   };
   //*****************************************授权列表相关 开始************************************/
   const authListForm = ref({

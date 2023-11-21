@@ -1,75 +1,96 @@
 <template>
   <div id="apps" class="app" >
-    <a-card class="search-card" :bodyStyle="{'padding-right':0}">
-      <a-row align="middle" class="search-row">
-        <a-col style="flex-wrap: nowrap">
-          <div>
-            <a-select style="width: 100px; margin-right: 8px;" v-model:value="searchForm.upscaleFlag" @change="onQuerySearch(null)" class="mobile-select">
+    <a-card class="search-card" :bodyStyle="{'padding-left':0}">
+      <a-space>
+        <a-select style="width: 100px; margin-right: 8px;" v-model:value="searchForm.upscaleFlag" @change="onQuerySearch(null)" class="mobile-select">
               <a-select-option value="">全部</a-select-option>
               <a-select-option value="Y">单图</a-select-option>
               <a-select-option value="N">网格图</a-select-option>
             </a-select>
             <a-mentions
-              v-model:value="searchForm.tagName"
-              autofocus
-              placeholder="暂时只支持标签查询~"
-              :options="drawTagForm.tagNameOptions"
-              @select="onChangeSearchLabel"
-              style="width: 200px"
+          v-model:value="searchForm.tagName"
+          autofocus
+          placeholder="标签查询，可使用@提示~"
+          :options="drawTagForm.tagNameOptions"
+          @select="onChangeSearchLabel"
+          style="width: 220px"
+        />
+        <a-button-group>
+          <a-button type="primary"  @click="onQuerySearch(null)">
+            <Icon
+              icon="lucide:scan-search"
+              class="vel-icon icon"
+              aria-hidden="true"
+            />查询
+          </a-button>
+            
+          <a-button @click="onReset">
+            <Icon
+              icon="tdesign:clear-formatting"
+              class="vel-icon icon"
+              aria-hidden="true"
             />
-            <a-button disabled @click="onQuerySearch(null)">🔍查询</a-button>
-            <a-dropdown-button :trigger="['click']">
-              <a class="ant-dropdown-link"  @click.prevent> 📜 </a>
-              <template #overlay>
-                <a-menu>
-                 
-                  <a-menu-item key="1">
-                    <a-popconfirm
-                      title="是否保存查看进度到本地缓存？"
-                      ok-text="立即保存"
-                      cancel-text="不需要"
-                      @confirm="saveProcess()"
-                    >
-                      🍝保存进度
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-item key="4">
-                    <a-popconfirm
-                      title="该选项默认暂时未作存储，默认关闭状态，刷新就失效了！分割图场景适用~"
-                      :ok-text="userSetting.useUpImage ? '确认关闭' : '确认开启'"
-                      cancel-text="取消"
-                      @confirm="setUseUpImage()"
-                    >
-                      🍝{{ userSetting.useUpImage ? '开启缩略图' : '开启原图' }}
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-item key="5">
-                    <a-popconfirm
-                      title="我的网速无懈可击！！！"
-                      :ok-text="userSetting.usePersonNet ? '就是要原连接' : '还是加速吧'"
-                      cancel-text="取消"
-                      @confirm="setUsePersonNet()"
-                    >
-                      🏄{{ userSetting.usePersonNet ? '使用原连接' : '加速连接' }}
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-item key="5" disabled>
-                    <a-popconfirm
-                      title="⚠️要切割当前页所有4格图，页面会加载很久。"
-                      ok-text="确定切割"
-                      cancel-text="取消"
-                      @confirm="() => {}"
-                      disabled
-                    >
-                      ⚠️✂️全量切割
-                    </a-popconfirm>
-                  </a-menu-item>
-                </a-menu>
-              </template>
-            </a-dropdown-button>
-          </div>
-        </a-col>
-      </a-row>
+            重置
+          </a-button>
+        </a-button-group>
+        <a-dropdown :trigger="['click']">
+          <a-button type="warning">
+            配置
+            <Icon
+              icon="icon-park-solid:setting-computer"
+              class="vel-icon icon"
+              aria-hidden="true"
+            />
+          </a-button>
+          <template #overlay>
+            <a-menu>
+              
+              <a-menu-item key="1">
+                <a-popconfirm
+                  title="是否保存查看进度到本地缓存？"
+                  ok-text="立即保存"
+                  cancel-text="不需要"
+                  @confirm="saveProcess()"
+                >
+                  🍝保存进度
+                </a-popconfirm>
+              </a-menu-item>
+              <a-menu-item key="4">
+                <a-popconfirm
+                  title="该选项默认暂时未作存储，默认关闭状态，刷新就失效了！分割图场景适用~"
+                  :ok-text="userSetting.useUpImage ? '确认关闭' : '确认开启'"
+                  cancel-text="取消"
+                  @confirm="setUseUpImage()"
+                >
+                  🍝{{ userSetting.useUpImage ? '开启缩略图' : '开启原图' }}
+                </a-popconfirm>
+              </a-menu-item>
+              <a-menu-item key="5">
+                <a-popconfirm
+                  title="我的网速无懈可击！！！"
+                  :ok-text="userSetting.usePersonNet ? '就是要原连接' : '还是加速吧'"
+                  cancel-text="取消"
+                  @confirm="setUsePersonNet()"
+                >
+                  🏄{{ userSetting.usePersonNet ? '使用原连接' : '加速连接' }}
+                </a-popconfirm>
+              </a-menu-item>
+              <a-menu-item key="5" disabled>
+                <a-popconfirm
+                  title="⚠️要切割当前页所有4格图，页面会加载很久。"
+                  ok-text="确定切割"
+                  cancel-text="取消"
+                  @confirm="() => {}"
+                  disabled
+                >
+                  ⚠️✂️全量切割
+                </a-popconfirm>
+              </a-menu-item>
+            </a-menu>
+          </template>
+        </a-dropdown>
+      </a-space>
+      
     </a-card>
 
     <!-- 正文列表 -->
@@ -218,9 +239,9 @@ const handleSetting = (key, value) => {
   const searchForm = ref({
       tagName: null,
       upscaleFlag:'Y',
-      state: '',
-      nextCursorId: '',
-      preNextCursorId:''
+      state: null,
+      nextCursorId: null,
+      preNextCursorId:null
   });
   const nextCursorId = ref<null|string>(null);
   const cards = ref<DrawTaskListResp[]>([
@@ -294,8 +315,15 @@ function debounce(func, delay) {
 
     loadingRef.value = false
   };
-
   
+  
+  const onReset =  () => {
+    searchForm.value.tagName=null;
+    searchForm.value.upscaleFlag='Y',
+    searchForm.value.state=null;
+    searchForm.value.nextCursorId=null;
+    searchForm.value.preNextCursorId=null;
+  }
   const onQuerySearch = async (cursorId) => {
     loadingRef.value = true 
     searchForm.value.nextCursorId = cursorId
@@ -672,7 +700,7 @@ const saveProcess = (): void => {
     padding: 10px;
     border-radius: 4px;
     display: flex;
-    justify-content: end;
+    justify-content: start;
     align-items: center;
   }
 

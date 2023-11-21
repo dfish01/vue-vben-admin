@@ -2,218 +2,165 @@
   <div class="jobList-app" ref="formRef">
     <Loading :loading="loadingRef" :absolute="false" tip="数据加载中..." />
     <a-card class="search-card">
-      <!-- 在移动端使用 -->
-      <a-row v-if="getIsMobile" align="middle" class="search-row">
-        <a-col span="6 ">
-          <a-select v-model:value="searchForm.state" class="mobile-select" @change="onSearch(1)">
-            <a-select-option value="">全部</a-select-option>
-            <a-select-option value="QUEUED">排队中</a-select-option>
-            <a-select-option value="RUNNING">执行中</a-select-option>
-            <a-select-option value="SUCCESS">已完成</a-select-option>
-            <a-select-option value="FAILED">已失败</a-select-option>
-            <!-- ...其他选项... -->
-          </a-select>
-        </a-col>
-        <a-col span="18" class="search-row">
-          <div style="text-align: right">
-            <a-input-search
-              v-model:value="searchForm.prompt"
-              placeholder="搜索prompt...(暂不生效)"
-              enter-button="查询"
-              :style="getIsMobile ? 'width: 100%' : 'width: 100%'"
-              @search="onSearch(1)"
+      <a-space>
+        <a-select
+          v-model:value="searchForm.state"
+          style="width: 100px; height: 32px"
+          class="mobile-select"
+          placeholder="任务状态"
+          @change="onSearch(1)"
+        >
+          <a-select-option value="QUEUED">排队中</a-select-option>
+          <a-select-option value="RUNNING">执行中</a-select-option>
+          <a-select-option value="SUCCESS">已完成</a-select-option>
+          <a-select-option value="FAILED">已失败</a-select-option>
+        </a-select>
+        <a-select
+          v-model:value="searchForm.commandType"
+          class="mobile-select"
+          style="width: 100px; height: 32px"
+          placeholder="任务类型"
+          @change="onSearch(1)"
+        >
+          <a-select-option value="IMAGINE">文生图</a-select-option>
+          <a-select-option value="BLEND">混图</a-select-option>
+          <a-select-option value="DESCRIBE">解析图</a-select-option>
+          <a-select-option value="UPSCALE">放大</a-select-option>
+          <a-select-option value="VARIATION">变化</a-select-option>
+          <a-select-option value="PAN">填充</a-select-option>
+          <a-select-option value="ZOOM">缩放</a-select-option>
+        </a-select>
+
+        <a-mentions
+          v-model:value="searchForm.tagName"
+          autofocus
+          placeholder="标签查询，可使用@提示~"
+          :options="drawTagForm.tagNameOptions"
+          @select="onChangeSearchLabel"
+          style="width: 220px"
+        />
+
+        <a-button-group>
+          <a-button type="primary" @click="onSearch(null)">
+            <Icon icon="lucide:scan-search" class="vel-icon icon" aria-hidden="true" />查询
+          </a-button>
+
+          <a-button @click="onReset">
+            <Icon icon="tdesign:clear-formatting" class="vel-icon icon" aria-hidden="true" />
+            重置
+          </a-button>
+        </a-button-group>
+        <a-dropdown :trigger="['click']">
+          <a-button type="warning">
+            配置
+            <Icon
+              icon="icon-park-solid:setting-computer"
+              class="vel-icon icon"
+              aria-hidden="true"
             />
-          </div>
-          <!-- 在移动端添加绘画按钮 -->
-          <div style="text-align: right">
-            <a-button
-              style="background-color: rgb(23 99 23); color: white"
-              color="success"
-              @click="$emit('openDrawer')"
-              >绘画</a-button
-            >
-          </div>
-        </a-col>
-      </a-row>
-      <a-row
-        v-else
-        align="middle"
-        class="search-row"
-        style="justify-content: space-between"
-        :wrap="false"
-      >
-        <a-col flex="400px">
-          <a-row style="justify-content: left">
-            <a-col span="6">
-              <a-tag class="quality-tag" color="default">🍺任务状态 </a-tag>
-            </a-col>
-            <a-col span="5">
-              <a-select
-                v-model:value="searchForm.state"
-                style="min-width: 100px; height: 32px"
-                class="mobile-select"
-                @change="onSearch(1)"
-              >
-                <a-select-option value="">全部</a-select-option>
-                <a-select-option value="QUEUED">排队中</a-select-option>
-                <a-select-option value="RUNNING">执行中</a-select-option>
-                <a-select-option value="SUCCESS">已完成</a-select-option>
-                <a-select-option value="FAILED">已失败</a-select-option>
-              </a-select>
-            </a-col>
+          </a-button>
+          <template #overlay>
+            <a-menu>
+              <a-menu-item key="1">
+                <a-popconfirm
+                  title="将永久删除该空间下的全部排队记录，是否确认删除?"
+                  ok-text="确认删除"
+                  cancel-text="取消"
+                  @confirm="deleteBatchHandle('QUEUED')"
+                >
+                  <a>❌排队</a>
+                </a-popconfirm>
+              </a-menu-item>
 
-            <a-col span="2" />
-            <a-col span="6">
-              <a-tag class="quality-tag" color="default">🍥任务类型 </a-tag>
-            </a-col>
-            <a-col span="5">
-              <a-select
-                v-model:value="searchForm.commandType"
-                class="mobile-select"
-                style="min-width: 100px; height: 32px"
-                @change="onSearch(1)"
-              >
-                <a-select-option value="">全部</a-select-option>
-                <a-select-option value="IMAGINE">文生图</a-select-option>
-                <a-select-option value="BLEND">混图</a-select-option>
-                <a-select-option value="DESCRIBE">解析图</a-select-option>
-                <a-select-option value="UPSCALE">放大</a-select-option>
-                <a-select-option value="VARIATION">变化</a-select-option>
-                <a-select-option value="PAN">填充</a-select-option>
-                <a-select-option value="ZOOM">缩放</a-select-option>
-              </a-select>
-            </a-col>
+              <a-menu-item key="2">
+                <a-popconfirm
+                  title="将永久删除该空间下的全部失败记录，是否确认删除?"
+                  ok-text="确认删除"
+                  cancel-text="取消"
+                  @confirm="deleteBatchHandle('FAILED')"
+                >
+                  <a>❌失败</a>
+                </a-popconfirm>
+              </a-menu-item>
+              <a-menu-divider />
+              <a-menu-item key="3" class="delete">
+                <a-popconfirm
+                  title="请确认相关账号的remix状态，这里只是控制弹窗而已（暂时未接入实时控制Remix）。如果remix状态不匹配，会导致任务失败!"
+                  :ok-text="remix.enable_flag ? '关闭Remix' : '开启Remix'"
+                  cancel-text="取消"
+                  @confirm="changeRemix()"
+                >
+                  📝{{ remix.enable_flag ? '关闭Remix' : '开启Remix' }}
+                </a-popconfirm>
+              </a-menu-item>
+              <a-menu-item key="5">
+                <a-popconfirm
+                  title="⚠️以卡片的方式进行预览，建议配合原图模式。"
+                  ok-text="立即预览"
+                  cancel-text="取消"
+                  @confirm="showAllImage(false)"
+                >
+                  📺全量清晰预览
+                </a-popconfirm>
+              </a-menu-item>
+              <a-menu-item key="5">
+                <a-popconfirm
+                  title="⚠️以卡片的方式进行预览，建议配合原图模式。"
+                  ok-text="立即预览"
+                  cancel-text="取消"
+                  @confirm="showAllImage(true)"
+                >
+                  📺全量高清预览
+                </a-popconfirm>
+              </a-menu-item>
+              <a-menu-item key="5" disabled>
+                <a-popconfirm
+                  title="⚠️要切割当前页所有4格图，页面会加载很久。"
+                  ok-text="确定切割"
+                  cancel-text="取消"
+                  @confirm="() => {}"
+                  disabled
+                >
+                  ⚠️✂️全量切割
+                </a-popconfirm>
+              </a-menu-item>
 
-            <!-- <a-radio-group
-              v-model:value="searchForm.state"
-              button-style="solid"
-              @change="onSearch(1)"
-            >
-              <a-radio-button value="">全部</a-radio-button>
-              <a-radio-button value="QUEUED">排队中</a-radio-button>
-              <a-radio-button value="RUNNING">执行中</a-radio-button>
-              <a-radio-button value="SUCCESS">已完成</a-radio-button>
-              <a-radio-button value="FAILED">已失败</a-radio-button>
-            </a-radio-group> -->
-          </a-row>
-        </a-col>
-        <a-col style="flex-wrap: nowrap">
-          <div>
-            <a-dropdown-button :trigger="['click']">
-              <a class="ant-dropdown-link" disable @click.prevent> 📜 </a>
-              <template #overlay>
-                <a-menu>
-                  <a-menu-item key="1">
-                    <a-popconfirm
-                      title="将永久删除该空间下的全部排队记录，是否确认删除?"
-                      ok-text="确认删除"
-                      cancel-text="取消"
-                      @confirm="deleteBatchHandle('QUEUED')"
-                    >
-                      <a>❌排队</a>
-                    </a-popconfirm>
-                  </a-menu-item>
+              <a-menu-divider />
+              <a-menu-item key="4">
+                <a-popconfirm
+                  title="该选项默认暂时未作存储，默认关闭状态，刷新就失效了！分割图场景适用~"
+                  :ok-text="userSetting.useUpImage ? '确认关闭' : '确认开启'"
+                  cancel-text="取消"
+                  @confirm="setUseUpImage()"
+                >
+                  🍝{{ userSetting.useUpImage ? '开启缩略图' : '开启原图' }}
+                </a-popconfirm>
+              </a-menu-item>
 
-                  <a-menu-item key="2">
-                    <a-popconfirm
-                      title="将永久删除该空间下的全部失败记录，是否确认删除?"
-                      ok-text="确认删除"
-                      cancel-text="取消"
-                      @confirm="deleteBatchHandle('FAILED')"
-                    >
-                      <a>❌失败</a>
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-divider />
-                  <a-menu-item key="3" class="delete">
-                    <a-popconfirm
-                      title="请确认相关账号的remix状态，这里只是控制弹窗而已（暂时未接入实时控制Remix）。如果remix状态不匹配，会导致任务失败!"
-                      :ok-text="remix.enable_flag ? '关闭Remix' : '开启Remix'"
-                      cancel-text="取消"
-                      @confirm="changeRemix()"
-                    >
-                      📝{{ remix.enable_flag ? '关闭Remix' : '开启Remix' }}
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-item key="5">
-                    <a-popconfirm
-                      title="⚠️以卡片的方式进行预览，建议配合原图模式。"
-                      ok-text="立即预览"
-                      cancel-text="取消"
-                      @confirm="showAllImage(false)"
-                    >
-                      📺全量清晰预览
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-item key="5">
-                    <a-popconfirm
-                      title="⚠️以卡片的方式进行预览，建议配合原图模式。"
-                      ok-text="立即预览"
-                      cancel-text="取消"
-                      @confirm="showAllImage(true)"
-                    >
-                      📺全量高清预览
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-item key="5" disabled>
-                    <a-popconfirm
-                      title="⚠️要切割当前页所有4格图，页面会加载很久。"
-                      ok-text="确定切割"
-                      cancel-text="取消"
-                      @confirm="() => {}"
-                      disabled
-                    >
-                      ⚠️✂️全量切割
-                    </a-popconfirm>
-                  </a-menu-item>
-
-                  <a-menu-divider />
-                  <a-menu-item key="4">
-                    <a-popconfirm
-                      title="该选项默认暂时未作存储，默认关闭状态，刷新就失效了！分割图场景适用~"
-                      :ok-text="userSetting.useUpImage ? '确认关闭' : '确认开启'"
-                      cancel-text="取消"
-                      @confirm="setUseUpImage()"
-                    >
-                      🍝{{ userSetting.useUpImage ? '开启缩略图' : '开启原图' }}
-                    </a-popconfirm>
-                  </a-menu-item>
-
-                  <a-menu-item key="5">
-                    <a-popconfirm
-                      title="我的网速无懈可击！！！"
-                      :ok-text="userSetting.usePersonNet ? '还是加速吧' : '就是要原连接'"
-                      cancel-text="取消"
-                      @confirm="setUsePersonNet()"
-                    >
-                      🏄{{ userSetting.usePersonNet ? '加速连接' : '使用原连接' }}
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-item key="5">
-                    <a-popconfirm
-                      title="提交任务自动刷新！！！"
-                      :ok-text="userSetting.taskRefresh ? '关闭刷新' : '开启刷新'"
-                      cancel-text="取消"
-                      @confirm="setTaskRefresh()"
-                    >
-                      💫{{ userSetting.taskRefresh ? '关闭刷新' : '开启刷新' }}
-                    </a-popconfirm>
-                  </a-menu-item>
-                </a-menu>
-              </template>
-            </a-dropdown-button>
-            <a-mentions
-              v-model:value="searchForm.tagName"
-              autofocus
-              placeholder="暂时只支持标签查询~"
-              :options="drawTagForm.tagNameOptions"
-              @select="onChangeSearchLabel"
-              style="width: 200px"
-            />
-            <a-button @click="onSearch(1)">🔍查询</a-button>
-          </div>
-        </a-col>
-      </a-row>
+              <a-menu-item key="5">
+                <a-popconfirm
+                  title="我的网速无懈可击！！！"
+                  :ok-text="userSetting.usePersonNet ? '还是加速吧' : '就是要原连接'"
+                  cancel-text="取消"
+                  @confirm="setUsePersonNet()"
+                >
+                  🏄{{ userSetting.usePersonNet ? '加速连接' : '使用原连接' }}
+                </a-popconfirm>
+              </a-menu-item>
+              <a-menu-item key="5">
+                <a-popconfirm
+                  title="提交任务自动刷新！！！"
+                  :ok-text="userSetting.taskRefresh ? '关闭刷新' : '开启刷新'"
+                  cancel-text="取消"
+                  @confirm="setTaskRefresh()"
+                >
+                  💫{{ userSetting.taskRefresh ? '关闭刷新' : '开启刷新' }}
+                </a-popconfirm>
+              </a-menu-item>
+            </a-menu>
+          </template>
+        </a-dropdown>
+      </a-space>
     </a-card>
 
     <div
@@ -1485,6 +1432,7 @@
     pageSizeChange,
     onSearchNoLoading,
     onSearch,
+    onReset,
     removeTimer,
   } = jobListQueryApi();
 
@@ -1570,13 +1518,12 @@
   watch(spaceId, (newId) => {
     if (newId) {
       searchForm.value.spaceId = newId;
-      onSearchNoLoading();
+      onSearch();
     }
   });
 
   onMounted(() => {
     (window as any).varyRegionForm = varyRegionForm;
-    // onSearch(1);
     loadTagList();
   });
 
@@ -1587,12 +1534,6 @@
       varyRegionForm.value.viewFlag = false;
     }
   };
-
-  const descButton = ref({
-    addTaskSpace: `<div style="display: flex; flex-direction: row; justify-content: space-between;">
-    <div>🦎任务空间 </div><a-button @click="showDrawTaskTagModel(infoData.card)">📛添加标签</a-button>
-  </div>`,
-  });
 
   onMounted(() => {
     window.addEventListener('message', handleMessage, false);
