@@ -600,7 +600,7 @@ export function jobOptionApi() {
         ? getPersonalSetting.userAccountId
         : null;
     varyRegionForm.value.card = card;
-    varyRegionForm.value.customId = key;
+    varyRegionForm.value.customId = idStr;
     varyRegionForm.value.token = token;
     varyRegionForm.value.varyRegionUrl = '/mjTools.html?customId=' + customId;
     varyRegionForm.value.viewFlag = true;
