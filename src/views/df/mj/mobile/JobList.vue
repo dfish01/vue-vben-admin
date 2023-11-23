@@ -1318,6 +1318,9 @@
     // 验证消息来源和内容，然后关闭 iframe
     if (event.data === 'close_iframe') {
       varyRegionForm.value.viewFlag = false;
+    } else if (event.data === 'commit_success') {
+      varyRegionForm.value.viewFlag = false;
+      message.success('提交成功');
     }
   };
 

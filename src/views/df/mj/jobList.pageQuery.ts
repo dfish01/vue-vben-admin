@@ -591,14 +591,21 @@ export function jobOptionApi() {
     console.log(customId);
     const token = userStore.getToken;
     const getPersonalSetting = userStore.getPersonalSetting;
-    varyRegionForm.value.refAccountId = getPersonalSetting.userAccountId
-      ? getPersonalSetting.userAccountId
-      : card.refAccountId;
+    // varyRegionForm.value.refAccountId =
+    //   getPersonalSetting.userAccountId && getPersonalSetting.userAccountId != ''
+    //     ? getPersonalSetting.userAccountId
+    //     : card.refAccountId;
+    varyRegionForm.value.refAccountId =
+      getPersonalSetting.userAccountId && getPersonalSetting.userAccountId != ''
+        ? getPersonalSetting.userAccountId
+        : null;
     varyRegionForm.value.card = card;
     varyRegionForm.value.customId = key;
     varyRegionForm.value.token = token;
     varyRegionForm.value.varyRegionUrl = '/mjTools.html?customId=' + customId;
     varyRegionForm.value.viewFlag = true;
+    console.log('openVaryRegion getPersonalSetting ' + getPersonalSetting);
+    console.log('openVaryRegion ' + varyRegionForm.value);
   };
 
   const remixCard = ref({});

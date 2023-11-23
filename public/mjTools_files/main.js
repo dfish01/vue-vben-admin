@@ -18609,7 +18609,7 @@ var ur = class {
   close(a="Job Submitted!") {
       console.log("1111111 - Job Submitted!")
       // 当需要关闭 iframe 时，发送消息给父窗口
-      window.parent.postMessage('close_iframe', '*');
+      window.parent.postMessage('commit_success', '*');
       // this.discord != null && this.discord.close(ci.CLOSE_NORMAL, a)
   }
   processDoCommand(a, h, p) {
@@ -18755,13 +18755,13 @@ var ur = class {
       await this.submitToBackend(this.refTaskId, this.token, Se, d, this.customId)
   }
   async submitToBackend(refTaskId, token, mask, prompt, customId, refAccountId) {
-      let Z = await fetch("./basic-api/open/drawTaskMjTemp/addVaryRegion", {
+      let Z = await fetch("https://api.gfish.top/open/drawTaskMjTemp/addVaryRegion", {
           method: "POST",
-          mode: "same-origin",
+          mode: "cors", 
           cache: "no-cache",
           headers: {
               "Content-Type": "application/json",
-              Accept: "application/json",
+              "Accept": "application/json",
               "Authorization": token,
           },
           body: JSON.stringify({
@@ -18773,12 +18773,22 @@ var ur = class {
           })
       });
       return Z.status == 200 ? (Z = await Z.json(),
-      !this.keymap.has("Shift") && !this.keymap.has("Alt") && (window.parent.postMessage('close_iframe', '*'),
-      hn({
-          header: "Job Submitted!",
-          content: "Your job was submitted successfully! You can now close this window, or make additional edits.",
-          footer: this.createDefaultCloseButton()
-      })),
+      !this.keymap.has("Shift") && !this.keymap.has("Alt") && (
+        Z.code === 0 && window.parent.postMessage('commit_success', '*'),
+        Z.code === 0 ? (
+            hn({
+                header: "Job Submitted!",
+                content: "Your job was submitted successfully! You can now close this window, or make additional edits.",
+                footer: this.createDefaultCloseButton()
+            })
+        ) : (
+            hn({
+                header: "Error",
+                content: Z.message,
+                footer: this.createDefaultCloseButton()
+            })
+        )
+      ),
       Z) : 400 <= Z.status < 500 ? (Z = await Z.json(),
       console.error("Received Error Response!", Z),
       window.parent.postMessage('close_iframe', '*'),
