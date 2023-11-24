@@ -580,6 +580,7 @@ export function jobOptionApi() {
     customId: '',
     token: '',
     card: null,
+    mode: null,
     refAccountId: null,
   });
   const openVaryRegion = (card, type, key) => {
@@ -601,6 +602,7 @@ export function jobOptionApi() {
         : null;
     varyRegionForm.value.card = card;
     varyRegionForm.value.customId = idStr;
+    varyRegionForm.value.mode = getPersonalSetting.mode;
     varyRegionForm.value.token = token;
     varyRegionForm.value.varyRegionUrl = '/mjTools.html?customId=' + customId;
     varyRegionForm.value.viewFlag = true;

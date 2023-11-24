@@ -18376,6 +18376,7 @@ var ur = class {
       this.refAccountId = regionObj.refAccountId,
       this.token = regionObj.token,
       this.customId = regionObj.customId
+      this.mode = regionObj.mode
       console.log("setup setup setup")
       if (
       this.inIFrame = window.location.search != "",
@@ -18752,9 +18753,9 @@ var ur = class {
       this.checkerboardImage.visible = !0,
       this.inIFrame || await new Promise(ye=>setTimeout(ye, 2e3));
       let Se = Me.split(",")[1];
-      await this.submitToBackend(this.refTaskId, this.token, Se, d, this.customId)
+      await this.submitToBackend(this.mode, this.refTaskId, this.token, Se, d, this.customId)
   }
-  async submitToBackend(refTaskId, token, mask, prompt, customId, refAccountId) {
+  async submitToBackend(mode, refTaskId, token, mask, prompt, customId, refAccountId) {
       let Z = await fetch("https://api.gfish.top/open/drawTaskMjTemp/addVaryRegion", {
           method: "POST",
           mode: "cors", 
@@ -18768,6 +18769,7 @@ var ur = class {
               refTaskId: refTaskId,
               mask: mask,
               prompt: prompt,
+              mode:mode,
               customId: customId,
               refAccountId:refAccountId,
           })
