@@ -93,7 +93,7 @@
                   📝{{ remix.enable_flag ? '关闭Remix' : '开启Remix' }}
                 </a-popconfirm>
               </a-menu-item>
-              <a-menu-item key="5">
+              <a-menu-item key="5" disabled>
                 <a-popconfirm
                   title="⚠️以卡片的方式进行预览，建议配合原图模式。"
                   ok-text="立即预览"
@@ -126,18 +126,19 @@
               </a-menu-item>
 
               <a-menu-divider />
-              <a-menu-item key="4">
+              <a-menu-item key="4" disabled>
                 <a-popconfirm
                   title="该选项默认暂时未作存储，默认关闭状态，刷新就失效了！分割图场景适用~"
                   :ok-text="userSetting.useUpImage ? '确认关闭' : '确认开启'"
                   cancel-text="取消"
                   @confirm="setUseUpImage()"
                 >
-                  🍝{{ userSetting.useUpImage ? '开启缩略图' : '开启原图' }}
+                  <!-- 🍝{{ userSetting.useUpImage ? '开启缩略图' : '开启原图' }} -->
+                  🍝开启缩略图
                 </a-popconfirm>
               </a-menu-item>
 
-              <a-menu-item key="5">
+              <a-menu-item key="5" disabled>
                 <a-popconfirm
                   title="我的网速无懈可击！！！"
                   :ok-text="userSetting.usePersonNet ? '还是加速吧' : '就是要原连接'"
@@ -286,25 +287,74 @@
               </div>
             </div>
           </div>
+          <div v-if="card.state === 'SUCCESS' && false">
+            <a-card
+              :bodyStyle="{ padding: '0px' }"
+              class="my-transparent-card"
+              style="width: 100%; border: none; background: transparent"
+              v-if="card.taskImage.infoImageList.length > 1"
+              :bordered="false"
+              :hoverable="false"
+            >
+              <a-card-grid
+                v-for="infoImage in card.taskImage.infoImageList"
+                :key="infoImage.url"
+                style="width: 49%; margin: 1px; padding: 0; border-radius: 15px; text-align: center"
+              >
+                <img
+                  @click="showInfoImage(infoImage.url)"
+                  v-lazy.container="infoImage.url"
+                  class="card-image img-box"
+                  :src="infoImage.url"
+                  style="max-width: 100%; border-radius: 15px"
+                  alt=""
+                />
+              </a-card-grid>
+            </a-card>
+            <a-card
+              :bodyStyle="{ padding: '0px' }"
+              style="width: 100%"
+              :bordered="false"
+              :hoverable="false"
+              class="my-transparent-card"
+              v-else
+              ><a-card-grid
+                v-for="infoImage in card.taskImage.infoImageList"
+                :key="infoImage.url"
+                style="width: 100%; padding: 0; border-radius: 15px; text-align: center"
+              >
+                <img
+                  @click="showInfoImage(infoImage.url)"
+                  v-lazy.container="infoImage.url"
+                  class="card-image img-box"
+                  :src="infoImage.url"
+                  style="max-width: 100%; border-radius: 15px"
+                  alt=""
+                />
+              </a-card-grid>
+            </a-card>
+          </div>
           <div v-if="card.state === 'SUCCESS'">
-            <img
-              @click="showTaskInfo(card)"
-              v-lazy.container="
-                userSetting.useUpImage
-                  ? userSetting.usePersonNet
-                    ? card.cdnResultImage
-                    : card.resultImage
-                  : userSetting.usePersonNet
-                  ? card.cdnImediaImageUrl
-                  : card.mediaImageUrl
-              "
-              class="card-image img-box"
-              :preview="{
-                src: userSetting.usePersonNet ? card.cdnResultImage : card.resultImage,
-              }"
-              fallback=""
-              alt=""
-            />
+            <a-card
+              :bodyStyle="{ padding: '0px' }"
+              class="my-transparent-card"
+              style="width: 100%; border: none; background: transparent"
+              :bordered="false"
+              :hoverable="false"
+            >
+              <img
+                @click="showTaskInfo(card)"
+                v-lazy.container="
+                  userSetting.useUpImage ? card.taskImage.imageUrl : card.taskImage.mediaImageUrl
+                "
+                class="card-image img-box"
+                :preview="{
+                  src: card.taskImage.imageUrl,
+                }"
+                fallback=""
+                alt=""
+              />
+            </a-card>
           </div>
           <div
             v-if="card.state != 'SUCCESS'"
@@ -473,10 +523,7 @@
                     title="下载"
                     v-if="card.state === 'SUCCESS' && card.commandType != 'DESCRIBE'"
                   >
-                    <a-button
-                      class="card-icon-button"
-                      @click="handleDownloadByUrl(card.resultImage)"
-                    >
+                    <a-button class="card-icon-button" @click="doDownload(card)">
                       <Icon icon="bx:bxs-cloud-download" size="14" color="#4F709C" />
                     </a-button>
                   </a-tooltip>
@@ -737,7 +784,9 @@
 
         <template #overlay>
           <a-menu>
-            <a-menu-item key="1" @click="splitAndDownloadImage(card)">✂️切4份下载</a-menu-item>
+            <a-menu-item key="1" @click="splitAndDownloadImage(card)" disabled
+              >✂️切4份下载</a-menu-item
+            >
             <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)">📛添加标签</a-menu-item>
             <a-menu-item key="3" @click="() => showSampleView(card)">🍹添加到官方案例</a-menu-item>
             <a-menu-item key="4" @click="() => copyText(card.messageHash)"
@@ -824,7 +873,7 @@
               />
             </div>
             <div
-              @click="handleDownloadByUrl(lightBoxOptions.currentItem)"
+              @click="doDownload(lightBoxOptions.currentItem)"
               role="button"
               aria-label="zoom in button"
               class="toolbar-btn toolbar-btn__zoomin"
@@ -1684,6 +1733,11 @@
   }
 
   /*************************************** 相关包装方法 ********************************************* */
+  //下载
+  const doDownload = async (card) => {
+    const imageUrlsArray = card.taskImage.infoImageList.map((item) => item.url);
+    await handleDownloadByUrls(imageUrlsArray);
+  };
 
   const showInfoImage = (url) => {
     const imageList = [];
@@ -1956,5 +2010,12 @@
     align-items: center;
     justify-content: center;
     height: 100%;
+  }
+
+  .my-transparent-card {
+    padding: 0; /* 可能还需要设置 padding 为 0 */
+    border: none;
+    background: transparent;
+    box-shadow: none; /* 可能还需要禁用阴影 */
   }
 </style>

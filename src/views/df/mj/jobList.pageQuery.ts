@@ -879,9 +879,7 @@ export function lightBoxApi() {
   });
 
   const showImage = (item) => {
-    const baseImageSource = userSettingApi().userSetting.usePersonNet
-      ? item.cdnResultImage
-      : item.resultImage;
+    const baseImageSource = item.taskImage.imageUrl;
     const newArray = [
       {
         src: baseImageSource,
@@ -899,11 +897,7 @@ export function lightBoxApi() {
   const showAllImage = (oriFlag) => {
     const newArray = jobListQueryApi().cards.value.map((item) => {
       return {
-        src: oriFlag
-          ? userSettingApi().userSetting.value.usePersonNet
-            ? item.cdnResultImage
-            : item.resultImage
-          : item.mediaImageUrl,
+        src: oriFlag ? item.taskImage.imageUrl : item.taskImage.mediaImageUrl,
         item,
       };
     });
@@ -972,7 +966,7 @@ export function lightBoxApi() {
 
 //图片切割下载
 export function splitAndDownloadImage(card) {
-  const imageUrl = card.resultImage;
+  const imageUrl = card.taskImage.imageUrl;
   loadingRef.value = true;
   const image = new Image();
   image.crossOrigin = 'Anonymous'; // 设置跨域属性以允许获取图像数据

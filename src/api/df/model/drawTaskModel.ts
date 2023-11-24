@@ -199,17 +199,10 @@ export interface DrawTaskListResp {
   priority: number | null;
 
   /**
-   * 图片结果
+   * 图片信息
    */
-  resultImage: string | null;
+  taskImage: any;
 
-  /**
-   * 图片结果
-   */
-  mediaImageUrl: string | null;
-
-  cdnImediaImageUrl: string | null;
-  cdnResultImage: string | null;
   /**
    * 文本结果
    */

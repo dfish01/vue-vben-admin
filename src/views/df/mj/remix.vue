@@ -755,53 +755,6 @@
     visible.value = value;
   };
 
-  function splitAndDownloadImage(card) {
-    const imageUrl = card.resultImage;
-    loadingRef.value = true;
-    const image = new Image();
-    image.crossOrigin = 'Anonymous'; // 设置跨域属性以允许获取图像数据
-
-    image.onload = () => {
-      const canvas = document.createElement('canvas');
-      const canvasWidth = image.width / 2; // 根据需求调整分割大小
-      const canvasHeight = image.height / 2;
-
-      canvas.width = canvasWidth;
-      canvas.height = canvasHeight;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        for (let row = 0; row < 2; row++) {
-          for (let col = 0; col < 2; col++) {
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-            ctx.drawImage(
-              image,
-              col * canvasWidth,
-              row * canvasHeight,
-              canvasWidth,
-              canvasHeight,
-              0,
-              0,
-              canvasWidth,
-              canvasHeight,
-            );
-
-            const dataUrl = canvas.toDataURL();
-            const downloadLink = document.createElement('a');
-            // 获取原始文件名
-            const originalFileName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
-            // 设置下载链接的文件名，带有索引编号
-            downloadLink.href = dataUrl;
-            downloadLink.download = `split_image_${originalFileName}_${row * 2 + col + 1}.png`;
-            downloadLink.click();
-          }
-        }
-      }
-      loadingRef.value = false;
-    };
-
-    image.src = imageUrl;
-  }
-
   /*********************************** 基础配置 ******************************** */
   const userSetting = ref({
     useUpImage: false,
@@ -826,41 +779,6 @@
     imgsRef: [] as any[],
     currentItem: null,
   });
-
-  const showImage = (item) => {
-    const baseImageSource = userSetting.value.usePersonNet ? item.cdnResultImage : item.resultImage;
-    const newArray = [
-      {
-        src: baseImageSource,
-        item,
-      },
-    ];
-    console.log(newArray);
-    lightBoxOptions.imgsRef.length = 0;
-    lightBoxOptions.imgsRef.push(...newArray);
-    lightBoxOptions.indexRef = 0;
-    lightBoxOptions.visibleRef = true;
-    lightBoxOptions.currentItem = lightBoxOptions.imgsRef[lightBoxOptions.indexRef].item;
-  };
-  //展示当前页所有图片
-  const showAllImage = (oriFlag) => {
-    const newArray = cards.value.map((item) => {
-      return {
-        src: oriFlag
-          ? userSetting.value.usePersonNet
-            ? item.cdnResultImage
-            : item.resultImage
-          : item.mediaImageUrl,
-        item,
-      };
-    });
-    console.log(newArray);
-    lightBoxOptions.imgsRef.length = 0;
-    lightBoxOptions.imgsRef.push(...newArray);
-    // lightBoxOptions.indexRef = 0;
-    lightBoxOptions.visibleRef = true;
-    lightBoxOptions.currentItem = lightBoxOptions.imgsRef[lightBoxOptions.indexRef].item;
-  };
 
   const onPrevClick = (oldIndex, newIndex) => {
     console.log('onPrevClick oldIndex=' + oldIndex + ' newIndex=' + newIndex);

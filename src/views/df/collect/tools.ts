@@ -11,6 +11,15 @@ export const handleDownloadByUrl = async (url: string) => {
   message.success('已添加下载任务~');
 };
 
+export const handleDownloadByUrls = async (urls: string[]) => {
+  for (const url of urls) {
+    const segments = url.split('/');
+    const fileName = segments[segments.length - 1];
+    downloadByOnlineUrl(url, fileName);
+  }
+  message.success('已添加下载任务~');
+};
+
 //下载文件
 export const downloadImage = (image) => {
   const link = document.createElement('a');
@@ -33,7 +42,7 @@ export function copyText(text) {
 
 //图片切割下载
 export function splitImage(card) {
-  const imageUrl = card.resultImage;
+  const imageUrl = card.taskImage.imageUrl;
 
   const image = new Image();
   image.crossOrigin = 'Anonymous'; // 设置跨域属性以允许获取图像数据

@@ -285,9 +285,7 @@ ref="waterfallRef"
   ]);
 
   const getImageSource = (card) => {
-    const baseImageSource = userSetting.value.usePersonNet
-      ? card.cdnResultImage
-      : card.resultImage;
+    const baseImageSource = card.taskImage.imageUrl;
 
     return userSetting.value.useUpImage ? baseImageSource : card.mediaImageUrl;
   };
@@ -528,9 +526,7 @@ const scrollToTop = () => {
       item.mouseenter = true;
     }else {
       item.mouseenter = false;
-      const baseImageSource = userSetting.value.usePersonNet
-        ? item.cdnResultImage
-        : item.resultImage;
+      const baseImageSource = item.taskImage.imageUrl;
       const imageList = [];
       imageList.push(baseImageSource);
       console.log(imageList)

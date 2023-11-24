@@ -67,7 +67,7 @@
                     </a-popconfirm>
                   </a-menu-item>
 
-                  <a-menu-item key="5">
+                  <a-menu-item key="5" disabled>
                     <a-popconfirm
                       title="我的网速无懈可击！！！"
                       :ok-text="userSetting.usePersonNet ? '还是加速吧' : '就是要原连接'"
@@ -166,17 +166,11 @@
             <img
               @click="showImage(card)"
               v-lazy.container="
-                userSetting.useUpImage
-                  ? userSetting.usePersonNet
-                    ? card.cdnResultImage
-                    : card.resultImage
-                  : userSetting.usePersonNet
-                  ? card.cdnImediaImageUrl
-                  : card.mediaImageUrl
+                userSetting.useUpImage ? card.taskImage.imageUrl : card.taskImage.mediaImageUrl
               "
               class="card-image img-box"
               :preview="{
-                src: userSetting.usePersonNet ? card.cdnResultImage : card.resultImage,
+                src: card.taskImage.imageUrl,
               }"
               fallback=""
               alt=""
@@ -302,10 +296,7 @@
                     title="下载"
                     v-if="card.state === 'SUCCESS' && card.commandType != 'DESCRIBE'"
                   >
-                    <a-button
-                      class="card-icon-button"
-                      @click="handleDownloadByUrl(card.resultImage)"
-                    >
+                    <a-button class="card-icon-button" @click="doDownload(card)">
                       <Icon icon="bx:bxs-cloud-download" size="14" color="#4F709C" />
                     </a-button>
                   </a-tooltip>
@@ -564,7 +555,9 @@
 
         <template #overlay>
           <a-menu>
-            <a-menu-item key="1" @click="splitAndDownloadImage(card)">✂️切4份下载</a-menu-item>
+            <a-menu-item key="1" @click="splitAndDownloadImage(card)" disabled
+              >✂️切4份下载</a-menu-item
+            >
             <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)">📛添加标签</a-menu-item>
             <a-menu-item key="3" @click="() => copyText(card.messageHash)"
               >🆔复制任务ID</a-menu-item
@@ -639,7 +632,7 @@
               />
             </div>
             <div
-              @click="handleDownloadByUrl(lightBoxOptions.currentItem)"
+              @click="doDownload(lightBoxOptions.currentItem)"
               role="button"
               aria-label="zoom in button"
               class="toolbar-btn toolbar-btn__zoomin"
@@ -1005,6 +998,7 @@
     formattedPrompt,
     splitPrompt,
     handleDownloadByUrl,
+    handleDownloadByUrls,
     generateTooltipText,
   } from './tools';
   import { Empty } from 'ant-design-vue';
@@ -1127,6 +1121,12 @@
   onBeforeUnmount(() => {
     window.removeEventListener('message', handleMessage);
   });
+
+  //下载
+  const doDownload = async (card) => {
+    const imageUrlsArray = card.taskImage.infoImageList.map((item) => item.url);
+    await handleDownloadByUrls(imageUrlsArray);
+  };
 </script>
 
 <style scoped>
