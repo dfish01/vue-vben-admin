@@ -784,7 +784,9 @@
 
         <template #overlay>
           <a-menu>
-            <a-menu-item key="1" @click="splitAndDownloadImage(card)">✂️切4份下载</a-menu-item>
+            <a-menu-item key="1" @click="splitAndDownloadImage(card)" disabled
+              >✂️切4份下载</a-menu-item
+            >
             <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)">📛添加标签</a-menu-item>
             <a-menu-item key="3" @click="() => showSampleView(card)">🍹添加到官方案例</a-menu-item>
             <a-menu-item key="4" @click="() => copyText(card.messageHash)"
