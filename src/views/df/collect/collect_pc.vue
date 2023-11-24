@@ -103,7 +103,7 @@
                 </a-popconfirm>
               </a-menu-item>
 
-              <a-menu-item key="5">
+              <a-menu-item key="5" disabled>
                 <a-popconfirm
                   title="我的网速无懈可击！！！"
                   :ok-text="userSetting.usePersonNet ? '还是加速吧' : '就是要原连接'"
@@ -184,17 +184,11 @@
             <img
               @click="showImage(card)"
               v-lazy.container="
-                userSetting.useUpImage
-                  ? userSetting.usePersonNet
-                    ? card.cdnResultImage
-                    : card.resultImage
-                  : userSetting.usePersonNet
-                  ? card.cdnImediaImageUrl
-                  : card.mediaImageUrl
+                userSetting.useUpImage ? card.taskImage.imageUrl : card.taskImage.mediaImageUrl
               "
               class="card-image img-box"
               :preview="{
-                src: userSetting.usePersonNet ? card.cdnResultImage : card.resultImage,
+                src: card.taskImage.imageUrl,
               }"
               fallback=""
               alt=""
@@ -320,10 +314,7 @@
                     title="下载"
                     v-if="card.state === 'SUCCESS' && card.commandType != 'DESCRIBE'"
                   >
-                    <a-button
-                      class="card-icon-button"
-                      @click="handleDownloadByUrl(card.resultImage)"
-                    >
+                    <a-button class="card-icon-button" @click="doDownload(card)">
                       <Icon icon="bx:bxs-cloud-download" size="14" color="#4F709C" />
                     </a-button>
                   </a-tooltip>
@@ -665,7 +656,7 @@
               />
             </div>
             <div
-              @click="handleDownloadByUrl(lightBoxOptions.currentItem)"
+              @click="doDownload(lightBoxOptions.currentItem)"
               role="button"
               aria-label="zoom in button"
               class="toolbar-btn toolbar-btn__zoomin"
@@ -1180,6 +1171,7 @@
     formattedPrompt,
     splitPrompt,
     handleDownloadByUrl,
+    handleDownloadByUrls,
     generateTooltipText,
   } from './tools';
   import { Empty } from 'ant-design-vue';
@@ -1279,6 +1271,12 @@
     if (event.data === 'close_iframe') {
       varyRegionForm.value.viewFlag = false;
     }
+  };
+
+  //下载
+  const doDownload = async (card) => {
+    const imageUrlsArray = card.taskImage.infoImageList.map((item) => item.url);
+    await handleDownloadByUrls(imageUrlsArray);
   };
 
   onMounted(() => {

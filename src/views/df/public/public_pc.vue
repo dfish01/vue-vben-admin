@@ -249,9 +249,7 @@ const handleSetting = (key, value) => {
   ]);
 
   const getImageSource = (card) => {
-    const baseImageSource = userSetting.value.usePersonNet
-      ? card.cdnResultImage
-      : card.resultImage;
+    const baseImageSource = card.taskImage.imageUrl;
 
     return userSetting.value.useUpImage ? baseImageSource : card.mediaImageUrl;
   };
@@ -493,9 +491,7 @@ const saveProcess = (): void => {
   })
 
   const showImage = (item) => {
-    const baseImageSource = userSetting.value.usePersonNet
-        ? item.cdnResultImage
-        : item.resultImage;
+    const baseImageSource = item.taskImage.imageUrl;
     const imageList = [];
     imageList.push(baseImageSource);
     console.log(imageList)

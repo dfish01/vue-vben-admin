@@ -45,7 +45,7 @@ export const copyText = async (text) => {
 
 //图片切割下载
 export function splitImage(card) {
-  const imageUrl = card.resultImage;
+  const imageUrl = card.taskImage.imageUrl;
 
   const image = new Image();
   image.crossOrigin = 'Anonymous'; // 设置跨域属性以允许获取图像数据
