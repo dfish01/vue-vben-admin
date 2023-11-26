@@ -825,7 +825,7 @@
     <!-- remix弹窗-->
     <div>
       <a-modal
-        v-model:visible="remix.view"
+        v-model:open="remix.view"
         :title="remix.title"
         @ok="doZoomCus()"
         :loading="remix.loading"
@@ -852,11 +852,11 @@
     <!-- 标签弹窗  -->
     <div>
       <a-modal
-        v-model:visible="drawTagForm.viewFlag"
-        title="🔥添加标签"
+        v-model:open="drawTagForm.viewFlag"
         @ok="addDrawTaskTag()"
         :loading="drawTagForm.loading"
       >
+        <template #title> <Icon icon="streamline-emojis:blossom" />添加标签 </template>
         <a-spin :spinning="drawTagForm.loading">
           <a-row style="padding: 15px">
             <a-col span="24">
@@ -879,13 +879,13 @@
       </a-modal>
     </div>
 
-    <a-modal v-model:visible="isModalVisible" width="80%">
+    <a-modal v-model:open="isModalVisible" width="80%">
       <template #title> 图片查看 </template>
       <img :src="currentImage" style="width: 100%; height: auto" />
     </a-modal>
 
     <a-modal
-      v-model:visible="varyRegionForm.viewFlag"
+      v-model:open="varyRegionForm.viewFlag"
       title="🎨Midjourney局部变化"
       style="top: 20px; width: 75%; height: auto"
     >
@@ -899,7 +899,7 @@
 
     <!-- 条件查询 -->
     <a-modal
-      v-model:visible="showQueryViewFlag"
+      v-model:open="showQueryViewFlag"
       width="100%"
       title="🔍️条件查询"
       :bodyStyle="{ padding: '7px 12px 7px 12px', width: '100%', 'align-items': 'center' }"

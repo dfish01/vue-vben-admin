@@ -92,6 +92,21 @@ export function jobListQueryApi() {
     state: null,
     commandType: null,
     spaceId: null,
+    sortWay: null,
+    sortWayOptions: [
+      {
+        value: 'owner',
+        payload: {
+          title: '空间',
+        },
+      },
+      {
+        value: 'other',
+        payload: {
+          title: '任务',
+        },
+      },
+    ],
   });
   // 分页
   const pagination = ref({
@@ -128,6 +143,7 @@ export function jobListQueryApi() {
   //异步查询，无loading
   const onSearchNoLoading = async () => {
     const params: DrawTaskListQueryReq = {
+      sortWay: searchForm.value.sortWay,
       spaceId: searchForm.value.spaceId,
       tagName: searchForm.value.tagName,
       commandType: searchForm.value.commandType,
@@ -135,6 +151,7 @@ export function jobListQueryApi() {
       current: pagination.value.current,
       pageSize: pagination.value.pageSize,
     };
+
     const response = await drawTaskList(params);
     setTimerIfNecessary(response);
     cards.value = response.records;
@@ -170,7 +187,7 @@ export function jobListQueryApi() {
     searchForm.value.tagName = null;
     searchForm.value.state = null;
     searchForm.value.commandType = null;
-    searchForm.value.spaceId = null;
+    searchForm.value.sortWay = null;
   };
 
   //查询
@@ -181,6 +198,7 @@ export function jobListQueryApi() {
     pagination.value.current = current;
     loadingRef.value = true;
     const params: DrawTaskListQueryReq = {
+      sortWay: searchForm.value.sortWay,
       tagName: searchForm.value.tagName,
       commandType: searchForm.value.commandType,
       spaceId: searchForm.value.spaceId,
@@ -189,13 +207,14 @@ export function jobListQueryApi() {
       current: pagination.value.current,
       pageSize: pagination.value.pageSize,
     };
-
-    const response = await drawTaskList(params);
-    setTimerIfNecessary(response);
-    cards.value = response.records;
-    pagination.value.total = response.total;
-    loadingRef.value = false;
-    console.log(111111111111);
+    try {
+      const response = await drawTaskList(params);
+      setTimerIfNecessary(response);
+      cards.value = response.records;
+      pagination.value.total = response.total;
+    } finally {
+      loadingRef.value = false;
+    }
   };
 
   /***********************************明细*************************** */
@@ -845,7 +864,17 @@ export function userSettingApi() {
     useUpImage: false,
     usePersonNet: false,
     taskRefresh: false,
+    cardShow: 'MULTI',
   });
+
+  const setCardShow = (): void => {
+    if (userSetting.value.cardShow === 'MULTI') {
+      userSetting.value.cardShow = 'SINGLE';
+    } else {
+      userSetting.value.cardShow = 'MULTI';
+    }
+  };
+
   const setUseUpImage = (): void => {
     userSetting.value.useUpImage = !userSetting.value.useUpImage;
   };
@@ -862,6 +891,7 @@ export function userSettingApi() {
     setUseUpImage,
     setUsePersonNet,
     setTaskRefresh,
+    setCardShow,
   };
   userSettingApiInstance = api;
   return api;

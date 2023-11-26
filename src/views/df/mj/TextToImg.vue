@@ -127,7 +127,7 @@
         <template #title>
           <div class="ar-card2-title">
             <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
-              >添加标签
+              ><Icon icon="streamline-emojis:blossom" /> 添加标签
               <a-tooltip
                 title="用于对批次任务的标记，方便管理图片。多个标签'空格'隔开,最多5个标签。每个标签长度不超过16个字。~"
               >
@@ -1022,7 +1022,12 @@
     </div>
 
     <div>
-      <a-button class="bottom-button" ref="button" type="primary" @click="onSubmit"
+      <a-button
+        class="bottom-button"
+        :loading="textFormLoading"
+        ref="button"
+        type="primary"
+        @click="onSubmit"
         >提交绘画任务</a-button
       >
     </div>
@@ -1034,7 +1039,7 @@
     <!--翻译弹窗-->
     <div>
       <a-modal
-        v-model:visible="modelData.isOpenTranslate"
+        v-model:open="modelData.isOpenTranslate"
         title="内容翻译"
         width="90%"
         @cancel="cancelModal('translate')"
@@ -1107,7 +1112,7 @@
     <!-- prompt弹窗-->
     <div>
       <a-modal
-        v-model:visible="modelData.isOpenAiPrompt"
+        v-model:open="modelData.isOpenAiPrompt"
         title="Chatgpt生成Prompt"
         :style="{ top: modelData.aiOutputText ? '50px' : '200px' }"
         :width="modelData.aiOutputText ? '70%' : ''"
@@ -1393,6 +1398,7 @@
   const emit = defineEmits(['startLoading', 'endLoading']);
 
   const { createMessage } = useMessage();
+  const textFormLoading = ref(false);
   const textToImgForm = reactive({
     command: null,
     commandEN: null,
@@ -1442,6 +1448,7 @@
     command: [{ required: true, message: '请输入绘图指令', trigger: 'blur' }],
   };
 
+  //提交任务
   const onSubmit = () => {
     console.log(textToImgForm);
     if (
@@ -1477,10 +1484,22 @@
             enableTranslate: textToImgForm.enableTranslate,
           },
         };
-        emit('startLoading');
-        await addDrawTask(addTaskParam);
-        emit('endLoading');
-        createMessage.success('任务已添加~~~');
+
+        textFormLoading.value = true;
+        const key = 'submitTask';
+        message.loading({ content: '正在提交任务...', key, duration: 0 });
+        try {
+          await addDrawTask(addTaskParam);
+          message.success({ content: '任务提交成功!', key, duration: 2 });
+          emit('startLoading');
+        } catch (error) {
+          console.log(error);
+          message.error({ content: '任务提交失败!', key, duration: 2 });
+        } finally {
+          textFormLoading.value = false;
+          // emit('endLoading');
+        }
+        // createMessage.success('任务已添加~~~');
 
         //待处理触发右侧列表刷新
         console.log(textToImgForm);

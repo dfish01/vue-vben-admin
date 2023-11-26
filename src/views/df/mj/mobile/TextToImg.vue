@@ -112,7 +112,7 @@
         <template #title>
           <div class="ar-card2-title">
             <span style="font-weight: bold" class="quality-tag"
-              >添加标签
+              ><Icon icon="streamline-emojis:blossom" />添加标签
               <a-tooltip
                 title="用于对批次任务的标记，方便管理图片。多个标签'空格'隔开,最多5个标签。每个标签长度不超过16个字。~"
               >
@@ -1115,7 +1115,7 @@
     <!--翻译弹窗-->
     <div>
       <a-modal
-        v-model:visible="modelData.isOpenTranslate"
+        v-model:open="modelData.isOpenTranslate"
         title="内容翻译"
         width="100%"
         wrap-class-name="full-modal"
@@ -1186,7 +1186,7 @@
     <!-- prompt弹窗-->
     <div>
       <a-modal
-        v-model:visible="modelData.isOpenAiPrompt"
+        v-model:open="modelData.isOpenAiPrompt"
         title="Chatgpt生成Prompt"
         width="100%"
         wrap-class-name="full-modal"

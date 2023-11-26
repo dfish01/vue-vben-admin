@@ -18,6 +18,26 @@ enum Api {
 
   AddSpaceTask = '/open/userSpace/addSpaceTask',
   RemoveSpaceTask = '/open/userSpace/removeSpaceTask',
+
+  GenCode = '/open/userSpace/genCode',
+}
+
+/**
+ * 生成导入编码
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function genCode(params: IdReq, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<string>(
+    {
+      url: Api.GenCode,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
 }
 
 export function channelList(params: IdReq, mode: ErrorMessageMode = 'message') {

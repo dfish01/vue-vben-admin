@@ -28,6 +28,7 @@ enum Api {
   DisabledAccount = '/open/accountDiscord/disabledAccount',
   SetDefault = '/open/accountDiscord/setDefault',
   GetGroupAccounts = '/open/accountDiscord/getGroupAccounts',
+  GetGroupDiscords = '/open/accountDiscord/getGroupDiscords',
 
   QueryGroupList = '/open/discordGroup/listGroup',
   AddToGroup = '/open/discordGroup/addToGroup',
@@ -52,6 +53,25 @@ export function queryList(params: ListQueryParams, mode: ErrorMessageMode = 'mes
     },
   );
 }
+
+/**
+ * 获取账户下面的discord列表
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function getGroupDiscords(params: IdReq, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<any[]>(
+    {
+      url: Api.GetGroupDiscords,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
+}
+
 /**
  * 可用账户列表
  * @param params

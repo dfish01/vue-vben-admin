@@ -177,12 +177,16 @@
                       >
                     </a-popconfirm>
                     <a-button
-                      type="primary"
+                      type="warning"
                       @click="addUserSpace(record)"
                       v-if="record.defaultFlag === 'N'"
                       >编辑</a-button
                     >
+
                     <a-button @click="selectSpace(record)">选择</a-button>
+                    <a-button type="primary" @click="doGenCode(record, 'topRight')"
+                      >生成编码</a-button
+                    >
                   </a-button-group>
                 </template>
               </a-table-column>
@@ -246,11 +250,13 @@
     <div>
       <a-modal
         v-model:visible="importForm.viewFlag"
-        title="🔥导入Discord数据"
         :confirmLoading="importForm.loading"
         @ok="importDiscordMessage()"
       >
-        <a-spin :spinning="importForm.loading">
+        <template #title>
+          <span> <Icon icon="streamline-emojis:fire" size="20" /> 导入Discord数据 </span>
+        </template>
+        <a-spin :spinning="importForm.loading" tip="正在处理...">
           <a-card
             :bordered="false"
             :bodyStyle="{
@@ -262,15 +268,37 @@
           >
             <a-row style="padding: 15px">
               <a-col span="24">
-                <span style="font-size: 10"
-                  >📌
-                  只能选自有的DISCORD账号！如果channel没找到的话，请去账户管理同步Discord更新下！并刷新当前页面！</span
+                <Icon icon="streamline-emojis:beaming-face-with-smiling-eyes" size="22" />
+                <span style="font-size: 13px">
+                  导入权限控制在<b>主账号</b>这边!
+                  授权账号需要导入的话，需生成<b>授权空间码</b>给主账号进行导入。如果channel没找到的话，请去账户管理同步Discord更新下！并刷新当前页面！</span
                 >
               </a-col>
             </a-row>
             <a-row :gutter="[0, 2]" type="flex">
+              <a-segmented
+                v-model:value="importForm.importMode"
+                @change="changeImportMode()"
+                :options="importForm.modeOptions"
+              >
+                <template #label="{ payload }">
+                  <div style="padding: 4px">
+                    <div>{{ payload.title }}</div>
+                  </div>
+                </template>
+              </a-segmented>
+            </a-row>
+
+            <a-row
+              :gutter="[0, 2]"
+              type="flex"
+              style="margin-top: 7px"
+              v-if="importForm.importMode === 'owner'"
+            >
               <a-col flex="120px">
-                <a-tag class="quality-tag" color="default">🍺导入空间 </a-tag>
+                <a-tag class="quality-tag" color="default"
+                  ><Icon icon="streamline-emojis:ant" size="22" />导入空间
+                </a-tag>
               </a-col>
               <a-col flex="auto">
                 <a-select
@@ -281,22 +309,41 @@
                 />
               </a-col>
             </a-row>
-            <!-- <a-row :gutter="[0, 2]" type="flex" style="margin-top: 7px">
-              <a-col flex="80px">
-                <a-tag class="quality-tag" color="default">🍋执行账号 </a-tag>
+
+            <a-row :gutter="[0, 2]" type="flex" style="margin-top: 7px" v-else>
+              <a-col flex="120px">
+                <a-tag class="quality-tag" color="default"
+                  ><Icon icon="streamline-emojis:anchor" size="22" />空间编码
+                </a-tag>
+              </a-col>
+
+              <a-col flex="auto">
+                <a-input v-model:value="importForm.spaceCode" placeholder="导入的空间编码" />
+              </a-col>
+            </a-row>
+            <a-divider style="margin: 10px 0" />
+
+            <a-row :gutter="[0, 2]" type="flex" style="margin-top: 7px">
+              <a-col flex="120px">
+                <a-tag class="quality-tag" color="default"
+                  ><Icon icon="streamline-emojis:beer-mug" size="22" />执行账户
+                </a-tag>
               </a-col>
               <a-col flex="auto">
                 <a-select
-                  @change="handleSelectAccount"
+                  @change="onSelectAccount"
                   style="width: 100%; height: 32px"
                   v-model:value="importForm.accountId"
                   :options="importForm.accountOptions"
+                  placeholder="请选择账户组"
                 />
               </a-col>
-            </a-row> -->
+            </a-row>
             <a-row :gutter="[0, 2]" type="flex" style="margin-top: 7px">
               <a-col flex="120px">
-                <a-tag class="quality-tag" color="default">🍋Discord账号 </a-tag>
+                <a-tag class="quality-tag" color="default"
+                  ><Icon icon="streamline-emojis:hot-beverage-2" size="22" />Discord账号
+                </a-tag>
               </a-col>
               <a-col flex="auto">
                 <a-select
@@ -310,7 +357,9 @@
             </a-row>
             <a-row :gutter="[0, 2]" type="flex" style="margin-top: 7px">
               <a-col flex="120px">
-                <a-tag class="quality-tag" color="default">🍵同步服务器 </a-tag>
+                <a-tag class="quality-tag" color="default"
+                  ><Icon icon="streamline-emojis:snail" size="22" />同步服务器
+                </a-tag>
               </a-col>
               <a-col flex="auto">
                 <a-select
@@ -324,7 +373,9 @@
             </a-row>
             <a-row :gutter="[0, 2]" type="flex" style="margin-top: 7px">
               <a-col flex="120px">
-                <a-tag class="quality-tag" color="default">🍥同步频道 </a-tag>
+                <a-tag class="quality-tag" color="default"
+                  ><Icon icon="streamline-emojis:rooster" size="22" />同步频道
+                </a-tag>
               </a-col>
               <a-col flex="auto">
                 <a-select
@@ -350,17 +401,27 @@
   import TextToImage from './TextToImg.vue';
   import Describe from './Describe.vue';
   import {
+    RadiusUpleftOutlined,
+    RadiusUprightOutlined,
+    RadiusBottomleftOutlined,
+    RadiusBottomrightOutlined,
+    BorderTopOutlined,
+    BorderBottomOutlined,
     RightOutlined,
     LeftOutlined,
     SettingOutlined,
     ClusterOutlined,
   } from '@ant-design/icons-vue';
+  import { notification } from 'ant-design-vue';
+  import { downloadImage, copyText } from './tools';
+  import type { NotificationPlacement } from 'ant-design-vue';
   import {
     saveUserSpace,
     deleteSpace,
     allUserSpace,
     importMessage,
     channelList,
+    genCode,
   } from '/@/api/df/workSpace';
 
   import {
@@ -382,7 +443,9 @@
     showImportView,
     onSelectDiscordUser,
     onSelectGuild,
+    onSelectAccount,
     queryDiscordList,
+    queryAccountList,
   } = discordApi();
   const userStore = useUserStore();
 
@@ -409,7 +472,10 @@
   });
 
   const startLoadingHandler = () => {
-    loadingRef.value = true;
+    // loadingRef.value = true;
+    if (jobListRef.value) {
+      jobListRef.value.onSearch();
+    }
   };
 
   const endLoadingHandler = () => {
@@ -425,12 +491,24 @@
 
   //===================================== 导入discod记录 ================================
   onMounted(async () => {
-    await queryDiscordList();
+    await queryAccountList();
   });
 
+  const changeImportMode = () => {
+    importForm.value.spaceId = null;
+  };
+
   const importDiscordMessage = async () => {
-    if (importForm.value.spaceId === '') {
+    if (importForm.value.importMode === 'other' && importForm.value.spaceCode === '') {
+      createMessage.error('请输入空间编码！');
+      return;
+    }
+    if (importForm.value.importMode === 'owner' && importForm.value.spaceId === '') {
       createMessage.error('请选择导入空间！');
+      return;
+    }
+    if (importForm.value.spaceId === '') {
+      createMessage.error('请选择导入账户！');
       return;
     }
     if (importForm.value.discordUserId === '') {
@@ -446,11 +524,13 @@
       return;
     }
     importForm.value.loading = true;
-    console.log('---------------------------------');
     try {
       await importMessage({
-        accountId: importForm.value.accountId,
+        importMode: importForm.value.importMode,
+        spaceCode: importForm.value.spaceCode,
         spaceId: importForm.value.spaceId,
+        accountId: importForm.value.accountId,
+
         discordUserId: importForm.value.discordUserId,
         guildId: importForm.value.guildId,
         channelId: importForm.value.channelId,
@@ -468,6 +548,17 @@
     loading: false,
     tip: '加载中...',
   });
+
+  //显示工作空间
+  const doGenCode = async (record, placement: NotificationPlacement) => {
+    const result = await genCode({ id: record.id });
+    copyText(result);
+    notification.open({
+      message: '【' + result + '】空间码生成成功！已复制到剪切板~',
+      description: '导入的空间编码在5分钟内有效，请及时使用~',
+      placement,
+    });
+  };
 
   const isShowWorkSpace = ref(false);
   const isShowUserSpaceSave = ref(false);

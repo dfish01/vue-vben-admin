@@ -957,7 +957,7 @@
 
     <!-- remix弹窗-->
     <div>
-      <a-modal v-model:visible="remix.view" :title="remix.title" @ok="doZoomCus()">
+      <a-modal v-model:open="remix.view" :title="remix.title" @ok="doZoomCus()">
         <a-spin :spinning="remix.loading">
           <a-row style="padding: 15px">
             <a-col span="24">
@@ -980,7 +980,7 @@
     <!-- 标签弹窗  -->
     <div>
       <a-modal
-        v-model:visible="drawTagForm.viewFlag"
+        v-model:open="drawTagForm.viewFlag"
         title="🔥添加标签"
         @ok="addDrawTaskTag()"
         :loading="drawTagForm.loading"
@@ -1010,7 +1010,7 @@
     <!-- 添加到其他空间  -->
     <div>
       <a-modal
-        v-model:visible="userSpaceTaskForm.viewFlag"
+        v-model:open="userSpaceTaskForm.viewFlag"
         title="🎈添加到其他空间"
         ok-text="立即执行"
         @ok="addSpaceCard"
@@ -1046,13 +1046,13 @@
       </a-modal>
     </div>
 
-    <a-modal v-model:visible="isModalVisible" width="80%">
+    <a-modal v-model:open="isModalVisible" width="80%">
       <template #title> 图片查看 </template>
       <img :src="currentImage" style="width: 100%; height: auto" />
     </a-modal>
 
     <a-modal
-      v-model:visible="varyRegionForm.viewFlag"
+      v-model:open="varyRegionForm.viewFlag"
       title="🎨Midjourney局部变化"
       style="top: 20px; width: 100%; height: auto"
       :bodyStyle="{ padding: '0', width: '100%', 'align-items': 'center' }"
@@ -1067,7 +1067,7 @@
 
     <!-- 条件查询 -->
     <a-modal
-      v-model:visible="showQueryViewFlag"
+      v-model:open="showQueryViewFlag"
       width="100%"
       title="🔍️条件查询"
       :bodyStyle="{ padding: '7px 12px 7px 12px', width: '100%', 'align-items': 'center' }"
@@ -1129,7 +1129,7 @@
     </a-modal>
     <!-- 案例添加 -->
     <a-modal
-      v-model:visible="showExampleViewFlag"
+      v-model:open="showExampleViewFlag"
       width="100%"
       title="🧉添加到官方案例"
       :bodyStyle="{ padding: '7px 12px 7px 12px', width: '100%', 'align-items': 'center' }"
@@ -1283,7 +1283,8 @@
     onChangeSearchLabel,
   } = jobTagApi();
 
-  const { userSetting, setUseUpImage, setUsePersonNet, setTaskRefresh } = userSettingApi();
+  const { userSetting, setCardShow, setUseUpImage, setUsePersonNet, setTaskRefresh } =
+    userSettingApi();
 
   const {
     lightBoxOptions,

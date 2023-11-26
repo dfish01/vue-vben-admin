@@ -38,84 +38,148 @@
             重置
           </a-button>
         </a-button-group>
-        <a-dropdown :trigger="['click']">
-          <a-button type="warning">
-            配置
-            <Icon
-              icon="icon-park-solid:setting-computer"
-              class="vel-icon icon"
-              aria-hidden="true"
-            />
-          </a-button>
-          <template #overlay>
-            <a-menu>
-              <a-menu-item key="3" class="delete">
-                <a-popconfirm
-                  title="请确认相关账号的remix状态，这里只是控制弹窗而已（暂时未接入实时控制Remix）。如果remix状态不匹配，会导致任务失败!"
-                  :ok-text="remix.enable_flag ? '关闭Remix' : '开启Remix'"
-                  cancel-text="取消"
-                  @confirm="changeRemix()"
-                >
-                  📝{{ remix.enable_flag ? '关闭Remix' : '开启Remix' }}
-                </a-popconfirm>
-              </a-menu-item>
-              <a-menu-item key="5">
-                <a-popconfirm
-                  title="⚠️以卡片的方式进行预览，建议配合原图模式。"
-                  ok-text="立即预览"
-                  cancel-text="取消"
-                  @confirm="showAllImage(false)"
-                >
-                  📺全量清晰预览
-                </a-popconfirm>
-              </a-menu-item>
-              <a-menu-item key="5">
-                <a-popconfirm
-                  title="⚠️以卡片的方式进行预览，建议配合原图模式。"
-                  ok-text="立即预览"
-                  cancel-text="取消"
-                  @confirm="showAllImage(true)"
-                >
-                  📺全量高清预览
-                </a-popconfirm>
-              </a-menu-item>
-              <a-menu-item key="5" disabled>
-                <a-popconfirm
-                  title="⚠️要切割当前页所有4格图，页面会加载很久。"
-                  ok-text="确定切割"
-                  cancel-text="取消"
-                  @confirm="() => {}"
-                  disabled
-                >
-                  ⚠️✂️全量切割
-                </a-popconfirm>
-              </a-menu-item>
+        <a-button-group>
+          <a-dropdown :trigger="['click']">
+            <a-button type="primary" danger>
+              <Icon
+                icon="material-symbols:contract-delete-outline-rounded"
+                class="vel-icon icon"
+                aria-hidden="true"
+              />
+              删除
+            </a-button>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item key="1">
+                  <a-popconfirm
+                    title="将永久删除该空间下的全部排队记录，是否确认删除?"
+                    ok-text="确认删除"
+                    cancel-text="取消"
+                    @confirm="deleteBatchHandle('QUEUED')"
+                  >
+                    <a>❌排队</a>
+                  </a-popconfirm>
+                </a-menu-item>
 
-              <a-menu-divider />
-              <a-menu-item key="4">
-                <a-popconfirm
-                  title="该选项默认暂时未作存储，默认关闭状态，刷新就失效了！分割图场景适用~"
-                  :ok-text="userSetting.useUpImage ? '确认关闭' : '确认开启'"
-                  cancel-text="取消"
-                  @confirm="setUseUpImage()"
-                >
-                  🍝{{ userSetting.useUpImage ? '开启缩略图' : '开启原图' }}
-                </a-popconfirm>
-              </a-menu-item>
+                <a-menu-item key="2">
+                  <a-popconfirm
+                    title="将永久删除该空间下的全部失败记录，是否确认删除?"
+                    ok-text="确认删除"
+                    cancel-text="取消"
+                    @confirm="deleteBatchHandle('FAILED')"
+                  >
+                    <a>❌失败</a>
+                  </a-popconfirm>
+                </a-menu-item>
+              </a-menu>
+            </template>
+          </a-dropdown>
+          <a-dropdown :trigger="['click']">
+            <a-button type="warning">
+              <Icon
+                icon="icon-park-solid:setting-computer"
+                class="vel-icon icon"
+                aria-hidden="true"
+              />配置
+            </a-button>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item key="1" class="delete">
+                  <a-popconfirm
+                    title="请确认相关账号的remix状态，这里只是控制弹窗而已（暂时未接入实时控制Remix）。如果remix状态不匹配，会导致任务失败!"
+                    :ok-text="remix.enable_flag ? '关闭Remix' : '开启Remix'"
+                    cancel-text="取消"
+                    @confirm="changeRemix()"
+                  >
+                    📝{{ remix.enable_flag ? '关闭Remix' : '开启Remix' }}
+                  </a-popconfirm>
+                </a-menu-item>
 
-              <a-menu-item key="5" disabled>
-                <a-popconfirm
-                  title="我的网速无懈可击！！！"
-                  :ok-text="userSetting.usePersonNet ? '还是加速吧' : '就是要原连接'"
-                  cancel-text="取消"
-                  @confirm="setUsePersonNet()"
-                >
-                  🏄{{ userSetting.usePersonNet ? '加速连接' : '使用原连接' }}
-                </a-popconfirm>
-              </a-menu-item>
-            </a-menu>
-          </template>
-        </a-dropdown>
+                <a-menu-item key="2">
+                  <a-popconfirm
+                    title="提交任务自动刷新！！！"
+                    :ok-text="userSetting.taskRefresh ? '关闭刷新' : '开启刷新'"
+                    cancel-text="取消"
+                    @confirm="setTaskRefresh()"
+                  >
+                    💫{{ userSetting.taskRefresh ? '关闭刷新' : '开启刷新' }}
+                  </a-popconfirm>
+                </a-menu-item>
+                <a-menu-divider />
+                <a-menu-item key="11">
+                  <a-popconfirm
+                    :title="
+                      userSetting.cardShow === 'SINGLE'
+                        ? '开启后，列表显示4图，点击可放大。明细页在右键列表~'
+                        : '开启后，列表显示单图，点击出现明细页~'
+                    "
+                    :ok-text="userSetting.cardShow === 'SINGLE' ? '立即开启' : '立即开启'"
+                    cancel-text="取消"
+                    @confirm="setCardShow()"
+                  >
+                    ✨{{ userSetting.cardShow === 'SINGLE' ? '列表4图模式' : '列表单图模式' }}
+                  </a-popconfirm>
+                </a-menu-item>
+                <a-menu-item key="3">
+                  <a-popconfirm
+                    title="⚠️以卡片的方式进行预览，建议配合原图模式。"
+                    ok-text="立即预览"
+                    cancel-text="取消"
+                    @confirm="showAllImage(true)"
+                  >
+                    📺全量高清预览
+                  </a-popconfirm>
+                </a-menu-item>
+                <a-menu-divider />
+                <a-menu-item key="4" disabled>
+                  <a-popconfirm
+                    title="⚠️以卡片的方式进行预览，建议配合原图模式。"
+                    ok-text="立即预览"
+                    cancel-text="取消"
+                    @confirm="showAllImage(false)"
+                  >
+                    📺全量清晰预览
+                  </a-popconfirm>
+                </a-menu-item>
+                <a-menu-item key="5" disabled>
+                  <a-popconfirm
+                    title="⚠️要切割当前页所有4格图，页面会加载很久。"
+                    ok-text="确定切割"
+                    cancel-text="取消"
+                    @confirm="() => {}"
+                    disabled
+                  >
+                    ⚠️✂️全量切割
+                  </a-popconfirm>
+                </a-menu-item>
+
+                <a-menu-divider />
+                <a-menu-item key="6" disabled>
+                  <a-popconfirm
+                    title="该选项默认暂时未作存储，默认关闭状态，刷新就失效了！分割图场景适用~"
+                    :ok-text="userSetting.useUpImage ? '确认关闭' : '确认开启'"
+                    cancel-text="取消"
+                    @confirm="setUseUpImage()"
+                  >
+                    <!-- 🍝{{ userSetting.useUpImage ? '开启缩略图' : '开启原图' }} -->
+                    🍝开启缩略图
+                  </a-popconfirm>
+                </a-menu-item>
+
+                <a-menu-item key="7" disabled>
+                  <a-popconfirm
+                    title="我的网速无懈可击！！！"
+                    :ok-text="userSetting.usePersonNet ? '还是加速吧' : '就是要原连接'"
+                    cancel-text="取消"
+                    @confirm="setUsePersonNet()"
+                  >
+                    🏄{{ userSetting.usePersonNet ? '加速连接' : '使用原连接' }}
+                  </a-popconfirm>
+                </a-menu-item>
+              </a-menu>
+            </template>
+          </a-dropdown>
+        </a-button-group>
       </a-space>
     </a-card>
 
@@ -132,7 +196,7 @@
       :style="{ height: `calc(${contentHeight}px - 40px)`, overflow: 'auto' }"
     >
       <a-dropdown v-for="card in cards" :key="card.id" :trigger="['contextmenu']">
-        <a-card :bodyStyle="{ padding: '0px' }" class="card" hoverable>
+        <a-card :bodyStyle="{ padding: '0px' }" class="card" :hoverable="false">
           <div v-if="card.state === 'QUEUED'" class="mask-queued label-front">
             <div
               style="
@@ -181,18 +245,81 @@
             </div>
           </div>
           <div v-if="card.state === 'SUCCESS'">
-            <img
-              @click="showImage(card)"
-              v-lazy.container="
-                userSetting.useUpImage ? card.taskImage.imageUrl : card.taskImage.mediaImageUrl
-              "
-              class="card-image img-box"
-              :preview="{
-                src: card.taskImage.imageUrl,
-              }"
-              fallback=""
-              alt=""
-            />
+            <div v-if="userSetting.cardShow === 'MULTI'">
+              <a-card
+                :bodyStyle="{ padding: '0px' }"
+                class="my-transparent-card"
+                style="width: 100%; border: none; background: transparent"
+                v-if="card.taskImage.infoImageList.length > 1"
+                :bordered="false"
+                :hoverable="false"
+              >
+                <a-card-grid
+                  v-for="infoImage in card.taskImage.infoImageList"
+                  :key="infoImage.url"
+                  style="
+                    width: 49%;
+                    margin: 1px;
+                    padding: 0;
+                    border-radius: 15px;
+                    text-align: center;
+                  "
+                >
+                  <img
+                    @click="showInfoImage(getImageList(card), infoImage.url)"
+                    v-lazy.container="infoImage.mediaUrl"
+                    class="card-image img-box"
+                    :src="infoImage.mediaUrl"
+                    style="max-width: 100%; border-radius: 15px"
+                    alt=""
+                  />
+                </a-card-grid>
+              </a-card>
+              <a-card
+                :bodyStyle="{ padding: '0px' }"
+                style="width: 100%"
+                :bordered="false"
+                :hoverable="false"
+                class="my-transparent-card"
+                v-else
+                ><a-card-grid
+                  v-for="infoImage in card.taskImage.infoImageList"
+                  :key="infoImage.url"
+                  style="width: 100%; padding: 0; border-radius: 15px; text-align: center"
+                >
+                  <img
+                    @click="showInfoImage(getImageList(card), infoImage.url)"
+                    v-lazy.container="infoImage.mediaUrl"
+                    class="card-image img-box"
+                    :src="infoImage.mediaUrl"
+                    style="max-width: 100%; border-radius: 15px"
+                    alt=""
+                  />
+                </a-card-grid>
+              </a-card>
+            </div>
+            <div v-else>
+              <a-card
+                :bodyStyle="{ padding: '0px' }"
+                class="my-transparent-card"
+                style="width: 100%; border: none; background: transparent"
+                :bordered="false"
+                :hoverable="false"
+              >
+                <img
+                  @click="showTaskInfo(card)"
+                  v-lazy.container="
+                    userSetting.useUpImage ? card.taskImage.imageUrl : card.taskImage.mediaImageUrl
+                  "
+                  class="card-image img-box"
+                  :preview="{
+                    src: card.taskImage.imageUrl,
+                  }"
+                  fallback=""
+                  alt=""
+                />
+              </a-card>
+            </div>
           </div>
           <div
             v-if="card.state != 'SUCCESS'"
@@ -575,15 +702,43 @@
 
         <template #overlay>
           <a-menu>
-            <a-menu-item key="1" @click="splitAndDownloadImage(card)" disabled
-              >✂️切4份下载</a-menu-item
+            <a-menu-item
+              key="1"
+              v-if="userSetting.cardShow === 'MULTI' && card.state === 'SUCCESS'"
+              @click="() => showTaskInfo(card)"
+              ><Icon icon="streamline-emojis:television" /> 任务明细</a-menu-item
             >
-            <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)">📛添加标签</a-menu-item>
-            <a-menu-item key="3" @click="() => copyText(card.messageHash)"
-              >🆔复制任务ID</a-menu-item
+            <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)"
+              ><Icon icon="streamline-emojis:blossom" /> 添加标签</a-menu-item
             >
-            <a-menu-item key="4" @click="() => copyText(card.prompt)">🐣复制Prompt</a-menu-item>
-            <!-- <a-menu-item key="3" disabled>移除标签</a-menu-item> -->
+            <a-menu-item key="3" @click="() => showSampleView(card)"
+              ><Icon icon="streamline-emojis:globe-showing-europe-africa" />
+              添加到官方案例</a-menu-item
+            >
+            <a-menu-item key="4" @click="() => copyText(card.messageHash)"
+              ><Icon icon="fluent-emoji-flat:id-button" color="grey" /> 复制任务ID</a-menu-item
+            >
+
+            <a-menu-item key="5" @click="() => copyText(card.prompt)"
+              ><Icon icon="streamline-emojis:baseball" color="grey" /> 复制Prompt</a-menu-item
+            >
+            <a-menu-item key="6" @click="showUserSpaceTask(card)"
+              ><Icon icon="streamline-emojis:helicopter" /> 添加到其他空间</a-menu-item
+            >
+            <a-popconfirm
+              title="该操作将永久删除任务，是否确认删除?"
+              ok-text="确认删除"
+              cancel-text="取消"
+              @confirm="deleteCard(card)"
+            >
+              <a-menu-item key="7" @click="deleteSpaceCard(card, spaceId)">
+                <Icon icon="streamline-emojis:recycling-symbol" color="red" />
+                从该空间移除</a-menu-item
+              >
+            </a-popconfirm>
+            <a-menu-item key="8" @click="() => getSeed(card.id, false)"
+              ><Icon icon="streamline-emojis:rocket" /> 获取Seed</a-menu-item
+            >
           </a-menu>
         </template>
       </a-dropdown>
@@ -851,7 +1006,7 @@
     <!-- remix弹窗-->
     <div>
       <a-modal
-        v-model:visible="remix.view"
+        v-model:open="remix.view"
         :title="remix.title"
         @ok="doZoomCus()"
         :loading="remix.loading"
@@ -878,11 +1033,11 @@
     <!-- 标签弹窗  -->
     <div>
       <a-modal
-        v-model:visible="drawTagForm.viewFlag"
-        title="🔥添加标签"
+        v-model:open="drawTagForm.viewFlag"
         @ok="addDrawTaskTag()"
         :loading="drawTagForm.loading"
       >
+        <template #title> <Icon icon="streamline-emojis:blossom" />添加标签 </template>
         <a-spin :spinning="drawTagForm.loading">
           <a-row style="padding: 15px">
             <a-col span="24">
@@ -906,11 +1061,7 @@
     </div>
 
     <!-- 查看明细  -->
-    <a-modal
-      title="任务概况"
-      v-model:visible="infoData.viewFlag"
-      style="top: 10px; min-width: 720px"
-    >
+    <a-modal title="任务概况" v-model:open="infoData.viewFlag" style="top: 10px; min-width: 720px">
       <template #footer>
         <a-button key="submit" type="primary" :loading="loadingRef" @click="closeTaskInfo"
           >已知晓</a-button
@@ -927,6 +1078,7 @@
             <a-card
               :bodyStyle="{ padding: '0px' }"
               style="width: 100%"
+              class="my-transparent-card"
               v-if="infoData.taskInfo.imageUrls.length > 1"
               :bordered="false"
               :hoverable="false"
@@ -937,7 +1089,7 @@
                 style="width: 49%; margin: 1px; padding: 0; border-radius: 15px; text-align: center"
               >
                 <img
-                  @click="showInfoImage(url)"
+                  @click="showInfoImage(infoData.taskInfo.imageUrls, url)"
                   v-lazy.container="url"
                   class="card-image img-box"
                   :src="url"
@@ -959,7 +1111,7 @@
                 style="width: 100%; padding: 0; border-radius: 15px; text-align: center"
               >
                 <img
-                  @click="showTaskInfo(card)"
+                  @click="showInfoImage(infoData.taskInfo.imageUrls, url)"
                   v-lazy.container="url"
                   class="card-image img-box"
                   :src="url"
@@ -969,7 +1121,9 @@
               </a-card-grid>
             </a-card>
             <a-flex :style="{ width: '100%' }" justify="center" align="center">
-              <span style="font-size: 12px"> 📢获取seed后显示4格图,点击图片可查看大图！！！</span>
+              <span style="font-size: 12px">
+                📢每张图片都是放大后的图片。点击图片可查看大图！！！</span
+              >
               <a-button @click="handleDownloadByUrls(infoData.taskInfo.imageUrls)" size="small">
                 <Icon icon="bx:bxs-cloud-download" class="vel-icon icon" aria-hidden="true" />
                 下载图片
@@ -977,20 +1131,7 @@
             </a-flex>
           </div>
         </a-card-grid>
-        <!-- <a-card-grid style="width: 100%; text-align: center" :hoverable="false" :bordered="false">
-          <a-row>
-            <a-col :span="24">
-              <a-button @click="showDrawTaskTagModel(infoData.card)" style="width: 33%"
-                >📛添加标签
-              </a-button>
-              <a-button @click="showUserSpaceTask(infoData.card)" style="width: 33%"
-                >♻添加到其他空间
-              </a-button>
 
-              <a-button @click="getSeed(infoData.id)" style="width: 33%">🆔获取Seed </a-button>
-            </a-col>
-          </a-row>
-        </a-card-grid> -->
         <a-card-grid style="width: 100%; text-align: center" :hoverable="false">
           <a-descriptions bordered size="small" :column="2">
             <a-descriptions-item label="👨执行账户">{{
@@ -1055,10 +1196,12 @@
             <a-descriptions-item :span="2">
               <template #label>
                 <div style="display: flex; flex-direction: row; justify-content: space-between">
-                  <div>🦎任务空间 </div
-                  ><a-button size="small" @click="showUserSpaceTask(infoData.card)"
-                    >♻添加空间</a-button
-                  >
+                  <div>
+                    <a-span> <Icon icon="streamline-emojis:office-building" />任务空间 </a-span>
+                  </div>
+                  <a-button size="small" @click="showUserSpaceTask(infoData.card)">
+                    <a-span> <Icon icon="streamline-emojis:palm-tree" />添加空间 </a-span>
+                  </a-button>
                 </div>
               </template>
               <a-tag
@@ -1078,10 +1221,10 @@
             <a-descriptions-item :span="2" v-if="infoData.tagList && infoData.tagList.length > 0">
               <template #label>
                 <div style="display: flex; flex-direction: row; justify-content: space-between">
-                  <div>🐍任务标签 </div
-                  ><a-button size="small" @click="showDrawTaskTagModel(infoData.card)"
-                    >📛添加标签</a-button
-                  >
+                  <div><Icon icon="streamline-emojis:blossom" />任务标签 </div>
+                  <a-button size="small" @click="showDrawTaskTagModel(infoData.card)">
+                    <a-span> <Icon icon="streamline-emojis:palm-tree" />添加标签 </a-span>
+                  </a-button>
                 </div>
               </template>
               <a-tag
@@ -1097,10 +1240,10 @@
             <a-descriptions-item :span="2" v-else>
               <template #label>
                 <div style="display: flex; flex-direction: row; justify-content: space-between">
-                  <div>🐍任务标签 </div
-                  ><a-button size="small" @click="showDrawTaskTagModel(infoData.card)"
-                    >📛添加标签</a-button
-                  >
+                  <div><Icon icon="streamline-emojis:blossom" />任务标签 </div>
+                  <a-button size="small" @click="showDrawTaskTagModel(infoData.card)">
+                    <a-span> <Icon icon="streamline-emojis:palm-tree" />添加标签 </a-span>
+                  </a-button>
                 </div>
               </template>
               <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" />
@@ -1126,7 +1269,7 @@
     </a-modal>
 
     <a-modal
-      v-model:visible="varyRegionForm.viewFlag"
+      v-model:open="varyRegionForm.viewFlag"
       title="🎨Midjourney局部变化"
       style="top: 20px; width: 75%; height: auto"
     >
@@ -1145,6 +1288,7 @@
   import 'vue-easy-lightbox/external-css/vue-easy-lightbox.css';
   import VueEasyLightbox from 'vue-easy-lightbox';
   import VueLazyload from 'vue-lazyload';
+  import { api as viewerApi } from 'v-viewer';
   import Icon from '/@/components/Icon/Icon.vue';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
   import {
@@ -1229,7 +1373,8 @@
     onChangeSearchLabel,
   } = jobTagApi();
 
-  const { userSetting, setUseUpImage, setUsePersonNet, setTaskRefresh } = userSettingApi();
+  const { userSetting, setUseUpImage, setCardShow, setUsePersonNet, setTaskRefresh } =
+    userSettingApi();
 
   const {
     lightBoxOptions,
@@ -1275,11 +1420,55 @@
     }
   };
 
+  const showSampleView = (card) => {
+    exampleForm.value.drawTaskId = card.id;
+    showExampleViewFlag.value = true;
+    console.log(exampleForm.value);
+  };
+
+  function stringToColor(str) {
+    // Convert the string to a hash code
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    // Generate a color based on the hash
+    const color = '#' + (hash & 0x00ffffff).toString(16).toUpperCase();
+
+    // Check if the color is too light (close to white or gray)
+    const threshold = 0xbbbbbb; // You can adjust this threshold as needed
+    const isLightColor = hash < threshold;
+
+    // If it's too light, generate a new color
+    return isLightColor ? stringToColor(str + 'salt') : color;
+  }
+
   //下载
   const doDownload = async (card) => {
     const imageUrlsArray = card.taskImage.infoImageList.map((item) => item.url);
     await handleDownloadByUrls(imageUrlsArray);
   };
+  const getImageList = (card) => {
+    return card.taskImage.infoImageList.map((item) => item.url);
+  };
+
+  function showInfoImage(infoImageList, showUrl) {
+    // 检查数组中是否存在 showUrl
+    const showUrlIndex = infoImageList.findIndex((url) => url === showUrl);
+    let imageList = infoImageList;
+    // 如果存在，则创建一个新数组，将 showUrl 放在第一个位置，其余元素按原顺序添加
+    if (showUrlIndex !== -1) {
+      imageList = [
+        showUrl,
+        ...infoImageList.slice(showUrlIndex + 1),
+        ...infoImageList.slice(0, showUrlIndex),
+      ];
+    }
+
+    // 如果不存在 showUrl，则返回原数组
+    viewerApi({ images: imageList });
+  }
 
   onMounted(() => {
     window.addEventListener('message', handleMessage, false);
@@ -1535,5 +1724,12 @@
     height: 100%;
     overflow-x: auto;
     overflow-y: hidden;
+  }
+
+  .my-transparent-card {
+    padding: 0; /* 可能还需要设置 padding 为 0 */
+    border: none;
+    background: transparent;
+    box-shadow: none; /* 可能还需要禁用阴影 */
   }
 </style>

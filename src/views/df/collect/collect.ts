@@ -21,6 +21,7 @@ import {
   changePublic,
   delDrawTask,
   deleteBatch,
+  getTaskInfo,
 } from '/@/api/df/drawTask';
 import {
   AddDrawTaskParams,
@@ -676,7 +677,16 @@ export function userSettingApi() {
     useUpImage: false,
     usePersonNet: false,
     taskRefresh: false,
+    cardShow: 'MULTI',
   });
+
+  const setCardShow = (): void => {
+    if (userSetting.value.cardShow === 'MULTI') {
+      userSetting.value.cardShow = 'SINGLE';
+    } else {
+      userSetting.value.cardShow = 'MULTI';
+    }
+  };
   const setUseUpImage = (): void => {
     userSetting.value.useUpImage = !userSetting.value.useUpImage;
   };
@@ -689,6 +699,7 @@ export function userSettingApi() {
   };
 
   const api = {
+    setCardShow,
     userSetting,
     setUseUpImage,
     setUsePersonNet,
