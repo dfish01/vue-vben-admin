@@ -217,7 +217,7 @@
       class="cards"
       :style="{ height: `calc(${contentHeight}px - 50px)`, overflow: 'auto' }"
     >
-      <a-dropdown v-for="card in cards" :key="card.id" :trigger="['contextmenu']">
+      <a-dropdown ref="cardListRef" v-for="card in cards" :key="card.id" :trigger="['contextmenu']">
         <a-card :bodyStyle="{ padding: '0px' }" class="card" :hoverable="false">
           <div v-if="card.state === 'QUEUED'" class="mask-queued label-front">
             <div
@@ -349,13 +349,28 @@
                     text-align: center;
                   "
                 >
+                  <div
+                    v-show="!card.loaded"
+                    :style="{
+                      width: '99%',
+                      height: '99%',
+                      paddingBottom: `${
+                        (card.taskImage.imageHeight / card.taskImage.imageWidth) * 100
+                      }%`,
+                    }"
+                    ><SvgIcon
+                      name="loading"
+                      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
+                    />
+                  </div>
                   <img
+                    v-show="card.loaded"
                     @click="showInfoImage(getImageList(card), infoImage.url)"
                     v-lazy.container="infoImage.mediaUrl"
-                    class="card-image img-box"
                     :src="infoImage.mediaUrl"
                     style="max-width: 100%; border-radius: 15px"
                     alt=""
+                    @load="imageLoaded(card)"
                   />
                 </a-card-grid>
               </a-card>
@@ -371,13 +386,29 @@
                   :key="infoImage.url"
                   style="width: 100%; padding: 0; border-radius: 15px; text-align: center"
                 >
+                  <div
+                    v-show="!card.loaded"
+                    :style="{
+                      width: '100%',
+                      height: '100%',
+                      paddingBottom: `${
+                        (card.taskImage.imageHeight / card.taskImage.imageWidth) * 100
+                      }%`,
+                    }"
+                  >
+                    <SvgIcon
+                      name="loading"
+                      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
+                    />
+                  </div>
                   <img
+                    v-show="card.loaded"
                     @click="showInfoImage(getImageList(card), infoImage.url)"
                     v-lazy.container="infoImage.mediaUrl"
-                    class="card-image img-box"
                     :src="infoImage.mediaUrl"
                     style="max-width: 100%; border-radius: 15px"
                     alt=""
+                    @load="imageLoaded(card)"
                   />
                 </a-card-grid>
               </a-card>
@@ -390,17 +421,33 @@
                 :bordered="false"
                 :hoverable="false"
               >
+                <div
+                  v-show="!card.loaded"
+                  :style="{
+                    width: '100%',
+                    height: '100%',
+                    paddingBottom: `${
+                      (card.taskImage.imageHeight / card.taskImage.imageWidth) * 100
+                    }%`,
+                  }"
+                >
+                  <SvgIcon
+                    name="loading"
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
+                  />
+                </div>
                 <img
+                  v-show="card.loaded"
                   @click="showTaskInfo(card)"
                   v-lazy.container="
                     userSetting.useUpImage ? card.taskImage.imageUrl : card.taskImage.mediaImageUrl
                   "
-                  class="card-image img-box"
                   :preview="{
                     src: card.taskImage.imageUrl,
                   }"
                   fallback=""
                   alt=""
+                  @load="imageLoaded(card)"
                 />
               </a-card>
             </div>
@@ -1487,10 +1534,11 @@
   import { Loading } from '/@/components/Loading';
   import 'vue-easy-lightbox/external-css/vue-easy-lightbox.css';
   import VueEasyLightbox from 'vue-easy-lightbox';
-  import VueLazyload from 'vue-lazyload';
+
   import { api as viewerApi } from 'v-viewer';
   import 'viewerjs/dist/viewer.css';
   import Icon from '/@/components/Icon/Icon.vue';
+  import { SvgIcon } from '/@/components/Icon';
   import { listCategory, queryDrawingSample, addDrawingSample } from '/@/api/df/drawingSample';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
   import { addSpaceTask, removeSpaceTask, allUserSpace } from '/@/api/df/workSpace';
@@ -1737,6 +1785,11 @@
 
   /*********************** 案例相关 ********************* */
   const { drawingSampleCategory, doAddDrawingSample } = exampleApi();
+
+  const imageLoaded = async (card) => {
+    console.log(1111);
+    card.loaded = true;
+  };
   const exampleForm = ref({
     drawingSampleCategory: [],
     categoryCodes: [],
@@ -1793,6 +1846,19 @@
   }
 
   /*************************************** 相关包装方法 ********************************************* */
+
+  const cardWidth = ref(null);
+  const cardListRef = ref(null);
+  const getCardWidth = () => {
+    const firstCard = cardListRef.value.querySelector('.card');
+    if (firstCard) {
+      const firstCardWidth = firstCard.clientWidth;
+      cardWidth.value = firstCardWidth;
+    } else {
+      console.error('Element with class .card not found.');
+    }
+  };
+
   //下载
   const doDownload = async (card) => {
     const imageUrlsArray = card.taskImage.infoImageList.map((item) => item.url);
