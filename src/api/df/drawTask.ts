@@ -123,7 +123,7 @@ export function addDrawTask(params: AddDrawTaskParams, mode: ErrorMessageMode = 
     {
       url: Api.AddDrawTask,
       params,
-      timeout: 30 * 1000,
+      timeout: 35 * 1000,
     },
     {
       errorMessageMode: mode,

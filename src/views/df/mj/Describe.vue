@@ -1,6 +1,6 @@
 <template>
   <div style="text-align: left" ref="formRef">
-    <div :style="{ height: `calc(${contentHeight}px `, overflow: 'auto' }">
+    <div :style="{ height: `calc(${contentHeight - 1}px`, overflow: 'auto' }">
       <div style="height: 112px">
         <a-upload
           v-model:file-list="fileList"
@@ -69,7 +69,12 @@
       </a-row>
     </div>
     <div>
-      <a-button class="bottom-button" type="primary" @click="startDrawing" ref="button"
+      <a-button
+        class="bottom-button"
+        :loading="textFormLoading"
+        type="primary"
+        @click="startDrawing"
+        ref="button"
         >开始解析任务</a-button
       >
     </div>
@@ -279,33 +284,38 @@
     return false;
   };
 
+  const textFormLoading = ref(false);
   const startDrawing = async () => {
+    const addTaskParam: AddDrawTaskParams = {
+      spaceId: spaceId.value,
+      refAccountId: textToImgForm.useAccountId,
+      channel: 'MJ',
+      priority: 0,
+      // refTaskId: null,
+      mode: textToImgForm.mode,
+      privacyMode: 'Y',
+      commandType: 'BLEND',
+      invokeTimes: textToImgForm.invokeTimes,
+      prompt: {
+        base64Image: base64Images.value[0],
+        commandType: 'DESCRIBE',
+        bootId: compRender.robotSelect.value,
+      },
+    };
+    textFormLoading.value = true;
+    const key = 'submitTask';
+    message.loading({ content: '正在提交解析任务...', key, duration: 0 });
     try {
-      emit('startLoading');
-      const addTaskParam: AddDrawTaskParams = {
-        spaceId: spaceId.value,
-        refAccountId: textToImgForm.useAccountId,
-        channel: 'MJ',
-        priority: 0,
-        // refTaskId: null,
-        mode: textToImgForm.mode,
-        privacyMode: 'Y',
-        commandType: 'BLEND',
-        invokeTimes: textToImgForm.invokeTimes,
-        prompt: {
-          base64Image: base64Images.value[0],
-          commandType: 'DESCRIBE',
-          bootId: compRender.robotSelect.value,
-        },
-      };
       await addDrawTask(addTaskParam);
-      message.success('解析任务已开始');
+      message.success({ content: '解析任务已开始!', key, duration: 2 });
       fileList.value = [];
       base64Images.value = [];
+      emit('startLoading');
     } catch (error) {
-      message.error('解析任务启动失败');
+      console.log(error);
+      message.error({ content: '解析任务启动失败!', key, duration: 2 });
     } finally {
-      emit('endLoading');
+      textFormLoading.value = false;
     }
   };
 </script>

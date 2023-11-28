@@ -85,7 +85,12 @@
       </a-row>
     </div>
     <div>
-      <a-button class="bottom-button" type="primary" @click="startDrawing" ref="button"
+      <a-button
+        class="bottom-button"
+        :loading="textFormLoading"
+        type="primary"
+        @click="startDrawing"
+        ref="button"
         >开始混图任务</a-button
       >
     </div>
@@ -307,34 +312,39 @@
     }
   };
 
+  const textFormLoading = ref(false);
   const startDrawing = async () => {
-    try {
-      emit('startLoading');
-      const addTaskParam: AddDrawTaskParams = {
-        spaceId: spaceId.value,
-        refAccountId: textToImgForm.useAccountId,
-        channel: 'MJ',
-        priority: 0,
-        // refTaskId: null,
-        privacyMode: 'Y',
-        mode: textToImgForm.mode,
+    const addTaskParam: AddDrawTaskParams = {
+      spaceId: spaceId.value,
+      refAccountId: textToImgForm.useAccountId,
+      channel: 'MJ',
+      priority: 0,
+      // refTaskId: null,
+      privacyMode: 'Y',
+      mode: textToImgForm.mode,
+      commandType: 'BLEND',
+      invokeTimes: textToImgForm.invokeTimes,
+      prompt: {
+        base64Array: base64Images.value,
         commandType: 'BLEND',
-        invokeTimes: textToImgForm.invokeTimes,
-        prompt: {
-          base64Array: base64Images.value,
-          commandType: 'BLEND',
-          dimensionsStr: compRender.dimensionSelector.value,
-          bootId: compRender.robotSelect.value,
-        },
-      };
+        dimensionsStr: compRender.dimensionSelector.value,
+        bootId: compRender.robotSelect.value,
+      },
+    };
+    textFormLoading.value = true;
+    const key = 'submitTask';
+    message.loading({ content: '正在提交混图任务...', key, duration: 0 });
+    try {
       await addDrawTask(addTaskParam);
-      message.success('混图任务已开始');
+      message.success({ content: '混图任务已开始!', key, duration: 2 });
       fileList.value = [];
       base64Images.value = [];
+      emit('startLoading');
     } catch (error) {
-      message.error('混图任务启动失败');
+      console.log(error);
+      message.error({ content: '混图任务启动失败!', key, duration: 2 });
     } finally {
-      emit('endLoading');
+      textFormLoading.value = false;
     }
   };
 </script>
