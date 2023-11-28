@@ -99,7 +99,7 @@
       </a-table-column>
     </a-table>
     <!-- 新增用户 -->
-    <a-modal v-model:visible="isAddModalVisible" title="新增账户" ok-text="提交" @ok="onSubmitAdd">
+    <a-modal v-model:open="isAddModalVisible" title="新增账户" ok-text="提交" @ok="onSubmitAdd">
       <a-card>
         <a-form layout="vertical">
           <a-row gutter="24">
@@ -137,7 +137,7 @@
       </a-card>
     </a-modal>
     <!-- 授权列表 -->
-    <a-modal v-model:visible="isAuthModalVisible" title="授权列表" @ok="closeAuthModal">
+    <a-modal v-model:open="isAuthModalVisible" title="授权列表" @ok="closeAuthModal">
       <a-table :dataSource="authList" :columns="authColumns" class="a-table">
         <template #header>
           <a-row>

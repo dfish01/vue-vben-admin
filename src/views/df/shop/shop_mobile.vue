@@ -143,7 +143,7 @@
     </div>
     <!-- 支付弹窗 -->
     <a-modal
-      v-model:visible="payForm.viewFlag"
+      v-model:open="payForm.viewFlag"
       title="打开支付宝扫码支付"
       style="width: 100%; height: 450px"
       @cancel="closeView"
@@ -158,7 +158,7 @@
 
     <!-- 条件查询 -->
     <a-modal
-      v-model:visible="searchForm.viewFlag"
+      v-model:open="searchForm.viewFlag"
       width="100%"
       title="🔍️条件查询"
       :bodyStyle="{ padding: '7px 12px 7px 12px', width: '100%', 'align-items': 'center' }"

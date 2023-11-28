@@ -340,7 +340,7 @@
 
     <!-- 新增店铺 -->
     <a-modal
-      v-model:visible="shopFormOther.viewFlag"
+      v-model:open="shopFormOther.viewFlag"
       :title="shopForm.title"
       :ok-text="
         shopForm.applyStatus === 'APPLY' || shopForm.applyStatus === 'REJECT'

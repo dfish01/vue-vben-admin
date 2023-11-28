@@ -342,6 +342,7 @@
                   v-for="infoImage in card.taskImage.infoImageList"
                   :key="infoImage.url"
                   style="
+                    position: relative;
                     width: 49%;
                     margin: 1px;
                     padding: 0;
@@ -349,28 +350,27 @@
                     text-align: center;
                   "
                 >
-                  <div
-                    v-show="!card.loaded"
+                  <!-- <div
+                    v-show="!infoImage.loaded"
                     :style="{
-                      width: '99%',
-                      height: '99%',
+                      width: '100%',
+                      height: '100%',
                       paddingBottom: `${
                         (card.taskImage.imageHeight / card.taskImage.imageWidth) * 100
                       }%`,
                     }"
-                    ><SvgIcon
+                  >
+                    <SvgIcon
                       name="loading"
                       style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
                     />
-                  </div>
+                  </div> -->
                   <img
-                    v-show="card.loaded"
                     @click="showInfoImage(getImageList(card), infoImage.url)"
                     v-lazy.container="infoImage.mediaUrl"
-                    :src="infoImage.mediaUrl"
                     style="max-width: 100%; border-radius: 15px"
                     alt=""
-                    @load="imageLoaded(card)"
+                    @load="imageLoaded(infoImage)"
                   />
                 </a-card-grid>
               </a-card>
@@ -386,26 +386,9 @@
                   :key="infoImage.url"
                   style="width: 100%; padding: 0; border-radius: 15px; text-align: center"
                 >
-                  <div
-                    v-show="!card.loaded"
-                    :style="{
-                      width: '100%',
-                      height: '100%',
-                      paddingBottom: `${
-                        (card.taskImage.imageHeight / card.taskImage.imageWidth) * 100
-                      }%`,
-                    }"
-                  >
-                    <SvgIcon
-                      name="loading"
-                      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
-                    />
-                  </div>
                   <img
-                    v-show="card.loaded"
                     @click="showInfoImage(getImageList(card), infoImage.url)"
                     v-lazy.container="infoImage.mediaUrl"
-                    :src="infoImage.mediaUrl"
                     style="max-width: 100%; border-radius: 15px"
                     alt=""
                     @load="imageLoaded(card)"
@@ -421,30 +404,9 @@
                 :bordered="false"
                 :hoverable="false"
               >
-                <div
-                  v-show="!card.loaded"
-                  :style="{
-                    width: '100%',
-                    height: '100%',
-                    paddingBottom: `${
-                      (card.taskImage.imageHeight / card.taskImage.imageWidth) * 100
-                    }%`,
-                  }"
-                >
-                  <SvgIcon
-                    name="loading"
-                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
-                  />
-                </div>
                 <img
-                  v-show="card.loaded"
                   @click="showTaskInfo(card)"
-                  v-lazy.container="
-                    userSetting.useUpImage ? card.taskImage.imageUrl : card.taskImage.mediaImageUrl
-                  "
-                  :preview="{
-                    src: card.taskImage.imageUrl,
-                  }"
+                  v-lazy.container="card.taskImage.mediaImageUrl"
                   fallback=""
                   alt=""
                   @load="imageLoaded(card)"
@@ -1297,22 +1259,36 @@
             :bodyStyle="{ padding: '0px' }"
             style="width: 100%"
             class="my-transparent-card"
-            v-if="infoData.taskInfo.imageUrls.length > 1"
+            v-if="infoData.taskInfo.taskImage.infoImageList.length > 1"
             :bordered="false"
             :hoverable="false"
           >
             <a-card-grid
-              v-for="url in infoData.taskInfo.imageUrls"
-              :key="url"
+              v-for="infoImage in infoData.taskInfo.taskImage.infoImageList"
+              :key="infoImage.url"
               style="width: 49%; margin: 1px; padding: 0; border-radius: 15px; text-align: center"
             >
+              <!-- <div
+                v-show="!infoImage.loaded"
+                :style="{
+                  width: '100%',
+                  height: '100%',
+                  paddingBottom: `${
+                    (infoData.taskInfo.taskImage.imageHeight /
+                      infoData.taskInfo.taskImage.imageWidth) *
+                    100
+                  }%`,
+                }"
+              >
+              </div> -->
+
               <img
-                @click="showInfoImage(infoData.taskInfo.imageUrls, url)"
-                v-lazy.container="url"
+                @click="showInfoImage(getImageList(infoData.taskInfo), infoImage.url)"
+                v-lazy.container="infoImage.mediaUrl"
                 class="card-image img-box"
-                :src="url"
                 style="max-width: 100%; border-radius: 15px"
                 alt=""
+                @load="imageLoaded(infoImage)"
               />
             </a-card-grid>
           </a-card>
@@ -1324,25 +1300,25 @@
             v-else
           >
             <a-card-grid
-              v-for="url in infoData.taskInfo.imageUrls"
-              :key="url"
+              v-for="infoImage in infoData.taskInfo.taskImage.infoImageList"
+              :key="infoImage.url"
               style="width: 100%; padding: 0; border-radius: 15px; text-align: center"
             >
               <img
-                @click="showInfoImage(infoData.taskInfo.imageUrls, infoData.url)"
-                v-lazy.container="url"
+                @click="showInfoImage(getImageList(infoData.taskInfo), infoImage.url)"
+                v-lazy.container="infoImage.mediaUrl"
                 class="card-image img-box"
-                :src="url"
                 style="max-width: 100%; border-radius: 15px"
                 alt=""
+                @load="imageLoaded(infoImage)"
               />
             </a-card-grid>
           </a-card>
           <a-flex :style="{ width: '100%' }" justify="center" align="center">
             <span style="font-size: 12px">
-              📢 每张图片都是放大后的图片。 点击图片可查看大图！！！</span
+              📢 导入的任务图片加载失败可以试着获取下Seed。 点击图片可查看大图！！！</span
             >
-            <a-button @click="handleDownloadByUrls(infoData.taskInfo.imageUrls)" size="small">
+            <a-button @click="handleDownloadByUrls(getImageList(infoData.taskInfo))" size="small">
               <Icon icon="bx:bxs-cloud-download" class="vel-icon icon" aria-hidden="true" />
               下载图片
             </a-button>
@@ -1352,19 +1328,33 @@
 
       <a-card-grid style="width: 100%; text-align: center" :hoverable="false">
         <a-descriptions bordered size="small" :column="2">
-          <a-descriptions-item label="👨执行账户">{{
-            infoData.taskInfo.accountName
-          }}</a-descriptions-item>
-          <a-descriptions-item label="🍪任务类型">
+          <a-descriptions-item
+            label="👨执行账户"
+            :labelStyle="{ width: '25%' }"
+            :contentStyle="{ width: '25%' }"
+            >{{ infoData.taskInfo.accountName }}</a-descriptions-item
+          >
+          <a-descriptions-item
+            label="🍪任务类型"
+            :labelStyle="{ width: '25%' }"
+            :contentStyle="{ width: '25%' }"
+          >
             <a-tag :color="stringToColor(infoData.taskInfo.commandTypeName)">{{
               infoData.taskInfo.commandTypeName
             }}</a-tag>
           </a-descriptions-item>
-          <a-descriptions-item label="💎MJ账号">{{
-            infoData.taskInfo.discordUserName
-          }}</a-descriptions-item>
+          <a-descriptions-item
+            label="💎MJ账号"
+            :labelStyle="{ width: '25%' }"
+            :contentStyle="{ width: '25%' }"
+            >{{ infoData.taskInfo.discordUserName }}</a-descriptions-item
+          >
 
-          <a-descriptions-item label="🤖执行机器人">
+          <a-descriptions-item
+            label="🤖执行机器人"
+            :labelStyle="{ width: '25%' }"
+            :contentStyle="{ width: '25%' }"
+          >
             <a-tag :color="infoData.taskInfo.bootName === 'niji' ? 'green' : ''"
               >{{ infoData.taskInfo.bootName }} 机器人</a-tag
             >
@@ -1401,10 +1391,18 @@
               </a-button>
             </div>
           </a-descriptions-item>
-          <a-descriptions-item label="📔原始Prompt" :span="2">
+          <a-descriptions-item
+            label="📔原始Prompt"
+            :span="2"
+            :contentStyle="{ 'max-width': '75%', 'overflow-wrap': 'break-word' }"
+          >
             {{ infoData.taskInfo.oriPrompt }}
           </a-descriptions-item>
-          <a-descriptions-item label="📓执行Prompt" :span="2">
+          <a-descriptions-item
+            label="📓执行Prompt"
+            :span="2"
+            :contentStyle="{ 'max-width': '75%', 'overflow-wrap': 'break-word' }"
+          >
             {{ infoData.taskInfo.contentStripped }}
           </a-descriptions-item>
         </a-descriptions>
@@ -1540,6 +1538,7 @@
   import Icon from '/@/components/Icon/Icon.vue';
   import { SvgIcon } from '/@/components/Icon';
   import { listCategory, queryDrawingSample, addDrawingSample } from '/@/api/df/drawingSample';
+  import loadimage from '/@/assets/images/loading.svg';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
   import { addSpaceTask, removeSpaceTask, allUserSpace } from '/@/api/df/workSpace';
   import Info from './index.vue';
@@ -1787,7 +1786,6 @@
   const { drawingSampleCategory, doAddDrawingSample } = exampleApi();
 
   const imageLoaded = async (card) => {
-    console.log(1111);
     card.loaded = true;
   };
   const exampleForm = ref({
@@ -1867,6 +1865,13 @@
 
   const getImageList = (card) => {
     return card.taskImage.infoImageList.map((item) => item.url);
+  };
+  const getImgObj = (infoImage) => {
+    return {
+      src: infoImage.url,
+      error: loadimage,
+      loading: infoImage.mediaUrl,
+    };
   };
 
   function showInfoImage(infoImageList, showUrl) {

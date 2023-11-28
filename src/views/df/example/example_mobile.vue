@@ -168,7 +168,7 @@
     <Loading :loading="doLoading" :absolute="false" tip="正在加载中" />
     <!-- 公告 -->
     <a-modal
-      v-model:visible="noticeForm.viewFlag"
+      v-model:open="noticeForm.viewFlag"
       title="🧉最新公告"
       style="top: 20px; width: 100%; height: auto"
       :bodyStyle="{ padding: '0', width: '100%', 'align-items': 'center' }"

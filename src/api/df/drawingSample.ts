@@ -1,12 +1,14 @@
 import { defHttp } from '/@/utils/http/axios';
 import { VerifyCodeParams } from './model/UtilModel';
-
+import { IdReq } from '../model/baseModel';
 import { ErrorMessageMode } from '/#/axios';
 
 enum Api {
   ListCategory = '/open/drawingSample/listCategory',
   QueryDrawingSample = '/open/drawingSample/queryDrawingSample',
   AddDrawingSample = '/open/drawingSample/addDrawingSample',
+
+  Delete = '/open/drawingSample/delete',
 }
 
 /**
@@ -32,6 +34,26 @@ export function addDrawingSample(
     },
   );
 }
+
+/**
+ * 删除案例教程
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function delExample(params: IdReq, mode: ErrorMessageMode = 'message') {
+  return defHttp.post(
+    {
+      url: Api.Delete,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+      successMessageMode: mode,
+    },
+  );
+}
+
 /**
  * 类目列表查询
  * @param params

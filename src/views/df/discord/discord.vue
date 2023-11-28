@@ -166,7 +166,7 @@
     </div>
     <!-- 构建discord账号 -->
     <a-modal
-      v-model:visible="discordForm.viewFlag"
+      v-model:open="discordForm.viewFlag"
       :title="discordForm.title"
       ok-text="立即执行"
       @ok="addDiscord"

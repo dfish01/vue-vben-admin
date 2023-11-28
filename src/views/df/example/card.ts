@@ -1,6 +1,11 @@
 import { defineComponent, unref, ref, onMounted, onUnmounted } from 'vue';
 import { message } from 'ant-design-vue';
-import { listCategory, queryDrawingSample, addDrawingSample } from '/@/api/df/drawingSample';
+import {
+  listCategory,
+  queryDrawingSample,
+  addDrawingSample,
+  delExample,
+} from '/@/api/df/drawingSample';
 import { copyText as doCopyText } from '/@/utils/copyTextToClipboard';
 import { useGo } from '/@/hooks/web/usePage';
 

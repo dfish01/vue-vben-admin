@@ -282,7 +282,7 @@
 
     <!-- 使用情况 -->
     <a-modal
-      v-model:visible="statisticsForm.viewFlag"
+      v-model:open="statisticsForm.viewFlag"
       title="🔋账户使用情况"
       style="width: 80%"
       :style="statisticsForm.formData.ownerFlag === 'Y' ? 'top: 5px;' : ''"
@@ -419,7 +419,7 @@
 
     <!-- 新增用户 -->
     <a-modal
-      v-model:visible="accountForm.viewFlag"
+      v-model:open="accountForm.viewFlag"
       title="🍏新建账户"
       ok-text="立即创建"
       @ok="onSubmitAdd"
@@ -509,7 +509,7 @@
 
     <!-- 追加账户 -->
     <a-modal
-      v-model:visible="accountModifiedForm.viewFlag"
+      v-model:open="accountModifiedForm.viewFlag"
       title="🍏追加账户组账户"
       ok-text="立即保存"
       @ok="onAppendDiscordAccount"
@@ -547,7 +547,7 @@
 
     <!-- 生成授权码 -->
     <a-modal
-      v-model:visible="createAuthForm.isActiveVisible"
+      v-model:open="createAuthForm.isActiveVisible"
       :style="{ top: '50px' }"
       title="生成授权码"
       ok-text="提交"
@@ -658,7 +658,7 @@
 
     <!-- 激活授权账号 -->
     <a-modal
-      v-model:visible="activeData.isActiveVisible"
+      v-model:open="activeData.isActiveVisible"
       title="Midjouney授权激活"
       ok-text="提交"
       @ok="onActiveAccount"
@@ -677,7 +677,7 @@
     </a-modal>
 
     <!-- 授权列表 -->
-    <a-modal v-model:visible="authListForm.isAuthModalVisible" title="授权列表" width="75%">
+    <a-modal v-model:open="authListForm.isAuthModalVisible" title="授权列表" width="75%">
       <template #footer>
         <a-button key="submit" type="primary" @click="closeAuthModal">已知晓</a-button>
       </template>
@@ -697,7 +697,7 @@
 
     <!-- 账号组 -->
     <a-modal
-      v-model:visible="accountGroup"
+      v-model:open="accountGroup"
       title="🎈账号组管理"
       :style="{ width: '100%', height: '70vh' }"
       ok-text="立即新增"

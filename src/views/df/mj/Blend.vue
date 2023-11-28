@@ -104,7 +104,7 @@
   import { AddDrawTaskParams } from '/@/api/df/model/drawTaskModel';
   import type { UploadFile } from 'ant-design-vue/es/upload/interface';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
-  import { queryList } from '/@/api/df/account';
+  import { queryList, availableList } from '/@/api/df/account';
   import { useUserStore } from '/@/store/modules/user';
 
   const userStore = useUserStore();
@@ -143,22 +143,19 @@
   );
 
   const onSearchAccountList = async () => {
-    const response = await queryList({
-      state: 'normal',
+    const response = await availableList({
+      accMode: '',
       ownerFlag: '',
-      accountName: '',
-      current: 1,
-      pageSize: 999,
     });
 
     // 使用 map 方法转换数组
-    const transformedList = response.records.map((item) => ({
-      label: item.discordUserName,
+    const transformedList = response.map((item) => ({
+      label: item.accountName,
       value: item.id,
     }));
 
     // 如果您想在转换后的数组前面添加一个特定的对象，可以使用以下方法：
-    const finalList = [{ label: '随机', value: '' }, ...transformedList];
+    const finalList = [...transformedList];
     compRender.accountSelector.options = finalList;
   };
 

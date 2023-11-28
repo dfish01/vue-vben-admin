@@ -102,7 +102,7 @@
     </div>
     <!-- 支付弹窗 -->
     <a-modal
-      v-model:visible="payForm.viewFlag"
+      v-model:open="payForm.viewFlag"
       title="打开支付宝扫码支付"
       style="width: 410px; height: 450px"
       @cancel="closeView"

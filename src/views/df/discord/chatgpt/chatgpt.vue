@@ -352,7 +352,7 @@
 
     <!-- 新增用户 -->
     <a-modal
-      v-model:visible="accountForm.viewFlag"
+      v-model:open="accountForm.viewFlag"
       :title="accountForm.title"
       ok-text="立即执行"
       @ok="onSubmitAdd"
@@ -419,7 +419,7 @@
 
     <!-- 激活授权账号 -->
     <a-modal
-      v-model:visible="activeData.viewFlag"
+      v-model:open="activeData.viewFlag"
       title="ChatGpt授权激活"
       ok-text="提交"
       @ok="onActiveAccount"
@@ -439,7 +439,7 @@
 
     <!-- 生成授权码 -->
     <a-modal
-      v-model:visible="createAuthForm.viewFlag"
+      v-model:open="createAuthForm.viewFlag"
       :style="{ top: '50px' }"
       title="生成授权码"
       ok-text="提交"
@@ -509,7 +509,7 @@
     </a-modal>
 
     <!-- 授权列表 -->
-    <a-modal v-model:visible="authListForm.viewFlag" title="授权列表" width="75%" ok-text="">
+    <a-modal v-model:open="authListForm.viewFlag" title="授权列表" width="75%" ok-text="">
       <template #footer>
         <a-button key="submit" type="primary" @click="closeAuthModal">已知晓</a-button>
       </template>

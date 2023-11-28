@@ -159,7 +159,7 @@ ref="waterfallRef"
 
      <!-- 条件查询 -->
      <a-modal
-      v-model:visible="showQueryViewFlag"
+      v-model:open="showQueryViewFlag"
       width="100%"
       title="🔍️条件查询"
       :bodyStyle="{ padding: '7px 12px 7px 12px', width: '100%', 'align-items': 'center' }"

@@ -258,6 +258,7 @@
                   v-for="infoImage in card.taskImage.infoImageList"
                   :key="infoImage.url"
                   style="
+                    position: relative;
                     width: 49%;
                     margin: 1px;
                     padding: 0;
@@ -265,13 +266,27 @@
                     text-align: center;
                   "
                 >
+                  <!-- <div
+                    v-show="!infoImage.loaded"
+                    :style="{
+                      width: '100%',
+                      height: '100%',
+                      paddingBottom: `${
+                        (card.taskImage.imageHeight / card.taskImage.imageWidth) * 100
+                      }%`,
+                    }"
+                  >
+                    <SvgIcon
+                      name="loading"
+                      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
+                    />
+                  </div> -->
                   <img
                     @click="showInfoImage(getImageList(card), infoImage.url)"
                     v-lazy.container="infoImage.mediaUrl"
-                    class="card-image img-box"
-                    :src="infoImage.mediaUrl"
                     style="max-width: 100%; border-radius: 15px"
                     alt=""
+                    @load="imageLoaded(infoImage)"
                   />
                 </a-card-grid>
               </a-card>
@@ -290,10 +305,9 @@
                   <img
                     @click="showInfoImage(getImageList(card), infoImage.url)"
                     v-lazy.container="infoImage.mediaUrl"
-                    class="card-image img-box"
-                    :src="infoImage.mediaUrl"
                     style="max-width: 100%; border-radius: 15px"
                     alt=""
+                    @load="imageLoaded(card)"
                   />
                 </a-card-grid>
               </a-card>
@@ -308,19 +322,15 @@
               >
                 <img
                   @click="showTaskInfo(card)"
-                  v-lazy.container="
-                    userSetting.useUpImage ? card.taskImage.imageUrl : card.taskImage.mediaImageUrl
-                  "
-                  class="card-image img-box"
-                  :preview="{
-                    src: card.taskImage.imageUrl,
-                  }"
+                  v-lazy.container="card.taskImage.mediaImageUrl"
                   fallback=""
                   alt=""
+                  @load="imageLoaded(card)"
                 />
               </a-card>
             </div>
           </div>
+
           <div
             v-if="card.state != 'SUCCESS'"
             style="
@@ -1079,22 +1089,36 @@
               :bodyStyle="{ padding: '0px' }"
               style="width: 100%"
               class="my-transparent-card"
-              v-if="infoData.taskInfo.imageUrls.length > 1"
+              v-if="infoData.taskInfo.taskImage.infoImageList.length > 1"
               :bordered="false"
               :hoverable="false"
             >
               <a-card-grid
-                v-for="url in infoData.taskInfo.imageUrls"
-                :key="url"
+                v-for="infoImage in infoData.taskInfo.taskImage.infoImageList"
+                :key="infoImage.url"
                 style="width: 49%; margin: 1px; padding: 0; border-radius: 15px; text-align: center"
               >
+                <!-- <div
+                  v-show="!infoImage.loaded"
+                  :style="{
+                    width: '100%',
+                    height: '100%',
+                    paddingBottom: `${
+                      (infoData.taskInfo.taskImage.imageHeight /
+                        infoData.taskInfo.taskImage.imageWidth) *
+                      100
+                    }%`,
+                  }"
+                >
+                </div> -->
+
                 <img
-                  @click="showInfoImage(infoData.taskInfo.imageUrls, url)"
-                  v-lazy.container="url"
+                  @click="showInfoImage(getImageList(infoData.taskInfo), infoImage.url)"
+                  v-lazy.container="infoImage.mediaUrl"
                   class="card-image img-box"
-                  :src="url"
                   style="max-width: 100%; border-radius: 15px"
                   alt=""
+                  @load="imageLoaded(infoImage)"
                 />
               </a-card-grid>
             </a-card>
@@ -1106,25 +1130,25 @@
               v-else
             >
               <a-card-grid
-                v-for="url in infoData.taskInfo.imageUrls"
-                :key="url"
+                v-for="infoImage in infoData.taskInfo.taskImage.infoImageList"
+                :key="infoImage.url"
                 style="width: 100%; padding: 0; border-radius: 15px; text-align: center"
               >
                 <img
-                  @click="showInfoImage(infoData.taskInfo.imageUrls, url)"
-                  v-lazy.container="url"
+                  @click="showInfoImage(getImageList(infoData.taskInfo), infoImage.url)"
+                  v-lazy.container="infoImage.mediaUrl"
                   class="card-image img-box"
-                  :src="url"
                   style="max-width: 100%; border-radius: 15px"
                   alt=""
+                  @load="imageLoaded(infoImage)"
                 />
               </a-card-grid>
             </a-card>
             <a-flex :style="{ width: '100%' }" justify="center" align="center">
               <span style="font-size: 12px">
-                📢每张图片都是放大后的图片。点击图片可查看大图！！！</span
+                📢 导入的任务图片加载失败可以试着获取下Seed。 点击图片可查看大图！！！</span
               >
-              <a-button @click="handleDownloadByUrls(infoData.taskInfo.imageUrls)" size="small">
+              <a-button @click="handleDownloadByUrls(getImageList(infoData.taskInfo))" size="small">
                 <Icon icon="bx:bxs-cloud-download" class="vel-icon icon" aria-hidden="true" />
                 下载图片
               </a-button>
@@ -1338,6 +1362,7 @@
 
   const {
     // 方法
+    getSeed,
     deleteCard,
     deleteBatchHandle,
     toggleVisibility,
@@ -1469,6 +1494,10 @@
     // 如果不存在 showUrl，则返回原数组
     viewerApi({ images: imageList });
   }
+
+  const imageLoaded = async (card) => {
+    card.loaded = true;
+  };
 
   onMounted(() => {
     window.addEventListener('message', handleMessage, false);

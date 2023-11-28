@@ -217,12 +217,7 @@
     </div>
 
     <!-- 新增用户 -->
-    <a-modal
-      v-model:visible="isAddModalVisible"
-      title="🥰新增账户"
-      ok-text="提交"
-      @ok="onSubmitAdd"
-    >
+    <a-modal v-model:open="isAddModalVisible" title="🥰新增账户" ok-text="提交" @ok="onSubmitAdd">
       <a-card>
         <a-form layout="vertical">
           <a-row gutter="24">
@@ -262,7 +257,7 @@
 
     <!-- 生成授权码 -->
     <a-modal
-      v-model:visible="createAuthForm.isActiveVisible"
+      v-model:open="createAuthForm.isActiveVisible"
       wrap-class-name="full-modal"
       :bodyStyle="{ padding: '0' }"
       title="⛏生成授权码"
@@ -324,7 +319,7 @@
 
     <!-- 激活授权账号 -->
     <a-modal
-      v-model:visible="activeData.isActiveVisible"
+      v-model:open="activeData.isActiveVisible"
       title="🎈激活授权账号"
       :style="{ width: '100%', height: '35vh' }"
       ok-text="立即激活"
@@ -337,7 +332,7 @@
 
     <!-- 授权列表 -->
     <a-modal
-      v-model:visible="authListForm.isAuthModalVisible"
+      v-model:open="authListForm.isAuthModalVisible"
       title="📝授权列表"
       width="100%"
       wrap-class-name="full-modal"
@@ -407,7 +402,7 @@
 
     <!-- 条件查询 -->
     <a-modal
-      v-model:visible="showQueryViewFlag"
+      v-model:open="showQueryViewFlag"
       width="100%"
       title="🔍️条件查询"
       :bodyStyle="{ padding: '7px 12px 7px 12px', width: '100%', 'align-items': 'center' }"

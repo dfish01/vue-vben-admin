@@ -128,6 +128,13 @@
                     size="small"
                     >同款作画</a-button
                   >
+                  <a-button
+                    v-if="hasPermission('9999')"
+                    style="background-color: #b70d1e; color: white"
+                    size="small"
+                    @click.stop="showDeleteConfirm(item.id)"
+                    >删除</a-button
+                  >
                 </div>
               </div>
               <div class="move-out" v-else>
@@ -145,7 +152,7 @@
     <Loading :loading="doLoading" :absolute="false" tip="正在加载中" />
 
     <!-- 公告 -->
-    <a-modal v-model:visible="noticeForm.viewFlag" title="🧉最新公告">
+    <a-modal v-model:open="noticeForm.viewFlag" title="🧉最新公告">
       <template #footer>
         <a-button key="submit" type="primary" @click="hasRead()" :loading="noticeForm.loading"
           >已知悉，今日不在弹出</a-button
@@ -159,12 +166,13 @@
 </template>
 
 <script setup lang="ts">
-  import { onMounted, onUnmounted, ref, reactive } from 'vue';
+  import { onMounted, onUnmounted, ref, reactive, createVNode } from 'vue';
   import { LazyImg, Waterfall } from 'vue-waterfall-plugin-next';
   import 'vue-waterfall-plugin-next/dist/style.css';
   import { Loading } from '/@/components/Loading';
   import { useDrawCard } from './card';
   import Icon from '/@/components/Icon/Icon.vue';
+  import { usePermission } from '/@/hooks/web/usePermission';
   import {
     CaretLeftOutlined,
     CaretRightOutlined,
@@ -172,16 +180,27 @@
   } from '@ant-design/icons-vue';
   import 'viewerjs/dist/viewer.css';
   import { directive as viewer } from 'v-viewer';
-  import { message } from 'ant-design-vue';
-  import loading from '/@/assets/images/lazy-loading.svg';
+  import { message, Modal } from 'ant-design-vue';
+  // import loading from '/@/assets/images/lazy-loading.svg';
+  import loading from '/@/assets/images/loading.svg';
   import error from '/@/assets/images/lazy-error.svg';
   import { getRecentNotice } from '/@/api/df/utils';
 
+  import {
+    listCategory,
+    queryDrawingSample,
+    addDrawingSample,
+    delExample,
+  } from '/@/api/df/drawingSample';
+
+  const { hasPermission } = usePermission();
   const { copyText, goDrawing, loadMore, initDrawingSampleCategory } = useDrawCard();
 
   onMounted(async () => {
-    handleLoadMore(500);
+    handleLoadMore(500, true);
     categorySetting.value.categories = await initDrawingSampleCategory();
+    handleLoadMore(500, false);
+    handleLoadMore(500, false);
   });
 
   /****************************** 类目相关  ****************************** */
@@ -242,9 +261,27 @@
     if (scrollbarRef.value !== null) {
       console.log('handleScroll');
       const { scrollTop, scrollHeight, clientHeight } = scrollbarRef.value;
-      if (scrollTop + clientHeight >= scrollHeight - 50 && !doLoading.value) {
-        handleLoadMore(500);
+      // 计算滚动到一半的位置
+      const scrollPosition = scrollTop + clientHeight;
+      const thirdWayPoint = (scrollHeight - clientHeight) / 3;
+      const halfwayPoint = (scrollHeight - clientHeight) * 0.5;
+      const tenWayPoint = (scrollHeight - clientHeight) * 0.9;
+
+      // 当滚动到一半时触发加载
+      // if(!doLoading.value && !loadAllData.value) {
+      if (!loadAllData.value) {
+        if (
+          scrollPosition >= thirdWayPoint ||
+          scrollPosition >= halfwayPoint ||
+          scrollPosition >= tenWayPoint
+        ) {
+          handleLoadMore(500, false);
+        }
       }
+
+      // if (scrollTop + clientHeight >= scrollHeight - 50 && !doLoading.value) {
+      //   handleLoadMore(500, false);
+      // }
     }
   };
   const throttledScroll = debounce(handleScroll, 700);
@@ -284,6 +321,21 @@
   // }
 
   /************************* 样例相关 ******************** */
+  const showDeleteConfirm = (id) => {
+    Modal.confirm({
+      title: '是否确认删除该样例?',
+      icon: createVNode(ExclamationCircleOutlined),
+      content: 'Some descriptions',
+      okText: 'Yes',
+      okType: 'danger',
+      cancelText: 'No',
+      onOk() {
+        delExample({ id: id });
+      },
+      onCancel() {},
+    });
+  };
+
   const waterfallRef = ref(null);
   const selectCategory = async (code, key) => {
     list.value.length = 0;
@@ -291,20 +343,23 @@
     drawingSampleForm.value.categoryCode = code;
     drawingSampleForm.value.key = key;
     drawingSampleForm.value.nextCursorId = '';
+    loadAllData.value = false;
     //执行查询
-    await handleLoadMore(500);
+    await handleLoadMore(500, true);
   };
 
   // 加载更多
-  async function handleLoadMore(cacheTime) {
+  const loadAllData = ref(false);
+  async function handleLoadMore(cacheTime, neededLoading) {
     if (drawingSampleForm.value.nextCursorId === '-1') {
-      message.warning('暂无更多数据！');
+      // message.warning('暂无更多数据！');
+      loadAllData.value = true;
       doLoading.value = false;
       return;
     }
 
     try {
-      doLoading.value = true;
+      doLoading.value = neededLoading;
       const more = await loadMore(drawingSampleForm.value);
       if (more && more.recordList && more.recordList.length > 0) {
         list.value.push(...more.recordList);
@@ -315,11 +370,11 @@
     } finally {
       // 延迟 1 秒后执行操作
       doLoading.value = false;
-      if (drawingSampleForm.value.nextCursorId != '-1') {
-        setTimeout(function () {
-          doLoading.value = false;
-        }, cacheTime);
-      }
+      // if (drawingSampleForm.value.nextCursorId != '-1') {
+      //   setTimeout(function () {
+      //     doLoading.value = false;
+      //   }, cacheTime);
+      // }
     }
   }
   /*********************************** 公告 ******************************** */

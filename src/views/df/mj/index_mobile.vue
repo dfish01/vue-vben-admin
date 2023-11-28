@@ -83,7 +83,7 @@
       </a-col>
     </a-row>
     <div>
-      <a-modal width="100%" v-model:visible="isShowWorkSpace" title="工作空间管理">
+      <a-modal width="100%" v-model:open="isShowWorkSpace" title="工作空间管理">
         <a-spin :spinning="compState.loading" tip="数据加载中...">
           <a-card :bodyStyle="{ padding: '0px' }" :bordered="false">
             <a-button
@@ -165,7 +165,7 @@
         style="width: 90%"
         ok-text="提交"
         @ok="onSubmitUserSpace"
-        v-model:visible="isShowUserSpaceSave"
+        v-model:open="isShowUserSpaceSave"
         title="工作空间保存"
       >
         <a-spin size="small" :spinning="compState.loading">
@@ -213,7 +213,7 @@
 
     <!-- 交流群 -->
     <a-modal
-      v-model:visible="communicateForm.viewFlag"
+      v-model:open="communicateForm.viewFlag"
       title="🐵扫码进群吧~"
       width="100%"
       :bodyStyle="{

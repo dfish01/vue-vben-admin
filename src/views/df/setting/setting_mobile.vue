@@ -181,7 +181,7 @@
       </a-row>
       <!-- 意见箱 -->
       <a-modal
-        v-model:visible="suggestForm.viewFlag"
+        v-model:open="suggestForm.viewFlag"
         title="📝建议与改进"
         width="100%"
         wrap-class-name="full-modal"
@@ -225,7 +225,7 @@
 
       <!-- 交流群 -->
       <a-modal
-        v-model:visible="communicateForm.viewFlag"
+        v-model:open="communicateForm.viewFlag"
         title="🐵扫码进群吧~"
         width="100%"
         :bodyStyle="{ padding: '0' }"
@@ -247,7 +247,7 @@
 
       <!-- 邀新 -->
       <a-modal
-        v-model:visible="inviteForm.viewFlag"
+        v-model:open="inviteForm.viewFlag"
         title="🛎活动合集~"
         width="100%"
         :bodyStyle="{ padding: '20px 10px 10px 10px' }"
@@ -303,7 +303,7 @@
       <!-- 邮箱模态窗 -->
       <a-modal
         title="更改绑定邮箱"
-        v-model:visible="viewAgg.emailShow"
+        v-model:open="viewAgg.emailShow"
         @ok="handleEmailSubmit"
         :confirm-loading="loading"
         ok-text="确认更改邮箱"
@@ -336,7 +336,7 @@
       <!-- 手机号模态窗 -->
       <a-modal
         title="更改绑定手机号"
-        v-model:visible="viewAgg.phoneShow"
+        v-model:open="viewAgg.phoneShow"
         @ok="handlePhoneSubmit"
         :confirm-loading="loading"
         ok-text="确认更改手机号"
@@ -369,7 +369,7 @@
       <!-- 密码模态窗 -->
       <a-modal
         title="更改密码"
-        v-model:visible="viewAgg.passwordShow"
+        v-model:open="viewAgg.passwordShow"
         @ok="handlePasswordSubmit"
         :confirm-loading="loading"
         ok-text="确认更改密码"

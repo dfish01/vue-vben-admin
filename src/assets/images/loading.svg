@@ -8,5 +8,7 @@
     <g fill="none" stroke="#12486b" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path fill="#12486b" fill-opacity="0" stroke-dasharray="48" stroke-dashoffset="48" d="M17 9v9a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V9z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="48;0"/><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.15s" values="0;0.3"/></path><path stroke-dasharray="14" stroke-dashoffset="14" d="M17 14H20C20.55 14 21 13.55 21 13V10C21 9.45 20.55 9 20 9H17"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="14;28"/></path></g><mask id="lineMdCoffeeTwotoneLoop0"><path fill="none" stroke="#fff" stroke-width="2" d="M8 0c0 2-2 2-2 4s2 2 2 4-2 2-2 4 2 2 2 4M12 0c0 2-2 2-2 4s2 2 2 4-2 2-2 4 2 2 2 4M16 0c0 2-2 2-2 4s2 2 2 4-2 2-2 4 2 2 2 4"><animateMotion calcMode="linear" dur="3s" path="M0 0v-8" repeatCount="indefinite"/></path></mask><rect width="24" height="0" y="7" fill="#12486b" mask="url(#lineMdCoffeeTwotoneLoop0)"><animate fill="freeze" attributeName="y" begin="0.8s" dur="0.6s" values="7;2"/><animate fill="freeze" attributeName="height" begin="0.8s" dur="0.6s" values="0;5"/></rect>
   </svg>
    <!-- 添加文本 "正在加载中..."，调整位置使其居中 -->
-  <text x="50%" y="200" text-anchor="middle"  fill="rgb(51 51 51 / 70%)"  font-size="12">任务已完成,图片加载中...</text>
+  <!-- <text x="50%" y="200" text-anchor="middle"  fill="rgb(51 51 51 / 70%)"  font-size="12">任务已完成,图片加载中...</text> -->
+
+  <text x="50%" y="200" text-anchor="middle"  fill="rgb(51 51 51 / 70%)"  font-size="12">图片正在加载中...</text>
 </svg>

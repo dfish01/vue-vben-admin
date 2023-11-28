@@ -52,7 +52,7 @@
       <a-modal
         ok-text="提交"
         @ok="onSubmitGroupForm"
-        v-model:visible="groupForm.viewFlag"
+        v-model:open="groupForm.viewFlag"
         title="账号组保存"
       >
         <a-spin size="small" :spinning="groupForm.loading">

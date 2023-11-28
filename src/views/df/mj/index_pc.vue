@@ -84,7 +84,17 @@
           </template>
 
           <a-tabs class="edit-tab" v-model="activeTab">
-            <a-tab-pane key="TextToImg" tab="🌕文生图">
+            <a-tab-pane key="TextToImg">
+              <template #tab>
+                <span>
+                  <Icon
+                    icon="streamline-emojis:robot-face-1"
+                    style="margin: 0"
+                    aria-hidden="true"
+                  />
+                  <b>文生图</b>
+                </span>
+              </template>
               <TextToImage
                 style="text-align: center"
                 @startLoading="startLoadingHandler"
@@ -92,14 +102,35 @@
                 :spaceId="currentSpace.id"
               />
             </a-tab-pane>
-            <a-tab-pane key="MixImage" tab="🌗混图">
+            <a-tab-pane key="MixImage">
+              <template #tab>
+                <span>
+                  <Icon
+                    icon="streamline-emojis:robot-face-2"
+                    style="margin: 0"
+                    aria-hidden="true"
+                  />
+                  <b>混图</b>
+                </span>
+              </template>
               <Blend
                 @startLoading="startLoadingHandler"
                 @endLoading="endLoadingHandler"
                 :spaceId="currentSpace.id"
               />
             </a-tab-pane>
-            <a-tab-pane key="Describe" tab="🌑解析图">
+            <a-tab-pane key="Describe">
+              <template #tab>
+                <span>
+                  <Icon
+                    icon="streamline-emojis:robot-face-3"
+                    style="margin: 0"
+                    aria-hidden="true"
+                  />
+                  <b>解析图</b>
+                </span>
+              </template>
+
               <Describe
                 @startLoading="startLoadingHandler"
                 @endLoading="endLoadingHandler"
@@ -122,7 +153,7 @@
       </a-col>
     </a-row>
     <div>
-      <a-modal width="80%" v-model:visible="isShowWorkSpace" title="工作空间管理">
+      <a-modal width="80%" v-model:open="isShowWorkSpace" title="工作空间管理">
         <template #footer>
           <a-button key="submit" :loading="compState.loading" @click="closeWorkSpace"
             >暂不操作</a-button
@@ -200,7 +231,7 @@
         style="width: 300px"
         ok-text="提交"
         @ok="onSubmitUserSpace"
-        v-model:visible="isShowUserSpaceSave"
+        v-model:open="isShowUserSpaceSave"
         title="工作空间保存"
       >
         <a-spin size="small" :spinning="compState.loading">
@@ -249,7 +280,7 @@
     <!-- Discord数据导入弹窗  -->
     <div>
       <a-modal
-        v-model:visible="importForm.viewFlag"
+        v-model:open="importForm.viewFlag"
         :confirmLoading="importForm.loading"
         @ok="importDiscordMessage()"
       >

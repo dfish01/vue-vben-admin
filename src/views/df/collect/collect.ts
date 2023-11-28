@@ -677,7 +677,7 @@ export function userSettingApi() {
     useUpImage: false,
     usePersonNet: false,
     taskRefresh: false,
-    cardShow: 'MULTI',
+    cardShow: 'SINGLE',
   });
 
   const setCardShow = (): void => {
