@@ -57,6 +57,7 @@
           <a-select
             @change="handleSetting('userAccountId', textToImgForm.useAccountId)"
             style="width: 100%; height: 32px"
+            placeholder="随机选取账号，优先默认"
             v-model:value="textToImgForm.useAccountId"
             :size="compRender.accountSelector.size"
             :options="compRender.accountSelector.options"
@@ -76,11 +77,20 @@
             v-model:value="textToImgForm.mode"
             style="width: 100%; height: 32px"
           >
-            <!-- <a-select-option value="">不设置</a-select-option> -->
             <a-select-option value="relax">休闲模式</a-select-option>
             <a-select-option value="fast">快速模式</a-select-option>
             <a-select-option value="turbo">涡轮模式</a-select-option>
           </a-select>
+        </a-col>
+      </a-row>
+      <a-row style="margin-top: 10px">
+        <a-col span="24">
+          <a-card>
+            <span style="font-size: 14px">
+              <Icon icon="streamline-emojis:bell" color="red" />
+              当上传图片时，请限制数量在5张以内，并请注意不要上传超过5M的图片。!
+            </span>
+          </a-card>
         </a-col>
       </a-row>
     </div>
@@ -105,6 +115,7 @@
   import { ref, reactive, computed, onMounted, toRefs, unref } from 'vue';
   import { PlusOutlined } from '@ant-design/icons-vue';
   import { message, UploadProps, Upload } from 'ant-design-vue';
+  import Icon from '/@/components/Icon/Icon.vue';
   import { addDrawTask } from '/@/api/df/drawTask';
   import { AddDrawTaskParams } from '/@/api/df/model/drawTaskModel';
   import type { UploadFile } from 'ant-design-vue/es/upload/interface';
@@ -166,7 +177,7 @@
 
   const textToImgForm = reactive({
     invokeTimes: 1,
-    useAccountId: '',
+    useAccountId: null,
     isPublic: false,
     mode: 'relax',
   });

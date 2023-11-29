@@ -57,6 +57,7 @@
           <a-select
             @change="handleSetting('userAccountId', textToImgForm.useAccountId)"
             style="width: 100%; height: 32px"
+            placeholder="随机选取账号，优先默认"
             v-model:value="textToImgForm.useAccountId"
             :size="compRender.accountSelector.size"
             :options="compRender.accountSelector.options"

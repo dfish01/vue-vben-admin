@@ -400,6 +400,10 @@ export function jobOptionApi() {
     refreshIfNecessary();
   };
 
+  const describeInfo = ref({
+    autoReferImage: false,
+  });
+
   const handleDraw = async (card, event) => {
     // 这里的 event.key 将是您点击的菜单项的 key
     console.log('handleDraw card: ${JSON.stringify(card)}');
@@ -426,6 +430,8 @@ export function jobOptionApi() {
       commandType: 'IMAGINE',
       invokeTimes: 1,
       prompt: {
+        autoReferImage: describeInfo.value.autoReferImage,
+        enableTranslate: false,
         prompt: prompt,
         paramsDataMap: {},
         paramsStr: '',
@@ -594,6 +600,7 @@ export function jobOptionApi() {
     showRemixCustomer,
     showPanRemixCustomer,
     doZoomCus,
+    describeInfo,
   };
   jobOptionApiInstance = api;
   return api;

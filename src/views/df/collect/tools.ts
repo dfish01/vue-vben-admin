@@ -39,7 +39,10 @@ export function copyText(text) {
   }
   doCopyText(text);
 }
-
+export const splitInInfo = (prompt) => {
+  const parts = prompt.split('\n\n').filter((part) => part.trim() !== '');
+  return parts;
+};
 //图片切割下载
 export function splitImage(card) {
   const imageUrl = card.taskImage.imageUrl;
@@ -108,6 +111,10 @@ export const tagColor = (status) => {
   }
 };
 
+export const splitInInfo = (prompt) => {
+  const parts = prompt.split('\n\n').filter((part) => part.trim() !== '');
+  return parts;
+};
 export const formattedPrompt = (prompt) => {
   const parts = prompt.split('\n\n').filter((part) => part.trim() !== '');
   return parts.map((part) => `<p>${part.trim()}</p>`).join('');

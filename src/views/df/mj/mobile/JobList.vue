@@ -656,7 +656,7 @@
                         </a-menu>
                       </template>
                       <a-button size="small" class="card-button">
-                        👩‍🎨绘图
+                        <Icon icon="streamline-emojis:woman-artist-2" style="margin: 0" /> 绘图
                         <DownOutlined />
                       </a-button>
                     </a-dropdown>
@@ -664,7 +664,7 @@
                       class="check"
                       style="margin-left: 5px"
                       v-model:checked="describeInfo.autoReferImage"
-                      >自动垫图</a-checkbox
+                      >垫图</a-checkbox
                     >
                   </div>
                 </div>
@@ -1270,6 +1270,7 @@
     showRemixCustomer,
     showPanRemixCustomer,
     doZoomCus,
+    describeInfo,
   } = jobOptionApi();
 
   const {

@@ -692,15 +692,16 @@
                         </a-menu>
                       </template>
                       <a-button size="small" class="card-button">
-                        👩‍🎨绘图
+                        <Icon icon="streamline-emojis:woman-artist-2" style="margin: 0" /> 绘图
                         <DownOutlined />
                       </a-button>
                     </a-dropdown>
-                    <a-checkbox
+                    <a-radio
                       class="check"
+                      v-if="needShow(card)"
                       style="margin-left: 5px"
-                      v-model:checked="describeInfo.autoReferImage"
-                      >自动垫图</a-checkbox
+                      v-model:value="describeInfo.autoReferImage"
+                      >垫图</a-radio
                     >
                   </div>
                 </div>
@@ -1207,10 +1208,27 @@
                 </a-button>
               </div>
             </a-descriptions-item>
-            <a-descriptions-item label="📔原始Prompt" :span="2">
+
+            <a-descriptions-item
+              label="📔原始Prompt"
+              :span="2"
+              v-if="infoData.taskInfo.commandTypeName === 'IMAGINE'"
+            >
               {{ infoData.taskInfo.oriPrompt }}
             </a-descriptions-item>
-            <a-descriptions-item label="📓执行Prompt" :span="2">
+            <a-descriptions-item
+              label="📓解析结果"
+              :span="2"
+              v-if="infoData.taskInfo.commandTypeName === 'DESCRIBE'"
+            >
+              <p
+                v-for="(item, index) in splitInInfo(infoData.taskInfo.contentStripped)"
+                :key="index"
+              >
+                {{ item }}<br />
+              </p>
+            </a-descriptions-item>
+            <a-descriptions-item label="📓执行Prompt" :span="2" v-else>
               {{ infoData.taskInfo.contentStripped }}
             </a-descriptions-item>
           </a-descriptions>
@@ -1315,6 +1333,7 @@
   import { api as viewerApi } from 'v-viewer';
   import Icon from '/@/components/Icon/Icon.vue';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
+  import { addSpaceTask, removeSpaceTask, allUserSpace } from '/@/api/df/workSpace';
   import {
     ref,
     computed,
@@ -1340,6 +1359,7 @@
     tagColor,
     formattedPrompt,
     splitPrompt,
+    splitInInfo,
     handleDownloadByUrl,
     handleDownloadByUrls,
     generateTooltipText,
@@ -1385,6 +1405,7 @@
     showRemixCustomer,
     showPanRemixCustomer,
     doZoomCus,
+    describeInfo,
   } = jobOptionApi();
 
   const {
@@ -1443,6 +1464,19 @@
     if (event.data === 'close_iframe') {
       varyRegionForm.value.viewFlag = false;
     }
+  };
+
+  const needShow = (card) => {
+    // 解析给定的时间字符串
+    const gmtFinishedDate = new Date(card.getGmtFinished);
+    // 获取当前时间
+    const currentDate = new Date();
+    // 计算时间差异（以毫秒为单位）
+    const timeDifference = currentDate - gmtFinishedDate;
+    // 将时间差异转换为天数
+    const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
+    // 判断时间差异是否不超过5天
+    return daysDifference <= 5;
   };
 
   const showSampleView = (card) => {
@@ -1506,6 +1540,82 @@
   onBeforeUnmount(() => {
     window.removeEventListener('message', handleMessage);
   });
+
+  /***********************添加到其他空间 ******************* */
+  const userSpaceTaskFormRef = ref();
+  const userSpaceTaskForm = ref({
+    viewFlag: false,
+    loading: false,
+    spaceId: null,
+    spaceTitle: null,
+    taskId: null,
+    spaceOptions: [] as { label: string; value: string }[],
+  });
+  const handleSpaceChange = async (value, option) => {
+    userSpaceTaskForm.value.spaceId = value;
+    userSpaceTaskForm.value.spaceTitle = option.label;
+  };
+
+  //移除空间卡片
+  const deleteSpaceCard = async (card, spaceId) => {
+    loadingRef.value = true;
+    try {
+      await removeSpaceTask({ spaceId: spaceId, taskIds: [card.id] });
+      if (infoData.id && infoData.id === card.id) {
+        infoData.taskSpaceList = infoData.taskSpaceList.filter((item) => item.spaceId !== spaceId);
+      } else {
+        jobListQueryApi().onSearch(jobListQueryApi().pagination.value.current);
+      }
+    } finally {
+      loadingRef.value = false;
+    }
+  };
+
+  const showUserSpaceTask = async (card) => {
+    userSpaceTaskForm.value.loading = true;
+    userSpaceTaskForm.value.viewFlag = true;
+    userSpaceTaskForm.value.taskId = card.id;
+    userSpaceTaskForm.value.spaceId = null;
+    try {
+      if (userSpaceTaskForm.value.spaceOptions.length === 0) {
+        const response = await allUserSpace({});
+        console.log(response);
+        // 使用 map 方法转换数组
+        const transformedList = response
+          .filter((item) => item.id !== spaceId.value)
+          .map((item) => ({
+            label: item.title,
+            value: item.id,
+          }));
+        // 如果您想在转换后的数组前面添加一个特定的对象，可以使用以下方法：
+        const finalList = [...transformedList];
+        userSpaceTaskForm.value.spaceOptions = finalList;
+      }
+    } finally {
+      userSpaceTaskForm.value.loading = false;
+    }
+  };
+
+  //添加空间卡片
+  const addSpaceCard = async () => {
+    userSpaceTaskForm.value.loading = true;
+    try {
+      await userSpaceTaskFormRef.value.validate();
+      await addSpaceTask({
+        spaceId: userSpaceTaskForm.value.spaceId,
+        taskIds: [userSpaceTaskForm.value.taskId],
+      });
+      userSpaceTaskForm.value.viewFlag = false;
+      if (infoData.id && infoData.id === userSpaceTaskForm.value.taskId) {
+        infoData.taskSpaceList.push({
+          spaceId: userSpaceTaskForm.value.spaceId,
+          spaceName: userSpaceTaskForm.value.spaceTitle,
+        });
+      }
+    } finally {
+      userSpaceTaskForm.value.loading = false;
+    }
+  };
 </script>
 
 <style scoped>

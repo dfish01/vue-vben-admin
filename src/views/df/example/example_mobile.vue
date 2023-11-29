@@ -202,7 +202,8 @@
   // import { directive as viewer } from 'v-viewer';
   import { api as viewerApi } from 'v-viewer';
   import { message } from 'ant-design-vue';
-  import loading from '/@/assets/images/lazy-loading.svg';
+  // import loading from '/@/assets/images/lazy-loading.svg';
+  import loading from '/@/assets/images/loading.svg';
   import error from '/@/assets/images/lazy-error.svg';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
   import { useRoute } from 'vue-router';

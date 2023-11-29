@@ -137,7 +137,16 @@
       </a-card>
     </a-modal>
     <!-- 授权列表 -->
-    <a-modal v-model:open="isAuthModalVisible" title="授权列表" @ok="closeAuthModal">
+    <a-modal v-model:open="isAuthModalVisible" @ok="closeAuthModal">
+      <template #title>
+        <Icon
+          icon="streamline-emojis:beaming-face-with-smiling-eyes"
+          class="vel-icon icon"
+          aria-hidden="true"
+        />
+        授权列表
+      </template>
+
       <a-table :dataSource="authList" :columns="authColumns" class="a-table">
         <template #header>
           <a-row>
@@ -190,6 +199,7 @@
     AccountListItem,
     ChangeAuthParams,
   } from '/@/api/df/model/accountModel';
+  import Icon from '/@/components/Icon/Icon.vue';
   import { queryList, changeAuth } from '/@/api/df/account';
   import AccountDetailsModal from './accountDetailsModal.vue';
 

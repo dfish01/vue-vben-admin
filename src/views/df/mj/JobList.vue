@@ -812,27 +812,29 @@
                     </a-dropdown>
                   </div>
                   <div v-if="card.state === 'SUCCESS' && card.commandType === 'DESCRIBE'">
-                    <a-dropdown>
-                      <template #overlay>
-                        <a-menu @click="($event) => handleDraw(card, $event)">
-                          <a-menu-item key="0">1️⃣ Prompt</a-menu-item>
-                          <a-menu-item key="1">2️⃣ Prompt</a-menu-item>
-                          <a-menu-item key="2">3️⃣ Prompt</a-menu-item>
-                          <a-menu-item key="3">4️⃣ Prompt</a-menu-item>
-                          <a-menu-item key="4">全部 Prompt</a-menu-item>
-                        </a-menu>
-                      </template>
-                      <a-button size="small" class="card-button">
-                        👩‍🎨绘图
-                        <DownOutlined />
-                      </a-button>
-                    </a-dropdown>
-                    <!-- <a-checkbox
-                      class="check"
-                      style="margin-left: 5px"
-                      v-model:checked="describeInfo.autoReferImage"
-                      >自动垫图</a-checkbox
-                    > -->
+                    <a-row>
+                      <a-dropdown>
+                        <template #overlay>
+                          <a-menu @click="($event) => handleDraw(card, $event)">
+                            <a-menu-item key="0">1️⃣ Prompt</a-menu-item>
+                            <a-menu-item key="1">2️⃣ Prompt</a-menu-item>
+                            <a-menu-item key="2">3️⃣ Prompt</a-menu-item>
+                            <a-menu-item key="3">4️⃣ Prompt</a-menu-item>
+                            <a-menu-item key="4">全部 Prompt</a-menu-item>
+                          </a-menu>
+                        </template>
+                        <a-button size="small" class="card-button">
+                          <Icon icon="streamline-emojis:woman-artist-2" style="margin: 0" /> 绘图
+                        </a-button>
+                      </a-dropdown>
+                      <a-radio
+                        class="check"
+                        v-if="needShow(card)"
+                        style="margin-left: 5px"
+                        v-model:value="describeInfo.autoReferImage"
+                        >垫图</a-radio
+                      >
+                    </a-row>
                   </div>
                 </div>
               </a-button-group>
@@ -1394,15 +1396,20 @@
           <a-descriptions-item
             label="📔原始Prompt"
             :span="2"
-            :contentStyle="{ 'max-width': '75%', 'overflow-wrap': 'break-word' }"
+            v-if="infoData.taskInfo.commandTypeName === 'IMAGINE'"
           >
             {{ infoData.taskInfo.oriPrompt }}
           </a-descriptions-item>
           <a-descriptions-item
-            label="📓执行Prompt"
+            label="📓解析结果"
             :span="2"
-            :contentStyle="{ 'max-width': '75%', 'overflow-wrap': 'break-word' }"
+            v-if="infoData.taskInfo.commandTypeName === 'DESCRIBE'"
           >
+            <p v-for="(item, index) in splitInInfo(infoData.taskInfo.contentStripped)" :key="index">
+              {{ item }}<br />
+            </p>
+          </a-descriptions-item>
+          <a-descriptions-item label="📓执行Prompt" :span="2" v-else>
             {{ infoData.taskInfo.contentStripped }}
           </a-descriptions-item>
         </a-descriptions>
@@ -1569,6 +1576,7 @@
     tagColor,
     formattedPrompt,
     splitPrompt,
+    splitInInfo,
     handleDownloadByUrl,
     generateTooltipText,
   } from './tools';
@@ -1646,6 +1654,8 @@
     onHide,
   } = lightBoxApi();
 
+  const autoReferImage = ref(false);
+
   //页面高度处理
   const button = ref(null);
   const substractSpaceRefs = ref([]);
@@ -1692,6 +1702,19 @@
       varyRegionForm.value.viewFlag = false;
       message.success('提交成功');
     }
+  };
+
+  const needShow = (card) => {
+    // 解析给定的时间字符串
+    const gmtFinishedDate = new Date(card.getGmtFinished);
+    // 获取当前时间
+    const currentDate = new Date();
+    // 计算时间差异（以毫秒为单位）
+    const timeDifference = currentDate - gmtFinishedDate;
+    // 将时间差异转换为天数
+    const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
+    // 判断时间差异是否不超过5天
+    return daysDifference <= 5;
   };
 
   onMounted(() => {

@@ -677,12 +677,20 @@
     </a-modal>
 
     <!-- 授权列表 -->
-    <a-modal v-model:open="authListForm.isAuthModalVisible" title="授权列表" width="75%">
+    <a-modal v-model:open="authListForm.isAuthModalVisible" width="75%">
+      <template #title>
+        <Icon
+          icon="streamline-emojis:beaming-face-with-smiling-eyes"
+          class="vel-icon icon"
+          aria-hidden="true"
+        />
+        授权列表
+      </template>
       <template #footer>
         <a-button key="submit" type="primary" @click="closeAuthModal">已知晓</a-button>
       </template>
       <Loading :loading="authListForm.loading" :absolute="true" tip="数加载中..." />
-      <div style="width: 100%; overflow-x: auto">
+      <div style="width: 100%; padding: 10px; overflow-x: auto">
         <a-table :dataSource="authListTableData" class="a-table" :scroll="{ x: 'max-content' }">
           <a-table-column
             v-for="column in authColumns"
@@ -693,19 +701,6 @@
           />
         </a-table>
       </div>
-    </a-modal>
-
-    <!-- 账号组 -->
-    <a-modal
-      v-model:open="accountGroup"
-      title="🎈账号组管理"
-      :style="{ width: '100%', height: '70vh' }"
-      ok-text="立即新增"
-      @ok="onActiveAccount"
-    >
-      <template #footer> </template>
-      <!-- <AccountGroup /> -->
-      <Discord />
     </a-modal>
 
     <!-- 详情模态窗口组件 -->

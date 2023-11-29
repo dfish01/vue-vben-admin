@@ -41,6 +41,7 @@
           <a-select
             @change="handleSetting('userAccountId', textToImgForm.useAccountId)"
             style="width: 100%; height: 32px"
+            placeholder="随机选取账号，优先默认"
             v-model:value="textToImgForm.useAccountId"
             :size="compRender.accountSelector.size"
             :options="compRender.accountSelector.options"
@@ -259,7 +260,7 @@
         throw new Error('只能上传图片文件！');
       }
       // 获取图片文件的大小
-      const isLt5M = file.size / 1024 / 1024 <script 5;
+      const isLt5M = file.size / 1024 / 1024 < 5;
       if (!isLt5M) {
         throw new Error('图片大小不能超过5MB！');
       }
@@ -319,7 +320,7 @@
       textFormLoading.value = false;
     }
   };
-</script>
+</script >
 
 <style scoped>
   /* 媒体查询 */
