@@ -1706,7 +1706,7 @@
 
   const needShow = (card) => {
     // 解析给定的时间字符串
-    const gmtFinishedDate = new Date(card.getGmtFinished);
+    const gmtFinishedDate = new Date(card.gmtFinished);
     // 获取当前时间
     const currentDate = new Date();
     // 计算时间差异（以毫秒为单位）
@@ -1714,6 +1714,7 @@
     // 将时间差异转换为天数
     const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
     // 判断时间差异是否不超过5天
+    console.log('needShow ' + daysDifference);
     return daysDifference <= 5;
   };
 
