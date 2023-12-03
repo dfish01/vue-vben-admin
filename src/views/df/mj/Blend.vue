@@ -311,7 +311,6 @@
     const addTaskParam: AddDrawTaskParams = {
       spaceId: spaceId.value,
       refAccountId: accountForm.useAccountId,
-      refChannelId: accountForm.useChannelId,
       channel: 'MJ',
       priority: 0,
       // refTaskId: null,
@@ -320,6 +319,7 @@
       commandType: 'BLEND',
       invokeTimes: textToImgForm.invokeTimes,
       prompt: {
+        useChannelId: accountForm.useChannelId,
         base64Array: base64Images.value,
         commandType: 'BLEND',
         dimensionsStr: compRender.dimensionSelector.value,

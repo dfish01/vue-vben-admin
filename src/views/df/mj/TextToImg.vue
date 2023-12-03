@@ -1461,7 +1461,6 @@
         const addTaskParam: AddDrawTaskParams = {
           spaceId: spaceId.value,
           refAccountId: accountForm.useAccountId,
-          refChannelId: accountForm.channelId,
           channel: 'MJ',
           priority: 0,
           // refTaskId: null,
@@ -1470,6 +1469,7 @@
           invokeTimes: textToImgForm.invokeTimes,
           tagNames: textToImgForm.tagName,
           prompt: {
+            useChannelId: accountForm.useChannelId,
             base64Array: base64Images.value,
             paramsDataMap: paramDataValue.value,
             prompt: textToImgForm.command,

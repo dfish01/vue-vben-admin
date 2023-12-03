@@ -104,7 +104,7 @@ export function accountInfoApi() {
     setting['userAccountId'] = value;
     setting['userAccountName'] = option.label;
     userStore.syncSetting(setting);
-
+    accountForm.useChannelId = null;
     await doGetChannelsByGroup(value);
   };
 
