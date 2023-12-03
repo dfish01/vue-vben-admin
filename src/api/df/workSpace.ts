@@ -12,6 +12,7 @@ enum Api {
   SaveUserSpace = '/open/userSpace/saveOrUpdate',
   AllUserSpace = '/open/userSpace/list',
   Delete = '/open/userSpace/delete',
+  SetTop = '/open/userSpace/setTop',
 
   ChannelList = '/open/userSpace/channelList',
   ImportDiscordMessage = '/open/userSpace/importDiscordMessage',
@@ -20,6 +21,25 @@ enum Api {
   RemoveSpaceTask = '/open/userSpace/removeSpaceTask',
 
   GenCode = '/open/userSpace/genCode',
+}
+
+/**
+ * 置顶
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function setTop(params: IdReq, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<string>(
+    {
+      url: Api.SetTop,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+      successMessageMode: mode,
+    },
+  );
 }
 
 /**

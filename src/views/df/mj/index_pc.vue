@@ -203,15 +203,19 @@
                       cancel-text="取消"
                       @confirm="deleteHandle(record.id)"
                     >
-                      <a-button type="primary" danger v-if="record.defaultFlag === 'N'"
-                        >删除</a-button
-                      >
+                      <a-button type="primary" danger v-if="record.sort != 0">删除</a-button>
                     </a-popconfirm>
                     <a-button
                       type="warning"
                       @click="addUserSpace(record)"
                       v-if="record.defaultFlag === 'N'"
                       >编辑</a-button
+                    >
+                    <a-button
+                      :loading="compState.loading"
+                      @click="doSetTop(record)"
+                      v-if="record.sort != 0"
+                      >置顶</a-button
                     >
 
                     <a-button @click="selectSpace(record)">选择</a-button>
@@ -453,6 +457,7 @@
     importMessage,
     channelList,
     genCode,
+    setTop,
   } from '/@/api/df/workSpace';
 
   import {
@@ -461,7 +466,6 @@
     ImportDiscordMessageReq,
     DiscordChannel,
   } from '/@/api/df/model/workSpaceModel';
-  import { availableList } from '/@/api/df/account';
   import { useRoute } from 'vue-router';
   import { useUserStore } from '/@/store/modules/user';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -580,6 +584,16 @@
     tip: '加载中...',
   });
 
+  const doSetTop = async (record) => {
+    compState.loading = true;
+    try {
+      await setTop({ id: record.id });
+      querySpace();
+    } finally {
+      compState.loading = false;
+    }
+  };
+
   //显示工作空间
   const doGenCode = async (record, placement: NotificationPlacement) => {
     const result = await genCode({ id: record.id });
@@ -684,8 +698,12 @@
   const deleteHandle = async (id) => {
     compState.loading = true;
     console.log('Form is valid, submitting...');
-    await deleteSpace({ id });
-    querySpace();
+    try {
+      await deleteSpace({ id });
+      querySpace();
+    } finally {
+      compState.loading = false;
+    }
   };
 </script>
 

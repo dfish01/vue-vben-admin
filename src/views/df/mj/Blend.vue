@@ -55,12 +55,32 @@
         </a-col>
         <a-col span="18">
           <a-select
-            @change="handleSetting('userAccountId', textToImgForm.useAccountId)"
+            @change="handleSetting('userAccountId', accountForm.useAccountId)"
             style="width: 100%; height: 32px"
             placeholder="随机选取账号，优先默认"
-            v-model:value="textToImgForm.useAccountId"
-            :size="compRender.accountSelector.size"
-            :options="compRender.accountSelector.options"
+            v-model:value="accountForm.useAccountId"
+            :size="accountForm.accountSelector.size"
+            :options="accountForm.accountSelector.options"
+          />
+        </a-col>
+      </a-row>
+      <a-row style="margin-top: 10px" v-if="accountForm.useAccountId">
+        <a-col span="6">
+          <a-tooltip
+            title="不指定频道的话，默认账户组中的频道。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
+          >
+            <a-tag class="quality-tag tag-no-right-border" color="default">执行频道</a-tag>
+          </a-tooltip>
+        </a-col>
+
+        <a-col span="18">
+          <a-select
+            style="width: 100%"
+            @change="handleSetting('useChannelId', accountForm.useChannelId)"
+            placeholder="请选择ChannelId"
+            v-model:value="accountForm.useChannelId"
+            :size="accountForm.accountSelector.size"
+            :options="accountForm.channelSelector.options"
           />
         </a-col>
       </a-row>
@@ -73,8 +93,8 @@
         </a-col>
         <a-col span="18">
           <a-select
-            @change="handleSetting('mode', textToImgForm.mode)"
-            v-model:value="textToImgForm.mode"
+            @change="handleAccountSetting"
+            v-model:value="accountForm.mode"
             style="width: 100%; height: 32px"
           >
             <a-select-option value="relax">休闲模式</a-select-option>
@@ -120,15 +140,17 @@
   import { AddDrawTaskParams } from '/@/api/df/model/drawTaskModel';
   import type { UploadFile } from 'ant-design-vue/es/upload/interface';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
-  import { queryList, availableList } from '/@/api/df/account';
-  import { useUserStore } from '/@/store/modules/user';
+  import { queryList, availableList, getChannelsByGroup } from '/@/api/df/account';
+  import { accountInfoApi } from './accountInfo';
 
-  const userStore = useUserStore();
-  const handleSetting = (key, value) => {
-    const setting = {};
-    setting[key] = value;
-    userStore.syncSetting(setting);
-  };
+  const {
+    accountForm,
+    initAccountList,
+    initAccountInfo,
+    doGetChannelsByGroup,
+    handleAccountSetting,
+    handleSetting,
+  } = accountInfoApi();
 
   //初始化加载
   const props = defineProps({
@@ -158,47 +180,16 @@
     offsetHeightRef,
   );
 
-  const onSearchAccountList = async () => {
-    const response = await availableList({
-      accMode: '',
-      ownerFlag: '',
-    });
-
-    // 使用 map 方法转换数组
-    const transformedList = response.map((item) => ({
-      label: item.accountName,
-      value: item.id,
-    }));
-
-    // 如果您想在转换后的数组前面添加一个特定的对象，可以使用以下方法：
-    const finalList = [...transformedList];
-    compRender.accountSelector.options = finalList;
-  };
-
   const textToImgForm = reactive({
     invokeTimes: 1,
-    useAccountId: null,
     isPublic: false,
-    mode: 'relax',
   });
-  onMounted(async () => {
-    //查询可用账户
-    onSearchAccountList();
-    //初始化偏好
-    const getPersonalSetting = userStore.getPersonalSetting;
-    console.log('getPersonalSetting ' + getPersonalSetting);
-    if (getPersonalSetting) {
-      textToImgForm.mode = getPersonalSetting.mode;
-      const isAvaliable = compRender.accountSelector.options.some((obj) =>
-        obj.value.includes(getPersonalSetting.userAccountId),
-      );
-      if (isAvaliable) {
-        textToImgForm.useAccountId = getPersonalSetting.userAccountId;
-      } else {
-        userStore.syncSetting({ userAccountId: '' });
-      }
-    }
-  });
+  // onMounted(async () => {
+  //   //查询可用账户
+  //   await initAccountList();
+  //   //初始化偏好
+  //   initAccountInfo();
+  // });
 
   const emit = defineEmits(['startLoading', 'endLoading']);
   const previewVisible = ref(false);
@@ -232,15 +223,7 @@
         // { label: 'insightface', value: '936929561302675456' },
       ],
     },
-    accountSelector: {
-      value: '',
-      size: 'default',
-      options: [
-        { label: '随机', value: '' },
-        // { label: 'niji・journey', value: 'niji・journey' },
-        // { label: 'insightface', value: 'insightface' },
-      ],
-    },
+
     dimensionSelector: {
       value: 'SQUARE',
       size: 'default',
@@ -327,12 +310,13 @@
   const startDrawing = async () => {
     const addTaskParam: AddDrawTaskParams = {
       spaceId: spaceId.value,
-      refAccountId: textToImgForm.useAccountId,
+      refAccountId: accountForm.useAccountId,
+      refChannelId: accountForm.useChannelId,
       channel: 'MJ',
       priority: 0,
       // refTaskId: null,
       privacyMode: 'Y',
-      mode: textToImgForm.mode,
+      mode: accountForm.mode,
       commandType: 'BLEND',
       invokeTimes: textToImgForm.invokeTimes,
       prompt: {

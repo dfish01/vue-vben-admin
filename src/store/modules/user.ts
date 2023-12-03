@@ -52,6 +52,7 @@ export const useUserStore = defineStore({
     sessionTimeout: false,
     // Last fetch time
     lastUpdateTime: 0,
+
     personalSetting: null,
   }),
   getters: {
@@ -143,12 +144,14 @@ export const useUserStore = defineStore({
         return Promise.reject(error);
       }
     },
+    //这里定义的属性才生效
     async getSetting(): Promise<PersonalSetting> {
       let oldSetting = this.getPersonalSetting;
       if (oldSetting === null || Object.keys(oldSetting).length === 0) {
         oldSetting = {
           mode: 'relax',
-          userAccountId: '',
+          userAccountId: null,
+          useChannelId: null,
           userAccountName: '',
           spaceId: '',
           spaceName: '',

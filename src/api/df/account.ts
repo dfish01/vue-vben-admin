@@ -29,11 +29,30 @@ enum Api {
   SetDefault = '/open/accountDiscord/setDefault',
   GetGroupAccounts = '/open/accountDiscord/getGroupAccounts',
   GetGroupDiscords = '/open/accountDiscord/getGroupDiscords',
+  GetChannelsByGroup = '/open/accountDiscord/getChannelsByGroup',
 
   QueryGroupList = '/open/discordGroup/listGroup',
   AddToGroup = '/open/discordGroup/addToGroup',
   SaveGroup = '/open/discordGroup/saveGroup',
   RemoveGroupAccount = '/open/discordGroup/removeGroupAccount',
+}
+
+/**
+ * 账户组下面的可用渠道列表
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function getChannelsByGroup(params: IdReq, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<any[]>(
+    {
+      url: Api.GetChannelsByGroup,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
 }
 
 /**

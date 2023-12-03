@@ -2,6 +2,17 @@ import { ErrorTypeEnum } from '/@/enums/exceptionEnum';
 import { MenuModeEnum, MenuTypeEnum } from '/@/enums/menuEnum';
 import { RoleInfo } from '/@/api/sys/model/userModel';
 
+export interface PersonalSetting {
+  mode?: string;
+  userAccountId?: string | null;
+  useChannelId?: string | null;
+  userAccountName?: string;
+  spaceId?: string;
+  spaceName?: string;
+  useUpImage?: string;
+  usePersonNet?: string;
+  taskRefresh?: string;
+}
 // Lock screen information
 export interface LockInfo {
   // Password required

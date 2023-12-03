@@ -135,9 +135,7 @@
                       cancel-text="取消"
                       @confirm="deleteHandle(record.id)"
                     >
-                      <a-button type="primary" danger v-if="record.defaultFlag === 'N'"
-                        >删除</a-button
-                      >
+                      <a-button type="primary" danger v-if="record.sort != 0">删除</a-button>
                     </a-popconfirm>
                     <a-button
                       type="primary"
@@ -146,6 +144,13 @@
                       size="small"
                       >编辑</a-button
                     >
+                    <a-button
+                      @click="doSetTop(record)"
+                      v-if="record.sort != 0"
+                      :loading="compState.loading"
+                      >置顶</a-button
+                    >
+
                     <a-button @click="selectSpace(record)" size="small">选择</a-button>
                   </a-button-group>
                 </template>
@@ -250,7 +255,7 @@
   import Describe from './mobile/Describe.vue';
   import { SettingOutlined, CloudSyncOutlined, ClusterOutlined } from '@ant-design/icons-vue';
   import { WorkSpaceListResp, WorkSpaceSaveReq } from '/@/api/df/model/workSpaceModel'; // 请替换为您的请求模型路径
-  import { saveUserSpace, deleteSpace, allUserSpace } from '/@/api/df/workSpace';
+  import { saveUserSpace, deleteSpace, allUserSpace, setTop } from '/@/api/df/workSpace';
   import { addSuggest, communicateInfo } from '/@/api/df/utils';
   import { useGo } from '/@/hooks/web/usePage';
   import { useRoute } from 'vue-router';
@@ -302,6 +307,16 @@
     tip: '加载中...',
   });
 
+  const doSetTop = async (record) => {
+    compState.loading = true;
+    try {
+      await setTop({ id: record.id });
+      querySpace();
+    } finally {
+      compState.loading = false;
+    }
+  };
+
   const isShowWorkSpace = ref(false);
   const isShowUserSpaceSave = ref(false);
   const userSpaceFormRef = ref();
@@ -339,11 +354,13 @@
   //工作空间列表
   const querySpace = async () => {
     compState.loading = true;
-
-    const response = await allUserSpace({});
-    console.log(response);
-    tableData.value = response;
-    compState.loading = false;
+    try {
+      const response = await allUserSpace({});
+      console.log(response);
+      tableData.value = response;
+    } finally {
+      compState.loading = false;
+    }
   };
 
   const selectSpace = (item) => {
@@ -398,8 +415,12 @@
   const deleteHandle = async (id) => {
     compState.loading = true;
     console.log('Form is valid, submitting...');
-    await deleteSpace({ id });
-    querySpace();
+    try {
+      await deleteSpace({ id });
+      querySpace();
+    } finally {
+      compState.loading = false;
+    }
   };
 
   /****************************** 交流群 ******************************** */
