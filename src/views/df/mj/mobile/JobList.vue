@@ -1270,7 +1270,6 @@
     showRemixCustomer,
     showPanRemixCustomer,
     doZoomCus,
-    describeInfo,
   } = jobOptionApi();
 
   const {

@@ -1160,11 +1160,22 @@
           <a-row style="padding: 15px">
             <a-col span="24">
               <a-radio-group v-model:value="modelData.promptCategory" button-style="solid">
-                <a-radio-button value="NIJI">二次元</a-radio-button>
+                <a-radio-button value="NIJI_ANIME">动漫</a-radio-button>
+                <a-radio-button value="NIJI_COMIC">漫画</a-radio-button>
                 <a-radio-button value="MIDJOURNEY">摄影师</a-radio-button>
+                <a-radio-button value="CUSTOM">自定义</a-radio-button>
               </a-radio-group>
             </a-col>
-
+            <a-col span="24" v-if="modelData.promptCategory === 'CUSTOM'">
+              <a-textarea
+                style="width: 99%"
+                v-model:value="modelData.promptMask"
+                placeholder="预设内容。比如：你将扮演一个漫画师。你将在一行中写下描述，不使用换行符。首先是图片概念描绘什么画面内容，流畅的附加这些关键字：绘画风格、绘画工具、构图、布局、色调等。控制在2-6行文字以内。然后内容后附加：“--ar ”画面比例整数用冒号隔开“ --niji 5 ” 如果觉得风格偏美式在内容结尾继续添加“ --style expressive ”。注意：返回英文结果。"
+                allow-clear
+                :maxlength="120"
+                :auto-size="{ minRows: 1, maxRows: 2 }"
+              />
+            </a-col>
             <a-col span="24" style="margin-top: 10px">
               <a-textarea
                 style="width: 99%"
@@ -1297,7 +1308,8 @@
     promptSpinning: false,
     aiInputText: null,
     aiOutputText: null,
-    promptCategory: 'NIJI',
+    promptCategory: 'NIJI_ANIME',
+    promptMask: null,
     tip: '加载中...',
   });
 
@@ -1332,15 +1344,31 @@
     }
   };
   const genPrompt = async () => {
+    if (modelData.promptCategory === null || modelData.promptCategory === '') {
+      message.error('请选择生成的预设类别！');
+      return;
+    }
+    if (
+      modelData.promptCategory === 'CUSTOM' &&
+      (modelData.promptMask === '' || modelData.promptMask === null)
+    ) {
+      message.error('请选输入预设内容！');
+      return;
+    }
+    if (modelData.aiInputText === null || modelData.aiInputText === '') {
+      message.error('Prompt关键词不能为空！');
+      return;
+    }
+
     modelData.promptSpinning = true;
     modelData.tip = '正在生成Prompt...';
     try {
       const response = await aiPrompt({
         prompt: modelData.aiInputText,
+        promptMask: modelData.promptMask,
         promptCategory: modelData.promptCategory,
         translateTo: null,
       });
-      console.log('--------------------');
       modelData.aiOutputText = response;
       modelData.translateText = null;
     } finally {

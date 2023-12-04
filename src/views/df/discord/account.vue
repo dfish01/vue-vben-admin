@@ -74,7 +74,7 @@
       <div v-for="card in tableData" :key="card.id" :trigger="['contextmenu']">
         <a-badge-ribbon
           :text="card.ownerFlag == 'Y' ? '主账号' : '授权'"
-          :color="card.ownerFlag == 'Y' ? 'yellow' : ''"
+          :color="card.ownerFlag == 'Y' ? 'red' : ''"
         >
           <a-card :bodyStyle="{ padding: '0px' }" class="card account-card" hoverable>
             <template #extra>

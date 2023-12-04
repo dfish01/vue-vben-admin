@@ -77,10 +77,12 @@
                   size="13"
                 />
                 <span style="font-size: 12px">
-                  类型： {{ card.authType === 'O' ? '主账号' : '授权' }}</span
-                ></span
-              >
-
+                  类型：
+                  <a-tag size="small" :color="card.authType === 'O' ? 'red' : 'green'">
+                    {{ card.authType === 'O' ? '主账号' : '授权' }}</a-tag
+                  >
+                </span>
+              </span>
               <span>
                 <a-button
                   v-if="card.state === 'Y'"
