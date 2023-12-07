@@ -69,7 +69,7 @@
                 "
                 ><a-tooltip title="🍧导入DISCORD记录，可以将discord的图片导入进来进行管理哦~">
                   <a-button @click="showImportView" style="padding: 0 5px; border-radius: 5px"
-                    ><Icon icon="mingcute:discord-line" size="22"
+                    ><Icon icon="skill-icons:discord" size="22"
                   /></a-button>
                 </a-tooltip>
                 <a-tooltip title="🥃工作空间管理，各空间数据隔离，后续可邀请好友加入你的空间~">

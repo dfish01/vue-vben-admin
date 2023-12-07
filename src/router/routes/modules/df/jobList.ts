@@ -20,7 +20,7 @@ const jobList: AppRouteModule = {
     {
       path: 'index/:spaceId/:spaceTitle',
       name: 'JobListPage',
-      component: () => import('/@/views/df/mj/mobile/jobList.vue'),
+      component: () => import('/@/views/df/mj/mobile/JobList.vue'),
       meta: {
         icon: 'ant-design:comment-outlined',
         title: t('routes.app.jobList.pageTitle'),

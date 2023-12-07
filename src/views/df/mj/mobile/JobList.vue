@@ -270,19 +270,155 @@
             </div>
           </div>
           <div v-if="card.state === 'SUCCESS'">
-            <img
-              @click="showImage(card)"
-              v-lazy.container="
-                userSetting.useUpImage ? card.taskImage.imageUrl : card.taskImage.mediaImageUrl
-              "
-              class="card-image img-box"
-              :preview="{
-                src: card.taskImage.imageUrl,
-              }"
-              fallback=""
-              alt=""
-            />
+            <div v-if="userSetting.cardShow === 'MULTI'">
+              <a-card
+                :bodyStyle="{ padding: '0px' }"
+                class="my-transparent-card"
+                style="width: 100%; border: none; background: transparent"
+                v-if="card.taskImage.infoImageList.length > 1"
+                :bordered="false"
+                :hoverable="false"
+              >
+                <a-card-grid
+                  v-for="infoImage in card.taskImage.infoImageList"
+                  :key="infoImage.url"
+                  style="
+                    position: relative;
+                    width: 49%;
+                    margin: 1px;
+                    padding: 0;
+                    border-radius: 15px;
+                    text-align: center;
+                  "
+                >
+                  <!-- <div
+                    v-show="!infoImage.loaded"
+                    :style="{
+                      width: '100%',
+                      height: '100%',
+                      paddingBottom: `${
+                        (card.taskImage.imageHeight / card.taskImage.imageWidth) * 100
+                      }%`,
+                    }"
+                  >
+                    <SvgIcon
+                      name="loading"
+                      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
+                    />
+                  </div> -->
+                  <img
+                    @click="showInfoImage(getImageList(card), infoImage.url)"
+                    v-lazy.container="infoImage.mediaUrl"
+                    style="max-width: 100%; border-radius: 15px"
+                    alt=""
+                    @load="imageLoaded(infoImage)"
+                  />
+                </a-card-grid>
+              </a-card>
+              <a-card
+                :bodyStyle="{ padding: '0px' }"
+                style="width: 100%"
+                :bordered="false"
+                :hoverable="false"
+                class="my-transparent-card"
+                v-else
+                ><a-card-grid
+                  v-for="infoImage in card.taskImage.infoImageList"
+                  :key="infoImage.url"
+                  style="width: 100%; padding: 0; border-radius: 15px; text-align: center"
+                >
+                  <img
+                    @click="showInfoImage(getImageList(card), infoImage.url)"
+                    v-lazy.container="infoImage.mediaUrl"
+                    style="max-width: 100%; border-radius: 15px"
+                    alt=""
+                    @load="imageLoaded(card)"
+                  />
+                </a-card-grid>
+              </a-card>
+            </div>
+            <div v-else>
+              <a-card
+                :bodyStyle="{ padding: '0px' }"
+                class="my-transparent-card"
+                style="width: 100%; border: none; background: transparent"
+                :bordered="false"
+                :hoverable="false"
+              >
+                <img
+                  @click="showTaskInfo(card)"
+                  v-lazy.container="card.taskImage.mediaImageUrl"
+                  fallback=""
+                  alt=""
+                  @load="imageLoaded(card)"
+                />
+              </a-card>
+            </div>
           </div>
+
+          <div
+            v-if="card.state != 'SUCCESS'"
+            style="
+              display: flex;
+              position: absolute;
+              bottom: 35px;
+              flex-direction: row;
+              justify-content: center;
+              width: 100%;
+            "
+          >
+            <a-button-group size="small" buttonStyle="solid">
+              <a-tooltip title="" v-if="card.state === 'FAILED'">
+                <a-popconfirm
+                  title="是否重新提交该任务?"
+                  ok-text="重新提交"
+                  cancel-text="取消"
+                  @confirm="doRetryDrawTask(card)"
+                >
+                  <a-button class="card-icon-button">
+                    <Icon icon="pajamas:retry" size="14" color="#4F709C" />
+                  </a-button>
+                </a-popconfirm>
+              </a-tooltip>
+              <a-tooltip v-if="card.prompt" :overlayStyle="{ maxWidth: '500px' }" trigger="click">
+                <template #title>
+                  <p v-for="(part, index) in card.prompt.split('\n\n')" :key="index">{{
+                    part.trim()
+                  }}</p>
+                </template>
+                <a-button class="card-icon-button">
+                  <Icon icon="ic:outline-info" size="14" color="#FFCC70" />
+                </a-button>
+              </a-tooltip>
+              <a-tooltip>
+                <template #title>
+                  <p
+                    style="margin: 5px; font-size: 12px; line-height: 1"
+                    v-for="(part, index) in generateTooltipText(card)"
+                    :key="index"
+                  >
+                    {{ part.trim() }}
+                  </p>
+                </template>
+                <a-button class="card-icon-button">
+                  <Icon icon="ic:baseline-add-alarm" size="14" color="#EE9322" />
+                </a-button>
+              </a-tooltip>
+              <a-tooltip title="删除">
+                <a-popconfirm
+                  title="该操作将永久删除任务，是否确认删除?"
+                  ok-text="确认删除"
+                  cancel-text="取消"
+                  @confirm="deleteCard(card)"
+                >
+                  <a-button class="card-icon-button">
+                    <Icon icon="ic:baseline-delete-forever" size="14" color="#FF6969" />
+                  </a-button>
+                </a-popconfirm>
+              </a-tooltip>
+            </a-button-group>
+          </div>
+
           <div
             v-if="card.state != 'SUCCESS'"
             style="
@@ -1158,6 +1294,249 @@
         </a-card>
       </a-spin>
     </a-modal>
+
+    <!-- 查看明细  -->
+    <a-modal
+      title="任务概况"
+      v-model:open="infoData.viewFlag"
+      width="100%"
+      wrap-class-name="full-modal"
+    >
+      <template #footer>
+        <a-button key="submit" type="primary" :loading="loadingRef" @click="closeTaskInfo"
+          >已知晓</a-button
+        >
+      </template>
+      <a-card :bodyStyle="{ padding: '0px 5px' }" :bordered="false">
+        <a-card-grid
+          style="display: flex; justify-content: center; width: 100%; text-align: center"
+          :bodyStyle="{ padding: '0px 0px 0px 0px' }"
+          bordered="true"
+          :hoverable="false"
+        >
+          <div style="width: 50%">
+            <a-card
+              :bodyStyle="{ padding: '0px' }"
+              style="width: 100%"
+              class="my-transparent-card"
+              v-if="infoData.taskInfo.taskImage.infoImageList.length > 1"
+              :bordered="false"
+              :hoverable="false"
+            >
+              <a-card-grid
+                v-for="infoImage in infoData.taskInfo.taskImage.infoImageList"
+                :key="infoImage.url"
+                style="width: 49%; margin: 1px; padding: 0; border-radius: 15px; text-align: center"
+              >
+                <!-- <div
+                v-show="!infoImage.loaded"
+                :style="{
+                  width: '100%',
+                  height: '100%',
+                  paddingBottom: `${
+                    (infoData.taskInfo.taskImage.imageHeight /
+                      infoData.taskInfo.taskImage.imageWidth) *
+                    100
+                  }%`,
+                }"
+              >
+              </div> -->
+
+                <img
+                  @click="showInfoImage(getImageList(infoData.taskInfo), infoImage.url)"
+                  v-lazy.container="infoImage.mediaUrl"
+                  class="card-image img-box"
+                  style="max-width: 100%; border-radius: 15px"
+                  alt=""
+                  @load="imageLoaded(infoImage)"
+                />
+              </a-card-grid>
+            </a-card>
+            <a-card
+              :bodyStyle="{ padding: '0px' }"
+              style="width: 100%"
+              :bordered="false"
+              :hoverable="false"
+              v-else
+            >
+              <a-card-grid
+                v-for="infoImage in infoData.taskInfo.taskImage.infoImageList"
+                :key="infoImage.url"
+                style="width: 100%; padding: 0; border-radius: 15px; text-align: center"
+              >
+                <img
+                  @click="showInfoImage(getImageList(infoData.taskInfo), infoImage.url)"
+                  v-lazy.container="infoImage.mediaUrl"
+                  class="card-image img-box"
+                  style="max-width: 100%; border-radius: 15px"
+                  alt=""
+                  @load="imageLoaded(infoImage)"
+                />
+              </a-card-grid>
+            </a-card>
+            <a-flex :style="{ width: '100%' }" justify="center" align="center">
+              <span style="font-size: 12px">
+                📢 导入的任务图片加载失败可以试着获取下Seed。 点击图片可查看大图！！！</span
+              >
+              <a-button @click="handleDownloadByUrls(getImageList(infoData.taskInfo))" size="small">
+                <Icon icon="bx:bxs-cloud-download" class="vel-icon icon" aria-hidden="true" />
+                下载图片
+              </a-button>
+            </a-flex>
+          </div>
+        </a-card-grid>
+
+        <a-card-grid style="width: 100%; text-align: left" :hoverable="false">
+          <a-descriptions bordered size="small" :column="2" layout="vertical">
+            <a-descriptions-item label="👨执行账户" :style="{ width: '48%' }">{{
+              infoData.taskInfo.accountName
+            }}</a-descriptions-item>
+            <a-descriptions-item label="🍪任务类型" :style="{ width: '48%' }">
+              <a-tag :color="stringToColor(infoData.taskInfo.commandTypeName)">{{
+                infoData.taskInfo.commandTypeName
+              }}</a-tag>
+            </a-descriptions-item>
+            <a-descriptions-item label="💎MJ账号" :style="{ width: '48%' }">{{
+              infoData.taskInfo.discordUserName
+            }}</a-descriptions-item>
+
+            <a-descriptions-item label="🤖执行机器人" :style="{ width: '48%' }">
+              <a-tag :color="infoData.taskInfo.bootName === 'niji' ? 'green' : ''"
+                >{{ infoData.taskInfo.bootName }} 机器人</a-tag
+              >
+            </a-descriptions-item>
+            <a-descriptions-item label="🍦服务器" :style="{ width: '48%' }">{{
+              infoData.taskInfo.guildName
+            }}</a-descriptions-item>
+
+            <a-descriptions-item label="🍩运行模式" :style="{ width: '48%' }">
+              <a-tag
+                v-if="infoData.taskInfo.modeName"
+                :color="stringToColor(infoData.taskInfo.modeName)"
+                >{{ infoData.taskInfo.modeName }}</a-tag
+              >
+              <a-tag v-else>{{ '未定义' }}</a-tag>
+            </a-descriptions-item>
+            <a-descriptions-item label="🍯所在频道">{{
+              infoData.taskInfo.channelName
+            }}</a-descriptions-item>
+
+            <a-descriptions-item label="👁是否公开">
+              <a-tag :color="infoData.taskInfo.privacyMode === 'Y' ? 'blue' : ''"
+                >{{ infoData.taskInfo.privacyMode === 'Y' ? '公开' : '隐藏' }}
+              </a-tag>
+            </a-descriptions-item>
+
+            <a-descriptions-item label="🔢SEED" :span="2">
+              <div v-if="infoData.taskInfo.seed">
+                {{ infoData.taskInfo.seed }}
+              </div>
+              <div v-else>
+                <a-button @click="getSeed(infoData.id, true)" size="small" :loading="loadingRef"
+                  >🆔获取Seed
+                </a-button>
+              </div>
+            </a-descriptions-item>
+            <a-descriptions-item
+              label="📔原始Prompt"
+              :span="2"
+              v-if="infoData.taskInfo.commandTypeName === 'IMAGINE'"
+            >
+              {{ infoData.taskInfo.oriPrompt }}
+            </a-descriptions-item>
+            <a-descriptions-item
+              label="📓解析结果"
+              :span="2"
+              v-if="infoData.taskInfo.commandTypeName === 'DESCRIBE'"
+            >
+              <p
+                v-for="(item, index) in splitInInfo(infoData.taskInfo.contentStripped)"
+                :key="index"
+              >
+                {{ item }}<br />
+              </p>
+            </a-descriptions-item>
+            <a-descriptions-item label="📓执行Prompt" :span="2" v-else>
+              {{ infoData.taskInfo.contentStripped }}
+            </a-descriptions-item>
+          </a-descriptions>
+        </a-card-grid>
+        <a-card-grid style="width: 100%; text-align: left" :hoverable="false">
+          <a-descriptions bordered layout="vertical">
+            <a-descriptions-item :span="2">
+              <template #label>
+                <div style="display: flex; flex-direction: row; justify-content: space-between">
+                  <div>
+                    <a-span> <Icon icon="streamline-emojis:office-building" />任务空间 </a-span>
+                  </div>
+                  <a-button size="small" @click="showUserSpaceTask(infoData.card)">
+                    <a-span> <Icon icon="streamline-emojis:palm-tree" />添加空间 </a-span>
+                  </a-button>
+                </div>
+              </template>
+              <a-tag
+                v-for="taskSpace in infoData.taskSpaceList"
+                :key="taskSpace.spaceId"
+                :bordered="false"
+                closable
+                @close="deleteSpaceCard(infoData.card, taskSpace.spaceId)"
+                :color="stringToColor(taskSpace.spaceName)"
+                >{{ taskSpace.spaceName }}
+              </a-tag>
+            </a-descriptions-item>
+          </a-descriptions>
+        </a-card-grid>
+        <a-card-grid style="width: 100%; text-align: left" :hoverable="false">
+          <a-descriptions bordered layout="vertical">
+            <a-descriptions-item :span="2" v-if="infoData.tagList && infoData.tagList.length > 0">
+              <template #label>
+                <div style="display: flex; flex-direction: row; justify-content: space-between">
+                  <div><Icon icon="streamline-emojis:blossom" />任务标签 </div>
+                  <a-button size="small" @click="showDrawTaskTagModel(infoData.card)">
+                    <a-span> <Icon icon="streamline-emojis:palm-tree" />添加标签 </a-span>
+                  </a-button>
+                </div>
+              </template>
+              <a-tag
+                v-for="tag in infoData.tagList"
+                @close="removeDrawTaskTag(infoData.id, tag)"
+                :color="stringToColor(tag)"
+                :key="tag"
+                :bordered="false"
+                closable
+                >{{ tag }}</a-tag
+              >
+            </a-descriptions-item>
+            <a-descriptions-item :span="2" v-else>
+              <template #label>
+                <div style="display: flex; flex-direction: row; justify-content: space-between">
+                  <div><Icon icon="streamline-emojis:blossom" />任务标签 </div>
+                  <a-button size="small" @click="showDrawTaskTagModel(infoData.card)">
+                    <a-span> <Icon icon="streamline-emojis:palm-tree" /> 添加标签 </a-span>
+                  </a-button>
+                </div>
+              </template>
+              <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" />
+            </a-descriptions-item>
+          </a-descriptions>
+        </a-card-grid>
+        <a-card-grid style="width: 100%; text-align: center" :hoverable="false">
+          <a-descriptions bordered layout="vertical">
+            <a-descriptions-item label="🐊任务进度">
+              <a-steps size="small" :current="infoData.processList.length">
+                <a-step
+                  v-for="process in infoData.processList"
+                  :key="process.title"
+                  :title="process.title"
+                  :description="process.description"
+                />
+              </a-steps>
+            </a-descriptions-item>
+          </a-descriptions>
+        </a-card-grid>
+      </a-card>
+      <Loading :loading="loadingRef" :absolute="false" :tip="infoData.tip" />
+    </a-modal>
   </a-layout>
 </template>
 
@@ -1166,10 +1545,13 @@
   import 'vue-easy-lightbox/external-css/vue-easy-lightbox.css';
   import VueEasyLightbox from 'vue-easy-lightbox';
   import VueLazyload from 'vue-lazyload';
+  import { api as viewerApi } from 'v-viewer';
+  import 'viewerjs/dist/viewer.css';
   import Icon from '/@/components/Icon/Icon.vue';
   import { Empty, message } from 'ant-design-vue';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
   import { listCategory, queryDrawingSample, addDrawingSample } from '/@/api/df/drawingSample';
+  import { addSpaceTask, removeSpaceTask, allUserSpace } from '/@/api/df/workSpace';
   import {
     ref,
     computed,
@@ -1233,6 +1615,9 @@
   };
   const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
   const {
+    closeTaskInfo,
+    showTaskInfo,
+    infoData,
     cards,
     searchForm,
     pagination,
@@ -1240,6 +1625,7 @@
     pageSizeChange,
     onSearchNoLoading,
     onSearch,
+    onReset,
     removeTimer,
   } = jobListQueryApi();
 
@@ -1299,9 +1685,10 @@
     onHide,
   } = lightBoxApi();
 
-  const spaceId = ref(route.params.spaceId || route.query.spaceId);
+  const spaceId = ref(route.query.spaceId || route.query.spaceId);
   const spaceTitle = ref(route.params.spaceTitle || route.query.spaceTitle);
   onMounted(() => {
+    console.log(1111);
     searchForm.value.spaceId = ref(route.params.spaceId || route.query.spaceId);
     onSearch(1);
     (window as any).varyRegionForm = varyRegionForm;
@@ -1399,6 +1786,10 @@
   };
 
   /*********************** 案例相关 ********************* */
+  const imageLoaded = async (card) => {
+    card.loaded = true;
+  };
+
   const exampleForm = ref({
     drawingSampleCategory: [],
     categoryCodes: [],
@@ -1436,9 +1827,44 @@
     const finalList = [...transformedList];
     exampleForm.value.drawingSampleCategory = finalList;
   });
+  //随机颜色
+  function stringToColor(str) {
+    // Convert the string to a hash code
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
 
-  // 导出此方法以便外部访问
-  defineExpose({ onSearch });
+    // Generate a color based on the hash
+    const color = '#' + (hash & 0x00ffffff).toString(16).toUpperCase();
+
+    // Check if the color is too light (close to white or gray)
+    const threshold = 0xbbbbbb; // You can adjust this threshold as needed
+    const isLightColor = hash < threshold;
+
+    // If it's too light, generate a new color
+    return isLightColor ? stringToColor(str + 'salt') : color;
+  }
+  const getImageList = (card) => {
+    return card.taskImage.infoImageList.map((item) => item.url);
+  };
+
+  const showInfoImage = (infoImageList, showUrl) => {
+    // 检查数组中是否存在 showUrl
+    const showUrlIndex = infoImageList.findIndex((url) => url === showUrl);
+    let imageList = infoImageList;
+    // 如果存在，则创建一个新数组，将 showUrl 放在第一个位置，其余元素按原顺序添加
+    if (showUrlIndex !== -1) {
+      imageList = [
+        showUrl,
+        ...infoImageList.slice(showUrlIndex + 1),
+        ...infoImageList.slice(0, showUrlIndex),
+      ];
+    }
+
+    // 如果不存在 showUrl，则返回原数组
+    viewerApi({ images: imageList });
+  };
 </script>
 
 <style scoped>
@@ -1703,5 +2129,24 @@
   .check >>> .ant-checkbox + span {
     padding-right: 0;
     padding-left: 0;
+  }
+</style>
+<style lang="less">
+  .full-modal {
+    .ant-modal {
+      top: 0;
+      max-width: 100%;
+      margin: 0;
+      padding-bottom: 0;
+    }
+
+    .ant-modal-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ant-modal-body {
+      flex: 1;
+    }
   }
 </style>

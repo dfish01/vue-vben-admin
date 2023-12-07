@@ -1890,14 +1890,6 @@
   const getImageList = (card) => {
     return card.taskImage.infoImageList.map((item) => item.url);
   };
-  const getImgObj = (infoImage) => {
-    return {
-      src: infoImage.url,
-      error: loadimage,
-      loading: infoImage.mediaUrl,
-    };
-  };
-
   function showInfoImage(infoImageList, showUrl) {
     // 检查数组中是否存在 showUrl
     const showUrlIndex = infoImageList.findIndex((url) => url === showUrl);

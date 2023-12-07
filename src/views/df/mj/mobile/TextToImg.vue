@@ -111,8 +111,8 @@
       <a-card size="small" :bordered="true" :bodyStyle="{ padding: '5px' }" class="ar-card2">
         <template #title>
           <div class="ar-card2-title">
-            <span style="font-weight: bold" class="quality-tag"
-              ><Icon icon="streamline-emojis:blossom" />添加标签
+            <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
+              ><Icon icon="streamline-emojis:blossom" /> 添加标签
               <a-tooltip
                 title="用于对批次任务的标记，方便管理图片。多个标签'空格'隔开,最多5个标签。每个标签长度不超过16个字。~"
               >
@@ -140,6 +140,8 @@
           </a-col>
           <a-col span="18">
             <a-input
+              align="center"
+              justify="center"
               v-model:value="textToImgForm.invokeTimes"
               type="text"
               @input="checkInteger"
@@ -160,10 +162,30 @@
               placeholder="不选的话，随机选取账号，优先默认"
               @change="handleAccountSetting"
               style="width: 100%; height: 32px"
-              v-model:value="textToImgForm.useAccountId"
-              v-model="textToImgForm.useAccountId"
-              :size="compRender.accountSelector.size"
-              :options="compRender.accountSelector.options"
+              v-model:value="accountForm.useAccountId"
+              v-model="accountForm.useAccountId"
+              :size="accountForm.accountSelector.size"
+              :options="accountForm.accountSelector.options"
+            />
+          </a-col>
+        </a-row>
+        <a-row style="margin-top: 10px" v-if="accountForm.useAccountId">
+          <a-col span="6">
+            <a-tooltip
+              title="不指定频道的话，默认账户组中的频道。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
+            >
+              <a-tag class="quality-tag tag-no-right-border" color="default">执行频道</a-tag>
+            </a-tooltip>
+          </a-col>
+
+          <a-col span="18">
+            <a-select
+              style="width: 100%"
+              @change="handleSetting('useChannelId', accountForm.useChannelId)"
+              placeholder="请选择ChannelId"
+              v-model:value="accountForm.useChannelId"
+              :size="accountForm.accountSelector.size"
+              :options="accountForm.channelSelector.options"
             />
           </a-col>
         </a-row>
@@ -190,8 +212,8 @@
           </a-col>
           <a-col span="18">
             <a-select
-              @change="handleSetting('mode', textToImgForm.mode)"
-              v-model:value="textToImgForm.mode"
+              @change="handleSetting('mode', accountForm.mode)"
+              v-model:value="accountForm.mode"
               style="width: 100%; height: 32px"
               placeholder="不选的话，默认休闲模式"
             >
@@ -1299,39 +1321,25 @@
   import { message, UploadProps, Upload } from 'ant-design-vue';
   import { useRoute } from 'vue-router';
   import { useUserStore } from '/@/store/modules/user';
+  import { accountInfoApi } from '../accountInfo';
+
+  const {
+    accountForm,
+    initAccountList,
+    initAccountInfo,
+    doGetChannelsByGroup,
+    handleAccountSetting,
+    handleSetting,
+  } = accountInfoApi();
 
   const userStore = useUserStore();
-  const handleAccountSetting = (value, option) => {
-    const setting = {};
-    setting['userAccountId'] = value;
-    setting['userAccountName'] = option.label;
-    userStore.syncSetting(setting);
-  };
-
-  const handleSetting = (key, value) => {
-    const setting = {};
-    setting[key] = value;
-    userStore.syncSetting(setting);
-  };
 
   //初始化数据
   onMounted(async () => {
     //查询可用账户
-    await onSearchAccountList();
+    await initAccountList();
     //初始化偏好
-    const getPersonalSetting = userStore.getPersonalSetting;
-    console.log('getPersonalSetting ' + getPersonalSetting);
-    if (getPersonalSetting) {
-      textToImgForm.mode = getPersonalSetting.mode;
-      const isAvaliable = compRender.accountSelector.options.some((obj) =>
-        obj.value.includes(getPersonalSetting.userAccountId),
-      );
-      if (isAvaliable) {
-        textToImgForm.useAccountId = getPersonalSetting.userAccountId;
-      } else {
-        userStore.syncSetting({ userAccountId: '' });
-      }
-    }
+    initAccountInfo();
 
     //查询最近使用的tag
     const resp = await genTagList({});
@@ -1479,9 +1487,7 @@
     aiPrompt: null,
     robotSelect: '1022952195194359889',
     invokeTimes: 1,
-    useAccountId: null,
     isPublic: false,
-    mode: 'relax',
     enableTranslate: false,
     tagName: '',
     tagNameOptions: [] as { value: string; label: string }[],
@@ -1503,14 +1509,6 @@
         // { label: 'insightface', value: '936929561302675456' },
       ],
     },
-    accountSelector: {
-      size: 'default',
-      options: [
-        { label: '随机', value: '' },
-        // { label: 'niji・journey', value: 'niji・journey' },
-        // { label: 'insightface', value: 'insightface' },
-      ],
-    },
   });
 
   const checkInteger = () => {
@@ -1529,7 +1527,7 @@
       .then(async () => {
         const addTaskParam: AddDrawTaskParams = {
           spaceId: spaceId.value,
-          refAccountId: textToImgForm.useAccountId,
+          refAccountId: accountForm.useAccountId,
           channel: 'MJ',
           priority: 0,
           // refTaskId: null,
@@ -1538,13 +1536,14 @@
           invokeTimes: textToImgForm.invokeTimes,
           tagNames: textToImgForm.tagName,
           prompt: {
+            useChannelId: accountForm.useChannelId,
             base64Array: base64Images.value,
             paramsDataMap: paramDataValue.value,
             prompt: textToImgForm.command,
             commandType: 'IMAGINE',
             bootId: textToImgForm.robotSelect,
             paramsStr: concatenatedTags.value,
-            mode: textToImgForm.mode,
+            mode: accountForm.mode,
             enableTranslate: textToImgForm.enableTranslate,
           },
         };
@@ -1562,7 +1561,7 @@
       });
   };
 
-  const componentDisabled = ref(true);
+  const componentDisabled = ref(false);
   const labelCol = { style: { width: '150px' } };
   const wrapperCol = { span: 24 };
 
@@ -1751,23 +1750,6 @@
     textToImgForm.command = route.query.prompt;
   });
   const userPromptList = () => {};
-
-  const onSearchAccountList = async () => {
-    const response = await availableList({
-      accMode: '',
-      ownerFlag: '',
-    });
-
-    // 使用 map 方法转换数组
-    const transformedList = response.map((item) => ({
-      label: item.accountName,
-      value: item.id,
-    }));
-
-    // 如果您想在转换后的数组前面添加一个特定的对象，可以使用以下方法：
-    const finalList = [...transformedList];
-    compRender.accountSelector.options = finalList;
-  };
 
   /** ************************************上传图片******************************* */
   const previewVisible = ref(false);

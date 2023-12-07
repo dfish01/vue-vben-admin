@@ -28,17 +28,17 @@
                     >-{{ currentSpace.title }}
                   </div>
                   <div style="display: flex; gap: 5px">
-                    <a-tooltip title="交流群">
+                    <a-tooltip title="">
                       <a-button
                         @click="openCommunicateView"
                         style="padding: 0 6px; border-radius: 5px"
                       >
-                        <Icon icon="icon-park-outline:wechat" size="22" />
+                        <Icon icon="icon-park:tencent-qq" size="22" />
                       </a-button>
                     </a-tooltip>
                     <a-tooltip title="任务列表">
                       <a-button @click="showJobList" style="padding: 0 5px; border-radius: 5px">
-                        <Icon icon="fluent:task-list-square-16-regular" size="22" />
+                        <Icon icon="fluent:window-bullet-list-add-20-filled" size="22" />
                       </a-button>
                     </a-tooltip>
                     <a-tooltip title="工作空间管理">
@@ -343,7 +343,8 @@
 
   const showJobList = () => {
     console.log('showJobList ' + currentSpace.id);
-    go('/jobList/index/' + currentSpace.id + '/' + currentSpace.title);
+    // go('/jobList/index/' + currentSpace.id + '/' + currentSpace.title);
+    go('/jobList/index?spaceId=' + currentSpace.id + '&spaceTitle=' + currentSpace.title);
     // go({
     //   name: 'JobList', // 路由名称
     //   params: { spaceId: currentSpace.id }, // 路由参数
