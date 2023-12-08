@@ -1220,7 +1220,12 @@
             <a-tag class="quality-tag" color="default">🍺状态 </a-tag>
           </a-col>
           <a-col flex="auto">
-            <a-select v-model:value="searchForm.state" style="width: 100%" class="mobile-select">
+            <a-select
+              placeholder="任务状态"
+              v-model:value="searchForm.state"
+              style="width: 100%"
+              class="mobile-select"
+            >
               <a-select-option value="">全部</a-select-option>
               <a-select-option value="QUEUED">排队中</a-select-option>
               <a-select-option value="RUNNING">执行中</a-select-option>
@@ -1235,6 +1240,7 @@
           </a-col>
           <a-col flex="auto">
             <a-select
+              placeholder="任务类型"
               v-model:value="searchForm.commandType"
               class="mobile-select"
               style="width: 100%"
@@ -1251,6 +1257,9 @@
           </a-col>
         </a-row>
         <a-row type="flex" :gutter="[0, 2]" style="margin-top: 7px">
+          <a-col flex="80px">
+            <a-tag class="quality-tag" color="default">🥝标签 </a-tag>
+          </a-col>
           <a-col flex="auto">
             <a-mentions
               v-model:value="searchForm.tagName"
@@ -1300,21 +1309,22 @@
       title="任务概况"
       v-model:open="infoData.viewFlag"
       width="100%"
-      wrap-class-name="full-modal"
+      wrap-class-name="full-modal "
+      :bodyStyle="{ padding: '0px' }"
     >
       <template #footer>
         <a-button key="submit" type="primary" :loading="loadingRef" @click="closeTaskInfo"
           >已知晓</a-button
         >
       </template>
-      <a-card :bodyStyle="{ padding: '0px 5px' }" :bordered="false">
+      <a-card :bodyStyle="{ padding: '0px ' }" :bordered="false">
         <a-card-grid
           style="display: flex; justify-content: center; width: 100%; text-align: center"
           :bodyStyle="{ padding: '0px 0px 0px 0px' }"
           bordered="true"
           :hoverable="false"
         >
-          <div style="width: 50%">
+          <div style="width: 100%">
             <a-card
               :bodyStyle="{ padding: '0px' }"
               style="width: 100%"
@@ -1667,6 +1677,7 @@
     loadTagList,
     onChangeLabel,
     onChangeSearchLabel,
+    removeDrawTaskTag,
   } = jobTagApi();
 
   const { userSetting, setCardShow, setUseUpImage, setUsePersonNet, setTaskRefresh } =
@@ -2137,16 +2148,13 @@
       top: 0;
       max-width: 100%;
       margin: 0;
+      padding: 0;
       padding-bottom: 0;
     }
 
     .ant-modal-content {
       display: flex;
       flex-direction: column;
-    }
-
-    .ant-modal-body {
-      flex: 1;
     }
   }
 </style>

@@ -9,7 +9,8 @@ const { createMessage } = useMessage();
 export const handleDownloadByUrl = async (url: string) => {
   const path = url.split('?')[0];
   const segments = path.split('/');
-  const fileName = segments[segments.length - 1];
+  const fileName = segments[segments.length - 2] + '_' + segments[segments.length - 1];
+
   downloadByOnlineUrl(url, fileName);
   message.success('已添加下载任务~');
 };
@@ -17,7 +18,7 @@ export const handleDownloadByUrl = async (url: string) => {
 export const handleDownloadByUrls = async (urls: string[]) => {
   for (const url of urls) {
     const segments = url.split('/');
-    const fileName = segments[segments.length - 1];
+    const fileName = segments[segments.length - 2] + '_' + segments[segments.length - 1];
     downloadByOnlineUrl(url, fileName);
   }
   message.success('已添加下载任务~');

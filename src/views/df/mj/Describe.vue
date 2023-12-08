@@ -48,7 +48,7 @@
           />
         </a-col>
       </a-row>
-      <a-row style="margin-top: 10px" v-if="accountForm.useChannelId">
+      <a-row style="margin-top: 10px" v-if="accountForm.useAccountId">
         <a-col span="6">
           <a-tooltip
             title="不指定频道的话，默认账户组中的频道。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"

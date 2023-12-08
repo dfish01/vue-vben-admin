@@ -1052,7 +1052,12 @@
             <a-tag class="quality-tag" color="default">🍺状态 </a-tag>
           </a-col>
           <a-col flex="auto">
-            <a-select v-model:value="searchForm.state" style="width: 100%" class="mobile-select">
+            <a-select
+              v-model:value="searchForm.state"
+              style="width: 100%"
+              placeholder="任务状态"
+              class="mobile-select"
+            >
               <a-select-option value="">全部</a-select-option>
               <a-select-option value="QUEUED">排队中</a-select-option>
               <a-select-option value="RUNNING">执行中</a-select-option>
@@ -1069,6 +1074,7 @@
             <a-select
               v-model:value="searchForm.commandType"
               class="mobile-select"
+              placeholder="任务类型"
               style="width: 100%"
             >
               <a-select-option value="">全部</a-select-option>
@@ -1084,7 +1090,7 @@
         </a-row>
         <a-row type="flex" :gutter="[0, 2]" style="margin-top: 7px">
           <a-col flex="80px">
-            <a-tag class="quality-tag" color="default">🍥标签 </a-tag>
+            <a-tag class="quality-tag" color="default">🥝标签 </a-tag>
           </a-col>
           <a-col flex="auto">
             <a-mentions
@@ -1104,6 +1110,7 @@
       title="任务概况"
       v-model:open="infoData.viewFlag"
       width="100%"
+      :bodyStyle="{ padding: '0px' }"
       wrap-class-name="full-modal"
     >
       <template #footer>
@@ -1111,14 +1118,14 @@
           >已知晓</a-button
         >
       </template>
-      <a-card :bodyStyle="{ padding: '0px 5px' }" :bordered="false">
+      <a-card :bodyStyle="{ padding: '0px ' }" :bordered="false">
         <a-card-grid
           style="display: flex; justify-content: center; width: 100%; text-align: center"
           :bodyStyle="{ padding: '0px 0px 0px 0px' }"
           bordered="true"
           :hoverable="false"
         >
-          <div style="width: 50%">
+          <div style="width: 100%">
             <a-card
               :bodyStyle="{ padding: '0px' }"
               style="width: 100%"
@@ -1468,6 +1475,7 @@
     loadTagList,
     onChangeLabel,
     onChangeSearchLabel,
+    removeDrawTaskTag,
   } = jobTagApi();
 
   const { userSetting, setUseUpImage, setUsePersonNet, setTaskRefresh } = userSettingApi();
@@ -1775,6 +1783,7 @@
       top: 0;
       max-width: 100%;
       margin: 0;
+      padding: 0;
       padding-bottom: 0;
     }
 
@@ -1784,7 +1793,6 @@
     }
 
     .ant-modal-body {
-      flex: 1;
     }
   }
 </style>
