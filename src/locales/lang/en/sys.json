@@ -62,6 +62,7 @@
     "accountPlaceholder": "Please input username",
     "backSignIn": "Back sign in",
     "confirmPassword": "Confirm Password",
+    "customHost": "Server Host",
     "diffPwd": "The two passwords are inconsistent",
     "email": "Email",
     "emailCode": "Email Code",

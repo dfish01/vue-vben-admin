@@ -126,10 +126,10 @@
                 v-if="false"
               />
 
-              <a-table-column title="操作" key="actions">
+              <a-table-column title="操作" key="actions" width="99">
                 <template #default="{ record }">
                   <a-button-group>
-                    <a-popconfirm
+                    <!-- <a-popconfirm
                       title="删除后该空间图片将丢失（目前暂未做迁移逻辑），是否确认删除?"
                       ok-text="确认删除"
                       cancel-text="取消"
@@ -137,21 +137,24 @@
                     >
                       <a-button type="primary" danger v-if="record.sort != 0">删除</a-button>
                     </a-popconfirm>
-                    <a-button
-                      type="primary"
-                      @click="addUserSpace(record)"
-                      v-if="record.defaultFlag === 'N'"
-                      size="small"
+                    <a-button type="primary" @click="addUserSpace(record)" size="small"
                       >编辑</a-button
-                    >
+                    > -->
+
+                    <a-button @click="selectSpace(record)" size="small">选择</a-button>
+
                     <a-button
+                      size="small"
+                      type="warning"
+                      :loading="compState.loading"
                       @click="doSetTop(record)"
                       v-if="record.sort != 0"
-                      :loading="compState.loading"
                       >置顶</a-button
                     >
 
-                    <a-button @click="selectSpace(record)" size="small">选择</a-button>
+                    <a-button type="primary" size="small" @click="doGenCode(record, 'topRight')"
+                      >编码</a-button
+                    >
                   </a-button-group>
                 </template>
               </a-table-column>
@@ -255,11 +258,22 @@
   import Describe from './mobile/Describe.vue';
   import { SettingOutlined, CloudSyncOutlined, ClusterOutlined } from '@ant-design/icons-vue';
   import { WorkSpaceListResp, WorkSpaceSaveReq } from '/@/api/df/model/workSpaceModel'; // 请替换为您的请求模型路径
-  import { saveUserSpace, deleteSpace, allUserSpace, setTop } from '/@/api/df/workSpace';
+  import {
+    saveUserSpace,
+    deleteSpace,
+    allUserSpace,
+    importMessage,
+    channelList,
+    genCode,
+    setTop,
+  } from '/@/api/df/workSpace';
+  import { downloadImage, copyText } from './tools';
   import { addSuggest, communicateInfo } from '/@/api/df/utils';
   import { useGo } from '/@/hooks/web/usePage';
   import { useRoute } from 'vue-router';
   import { useUserStore } from '/@/store/modules/user';
+  import { notification } from 'ant-design-vue';
+  import type { NotificationPlacement } from 'ant-design-vue';
 
   const userStore = useUserStore();
 
@@ -306,16 +320,6 @@
     loading: false,
     tip: '加载中...',
   });
-
-  const doSetTop = async (record) => {
-    compState.loading = true;
-    try {
-      await setTop({ id: record.id });
-      querySpace();
-    } finally {
-      compState.loading = false;
-    }
-  };
 
   const isShowWorkSpace = ref(false);
   const isShowUserSpaceSave = ref(false);
@@ -422,6 +426,27 @@
     } finally {
       compState.loading = false;
     }
+  };
+
+  const doSetTop = async (record) => {
+    compState.loading = true;
+    try {
+      await setTop({ id: record.id });
+      querySpace();
+    } finally {
+      compState.loading = false;
+    }
+  };
+
+  //显示工作空间
+  const doGenCode = async (record, placement: NotificationPlacement) => {
+    const result = await genCode({ id: record.id });
+    copyText(result);
+    notification.open({
+      message: '【' + result + '】空间码生成成功！已复制到剪切板~',
+      description: '导入的空间编码在5分钟内有效，请及时使用~',
+      placement,
+    });
   };
 
   /****************************** 交流群 ******************************** */

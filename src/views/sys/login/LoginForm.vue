@@ -8,6 +8,32 @@
     v-show="getShow"
     @keypress.enter="handleLogin"
   >
+    <FormItem class="enter-x">
+      <span style="font-size: 15px">托管地址：</span>
+      <a-dropdown trigger="click" @click="handleMenuClick">
+        <a class="ant-dropdown-link" @click.prevent>
+          {{ customHostData.menuName }}
+          <DownOutlined />
+        </a>
+        <template #overlay>
+          <a-menu @click="onClick">
+            <!-- 使用 v-for 遍历 customHostData 中的下拉项数据 -->
+            <a-menu-item :key="item.key" v-for="item in customHostData.dropdownItems">
+              {{ item.name }}
+            </a-menu-item>
+          </a-menu>
+        </template>
+      </a-dropdown>
+    </FormItem>
+    <!-- <FormItem name="email" class="enter-x">
+      <Input
+        size="large"
+        v-model:value="formData.customHost"
+        :placeholder="t('sys.login.customHost')"
+        class="fix-auto-fill"
+        @change="customHostChange"
+      />
+    </FormItem> -->
     <FormItem name="email" class="enter-x">
       <Input
         size="large"
@@ -80,20 +106,58 @@
       <TwitterCircleFilled />
     </div>
   </Form>
+
+  <!-- 托管地址配置 -->
+  <a-modal
+    v-model:open="customHostData.viewFlag"
+    title="托管地址配置"
+    ok-text="确定"
+    @ok="saveCustomHost"
+    @cancel="closeCustomHost"
+  >
+    <a-card>
+      <a-form layout="vertical">
+        <a-row gutter="24">
+          <a-col :span="24">
+            <a-form-item label="托管地址">
+              <a-input v-model:value="customHostData.customHost" placeholder="输入托管地址">
+                <template #addonBefore>
+                  <a-select v-model:value="customHostData.ssl" style="width: 90px">
+                    <a-select-option value="Http://">Http://</a-select-option>
+                    <a-select-option value="Https://">Https://</a-select-option>
+                  </a-select>
+                </template>
+                <!-- <template #addonAfter>
+        <a-select v-model:value="value4" style="width: 80px">
+          <a-select-option value=".com">.com</a-select-option>
+          <a-select-option value=".jp">.jp</a-select-option>
+          <a-select-option value=".cn">.cn</a-select-option>
+          <a-select-option value=".org">.org</a-select-option>
+        </a-select>
+      </template> -->
+              </a-input>
+
+              <!-- <a-input v-model:value="customHostData.customHost" placeholder="输入托管地址" /> -->
+            </a-form-item>
+          </a-col>
+        </a-row>
+      </a-form>
+    </a-card>
+  </a-modal>
 </template>
 <script lang="ts" setup>
   import { reactive, ref, unref, computed } from 'vue';
 
-  import { Checkbox, Form, Input, Row, Col, Button, Divider } from 'ant-design-vue';
+  import { Checkbox, Form, Input, Row, Col, Button, Divider, message } from 'ant-design-vue';
   import {
     GithubFilled,
     WechatFilled,
     AlipayCircleFilled,
     GoogleCircleFilled,
     TwitterCircleFilled,
+    DownOutlined,
   } from '@ant-design/icons-vue';
   import LoginFormTitle from './LoginFormTitle.vue';
-
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
 
@@ -101,6 +165,8 @@
   import { LoginStateEnum, useLoginState, useFormRules, useFormValid } from './useLogin';
   import { useDesign } from '/@/hooks/web/useDesign';
   //import { onKeyStroke } from '@vueuse/core';
+  import { getCustomHost, setCustomHost } from '/@/utils/custom';
+  import { CacheTypeEnum, CUSTOM_HOST_KEY } from '/@/enums/cacheEnum';
 
   const ACol = Col;
   const ARow = Row;
@@ -118,6 +184,16 @@
   const loading = ref(false);
   const rememberMe = ref(false);
 
+  const customHostData = reactive({
+    ssl: 'https://',
+    customHost: '',
+    menuName: '自绘记录',
+    dropdownItems: [
+      { key: '1', name: '自绘记录' },
+      { key: '2', name: '自定义托管' },
+    ],
+    viewFlag: false,
+  });
   const formData = reactive({
     email: '',
     password: '',
@@ -130,6 +206,15 @@
   const getShow = computed(() => unref(getLoginState) === LoginStateEnum.LOGIN);
 
   async function handleLogin() {
+    //设置托管地址
+    // if (formData.customHost === '自绘记录' || formData.customHost === '') {
+    //   setCustomHost(CUSTOM_HOST_KEY, null);
+    // } else {
+    //   if (!isValidDomainWithPrefix(formData.customHost)) {
+    //     message.error('请输入正确的托管地址~');
+    //   }
+    //   setCustomHost(CUSTOM_HOST_KEY, formData.customHost);
+    // }
     const data = await validForm();
     if (!data) return;
     try {
@@ -155,5 +240,47 @@
     } finally {
       loading.value = false;
     }
+  }
+
+  const onClick: MenuProps['onClick'] = ({ key }) => {
+    console.log(`Click on item ${key}`);
+    if (key === '1') {
+      customHostData.menuName = '自绘记录';
+      setCustomHost(CUSTOM_HOST_KEY, null);
+    } else {
+      customHostData.menuName = '自定义托管';
+      customHostData.viewFlag = true;
+    }
+  };
+
+  const saveCustomHost = () => {
+    if (!isValidDomainWithPort(customHostData.customHost)) {
+      message.error('请输入正确的托管地址~');
+      return;
+    }
+    //设置托管地址
+    setCustomHost(CUSTOM_HOST_KEY, customHostData.ssl + customHostData.customHost);
+    customHostData.menuName = customHostData.customHost;
+    customHostData.viewFlag = false;
+  };
+
+  const closeCustomHost = () => {
+    if (!isValidDomainWithPort(customHostData.customHost)) {
+      customHostData.menuName = '自绘记录';
+      setCustomHost(CUSTOM_HOST_KEY, null);
+    }
+    customHostData.viewFlag = false;
+  };
+
+  function isValidDomainWithPort(host: string): boolean {
+    // 如果 host 为空，返回 false
+    if (!host) {
+      return false;
+    }
+    // 正则表达式，匹配域名和可选的端口号
+    const domainRegex = /^([a-zA-Z0-9.-]+)(:[0-9]+)?\/?$/;
+
+    // 使用正则表达式测试域名和端口的格式
+    return domainRegex.test(host);
   }
 </script>

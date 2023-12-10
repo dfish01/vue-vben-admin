@@ -1,3 +1,6 @@
+//自定义HOST
+export const CUSTOM_HOST_KEY = 'CUSTOM_HOST__';
+
 // token key
 export const TOKEN_KEY = 'TOKEN__';
 

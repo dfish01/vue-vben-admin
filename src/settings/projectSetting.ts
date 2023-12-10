@@ -22,7 +22,7 @@ const setting: ProjectConfig = {
   settingButtonPosition: 'auto',
   //permissionMode: 'ROUTE_MAPPING',
   permissionMode: PermissionModeEnum.BACK,
-  permissionCacheType: 1,
+  permissionCacheType: CacheTypeEnum.LOCAL,
   sessionTimeoutProcessing: 0,
   themeColor: '#0960bd',
   grayMode: false,

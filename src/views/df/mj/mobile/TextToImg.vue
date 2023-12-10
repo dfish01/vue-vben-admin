@@ -92,7 +92,7 @@
           </a-col>
           <a-col span="8">
             <a-button style="width: 100%; background: #d4237a" size="small" @click="openAiPrompt"
-              ><SvgIcon name="gpt" />GPT生成</a-button
+              ><SvgIcon name="gpt" />AI生成</a-button
             >
           </a-col>
           <a-col span="8">
@@ -1209,7 +1209,7 @@
     <div>
       <a-modal
         v-model:open="modelData.isOpenAiPrompt"
-        title="Chatgpt生成Prompt"
+        title="AI生成Prompt"
         width="100%"
         wrap-class-name="full-modal"
         @cancel="cancelModal('aiPrompt')"
@@ -1232,15 +1232,27 @@
             >生成Prompt</a-button
           >
         </template>
+
         <a-spin :spinning="modelData.promptSpinning" :tip="modelData.tip">
           <a-row style="padding: 15px">
             <a-col span="24">
               <a-radio-group v-model:value="modelData.promptCategory" button-style="solid">
-                <a-radio-button value="NIJI">二次元</a-radio-button>
+                <a-radio-button value="NIJI_ANIME">动漫</a-radio-button>
+                <a-radio-button value="NIJI_COMIC">漫画</a-radio-button>
                 <a-radio-button value="MIDJOURNEY">摄影师</a-radio-button>
+                <a-radio-button value="CUSTOM">自定义</a-radio-button>
               </a-radio-group>
             </a-col>
-
+            <a-col span="24" v-if="modelData.promptCategory === 'CUSTOM'">
+              <a-textarea
+                style="width: 99%"
+                v-model:value="modelData.promptMask"
+                placeholder="预设内容。比如：你将扮演一个漫画师。你将在一行中写下描述，不使用换行符。首先是图片概念描绘什么画面内容，流畅的附加这些关键字：绘画风格、绘画工具、构图、布局、色调等。控制在2-6行文字以内。然后内容后附加：“--ar ”画面比例整数用冒号隔开“ --niji 5 ” 如果觉得风格偏美式在内容结尾继续添加“ --style expressive ”。注意：返回英文结果。"
+                allow-clear
+                :maxlength="120"
+                :auto-size="{ minRows: 1, maxRows: 2 }"
+              />
+            </a-col>
             <a-col span="24" style="margin-top: 10px">
               <a-textarea
                 style="width: 99%"
@@ -1251,6 +1263,7 @@
                 :auto-size="{ minRows: 3, maxRows: 3 }"
               />
             </a-col>
+
             <a-col span="24">
               <a-card
                 v-if="modelData.aiOutputText"
@@ -1291,6 +1304,7 @@
         </a-spin>
       </a-modal>
     </div>
+
     <!-- 上传图片预览 -->
     <a-modal :open="previewVisible" :title="previewTitle" :footer="null" @cancel="handleCancel">
       <img alt="example" style="width: 100%" :src="previewImage" />
@@ -1477,6 +1491,12 @@
     upwardSpace,
     offsetHeightRef,
   );
+
+  //加次监听
+  window.addEventListener('resize', function () {
+    // 检查视图大小变化，确定键盘是否隐藏
+    setTimeout(redoHeight, 800);
+  });
 
   const emit = defineEmits(['startLoading', 'endLoading']);
 
@@ -1908,7 +1928,7 @@
   }
 
   .bottom-button {
-    right: 8px;
+    right: 5px;
     bottom: 0;
     width: 100%;
 

@@ -107,7 +107,7 @@
           </a-col>
           <a-col span="8">
             <a-button style="width: 100%; background: #d4237a" size="small" @click="openAiPrompt"
-              ><SvgIcon name="gpt" />GPT生成</a-button
+              ><SvgIcon name="gpt" />AI生成</a-button
             >
           </a-col>
           <a-col span="8">
@@ -1132,7 +1132,7 @@
     <div>
       <a-modal
         v-model:open="modelData.isOpenAiPrompt"
-        title="Chatgpt生成Prompt"
+        title="AI生成Prompt"
         :style="{ top: modelData.aiOutputText ? '50px' : '200px' }"
         :width="modelData.aiOutputText ? '70%' : ''"
         @cancel="cancelModal('aiPrompt')"

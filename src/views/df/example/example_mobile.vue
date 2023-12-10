@@ -417,19 +417,6 @@
     useUpImage: false,
     usePersonNet: false,
   });
-  const setUseUpImage = (): void => {
-    userSetting.value.useUpImage = !userSetting.value.useUpImage;
-  };
-
-  const setUsePersonNet = (): void => {
-    userSetting.value.usePersonNet = !userSetting.value.usePersonNet;
-  };
-
-  const getImageSource = (card) => {
-    const baseImageSource = userSetting.value.usePersonNet ? card.cdnResultImage : card.resultImage;
-
-    return userSetting.value.useUpImage ? baseImageSource : card.mediaImageUrl;
-  };
 
   const options = reactive({
     // 唯一key值

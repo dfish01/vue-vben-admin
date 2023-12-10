@@ -62,6 +62,7 @@
     "accountPlaceholder": "请输入账号",
     "backSignIn": "返回",
     "confirmPassword": "确认密码",
+    "customHost": "托管地址（默认自绘记录）",
     "diffPwd": "两次输入密码不一致",
     "email": "邮箱",
     "emailCode": "邮箱验证码",

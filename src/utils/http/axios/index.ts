@@ -12,6 +12,7 @@ import { useMessage } from '/@/hooks/web/useMessage';
 import { RequestEnum, ResultEnum, ContentTypeEnum } from '/@/enums/httpEnum';
 import { isString, isUndefined, isNull, isEmpty } from '/@/utils/is';
 import { getToken } from '/@/utils/auth';
+import { getCustomHost } from '/@/utils/custom';
 import { setObjToUrlParams, deepMerge } from '/@/utils';
 import { useErrorLogStoreWithOut } from '/@/store/modules/errorLog';
 import { useI18n } from '/@/hooks/web/useI18n';
@@ -19,6 +20,7 @@ import { joinTimestamp, formatRequestDate } from './helper';
 import { useUserStoreWithOut } from '/@/store/modules/user';
 import { AxiosRetry } from '/@/utils/http/axios/axiosRetry';
 import axios from 'axios';
+import { h } from 'vue';
 
 const globSetting = useGlobSetting();
 const urlPrefix = globSetting.urlPrefix;
@@ -105,8 +107,15 @@ const transform: AxiosTransform = {
     }
 
     if (apiUrl && isString(apiUrl)) {
-      config.url = `${apiUrl}${config.url}`;
+      //这里判断下是否是自定义的服务器
+      const customHost = getCustomHost();
+      if (customHost !== null && customHost !== undefined) {
+        config.url = `${customHost}${config.url}`;
+      } else {
+        config.url = `${apiUrl}${config.url}`;
+      }
     }
+    console.log('beforeRequestHook=========================' + config.url);
     const params = config.params || {};
     const data = config.data || false;
     formatDate && data && !isString(data) && formatRequestDate(data);

@@ -27,11 +27,11 @@
             <div><Icon class="vel-icon icon" icon="arcticons:openai-chatgpt" size="16" /> GPT</div>
           </div>
         </a-menu-item>
-        <a-menu-item key="public" @click="toDetail('/public')" class="flex-item">
+        <!-- <a-menu-item key="public" @click="toDetail('/public')" class="flex-item">
           <div class="menu-content">
             <div><Icon class="vel-icon icon" icon="gis:earth-north" size="16" /> 广场</div>
           </div>
-        </a-menu-item>
+        </a-menu-item> -->
         <a-menu-item key="example" @click="toDetail('/example')" class="flex-item">
           <div class="menu-content">
             <div

@@ -36,6 +36,21 @@
               /></a-button>
               <template #overlay>
                 <a-menu>
+                  <a-menu-item key="11">
+                    <a-popconfirm
+                      :title="
+                        userSetting.cardShow === 'SINGLE'
+                          ? '开启后，列表显示4图，点击可放大。明细页在右键列表~'
+                          : '开启后，列表显示单图，点击出现明细页~'
+                      "
+                      :ok-text="userSetting.cardShow === 'SINGLE' ? '立即开启' : '立即开启'"
+                      cancel-text="取消"
+                      @confirm="setCardShow()"
+                    >
+                      ✨{{ userSetting.cardShow === 'SINGLE' ? '列表4图模式' : '列表单图模式' }}
+                    </a-popconfirm>
+                  </a-menu-item>
+                  <a-menu-divider />
                   <a-menu-item key="5">
                     <a-popconfirm
                       title="⚠️以卡片的方式进行预览，建议配合原图模式。"
@@ -58,7 +73,7 @@
                   </a-menu-item>
 
                   <a-menu-divider />
-                  <a-menu-item key="4">
+                  <a-menu-item key="4" disabled>
                     <a-popconfirm
                       title="该选项默认暂时未作存储，默认关闭状态，刷新就失效了！分割图场景适用~"
                       :ok-text="userSetting.useUpImage ? '确认关闭' : '确认开启'"
@@ -285,9 +300,9 @@
                   style="
                     position: relative;
                     width: 49%;
-                    margin: 1px;
+                    margin: 0;
                     padding: 0;
-                    border-radius: 15px;
+                    border-radius: 8px;
                     text-align: center;
                   "
                 >
@@ -309,7 +324,7 @@
                   <img
                     @click="showInfoImage(getImageList(card), infoImage.url)"
                     v-lazy.container="infoImage.mediaUrl"
-                    style="max-width: 100%; border-radius: 15px"
+                    style="max-width: 100%; border-radius: 8px"
                     alt=""
                     @load="imageLoaded(infoImage)"
                   />
@@ -325,12 +340,12 @@
                 ><a-card-grid
                   v-for="infoImage in card.taskImage.infoImageList"
                   :key="infoImage.url"
-                  style="width: 100%; padding: 0; border-radius: 15px; text-align: center"
+                  style="width: 100%; padding: 0; border-radius: 8px; text-align: center"
                 >
                   <img
                     @click="showInfoImage(getImageList(card), infoImage.url)"
                     v-lazy.container="infoImage.mediaUrl"
-                    style="max-width: 100%; border-radius: 15px"
+                    style="max-width: 100%; border-radius: 8px"
                     alt=""
                     @load="imageLoaded(card)"
                   />
@@ -346,7 +361,7 @@
                 :hoverable="false"
               >
                 <img
-                  @click="showTaskInfo(card)"
+                  @click="showInfoImage([card.taskImage.imageUrl], card.taskImage.imageUrl)"
                   v-lazy.container="card.taskImage.mediaImageUrl"
                   fallback=""
                   alt=""
@@ -812,27 +827,40 @@
 
         <template #overlay>
           <a-menu>
-            <a-menu-item key="1" @click="splitAndDownloadImage(card)" disabled
-              >✂️切4份下载</a-menu-item
+            <a-menu-item key="1" v-if="card.state === 'SUCCESS'" @click="() => showTaskInfo(card)"
+              ><Icon icon="streamline-emojis:television" />任务明细</a-menu-item
             >
-            <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)">📛添加标签</a-menu-item>
-            <a-menu-item key="4" @click="() => showSampleView(card)">🍹添加到官方案例</a-menu-item>
-            <a-menu-item key="3" @click="() => copyText(card.messageHash)"
-              >🆔复制任务ID</a-menu-item
+            <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)"
+              ><Icon icon="streamline-emojis:blossom" /> 添加标签</a-menu-item
             >
-            <a-menu-item key="5" @click="() => copyText(card.prompt)">🐣复制Prompt</a-menu-item>
-            <a-menu-item key="6" @click="showUserSpaceTask(card)">♻添加到其他空间</a-menu-item>
+            <a-menu-item key="3" @click="() => showSampleView(card)"
+              ><Icon icon="streamline-emojis:globe-showing-europe-africa" />
+              添加到官方案例</a-menu-item
+            >
+            <a-menu-item key="4" @click="() => copyText(card.messageHash)"
+              ><Icon icon="fluent-emoji-flat:id-button" color="grey" /> 复制任务ID</a-menu-item
+            >
+
+            <a-menu-item key="5" @click="() => copyText(card.prompt)"
+              ><Icon icon="streamline-emojis:baseball" color="grey" /> 复制Prompt</a-menu-item
+            >
+            <a-menu-item key="6" @click="showUserSpaceTask(card)"
+              ><Icon icon="streamline-emojis:helicopter" /> 添加到其他空间</a-menu-item
+            >
             <a-popconfirm
               title="该操作将永久删除任务，是否确认删除?"
               ok-text="确认删除"
               cancel-text="取消"
               @confirm="deleteCard(card)"
             >
-              <a-menu-item key="7" @click="deleteSpaceCard(card, spaceId)"
-                >🚽从该空间移除</a-menu-item
+              <a-menu-item key="7" @click="deleteSpaceCard(card, spaceId)">
+                <Icon icon="streamline-emojis:recycling-symbol" color="red" />
+                从该空间移除</a-menu-item
               >
             </a-popconfirm>
-            <!-- <a-menu-item key="3" disabled>移除标签</a-menu-item> -->
+            <a-menu-item key="8" @click="() => getSeed(card.id, false)"
+              ><Icon icon="streamline-emojis:rocket" /> 获取Seed</a-menu-item
+            >
           </a-menu>
         </template>
       </a-dropdown>
@@ -1206,14 +1234,14 @@
       v-model:open="showQueryViewFlag"
       width="100%"
       title="🔍️条件查询"
-      :bodyStyle="{ padding: '7px 12px 7px 12px', width: '100%', 'align-items': 'center' }"
+      :bodyStyle="{ padding: '7px 0px', width: '100%', 'align-items': 'center' }"
     >
       <template #footer>
         <a-button key="submit" type="primary" @click="doModelSearch()">立即查询</a-button>
       </template>
       <a-card
         :bordered="false"
-        :bodyStyle="{ padding: '1px 1px 1px 1px', width: '100%', 'align-items': 'center' }"
+        :bodyStyle="{ padding: '1px 3px', width: '100%', 'align-items': 'center' }"
       >
         <a-row :gutter="[0, 2]" type="flex">
           <a-col flex="80px">
@@ -1317,7 +1345,7 @@
           >已知晓</a-button
         >
       </template>
-      <a-card :bodyStyle="{ padding: '0px ' }" :bordered="false">
+      <a-card :bodyStyle="{ padding: '0px ' }" :bordered="false" class="grid my-transparent-card">
         <a-card-grid
           style="display: flex; justify-content: center; width: 100%; text-align: center"
           :bodyStyle="{ padding: '0px 0px 0px 0px' }"
@@ -1334,9 +1362,10 @@
               :hoverable="false"
             >
               <a-card-grid
+                :bodyStyle="'padding: 0px'"
                 v-for="infoImage in infoData.taskInfo.taskImage.infoImageList"
                 :key="infoImage.url"
-                style="width: 49%; margin: 1px; padding: 0; border-radius: 15px; text-align: center"
+                style="width: 50%; margin: 0; padding: 0; border-radius: 15px; text-align: center"
               >
                 <!-- <div
                 v-show="!infoImage.loaded"
@@ -1386,7 +1415,7 @@
             </a-card>
             <a-flex :style="{ width: '100%' }" justify="center" align="center">
               <span style="font-size: 12px">
-                📢 导入的任务图片加载失败可以试着获取下Seed。 点击图片可查看大图！！！</span
+                📢 导入的图片加载失败可以试着获取下Seed。 点击图片可查看大图！！！</span
               >
               <a-button @click="handleDownloadByUrls(getImageList(infoData.taskInfo))" size="small">
                 <Icon icon="bx:bxs-cloud-download" class="vel-icon icon" aria-hidden="true" />
@@ -1396,30 +1425,30 @@
           </div>
         </a-card-grid>
 
-        <a-card-grid style="width: 100%; text-align: left" :hoverable="false">
+        <a-card-grid style="width: 100%; margin-top: 5px; text-align: left" :hoverable="false">
           <a-descriptions bordered size="small" :column="2" layout="vertical">
-            <a-descriptions-item label="👨执行账户" :style="{ width: '48%' }">{{
+            <a-descriptions-item label="👨执行账户" :style="{ width: '48%' }" :span="1">{{
               infoData.taskInfo.accountName
             }}</a-descriptions-item>
-            <a-descriptions-item label="🍪任务类型" :style="{ width: '48%' }">
+            <a-descriptions-item label="🍪任务类型" :style="{ width: '48%' }" :span="1">
               <a-tag :color="stringToColor(infoData.taskInfo.commandTypeName)">{{
                 infoData.taskInfo.commandTypeName
               }}</a-tag>
             </a-descriptions-item>
-            <a-descriptions-item label="💎MJ账号" :style="{ width: '48%' }">{{
+            <a-descriptions-item label="💎MJ账号" :style="{ width: '48%' }" :span="1">{{
               infoData.taskInfo.discordUserName
             }}</a-descriptions-item>
 
-            <a-descriptions-item label="🤖执行机器人" :style="{ width: '48%' }">
+            <a-descriptions-item label="🤖执行机器人" :style="{ width: '48%' }" :span="1">
               <a-tag :color="infoData.taskInfo.bootName === 'niji' ? 'green' : ''"
                 >{{ infoData.taskInfo.bootName }} 机器人</a-tag
               >
             </a-descriptions-item>
-            <a-descriptions-item label="🍦服务器" :style="{ width: '48%' }">{{
+            <a-descriptions-item label="🍦服务器" :style="{ width: '48%' }" :span="1">{{
               infoData.taskInfo.guildName
             }}</a-descriptions-item>
 
-            <a-descriptions-item label="🍩运行模式" :style="{ width: '48%' }">
+            <a-descriptions-item label="🍩运行模式" :style="{ width: '48%' }" :span="1">
               <a-tag
                 v-if="infoData.taskInfo.modeName"
                 :color="stringToColor(infoData.taskInfo.modeName)"
@@ -1427,11 +1456,11 @@
               >
               <a-tag v-else>{{ '未定义' }}</a-tag>
             </a-descriptions-item>
-            <a-descriptions-item label="🍯所在频道">{{
+            <a-descriptions-item label="🍯所在频道" :span="1">{{
               infoData.taskInfo.channelName
             }}</a-descriptions-item>
 
-            <a-descriptions-item label="👁是否公开">
+            <a-descriptions-item label="👁是否公开" :span="1">
               <a-tag :color="infoData.taskInfo.privacyMode === 'Y' ? 'blue' : ''"
                 >{{ infoData.taskInfo.privacyMode === 'Y' ? '公开' : '隐藏' }}
               </a-tag>
@@ -1471,9 +1500,9 @@
             </a-descriptions-item>
           </a-descriptions>
         </a-card-grid>
-        <a-card-grid style="width: 100%; text-align: left" :hoverable="false">
+        <a-card-grid style="width: 100%; margin-top: 5px; text-align: left" :hoverable="false">
           <a-descriptions bordered layout="vertical">
-            <a-descriptions-item :span="2">
+            <a-descriptions-item>
               <template #label>
                 <div style="display: flex; flex-direction: row; justify-content: space-between">
                   <div>
@@ -1496,9 +1525,9 @@
             </a-descriptions-item>
           </a-descriptions>
         </a-card-grid>
-        <a-card-grid style="width: 100%; text-align: left" :hoverable="false">
+        <a-card-grid style="width: 100%; margin-top: 5px; text-align: left" :hoverable="false">
           <a-descriptions bordered layout="vertical">
-            <a-descriptions-item :span="2" v-if="infoData.tagList && infoData.tagList.length > 0">
+            <a-descriptions-item v-if="infoData.tagList && infoData.tagList.length > 0">
               <template #label>
                 <div style="display: flex; flex-direction: row; justify-content: space-between">
                   <div><Icon icon="streamline-emojis:blossom" />任务标签 </div>
@@ -1517,7 +1546,7 @@
                 >{{ tag }}</a-tag
               >
             </a-descriptions-item>
-            <a-descriptions-item :span="2" v-else>
+            <a-descriptions-item v-else>
               <template #label>
                 <div style="display: flex; flex-direction: row; justify-content: space-between">
                   <div><Icon icon="streamline-emojis:blossom" />任务标签 </div>
@@ -1530,7 +1559,7 @@
             </a-descriptions-item>
           </a-descriptions>
         </a-card-grid>
-        <a-card-grid style="width: 100%; text-align: center" :hoverable="false">
+        <a-card-grid style="width: 100%; margin-top: 5px; text-align: center" :hoverable="false">
           <a-descriptions bordered layout="vertical">
             <a-descriptions-item label="🐊任务进度">
               <a-steps size="small" :current="infoData.processList.length">
@@ -1938,6 +1967,20 @@
 
   .card >>> .ant-image-mask {
     border-radius: 7%;
+  }
+
+  .grid >>> .ant-card-grid {
+    padding: 0; /* 可能还需要设置 padding 为 0 */
+    border: none;
+    background: transparent;
+    box-shadow: none; /* 可能还需要禁用阴影 */
+  }
+
+  .my-transparent-card {
+    padding: 0; /* 可能还需要设置 padding 为 0 */
+    border: none;
+    background: transparent;
+    box-shadow: none; /* 可能还需要禁用阴影 */
   }
 
   .pagination {

@@ -315,7 +315,7 @@
   }
 
   .bottom-button {
-    right: 8px;
+    right: 5px;
     bottom: 0;
     width: 100%;
 

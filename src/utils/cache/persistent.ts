@@ -5,6 +5,7 @@ import type { RouteLocationNormalized } from 'vue-router';
 import { createLocalStorage, createSessionStorage } from '/@/utils/cache';
 import { Memory } from './memory';
 import {
+  CUSTOM_HOST_KEY,
   TOKEN_KEY,
   USER_INFO_KEY,
   ROLES_KEY,
@@ -20,6 +21,7 @@ import { toRaw } from 'vue';
 import { pick, omit } from 'lodash-es';
 
 interface BasicStore {
+  [CUSTOM_HOST_KEY]: string | number | null | undefined;
   [TOKEN_KEY]: string | number | null | undefined;
   [USER_INFO_KEY]: UserInfo;
   [PERSONAL_SETTING_KEY]: PersonalSetting;

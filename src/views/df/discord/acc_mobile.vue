@@ -1,5 +1,6 @@
 <template>
-  <a-layout v-loading="loadingRef" class="app" loading-tip="加载中...">
+  <a-layout class="app" loading-tip="加载中...">
+    <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
     <!-- 查询选项卡 -->
     <a-card :bodyStyle="{ padding: 0, height: '50px' }" ref="formRef">
       <a-row
@@ -47,6 +48,12 @@
               </template>
             </a-dropdown>
           </a-tooltip>
+
+          <a-tooltip title="市场">
+            <a-button disabled @click="openGoodsShop" style="padding: 0 5px; border-radius: 10px">
+              <Icon icon="ph:shopping-cart-bold" size="22" />
+            </a-button>
+          </a-tooltip>
           <a-tooltip title="">
             <a-button
               @click="showQueryView"
@@ -54,11 +61,6 @@
               style="padding: 0 5px; border-radius: 10px"
             >
               <Icon icon="uil:search-alt" size="22" />
-            </a-button>
-          </a-tooltip>
-          <a-tooltip title="市场">
-            <a-button @click="openGoodsShop" style="padding: 0 5px; border-radius: 10px">
-              <Icon icon="ph:shopping-cart-bold" size="22" />
             </a-button>
           </a-tooltip>
           <a-tooltip title="">
@@ -70,127 +72,208 @@
       </a-row>
     </a-card>
 
-    <!-- 内容区域 -->
+    <div
+      v-if="tableData.length === 0"
+      style="display: flex; align-items: center; justify-content: center"
+      :style="{ height: `calc(${contentHeight}px )`, overflow: 'auto' }"
+    >
+      <a-empty :image="simpleImage" />
+    </div>
+
     <div
       class="cards"
-      :style="{ height: `calc(${contentHeight}px `, overflow: 'auto', padding: '2px 10px' }"
+      v-else
+      :style="{
+        height: `calc(${contentHeight}px)`,
+        overflow: 'auto',
+        padding: '0px 10px',
+      }"
     >
       <div v-for="card in tableData" :key="card.id" :trigger="['contextmenu']">
         <a-badge-ribbon
-          :text="card.ownerFlag == 'Y' ? '自有' : '授权'"
-          :color="card.ownerFlag == 'Y' ? '#11698E' : '#00C1D4'"
+          :text="card.ownerFlag == 'Y' ? '主账号' : '授权'"
+          :color="card.ownerFlag == 'Y' ? 'red' : ''"
         >
-          <a-card
-            :bodyStyle="{ padding: '0px' }"
-            :headStyle="{
-              padding: '0px',
-              display: 'flex',
-              'flex-direction': 'row',
-              'justify-content': 'space-between',
-            }"
-            class="card"
-            hoverable
-          >
-            <div
-              style="
-                display: flex;
-                flex-direction: row;
-                justify-content: space-between;
-                width: 100%;
-                padding: 15px;
-              "
-            >
-              <div style="justify-content: left">
-                <span>🪧 {{ ' ' + card.discordUserName }}</span>
+          <a-card :bodyStyle="{ padding: '0px' }" class="card account-card" hoverable>
+            <template #extra>
+              <div
+                style="
+                  display: flex;
+                  flex-direction: row;
+                  justify-content: space-between;
+                  width: 250px;
+                "
+              >
+                <div style="justify-content: left">
+                  <span style="font-weight: bold"> {{ card.accountName }}</span>
+                </div>
               </div>
-              <div style="margin-right: 15px"> </div>
-            </div>
-            <a-divider style="margin: 0" />
+            </template>
             <div style="display: flex; flex-direction: column; padding: 10px">
               <a-row class="card-tags">
                 <span>
-                  🚌服务器:
-                  <span style="font-weight: bolder">{{ card.guildTitle }}</span></span
+                  <Icon icon="uil:server" class="vel-icon icon" aria-hidden="true" size="14" />
+                  服务器： <span style="font-size: 13px">{{ card.guildTitle }}</span></span
                 >
               </a-row>
-
               <a-row class="card-tags">
                 <span>
-                  🧽类型:
-                  <a-tag v-if="card.accMode === 'SINGLE'">单账号</a-tag>
-                  <a-tag color="purple" v-else>账号组</a-tag>
-                </span>
-                <span>
-                  🍰状态:
-                  <a-tag :color="getTagColor(card.state)" v-if="card.state === 'unvalid'"
-                    >待验证</a-tag
-                  >
-                  <a-tag :color="getTagColor(card.state)" v-else-if="card.state === 'normal'"
-                    >正常</a-tag
-                  >
-                  <a-tag :color="getTagColor(card.state)" v-else-if="card.state === 'error'"
-                    >异常</a-tag
-                  >
-                  <a-tag :color="getTagColor(card.state)" v-else>过期</a-tag>
-                </span>
+                  <Icon icon="uil:server" class="vel-icon icon" aria-hidden="true" size="14" />
+                  频道： <span style="font-size: 13px">{{ card.channelTitle }}</span></span
+                >
+                <!-- <a-badge
+                  style="font-size: 13px"
+                  :status="card.numAvailableDiscordAccount > 0 ? 'processing' : 'default'"
+                  :text="card.numAvailableDiscordAccount + '/' + card.numTotalDiscordAccount"
+                /> -->
               </a-row>
-
-              <a-row class="card-tags" v-if="card.ownerFlag == 'N'">
-                <span>
-                  ⚡Turbo次数:
-                  <span style="font-weight: bolder">{{ card.turboTimes }}</span></span
-                >
-                <span>
-                  🐇Fast次数:
-                  <span style="font-weight: bolder">{{ card.fastTimes }}</span></span
-                >
-              </a-row>
-
-              <a-row class="card-tags" v-if="card.ownerFlag == 'N'">
-                <span>
-                  🐢Relax次数:
-                  <span style="font-weight: bolder">{{ card.relaxTimes }}</span></span
-                >
-                <span v-if="card.expireTime">
-                  📅到期: <span style="font-weight: bolder">{{ card.expireTime }}</span></span
-                >
-              </a-row>
-              <a-row class="card-tags" v-if="card.ownerFlag == 'N'">
-                <span>
-                  ☎管理员:
-                  <span style="font-weight: bolder">{{ card.connect }}</span></span
-                >
-              </a-row>
-              <a-divider style="margin-top: 15px; margin-bottom: 1px; margin-left: 0" />
               <a-row class="card-tags">
-                <span>
-                  <a-button size="small" disabled @click="showDetails(card.id)">📝概况</a-button>
-                </span>
-                <span>
-                  <a-button
-                    type="warning"
-                    size="small"
-                    @click="showCreateAuth(card.id)"
-                    v-if="card.ownerFlag == 'Y'"
-                    >⛏授权</a-button
-                  >
-                </span>
-                <span>
-                  <a-button
-                    size="small"
-                    @click="showAuthorizationList(card.id)"
-                    v-if="card.ownerFlag == 'Y'"
-                    >🛒列表</a-button
-                  >
-                </span>
-                <span>
-                  <a-switch
-                    :checked="card.disabledFlag === 'N'"
-                    checked-children="启用"
-                    un-checked-children="禁用"
-                    @click="toggleDisabled(card)"
+                <span style="font-size: 13px">
+                  <Icon
+                    icon="streamline:computer-battery-medium-1-phone-mobile-charge-medium-device-electricity-power-battery"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                    size="17"
+                  />
+                  状态：<a-badge
+                    v-if="card.ownerFlag === 'Y'"
+                    style="font-size: 13px"
+                    :status="card.numAvailableDiscordAccount > 0 ? 'processing' : 'default'"
+                    :text="
+                      (card.numAvailableDiscordAccount > 0 ? '正常' : '无效') +
+                      '（账号：' +
+                      card.numAvailableDiscordAccount +
+                      ' / ' +
+                      card.numTotalDiscordAccount +
+                      '）'
+                    "
+                  /><a-badge
+                    v-else
+                    style="font-size: 13px"
+                    :status="getStateContent(card.state).status"
+                    :text="
+                      getStateContent(card.state).text +
+                      '(账号：' +
+                      card.numAvailableDiscordAccount +
+                      '/' +
+                      card.numTotalDiscordAccount +
+                      ')'
+                    "
                   />
                 </span>
+                <span>
+                  <a-button size="small" style="font-size: 12px" @click="showDetails(card.id)"
+                    >使用概况</a-button
+                  >
+                </span>
+              </a-row>
+              <a-row class="card-tags">
+                <span>
+                  🕐︎ <span style="font-size: 12px">{{ card.gmtCreate }}</span></span
+                >
+                <a-button
+                  :disabled="card.defaultFlag === 'Y'"
+                  size="small"
+                  style="font-size: 12px"
+                  @click="doSetDefault(card.id)"
+                >
+                  {{ card.defaultFlag === 'Y' ? '默认账号' : '设置默认' }}</a-button
+                >
+                <a-col :span="24">
+                  <a-divider
+                    style="width: 100%; margin-top: 8px; margin-bottom: 1px; margin-left: 0"
+                  />
+                </a-col>
+              </a-row>
+
+              <a-row class="card-tags" style="margin-top: 5px" v-if="card.ownerFlag === 'Y'">
+                <a-col
+                  :span="24"
+                  style="display: flex; justify-content: center; align-item: center"
+                >
+                  <a-button-group type="text" style="width: 100%">
+                    <a-popconfirm
+                      title="是否确认删除账户？存在授权的账户无法删除！"
+                      ok-text="Yes"
+                      cancel-text="No"
+                      @confirm="deleteAccount(card.id)"
+                    >
+                      <a-tooltip title="删除账号">
+                        <a-button type="text" style="width: 100%">
+                          <Icon
+                            icon="material-symbols:delete-outline"
+                            class="vel-icon icon"
+                            aria-hidden="true"
+                            size="17"
+                          />
+                        </a-button>
+                      </a-tooltip>
+                    </a-popconfirm>
+                    <a-tooltip title="授权列表">
+                      <a-button
+                        type="text"
+                        @click="showAuthorizationList(card.id)"
+                        style="width: 100%"
+                      >
+                        <Icon
+                          icon="ph:user-list-bold"
+                          class="vel-icon icon"
+                          aria-hidden="true"
+                          size="17"
+                        />
+                      </a-button>
+                    </a-tooltip>
+                    <a-popconfirm
+                      title="是否确认生成授权？目前生成授权后账户禁止删除！"
+                      ok-text="立即生成"
+                      cancel-text="下次吧"
+                      @confirm="showCreateAuth(card)"
+                    >
+                      <a-tooltip title="生成授权">
+                        <a-button type="text" style="width: 100%">
+                          <Icon
+                            icon="mdi:genie-lamp"
+                            class="vel-icon icon"
+                            aria-hidden="true"
+                            size="17"
+                          />
+                        </a-button>
+                      </a-tooltip>
+                    </a-popconfirm>
+
+                    <a-tooltip title="追加账号">
+                      <a-button type="text" @click="showAccountModified(card)" style="width: 100%">
+                        <Icon
+                          icon="clarity:update-line"
+                          class="vel-icon icon"
+                          aria-hidden="true"
+                          size="17"
+                        />
+                      </a-button>
+                    </a-tooltip>
+                  </a-button-group>
+                </a-col>
+              </a-row>
+              <a-row class="card-tags" v-else>
+                <a-col :span="24">
+                  <a-popconfirm
+                    title="是否确认删除账户？存在授权的账户无法删除！"
+                    ok-text="Yes"
+                    cancel-text="No"
+                    @confirm="deleteAccount(card.id)"
+                  >
+                    <a-tooltip title="删除账号">
+                      <a-button type="text" style="width: 100%">
+                        <Icon
+                          icon="material-symbols:delete-outline"
+                          class="vel-icon icon"
+                          aria-hidden="true"
+                          size="17"
+                        />
+                      </a-button>
+                    </a-tooltip>
+                  </a-popconfirm>
+                </a-col>
               </a-row>
             </div>
             <!-- 更多卡片内容 -->
@@ -216,38 +299,274 @@
       </a-card>
     </div>
 
+    <!-- 使用情况 -->
+    <a-modal
+      v-model:open="statisticsForm.viewFlag"
+      title="🔋账户使用情况"
+      width="100%"
+      wrap-class-name="full-modal "
+      :bodyStyle="{ padding: '0px' }"
+      @ok="closeDetail"
+      :confirmLoading="statisticsForm.loading"
+    >
+      <template #footer>
+        <a-button key="submit" type="primary" :loading="statisticsForm.loading" @click="closeDetail"
+          >已知晓</a-button
+        >
+      </template>
+      <a-card :bodyStyle="{ padding: '0px' }">
+        <Loading :loading="statisticsForm.loading" :absolute="true" tip="数据加载中..." />
+
+        <a-descriptions :column="2" bordered layout="vertical">
+          <a-descriptions-item label="账户名" :style="{ width: '48%' }" :span="1">{{
+            statisticsForm.formData.accountName
+          }}</a-descriptions-item>
+          <a-descriptions-item label="账号模式" :style="{ width: '48%' }" :span="1">{{
+            statisticsForm.formData.accMode === 'GROUP' ? '账号组' : '单账号'
+          }}</a-descriptions-item>
+          <a-descriptions-item label="账号权限">{{
+            statisticsForm.formData.ownerFlag === 'N' ? '授权' : '主账号'
+          }}</a-descriptions-item>
+          <a-descriptions-item :span="3" label="负载信息">
+            <span>
+              Discord账号数:
+              {{
+                statisticsForm.formData.loadInfo ? statisticsForm.formData.loadInfo.numDiscord : 0
+              }}
+              <br />
+              队列数上限:
+              {{
+                statisticsForm.formData.loadInfo ? statisticsForm.formData.loadInfo.numExecute : 0
+              }}
+              <br />
+              已用并发数:
+              {{
+                statisticsForm.formData.loadInfo
+                  ? statisticsForm.formData.loadInfo.useConcurrency
+                  : 0
+              }}
+              <br />
+              最大并发数:
+              {{
+                statisticsForm.formData.loadInfo
+                  ? statisticsForm.formData.loadInfo.maxConcurrency
+                  : 0
+              }}
+              <br />
+            </span>
+          </a-descriptions-item>
+          <a-descriptions-item
+            :span="3"
+            label="授权使用情况"
+            v-if="statisticsForm.formData.ownerFlag === 'N'"
+          >
+            <span>
+              turbo次数: {{ statisticsForm.formData.authUseInfo.turboTimes }} /
+              {{
+                statisticsForm.formData.authUseInfo.totalTurboTimes
+                  ? statisticsForm.formData.authUseInfo.totalTurboTimes
+                  : ' ∞'
+              }}
+              <br />
+              快速次数: {{ statisticsForm.formData.authUseInfo.fastTimes }} /
+              {{
+                statisticsForm.formData.authUseInfo.totalFastTimes
+                  ? statisticsForm.formData.authUseInfo.totalFastTimes
+                  : ' ∞'
+              }}
+              <br />
+              relax次数: {{ statisticsForm.formData.authUseInfo.relaxTimes }} /
+              {{
+                statisticsForm.formData.authUseInfo.totalRelaxTimes
+                  ? statisticsForm.formData.authUseInfo.totalRelaxTimes
+                  : ' ∞'
+              }}
+              <br />
+              <!-- 成功次数:{{ statisticsForm.formData.authUseInfo.numSuccess }} -->
+              <br />
+              到期时间:{{ statisticsForm.formData.authUseInfo.expireTime }}
+            </span>
+          </a-descriptions-item>
+          <a-descriptions-item
+            :span="3"
+            label="授权账号概况"
+            v-if="statisticsForm.formData.ownerFlag === 'Y'"
+          >
+            <span>
+              总账号个数: {{ statisticsForm.formData.ownerInfo.countAccounts }}
+              <br />
+              总可用账号数:{{ statisticsForm.formData.ownerInfo.countNormalAccounts }}
+              <br />
+              总异常账号数:{{ statisticsForm.formData.ownerInfo.countErrorAccounts }}
+              <br />
+              到期账号数: {{ statisticsForm.formData.ownerInfo.countStopAccounts }}
+            </span>
+          </a-descriptions-item>
+          <a-descriptions-item
+            label="Discord账号情况"
+            :span="3"
+            v-if="statisticsForm.formData.ownerFlag === 'Y'"
+          >
+            <a-table :data-source="statisticsForm.formData.discordList" rowKey="email">
+              <a-table-column
+                title="账号名"
+                v-if="false"
+                dataIndex="globalName"
+                key="globalName"
+                :width="200"
+              />
+              <a-table-column title="邮箱" dataIndex="email" key="email" />
+              <a-table-column
+                title="Discord状态"
+                dataIndex="discordState"
+                key="discordState"
+                :width="100"
+              >
+                <template #default="{ text }">
+                  <a-badge
+                    :status="getDiscordStateContent(text).status"
+                    :text="getDiscordStateContent(text).text"
+                  />
+                </template>
+              </a-table-column>
+              <a-table-column title="MJ状态" dataIndex="mjState" key="mjState" :width="100">
+                <template #default="{ text }">
+                  <a-badge
+                    :status="getMjStateContent(text).status"
+                    :text="getMjStateContent(text).text"
+                  />
+                </template>
+              </a-table-column>
+            </a-table>
+          </a-descriptions-item>
+        </a-descriptions>
+      </a-card>
+    </a-modal>
+
     <!-- 新增用户 -->
-    <a-modal v-model:open="isAddModalVisible" title="🥰新增账户" ok-text="提交" @ok="onSubmitAdd">
+    <a-modal
+      v-model:open="accountForm.viewFlag"
+      title="🍏新建账户"
+      ok-text="立即创建"
+      @ok="onSubmitAdd"
+      :confirmLoading="accountForm.loading"
+    >
       <a-card>
-        <a-form layout="vertical">
-          <a-row gutter="24">
-            <a-col :span="12">
-              <a-form-item label="账号名">
-                <a-input v-model:value="addForm.accountName" placeholder="输入账号名" />
-              </a-form-item>
-            </a-col>
-            <a-col :span="12">
-              <a-form-item label="授权数">
-                <a-input-number v-model:value="addForm.authorizationCount" min="0" />
-              </a-form-item>
-            </a-col>
-          </a-row>
-          <a-row gutter="24">
-            <a-col :span="12">
-              <a-form-item label="Token">
-                <a-input v-model:value="addForm.token" placeholder="输入Token" />
-              </a-form-item>
-            </a-col>
-            <a-col :span="12">
-              <a-form-item label="服务ID">
-                <a-input v-model:value="addForm.serviceId" placeholder="输入服务ID" />
-              </a-form-item>
-            </a-col>
-          </a-row>
+        <Loading :loading="accountForm.loading" :absolute="true" tip="正在提交..." />
+        <a-form :model="accountForm" layout="vertical" ref="accountFormRef">
           <a-row gutter="24">
             <a-col :span="24">
-              <a-form-item label="Channel ID">
-                <a-input v-model:value="addForm.channelId" placeholder="输入Channel ID" />
+              <a-form-item
+                label="🐵账号名（账号多的时候方便记）"
+                :rules="[
+                  {
+                    required: true,
+                    message: '账号名名称是必填项',
+                  },
+                ]"
+                name="accountName"
+              >
+                <a-input v-model:value="accountForm.accountName" placeholder="输入账号名" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="🐧分配Discord账号"
+                :rules="[
+                  {
+                    required: true,
+                    message: 'discord账号是必填项',
+                  },
+                ]"
+                name="discordUserId"
+              >
+                <a-select
+                  @change="onSelectDiscordUser"
+                  style="width: 100%; height: 32px"
+                  v-model:value="accountForm.discordUserId"
+                  :options="accountForm.discordUserOptions"
+                  placeholder="请选择Discord账号"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="🍵执行服务器"
+                :rules="[
+                  {
+                    required: true,
+                    message: '执行服务器是必填项',
+                  },
+                ]"
+                name="guildId"
+              >
+                <a-select
+                  @change="onSelectGuild"
+                  style="width: 100%; height: 32px"
+                  v-model:value="accountForm.guildId"
+                  :options="accountForm.guildOptions"
+                  placeholder="请选择执行的服务器"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="🍙默认频道"
+                :rules="[
+                  {
+                    required: true,
+                    message: '默认频道是必填项',
+                  },
+                ]"
+                name="channelId"
+              >
+                <a-select
+                  v-model:value="accountForm.channelId"
+                  style="width: 100%"
+                  placeholder="请选择默认频道"
+                  :options="accountForm.channelOptions"
+                />
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
+      </a-card>
+    </a-modal>
+
+    <!-- 追加账户 -->
+    <a-modal
+      v-model:open="accountModifiedForm.viewFlag"
+      title="🍏追加账户组账户"
+      ok-text="立即保存"
+      @ok="onAppendDiscordAccount"
+      :confirmLoading="accountModifiedForm.loading"
+      width="100%"
+      wrap-class-name="full-modal "
+      :bodyStyle="{ padding: '0px' }"
+    >
+      <a-card>
+        <Loading :loading="accountModifiedForm.loading" :absolute="true" tip="正在提交..." />
+        <a-form :model="accountModifiedForm" layout="vertical" ref="accountModifiedFormRef">
+          <a-row gutter="24">
+            <a-col :span="24">
+              <a-form-item label="🐵账号名" name="accountName">
+                <a-input
+                  v-model:value="accountModifiedForm.accountName"
+                  disabled
+                  placeholder="输入账号名"
+                />
+              </a-form-item>
+            </a-col>
+
+            <a-col :span="24">
+              <a-form-item label="账户组账号">
+                <a-select
+                  v-model:value="accountModifiedForm.discordUserIds"
+                  mode="multiple"
+                  style="width: 100%"
+                  placeholder="请勾选账号组账号"
+                  :options="accountModifiedForm.discordFilterUserOptions"
+                />
               </a-form-item>
             </a-col>
           </a-row>
@@ -258,57 +577,108 @@
     <!-- 生成授权码 -->
     <a-modal
       v-model:open="createAuthForm.isActiveVisible"
-      wrap-class-name="full-modal"
-      :bodyStyle="{ padding: '0' }"
-      title="⛏生成授权码"
+      width="100%"
+      wrap-class-name="full-modal "
+      :bodyStyle="{ padding: '0px' }"
+      title="生成授权码"
       ok-text="提交"
       @ok="onCreateAuth"
+      :confirmLoading="createAuthForm.loading"
     >
       <a-card>
-        <a-form layout="vertical">
+        <Loading :loading="createAuthForm.loading" :absolute="true" tip="正在生成中..." />
+        <a-form layout="vertical" :model="createAuthForm" ref="createAuthFormRef">
           <a-row gutter="24">
             <a-col :span="24">
-              <a-form-item label="生成授权数量">
-                <a-input-number v-model:value="createAuthForm.num" min="1" />
+              <a-form-item
+                label="生成授权数量(1~50)"
+                name="num"
+                :rules="[{ required: true, message: '请输入生成授权码的数量!' }]"
+              >
+                <a-input-number
+                  v-model:value="createAuthForm.num"
+                  placeholder="请输入生成授权码的数量~"
+                  min="1"
+                  max="50"
+                />
               </a-form-item>
             </a-col>
             <a-col :span="24">
-              <a-form-item label="授权天数">
+              <a-form-item
+                label="授权类型"
+                name="authWay"
+                :rules="[{ required: true, message: '请输入生成授权码的数量!' }]"
+              >
+                <a-select
+                  v-model:value="createAuthForm.authWay"
+                  @change="changeAuthWay"
+                  placeholder="授权方式"
+                >
+                  <a-select-option value="DAY">按天计算</a-select-option>
+                  <a-select-option value="TIME">指定到期时间</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+
+            <a-col :span="24" v-if="createAuthForm.authWay === 'DAY'">
+              <a-form-item label="授权天数（0~365）" name="authDays">
                 <a-input-number
-                  id="authDays"
                   v-model:value="createAuthForm.authDays"
-                  :min="-1"
-                  :max="999999"
+                  placeholder="请输入授权天数，为空则是永久~"
+                  min="0"
+                  max="365"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24" v-if="createAuthForm.authWay === 'TIME'">
+              <a-form-item label="到期时间">
+                <a-date-picker
+                  show-time
+                  style="width: 100%"
+                  width="100%"
+                  v-model:value="createAuthForm.authExpireTimes"
+                  placeholder="到期时间，为空则是永久~"
+                  @change="onChangePicker"
                 />
               </a-form-item>
             </a-col>
             <a-col :span="24">
-              <a-form-item label="TURBO模式次数">
+              <a-form-item label="TURBO模式次数（0~9999）" name="turboTimes">
                 <a-input-number
-                  id="turboTimes"
-                  v-model:value="createAuthForm.turboTimes"
-                  :min="-1"
-                  :max="999999"
+                  v-model:value="createAuthForm.otherInfo.turboTimes"
+                  placeholder="请输入TURBO次数，为空则是永久~"
+                  min="0"
+                  max="9999"
                 />
               </a-form-item>
             </a-col>
             <a-col :span="24">
-              <a-form-item label="FAST模式次数">
+              <a-form-item label="FAST模式次数（0~9999）" name="fastTimes">
                 <a-input-number
-                  id="fastTimes"
-                  v-model:value="createAuthForm.fastTimes"
-                  :min="-1"
-                  :max="999999"
+                  v-model:value="createAuthForm.otherInfo.fastTimes"
+                  placeholder="请输入Fast次数，为空则是永久~"
+                  min="0"
+                  max="365"
                 />
               </a-form-item>
             </a-col>
             <a-col :span="24">
-              <a-form-item label="Relax模式次数">
+              <a-form-item label="Relax模式次数（0~9999）" name="relaxTimes">
+                <a-input
+                  v-model:value="createAuthForm.otherInfo.relaxTimes"
+                  placeholder="请输入Relax次数，为空则是永久~"
+                  min="0"
+                  max="9999"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item label="提交任务数" name="numExecute">
                 <a-input-number
-                  id="relaxTimes"
-                  v-model:value="createAuthForm.relaxTimes"
-                  :min="-1"
-                  :max="999999"
+                  v-model:value="createAuthForm.otherInfo.numExecute"
+                  placeholder="请输提交任务数，为空则上限为主账号上限~"
+                  min="1"
+                  :max="createAuthForm.maxNumExecute"
                 />
               </a-form-item>
             </a-col>
@@ -320,76 +690,53 @@
     <!-- 激活授权账号 -->
     <a-modal
       v-model:open="activeData.isActiveVisible"
-      title="🎈激活授权账号"
-      :style="{ width: '100%', height: '35vh' }"
-      ok-text="立即激活"
+      title="Midjouney授权激活"
+      ok-text="提交"
       @ok="onActiveAccount"
     >
-      <div style="padding: 15px">
-        <a-input v-model:value="activeData.activeCode" placeholder="输入授权码" />
-      </div>
+      <a-card>
+        <a-form layout="vertical">
+          <a-row gutter="24">
+            <a-col :span="24">
+              <a-form-item label="账号授权码">
+                <a-input v-model:value="activeData.activeCode" placeholder="输入授权码" />
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
+      </a-card>
     </a-modal>
 
     <!-- 授权列表 -->
     <a-modal
       v-model:open="authListForm.isAuthModalVisible"
-      title="📝授权列表"
       width="100%"
-      wrap-class-name="full-modal"
-      :bodyStyle="{ padding: '0' }"
+      wrap-class-name="full-modal "
+      :bodyStyle="{ padding: '0px' }"
     >
-      <template #footer>
-        <a-button key="back" @click="closeAuthListModal">关闭</a-button>
+      <template #title>
+        <Icon
+          icon="streamline-emojis:beaming-face-with-smiling-eyes"
+          class="vel-icon icon"
+          aria-hidden="true"
+        />
+        授权列表
       </template>
-
-      <div class="cards" :style="{ height: '75vh', overflow: 'auto', padding: '0 2px' }">
-        <div v-for="card in authListTableData" :key="card.id" :trigger="['contextmenu']">
-          <a-card
-            :bodyStyle="{ padding: '0px' }"
-            :headStyle="{
-              padding: '0px',
-              display: 'flex',
-              'flex-direction': 'row',
-              'justify-content': 'space-between',
-            }"
-            class="card"
-            hoverable
-          >
-            <div style="display: flex; flex-direction: column; padding: 10px">
-              <a-row class="card-tags">
-                <a-col :span="24">
-                  🚌服务器:
-                  <span style="font-weight: bolder">{{ card.guildTitle }}</span></a-col
-                >
-              </a-row>
-              <a-row class="card-tags" :gutter="[0, 5]">
-                <a-col :span="24">
-                  🧽授权码:
-                  <span style="font-weight: bolder">{{ card.authCode }}</span>
-                </a-col>
-                <a-col :span="24">
-                  🍰状态:
-                  <a-tag color="green" v-if="card.activeUserEmail">已激活</a-tag>
-                  <a-tag color="gray" v-else>未激活</a-tag>
-                </a-col>
-                <a-col :span="24">
-                  📩激活用户:
-                  <span style="font-weight: bolder">{{ card.activeUserEmail }}</span></a-col
-                >
-                <a-col :span="24">
-                  🕘激活时间:
-                  <span style="font-weight: bolder">{{ card.gmtActive }}</span></a-col
-                >
-                <a-col :span="24">
-                  🕐生成时间: <span style="font-weight: bolder">{{ card.gmtCreate }}</span></a-col
-                >
-              </a-row>
-            </div>
-            <!-- 更多卡片内容 -->
-          </a-card>
-        </div>
+      <template #footer>
+        <a-button key="submit" type="primary" @click="closeAuthModal">已知晓</a-button>
+      </template>
+      <Loading :loading="authListForm.loading" :absolute="true" tip="数加载中..." />
+      <div style="width: 100%; padding: 10px; overflow-x: auto">
+        <a-table :dataSource="authListTableData" class="a-table" :scroll="{ x: 'max-content' }">
+          <a-table-column
+            v-for="column in authColumns"
+            :v-if="!column.hidden"
+            :key="column.key"
+            :title="column.title"
+            :dataIndex="column.dataIndex"
+          />
+        </a-table>
       </div>
-      <Loading :loading="tableLoading" absolute="true" tip="正在加载中~" />
     </a-modal>
 
     <!-- 详情模态窗口组件 -->
@@ -414,12 +761,12 @@
         :bordered="false"
         :bodyStyle="{ padding: '1px 1px 1px 1px', width: '100%', 'align-items': 'center' }"
       >
-        <a-row :gutter="[0, 2]" type="flex">
+        <!-- <a-row :gutter="[0, 2]" type="flex">
           <a-col flex="80px">
             <a-tag class="quality-tag" color="default">🍺状态 </a-tag>
           </a-col>
           <a-col flex="auto">
-            <a-select v-model:value="search.state" style="width: 100%" class="mobile-select">
+            <a-select placeholder="类型" v-model:value="search.state" style="width: 100%" class="mobile-select">
               <a-select-option value="">全部</a-select-option>
               <a-select-option value="待验证">待验证</a-select-option>
               <a-select-option value="正常">正 常</a-select-option>
@@ -427,13 +774,18 @@
               <a-select-option value="过期">结 束</a-select-option>
             </a-select>
           </a-col>
-        </a-row>
+        </a-row> -->
         <a-row :gutter="[0, 2]" type="flex" style="margin-top: 7px">
           <a-col flex="80px">
             <a-tag class="quality-tag" color="default">🍥权限 </a-tag>
           </a-col>
           <a-col flex="auto">
-            <a-select v-model:value="search.ownerFlag" class="mobile-select" style="width: 100%">
+            <a-select
+              placeholder="选择账号权限"
+              v-model:value="search.ownerFlag"
+              class="mobile-select"
+              style="width: 100%"
+            >
               <a-select-option value="">全部</a-select-option>
               <a-select-option value="N">授权</a-select-option>
               <a-select-option value="Y">自有</a-select-option>
@@ -441,23 +793,27 @@
           </a-col>
         </a-row>
         <a-row type="flex" :gutter="[0, 2]" style="margin-top: 7px">
+          <a-col flex="80px">
+            <a-tag class="quality-tag" color="default">🥝名称 </a-tag>
+          </a-col>
           <a-col flex="auto">
             <a-input v-model:value="search.accountName" placeholder="输入账号名称" />
           </a-col>
         </a-row>
       </a-card>
     </a-modal>
-    <Loading :loading="tableLoading" absolute="false" tip="正在加载中~" />
   </a-layout>
 </template>
 
 <script lang="ts" setup>
-  import { ref, onMounted, onUnmounted, reactive, computed, unref } from 'vue';
+  import { ref, onMounted, computed, unref } from 'vue';
+  import { Loading } from '/@/components/Loading';
   import {
     ListQueryParams,
     AccountListItem,
     ChangeAuthParams,
     AccountAuthListResp,
+    AccountStatisticsModel,
   } from '/@/api/df/model/accountModel';
   import {
     queryList,
@@ -467,15 +823,29 @@
     accountAuthList,
     createAccountAuth,
     disabledAccount,
+    addOwnerAccount,
+    getAccountStatisticalInfo,
+    appendDiscordAccount,
+    setDefault,
+    getGroupAccounts,
   } from '/@/api/df/account';
   import AccountDetailsModal from './accountDetailsModal.vue';
   import { IdReq } from '/@/api/model/baseModel';
-  import { message } from 'ant-design-vue';
-  import { Loading } from '/@/components/Loading';
-  import { useGo } from '/@/hooks/web/usePage';
-  import { useContentHeight } from '/@/hooks/web/useContentHeight';
+  import Goods from './goods.vue';
+  import AccountGroup from './account_group.vue';
+  import Discord from './discord.vue';
   import Icon from '/@/components/Icon/Icon.vue';
-
+  import { message } from 'ant-design-vue';
+  import {
+    discordAddToken,
+    discordList,
+    discordInfo,
+    channelList,
+    guildList,
+  } from '/@/api/df/discord';
+  import { useMessage } from '/@/hooks/web/useMessage';
+  import { useContentHeight } from '/@/hooks/web/useContentHeight';
+  import { discordApi } from './discord';
   /** 页面高度计算开始 */
   const formRef = ref();
   //页面高度处理
@@ -495,7 +865,16 @@
     offsetHeightRef,
   );
 
-  const go = useGo();
+  const { createMessage, createSuccessModal, createErrorModal, createInfoModal } = useMessage();
+  const {
+    accountFormRef,
+    accountForm,
+    onAdd,
+    onSelectDiscordUser,
+    onSelectGuild,
+    queryDiscordList,
+  } = discordApi();
+
   const showQueryViewFlag = ref(false);
   const showQueryView = () => {
     showQueryViewFlag.value = true;
@@ -506,13 +885,11 @@
     onSearch();
   };
 
-  const loadingRef = ref(false);
-  const tableLoading = ref(false);
   //查询
   const search = ref({
-    ownerFlag: '',
+    ownerFlag: null,
     accountName: '',
-    state: '',
+    accountStatus: null,
   });
   // 分页
   const pagination = ref({
@@ -530,9 +907,9 @@
 
   const onReset = () => {
     search.value = {
-      ownerFlag: '',
+      ownerFlag: null,
       accountName: '',
-      accountStatus: '',
+      accountStatus: null,
     };
   };
   // 页数改变的方法
@@ -548,20 +925,25 @@
     onSearch();
   }
 
+  const globalLoading = ref(false);
   const onSearch = async () => {
-    tableLoading.value = true;
-    const params: ListQueryParams = search.value;
-    params.current = pagination.value.current;
-    params.pageSize = pagination.value.pageSize;
-    console.log(params);
-    const response = await queryList(params);
-    tableData.value = response.records;
-    pagination.value.total = response.total;
-    tableLoading.value = false;
+    globalLoading.value = true;
+    try {
+      const params: ListQueryParams = search.value;
+      params.current = pagination.value.current;
+      params.pageSize = pagination.value.pageSize;
+      console.log(params);
+      const response = await queryList(params);
+      tableData.value = response.records;
+      pagination.value.total = response.total;
+    } finally {
+      globalLoading.value = false;
+    }
   };
 
   onMounted(() => {
     onSearch();
+    queryDiscordList({});
   });
 
   // 主table 数据
@@ -571,59 +953,203 @@
 
   //授权列表相关 开始
   const authListForm = ref({
+    loading: false,
     isAuthModalVisible: false,
     authList: {},
   });
-  const closeAuthListModal = () => {
-    authListForm.value.isAuthModalVisible = false;
-  };
   const authListTableData = ref<AccountAuthListResp[]>([
     // 更多数据...
   ]);
 
+  // const authList = ref([
+  //   { id: '1', authCode: '123456', user: '张三', authTime: '2023-07-20 18:00:00' },
+  //   { id: '2', authCode: '789012', user: '李四', authTime: '2023-07-21 18:00:00' },
+  // ]);
+  const authColumns = [
+    // { title: 'ID', dataIndex: 'id', key: 'id', hidden: true },
+    { title: '授权码', dataIndex: 'authCode', key: 'authCode', width: 100 },
+    { title: '激活用户', dataIndex: 'activeUserEmail', key: 'activeUserEmail', width: 100 },
+    { title: '激活时间', dataIndex: 'gmtActive', key: 'gmtActive', width: 100 },
+    { title: 'Turbo次数', dataIndex: 'turboTimes', key: 'turboTimes', width: 100 },
+    { title: 'Fast次数', dataIndex: 'fastTimes', key: 'fastTimes', width: 100 },
+    { title: 'Relax次数', dataIndex: 'relaxTimes', key: 'relaxTimes', width: 100 },
+    { title: '提交任务数', dataIndex: 'numExecute', key: 'numExecute', width: 100 },
+    { title: '生成时间', dataIndex: 'gmtCreate', key: 'gmtCreate', width: 100 },
+    { title: '授权方式', dataIndex: 'authWayLabel', key: 'authWayLabel', width: 100 },
+    { title: '天数/效期', dataIndex: 'authDays', key: 'authDays', width: 100 },
+  ];
+
   const showAuthorizationList = async (id) => {
     // 显示授权列表
-    authListForm.value.isAuthModalVisible = true;
-    tableLoading.value = true;
+    authListForm.value.loading = true;
     try {
+      authListForm.value.isAuthModalVisible = true;
       authListTableData.value = await accountAuthList({ accountId: id, source: 'MJ' });
     } finally {
-      tableLoading.value = false;
+      authListForm.value.loading = false;
+    }
+  };
+  const closeAuthModal = () => {
+    authListForm.value.isAuthModalVisible = false;
+  };
+  //授权列表相关 结束
+
+  //**************************************新增或者编辑 ****************************************************//
+
+  const onSubmitAdd = async () => {
+    // if (accountForm.value.accountName === '' || accountForm.value.accountName === null) {
+    //   createMessage.error('请输入账号名！');
+    //   return;
+    // }
+    // if (accountForm.value.discordUserId === '' || accountForm.value.discordUserId === null) {
+    //   createMessage.error('请选择执行账号！');
+    //   return;
+    // }
+    // if (accountForm.value.guildId === '' || accountForm.value.guildId === null) {
+    //   createMessage.error('请选择执行服务器！');
+    //   return;
+    // }
+    // if (accountForm.value.channelId === '' || accountForm.value.channelId === null) {
+    //   createMessage.error('请选择执行频道！');
+    //   return;
+    // }
+    // 提交新增账户的数据
+    accountForm.value.loading = true;
+    try {
+      await accountFormRef.value.validate();
+      await addOwnerAccount(accountForm.value);
+      accountForm.value.viewFlag = false;
+      onSearch();
+    } finally {
+      accountForm.value.loading = false;
     }
   };
 
-  //授权列表相关 结束
+  const deleteAccount = async (id) => {
+    // 删除账户
+    globalLoading.value = true;
+    const param: IdReq = { id: id };
+    try {
+      await del(param);
+      onSearch();
+    } finally {
+      globalLoading.value = false;
+    }
+  };
 
-  //新增或者编辑
-  const isAddModalVisible = ref(false);
-  const addForm = ref({
+  const doSetDefault = async (id) => {
+    globalLoading.value = true;
+    try {
+      await setDefault({ id: id });
+    } finally {
+      globalLoading.value = false;
+    }
+  };
+
+  const getStateContent = (state) => {
+    if (state === 'normal') {
+      return { text: '正常', color: '#52c41a', status: 'processing' };
+    } else if (state === 'error') {
+      return { text: '异常', color: '#ff4d4f', status: 'error' };
+    } else if (state === 'unvalid') {
+      return { text: '待验证', color: '#d9d9d9', status: 'warning' };
+    } else {
+      return { text: '过期', color: '#d9d9d9', status: 'default' };
+    }
+  };
+
+  const getDiscordStateContent = (state) => {
+    if (state === 'NORMAL') {
+      return { text: '正常', color: '#52c41a', status: 'processing' };
+    } else if (state === 'EXPIRED') {
+      return { text: '过期', color: '#ff4d4f', status: 'error' };
+    } else if (state === 'VERIFY_HUMAN') {
+      return { text: '验证人类', color: '#d9d9d9', status: 'warning' };
+    } else {
+      return { text: '未知', color: '#d9d9d9', status: 'default' };
+    }
+  };
+
+  const getMjStateContent = (state) => {
+    console.log('getMjStateContent   ' + state);
+    if (state === 'NORMAL') {
+      return { text: '已订阅', color: '#52c41a', status: 'processing' };
+    } else if (state === 'BAN') {
+      return { text: 'BAN', color: '#ff4d4f', status: 'error' };
+    } else if (state === 'STOP') {
+      return { text: '未订阅', color: '#d9d9d9', status: 'default' };
+    } else {
+      return { text: '未知', color: '#d9d9d9', status: 'default' };
+    }
+  };
+
+  /*****************************追加账户*************************************** */
+  const accountModifiedForm = ref({
+    viewFlag: false,
+    loading: false,
     id: null,
-    accountName: '',
-    authorizationCount: 0,
-    token: '',
-    serviceId: '',
-    channelId: '',
+    accountName: null,
+    discordUserIds: null as string[] | null,
+    discordFilterUserOptions: [] as { label: string; value: string }[],
   });
-  const onAdd = () => {
-    isAddModalVisible.value = true;
-  };
-  const editAccount = (id) => {
-    isAddModalVisible.value = true;
-    // 编辑账户
-    addForm.value.accountName = '123';
-    addForm.value.authorizationCount = 123;
-  };
-  const onSubmitAdd = () => {
-    // 提交新增账户的数据
-    isAddModalVisible.value = false;
+
+  const showAccountModified = async (record) => {
+    accountModifiedForm.value.accountName = record.accountName;
+    accountModifiedForm.value.id = record.id;
+    accountModifiedForm.value.viewFlag = true;
+    accountModifiedForm.value.loading = true;
+    try {
+      const resp = await getGroupAccounts({ id: record.id });
+      accountModifiedForm.value.discordUserIds = resp;
+      const response = await discordList({ guildId: record.guildId });
+      // 使用 map 方法转换数组
+      const transformedList = response.map((item) => ({
+        label: item.globalName,
+        value: item.id,
+      }));
+      // 如果您想在转换后的数组前面添加一个特定的对象，可以使用以下方法：
+      const finalList = [...transformedList];
+      accountModifiedForm.value.discordFilterUserOptions = finalList;
+    } catch (e) {
+      console.log(e);
+      accountModifiedForm.value.loading = false;
+    } finally {
+      accountModifiedForm.value.loading = false;
+    }
   };
 
-  //账号统计相关
-  const selectedAccountId = ref('');
+  const onAppendDiscordAccount = async () => {
+    accountModifiedForm.value.loading = true;
+    try {
+      await appendDiscordAccount(accountModifiedForm.value);
+      accountModifiedForm.value.viewFlag = false;
+      onSearch();
+    } finally {
+      accountModifiedForm.value.loading = false;
+    }
+  };
+
+  //******************************账号统计相关***********************************/
+
+  const statisticsForm = ref({
+    viewFlag: false,
+    loading: false,
+    formData: {} as AccountStatisticsModel,
+  });
   const isDetailsModalVisible = ref(false);
-  const showDetails = (id: string) => {
-    selectedAccountId.value = id;
-    isDetailsModalVisible.value = true;
+  const showDetails = async (id: string) => {
+    console.log('11111');
+    statisticsForm.value.viewFlag = true;
+    statisticsForm.value.loading = true;
+    try {
+      const resp = await getAccountStatisticalInfo({ id: id });
+      statisticsForm.value.formData = resp;
+    } finally {
+      statisticsForm.value.loading = false;
+    }
+  };
+  const closeDetail = () => {
+    statisticsForm.value.viewFlag = false;
   };
 
   // 更新模态窗口的可见性，由子组件触发
@@ -631,38 +1157,70 @@
     isDetailsModalVisible.value = value;
   };
 
+  /************************************生成授权********************************* */
   //生成账户授权
+  const createAuthFormRef = ref();
   const createAuthForm = ref({
+    loading: false,
     isActiveVisible: false,
-    num: 1,
+    num: null,
     accountId: null,
-    turboTimes: 0,
-    fastTimes: 0,
-    relaxTimes: 0,
     authType: 'DAY',
-    authDays: 0,
+    authDays: null,
+    maxNumExecute: 50,
+    authExpireTimes: null,
+    otherInfo: {
+      turboTimes: null,
+      fastTimes: null,
+      relaxTimes: null,
+      numExecute: null,
+    },
   });
-  const showCreateAuth = async (id) => {
+  const showCreateAuth = async (card) => {
     createAuthForm.value.isActiveVisible = true;
-    createAuthForm.value.accountId = id;
+    createAuthForm.value.accountId = card.id;
+    createAuthForm.value.maxNumExecute = card.numExecute;
+
+    createAuthForm.value.num = null;
+    createAuthForm.value.otherInfo.turboTimes = null;
+    createAuthForm.value.otherInfo.fastTimes = null;
+    createAuthForm.value.otherInfo.relaxTimes = null;
+    createAuthForm.value.otherInfo.numExecute = null;
+    createAuthForm.value.authDays = null;
+    createAuthForm.value.authExpireTimes = null;
   };
 
   const onHideCreateAuth = async () => {
     createAuthForm.value.isActiveVisible = false;
   };
   const onCreateAuth = async () => {
-    tableLoading.value = true;
-    console.log('onCreateAuth');
+    createAuthForm.value.loading = true;
     try {
+      await createAuthFormRef.value.validate();
       await createAccountAuth(createAuthForm.value);
+      createMessage.success('已成功创建授权码~');
       createAuthForm.value.isActiveVisible = false;
+      // onSearch();
     } finally {
-      tableLoading.value = false;
+      createAuthForm.value.loading = false;
+    }
+  };
+
+  const onChangePicker = (value: [Dayjs, Dayjs], dateString: [string, string]) => {
+    createAuthForm.value.authDays = dateString;
+  };
+  const changeAuthWay = () => {
+    if (createAuthForm.value.authWay === 'DAY') {
+      createAuthForm.value.authDays = '1';
+    } else if (createAuthForm.value.authWay === 'TIME') {
+      createAuthForm.value.authDays = '';
+      createAuthForm.value.authExpireTimes = null;
     }
   };
 
   //激活账户相关
   const activeData = ref({
+    loading: false,
     isActiveVisible: false,
     activeCode: '',
   });
@@ -671,36 +1229,15 @@
     activeData.value.isActiveVisible = true;
   };
 
-  const openGoodsShop = async () => {
-    go('/goods/index');
-  };
-
-  const onHideActive = async () => {
-    activeData.value.isActiveVisible = false;
-  };
   const onActiveAccount = async () => {
-    tableLoading.value = true;
-    await activeAuthAccount(activeData.value);
-    activeData.value.isActiveVisible = false;
-    onSearch();
-  };
-
-  defineExpose({
-    closeModal: () => {
-      isDetailsModalVisible.value = false;
-    },
-  });
-
-  const getTagColor = (state) => {
-    switch (state) {
-      case 'unvalid':
-        return '#d9d9d9';
-      case 'normal':
-        return '#52c41a';
-      case 'error':
-        return '#ff4d4f';
-      default:
-        return '#d9d9d9';
+    activeData.value.loading = true;
+    try {
+      await activeAuthAccount(activeData.value);
+      activeData.value.isActiveVisible = false;
+      message.success('🎉恭喜！你已成功激活一个账户！');
+      onSearch();
+    } finally {
+      activeData.value.loading = false;
     }
   };
 </script>
@@ -892,11 +1429,6 @@
     .ant-modal-content {
       display: flex;
       flex-direction: column;
-      height: calc(100vh);
-    }
-
-    .ant-modal-body {
-      flex: 1;
     }
   }
 </style>
