@@ -127,9 +127,11 @@
               <template #title></template>
               <template #content>
                 {{ text }}
-                <a-button size="small" @click="() => copyText(text)">🐣复制</a-button>
+                <a-button size="small" @click="() => copyText(text)"
+                  ><Icon icon="mynaui:copy" /> 复制</a-button
+                >
               </template>
-              <a-button size="small">🙉查看TOKEN</a-button>
+              <a-button size="small">TOKEN</a-button>
             </a-popover>
           </template>
         </a-table-column>
@@ -140,12 +142,30 @@
           align="center"
           :width="120"
         >
-          <template #default="{ text }">
-            <a-popover placement="top" trigger="click">
+          <template #default="{ record }">
+            <a-popover placement="top" trigger="click" v-if="record.mjState !== 'NORMAL'">
               <template #title></template>
-              <template #content> {{ text }} </template>
-              <a-button size="small" type="danger" v-if="text">🙊异常信息</a-button>
+              <template #content> {{ record.errorMsg }} </template>
+              <a-button size="small" type="primary" danger
+                ><Icon
+                  icon="fluent-emoji-high-contrast:information"
+                  style="margin-right: 1px"
+                />异常</a-button
+              >
             </a-popover>
+            <span v-else>暂无异常</span>
+          </template>
+        </a-table-column>
+
+        <a-table-column
+          title="运行服务器"
+          dataIndex="bindServerName"
+          key="bindServerName"
+          align="center"
+          :width="120"
+        >
+          <template #default="{ text }">
+            <a-tag>{{ text }}</a-tag>
           </template>
         </a-table-column>
 
@@ -155,7 +175,7 @@
           <template #default="{ record }">
             <a-button-group>
               <!-- <a-button @click="showDiscordForm" disabled>概况</a-button> -->
-              <a-button @click="showDiscordForm" disabled>配置</a-button>
+              <a-button @click="showInfoSetting(record)">配置</a-button>
               <a-button type="warning" @click="showDiscordForm(record)" v-if="record.state != 'Y'"
                 >刷新TOKEN</a-button
               >
@@ -195,14 +215,42 @@
         </a-spin>
       </a-card>
     </a-modal>
+
+    <!-- 详情更新 -->
+    <a-modal
+      v-model:open="discordSettingForm.viewFlag"
+      title="账号配置"
+      ok-text="立即更新"
+      @ok="doUpdateServerZone"
+      :confirmLoading="discordSettingForm.loading"
+    >
+      <a-card>
+        <a-spin :spinning="discordSettingForm.loading" :tip="discordSettingForm.loadingTitle">
+          <a-select
+            style="width: 100%; height: 32px"
+            placeholder="请绑定执行的服务器~"
+            v-model:value="discordSettingForm.bindingServerName"
+            :options="discordSettingForm.bindingServerNameOptions"
+          />
+        </a-spin>
+      </a-card>
+    </a-modal>
   </a-layout>
 </template>
 
 <script lang="ts" setup>
   import { ref, unref, onMounted, defineProps } from 'vue';
-  import { discordAddToken, discordList, discordInfo, getValidResult } from '/@/api/df/discord';
+  import {
+    discordAddToken,
+    discordList,
+    discordInfo,
+    getValidResult,
+    getZoneList,
+    updateServerZone,
+  } from '/@/api/df/discord';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { copyText as doCopyText } from '/@/utils/copyTextToClipboard';
+  import Icon from '/@/components/Icon/Icon.vue';
 
   const { createMessage, createSuccessModal, createErrorModal, createInfoModal } = useMessage();
   const props = defineProps({
@@ -213,6 +261,50 @@
     discordState: null,
     mjState: null,
   });
+
+  /********************************************* 账号编辑 *********************************************** */
+  const discordSettingForm = ref({
+    viewFlag: false,
+    loading: false,
+
+    discordId: null,
+    bindingServerName: null,
+    bindingServerNameOptions: [],
+  });
+  const showInfoSetting = async (discord) => {
+    discordSettingForm.value.discordId = discord.id;
+    discordSettingForm.value.bindingServerName = discord.bindingServerName;
+    discordSettingForm.value.viewFlag = true;
+  };
+
+  const initBindServerNameList = async () => {
+    console.log(initBindServerNameList);
+    const response = await getZoneList();
+
+    // 使用 map 方法转换数组
+    const transformedList = response.map((item) => ({
+      label: item.zoneName + '(' + item.availableNums + ')',
+      value: item.zoneName,
+    }));
+
+    console.log(111111);
+    // 如果您想在转换后的数组前面添加一个特定的对象，可以使用以下方法：
+    const finalList = [...transformedList];
+    discordSettingForm.value.bindingServerNameOptions = finalList;
+  };
+  const doUpdateServerZone = async () => {
+    discordSettingForm.value.loading = true;
+    console.log('doUpdateServerZone');
+    try {
+      await updateServerZone({
+        discordId: discordSettingForm.value.discordId,
+        bindingServerName: discordSettingForm.value.bindingServerName,
+      });
+      discordSettingForm.value.viewFlag = false;
+    } finally {
+      discordSettingForm.value.loading = false;
+    }
+  };
 
   //************************************** discord 账号添加 ****************************************************//
   const discordFormRef = ref();
@@ -299,6 +391,7 @@
   };
   onMounted(() => {
     onSearch();
+    initBindServerNameList();
   });
 
   const copyText = async (text) => {
@@ -323,7 +416,7 @@
   };
 
   const getMjStateContent = (state) => {
-    console.log('getMjStateContent   ' + state);
+    // console.log('getMjStateContent   ' + state);
     if (state === 'NORMAL') {
       return { text: '已订阅', color: '#52c41a', status: 'processing' };
     } else if (state === 'BAN') {

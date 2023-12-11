@@ -67,18 +67,24 @@
                   margin-right: 10px;
                   font-size: 15px;
                 "
-                ><a-tooltip title="🍧导入DISCORD记录，可以将discord的图片导入进来进行管理哦~">
-                  <a-button @click="showImportView" style="padding: 0 5px; border-radius: 5px"
-                    ><Icon icon="skill-icons:discord" size="22"
-                  /></a-button>
-                </a-tooltip>
-                <a-tooltip title="🥃工作空间管理，各空间数据隔离，后续可邀请好友加入你的空间~">
-                  <a-button
-                    @click="showWorkerSpace"
-                    style="margin-left: 5px; padding: 0 5px; border-radius: 5px"
-                    ><Icon icon="material-symbols:space-dashboard-outline" size="22"
-                  /></a-button>
-                </a-tooltip>
+              >
+                <a-button-group>
+                  <a-tooltip title="🍧交流群~">
+                    <a-button @click="openCommunicateView" style="padding: 0 5px"
+                      ><SvgIcon name="QQ"
+                    /></a-button>
+                  </a-tooltip>
+                  <a-tooltip title="🍧导入DISCORD记录，可以将discord的图片导入进来进行管理哦~">
+                    <a-button @click="showImportView" style="padding: 0 5px"
+                      ><SvgIcon name="discord"
+                    /></a-button>
+                  </a-tooltip>
+                  <a-tooltip title="🥃工作空间管理，各空间数据隔离，后续可邀请好友加入你的空间~">
+                    <a-button @click="showWorkerSpace" style="padding: 0 5px"
+                      ><SvgIcon name="space"
+                    /></a-button>
+                  </a-tooltip>
+                </a-button-group>
               </div>
             </div>
           </template>
@@ -425,12 +431,32 @@
         </a-spin>
       </a-modal>
     </div>
+
+    <!-- 交流群 -->
+    <a-modal v-model:open="communicateForm.viewFlag" title="🐵扫码进群吧~">
+      <template #footer>
+        <a-button key="back" @click="closeCommunicateView">我已知晓</a-button>
+      </template>
+      <a-spin size="small" :spinning="communicateForm.loading">
+        <a-row>
+          <a-col :span="24" style="display: flex; justify-content: center">
+            <img
+              :src="communicateForm.wchatImage"
+              @onload="handleImageLoad()"
+              width="300"
+              alt="微信二维码"
+            />
+          </a-col>
+        </a-row>
+      </a-spin>
+    </a-modal>
   </a-layout>
 </template>
 
 <script lang="ts" setup>
   import JobList from './JobList.vue';
   import Icon from '/@/components/Icon/Icon.vue';
+  import { SvgIcon } from '/@/components/Icon';
   import Blend from './Blend.vue';
   import { ref, onMounted, reactive } from 'vue';
   import TextToImage from './TextToImg.vue';
@@ -449,6 +475,7 @@
   } from '@ant-design/icons-vue';
   import { notification } from 'ant-design-vue';
   import { downloadImage, copyText } from './tools';
+  import { addSuggest, communicateInfo } from '/@/api/df/utils';
   import type { NotificationPlacement } from 'ant-design-vue';
   import {
     saveUserSpace,
@@ -704,6 +731,35 @@
     } finally {
       compState.loading = false;
     }
+  };
+
+  /****************************** 交流群 ******************************** */
+
+  const communicateForm = ref({
+    viewFlag: false,
+    wchatImage: '',
+    loading: false,
+    qqGroupList: [] as string[],
+  });
+
+  const openCommunicateView = async () => {
+    communicateForm.value.loading = true;
+    try {
+      const resp = await communicateInfo({});
+      communicateForm.value.qqGroupList = resp.qqGroupList;
+      communicateForm.value.wchatImage = resp.wchatImage;
+      communicateForm.value.viewFlag = true;
+    } finally {
+      setTimeout(() => {
+        communicateForm.value.loading = false;
+      }, 3000);
+    }
+  };
+  const closeCommunicateView = async () => {
+    communicateForm.value.viewFlag = false;
+  };
+  const handleImageLoad = async () => {
+    communicateForm.value.loading = false;
   };
 </script>
 

@@ -9,9 +9,55 @@ enum Api {
   GetValidResult = '/open/discord/getValidResult',
   DiscordList = '/open/discord/discordList',
   Info = '/open/discord/info',
-
   GuildList = '/open/discord/guildList',
   ChannelList = '/open/discord/channelList',
+
+  GetZoneList = '/open/discord/getZoneList',
+  UpdateServerZone = '/open/discord/updateServerZone',
+}
+
+/**
+ * 获取discord请求结果
+ *
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function getZoneList(params: {}, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<{ zoneName: string; zoneCode: string; availableNums: number }[]>(
+    {
+      url: Api.GetZoneList,
+      params,
+      timeout: 30000,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
+}
+
+/**
+ * 更新Discord可用服务
+ *
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function updateServerZone(
+  params: { discordId: string; bindingServerName: string },
+  mode: ErrorMessageMode = 'message',
+) {
+  return defHttp.post(
+    {
+      url: Api.UpdateServerZone,
+      params,
+      timeout: 30000,
+    },
+    {
+      errorMessageMode: mode,
+      successMessageMode: mode,
+    },
+  );
 }
 
 /**

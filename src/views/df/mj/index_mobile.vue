@@ -33,17 +33,17 @@
                         @click="openCommunicateView"
                         style="padding: 0 6px; border-radius: 5px"
                       >
-                        <Icon icon="icon-park:tencent-qq" size="22" />
+                        <SvgIcon name="QQ" />
                       </a-button>
                     </a-tooltip>
                     <a-tooltip title="任务列表">
                       <a-button @click="showJobList" style="padding: 0 5px; border-radius: 5px">
-                        <Icon icon="fluent:window-bullet-list-add-20-filled" size="22" />
+                        <SvgIcon name="task-list" />
                       </a-button>
                     </a-tooltip>
                     <a-tooltip title="工作空间管理">
                       <a-button @click="showWorkerSpace" style="padding: 0 5px; border-radius: 5px">
-                        <Icon icon="ic:outline-space-dashboard" size="22" />
+                        <SvgIcon name="space" />
                       </a-button>
                     </a-tooltip>
                   </div>
@@ -255,6 +255,7 @@
   import { ref, onMounted, reactive } from 'vue';
   import TextToImage from './mobile/TextToImg.vue';
   import Icon from '/@/components/Icon/Icon.vue';
+  import { SvgIcon } from '/@/components/Icon';
   import Describe from './mobile/Describe.vue';
   import { SettingOutlined, CloudSyncOutlined, ClusterOutlined } from '@ant-design/icons-vue';
   import { WorkSpaceListResp, WorkSpaceSaveReq } from '/@/api/df/model/workSpaceModel'; // 请替换为您的请求模型路径
