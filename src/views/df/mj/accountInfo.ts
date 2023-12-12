@@ -36,10 +36,17 @@ export function accountInfoApi() {
   }
 
   const accountForm = reactive({
+    viewFlag: false,
     loading: false,
     useAccountId: null as string | null | undefined,
+    useAccountName: null as string | null | undefined,
     useChannelId: null as string | null | undefined,
+
     mode: 'relax' as string | undefined,
+
+    currentSpaceId: null,
+    currentSpaceTitle: null,
+
     accountSelector: {
       size: 'default',
       options: [
@@ -54,12 +61,23 @@ export function accountInfoApi() {
     },
   });
 
+  const showAccountConfig = () => {
+    accountForm.viewFlag = true;
+    accountForm.loading = false;
+  };
+  const closeAccountConfig = () => {
+    accountForm.viewFlag = false;
+    accountForm.loading = false;
+  };
+
   const initAccountInfo = async () => {
     //初始化偏好
     const getPersonalSetting = userStore.getPersonalSetting;
-    console.log('getPersonalSetting ' + getPersonalSetting);
     if (getPersonalSetting) {
       accountForm.mode = getPersonalSetting.mode;
+      if (getPersonalSetting.userAccountId === null || getPersonalSetting.userAccountId === '') {
+        return;
+      }
       const isAvaliable = accountForm.accountSelector.options.some((obj) =>
         obj.value.includes(getPersonalSetting.userAccountId as string),
       );
@@ -83,6 +101,9 @@ export function accountInfoApi() {
   };
 
   const doGetChannelsByGroup = async (id) => {
+    if (!id) {
+      return;
+    }
     accountForm.loading = true;
     try {
       const response = await getChannelsByGroup({ id: id });
@@ -100,11 +121,14 @@ export function accountInfoApi() {
   };
 
   const handleAccountSetting = async (value, option) => {
+    accountForm.useAccountName = option.label;
+
     const setting = {};
     setting['userAccountId'] = value;
     setting['userAccountName'] = option.label;
     userStore.syncSetting(setting);
     accountForm.useChannelId = null;
+
     await doGetChannelsByGroup(value);
   };
 
@@ -127,7 +151,7 @@ export function accountInfoApi() {
     }));
 
     // 如果您想在转换后的数组前面添加一个特定的对象，可以使用以下方法：
-    const finalList = [...transformedList];
+    const finalList = [{ label: '默认账号', value: '' }, ...transformedList];
     accountForm.accountSelector.options = finalList;
   };
 
@@ -138,6 +162,8 @@ export function accountInfoApi() {
     handleSetting,
     initAccountInfo,
     doGetChannelsByGroup,
+    showAccountConfig,
+    closeAccountConfig,
   };
   accountInstance = api;
   return api;

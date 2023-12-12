@@ -869,12 +869,12 @@
               ><Icon icon="streamline-emojis:helicopter" /> 添加到其他空间</a-menu-item
             >
             <a-popconfirm
-              title="该操作将永久删除任务，是否确认删除?"
+              title="该操作将移除任务，是否确认?"
               ok-text="确认删除"
               cancel-text="取消"
               @confirm="deleteCard(card)"
             >
-              <a-menu-item key="7" @click="deleteSpaceCard(card, spaceId)">
+              <a-menu-item key="7" @click="deleteSpaceCard(card, accountForm.currentSpaceId)">
                 <Icon icon="streamline-emojis:recycling-symbol" color="red" />
                 从该空间移除</a-menu-item
               >
@@ -1582,7 +1582,16 @@
   } from './tools';
   import { Empty, message } from 'ant-design-vue';
   import { info } from 'console';
+  import { accountInfoApi } from './accountInfo';
 
+  const {
+    accountForm,
+    initAccountList,
+    initAccountInfo,
+    doGetChannelsByGroup,
+    handleAccountSetting,
+    handleSetting,
+  } = accountInfoApi();
   const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
   const {
     closeTaskInfo,
@@ -1673,15 +1682,12 @@
     offsetHeightRef,
   );
   //初始化加载
-  const props = defineProps({
-    spaceId: {
-      type: String,
-      default: '',
-    },
-  });
-  const { spaceId } = toRefs(props);
 
-  watch(spaceId, (newId) => {
+  // 使用 ref 包装，以确保 computed 可以正确监听变化
+  const { currentSpaceId } = toRefs(accountForm);
+
+  // 创建计算属性
+  watch(currentSpaceId, (newId) => {
     if (newId) {
       searchForm.value.spaceId = newId;
       onSearch();
@@ -1771,7 +1777,7 @@
         console.log(response);
         // 使用 map 方法转换数组
         const transformedList = response
-          .filter((item) => item.id !== spaceId.value)
+          .filter((item) => item.id !== accountForm.currentSpaceId)
           .map((item) => ({
             label: item.title,
             value: item.id,

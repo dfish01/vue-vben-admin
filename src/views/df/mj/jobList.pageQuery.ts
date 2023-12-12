@@ -49,6 +49,17 @@ import { useUserStore as useUserStoreApi } from '/@/store/modules/user';
 import { listCategory, queryDrawingSample, addDrawingSample } from '/@/api/df/drawingSample';
 import { splitPrompt } from './tools';
 import { useMessage } from '/@/hooks/web/useMessage';
+import { accountInfoApi } from './accountInfo';
+import account from 'mock/demo/account';
+
+const {
+  accountForm,
+  initAccountList,
+  initAccountInfo,
+  doGetChannelsByGroup,
+  handleAccountSetting,
+  handleSetting,
+} = accountInfoApi();
 
 const { createMessage, createSuccessModal, createErrorModal, createInfoModal } = useMessage();
 let jobListQueryApiInstance: any | null = null;
@@ -236,17 +247,9 @@ export function jobListQueryApi() {
       guildName: '公会1',
       privacyMode: 'Y',
     },
-    processList: [
-      { title: '任务创建', description: '2023-01-01 12:00:00' },
-      { title: '任务分配', description: '2023-01-02 12:00:00' },
-      { title: '开始执行', description: '2023-01-03 12:00:00' },
-      { title: '任务完成', description: '2023-01-04 12:00:00' },
-    ],
-    tagList: ['标签1', '标签2'],
-    taskSpaceList: [
-      { spaceId: 1, spaceName: '空间1' },
-      { spaceId: 2, spaceName: '空间2' },
-    ],
+    processList: [],
+    tagList: [],
+    taskSpaceList: [],
   });
 
   const showTaskInfo = async (card) => {
@@ -323,6 +326,7 @@ export function jobOptionApi() {
     try {
       console.log('---------------------------------');
       await deleteBatch({ spaceId: jobListQueryApi().searchForm.value.spaceId, state: state });
+      // await deleteBatch({ spaceId: accountForm.currentSpaceId, state: state });
       jobListQueryApi().onSearch(jobListQueryApi().pagination.value.current);
       // message.success('删除成功！');
     } finally {
@@ -383,12 +387,12 @@ export function jobOptionApi() {
    */
   const doRetryDrawTask = async (card) => {
     loadingRef.value = true;
-    const getPersonalSetting = userStore.getPersonalSetting;
+
     try {
       await retryDrawTask({
         id: card.id,
-        mode: getPersonalSetting.mode,
-        refAccountId: getPersonalSetting.userAccountId,
+        mode: accountForm.mode,
+        refAccountId: accountForm.useAccountId,
       });
       message.success('已重新提交任务~~~');
     } finally {
@@ -400,12 +404,12 @@ export function jobOptionApi() {
   const handleU = async (card, key, upscaleType) => {
     // 这里的 event.key 将是您点击的菜单项的 key
     console.log('Selected card: ${JSON.stringify(card)}');
-    const getPersonalSetting = userStore.getPersonalSetting;
+
     const buttonObj = card.buttonMap[key];
     const customId = buttonObj.id === undefined ? buttonObj.custom_id : buttonObj.id;
     const addTaskParam: AddDrawTaskParams = {
       spaceId: jobListQueryApi().searchForm.value.spaceId,
-      refAccountId: getPersonalSetting.userAccountId,
+      refAccountId: accountForm.useAccountId,
       channel: 'MJ',
       priority: 0,
       privacyMode: 'Y',
@@ -416,7 +420,7 @@ export function jobOptionApi() {
         upscaleType: upscaleType,
         commandType: 'UPSCALE',
         refTaskId: card.id,
-        mode: getPersonalSetting.mode,
+        mode: accountForm.mode,
       },
     };
     loadingRef.value = true;
@@ -436,13 +440,9 @@ export function jobOptionApi() {
       showZoomCustomer(card, customId);
       return;
     }
-    const getPersonalSetting = userStore.getPersonalSetting;
-    // 这里的 event.key 将是您点击的菜单项的 key
-    console.log('Selected card: ${JSON.stringify(card)}');
-    console.log('Zoom option selected: ${event.key}');
     const addTaskParam: AddDrawTaskParams = {
       spaceId: jobListQueryApi().searchForm.value.spaceId,
-      refAccountId: getPersonalSetting.userAccountId,
+      refAccountId: accountForm.useAccountId,
       channel: 'MJ',
       priority: 0,
       privacyMode: 'Y',
@@ -452,7 +452,7 @@ export function jobOptionApi() {
         customId: customId,
         commandType: type,
         refTaskId: card.id,
-        mode: getPersonalSetting.mode,
+        mode: accountForm.mode,
       },
     };
     loadingRef.value = true;
@@ -480,13 +480,13 @@ export function jobOptionApi() {
       showPanRemixCustomer(card, type, event.key);
       return;
     }
-    const getPersonalSetting = userStore.getPersonalSetting;
+
     // 这里的 event.key 将是您点击的菜单项的 key
     console.log('Selected card: ${JSON.stringify(card)}');
     console.log('Zoom option selected: ${event.key}');
     const addTaskParam: AddDrawTaskParams = {
       spaceId: jobListQueryApi().searchForm.value.spaceId,
-      refAccountId: getPersonalSetting.userAccountId,
+      refAccountId: accountForm.useAccountId,
       channel: 'MJ',
       priority: 0,
       privacyMode: 'Y',
@@ -496,7 +496,7 @@ export function jobOptionApi() {
         index: event.key,
         commandType: type,
         refTaskId: card.id,
-        mode: getPersonalSetting.mode,
+        mode: accountForm.mode,
       },
     };
     loadingRef.value = true;
@@ -517,13 +517,10 @@ export function jobOptionApi() {
       showRemixCustomer(card, type, customId);
       return;
     }
-    const getPersonalSetting = userStore.getPersonalSetting;
-    console.log(55555);
-    // 这里的 event.key 将是您点击的菜单项的 key
-    console.log('Selected card: ${JSON.stringify(card)}');
+
     const addTaskParam: AddDrawTaskParams = {
       spaceId: jobListQueryApi().searchForm.value.spaceId,
-      refAccountId: getPersonalSetting.userAccountId,
+      refAccountId: accountForm.useAccountId,
       channel: 'MJ',
       priority: 0,
       privacyMode: 'Y',
@@ -534,7 +531,7 @@ export function jobOptionApi() {
         commandType: 'VARIATION',
         variationType: type,
         refTaskId: card.id,
-        mode: getPersonalSetting.mode,
+        mode: accountForm.mode,
       },
     };
     loadingRef.value = true;
@@ -565,9 +562,9 @@ export function jobOptionApi() {
       prompt = resultArray.join(' ');
       // promptArray = promptList;
     }
-    const getPersonalSetting = userStore.getPersonalSetting;
+
     const addTaskParam: AddDrawTaskParams = {
-      refAccountId: getPersonalSetting.userAccountId,
+      refAccountId: accountForm.useAccountId,
       spaceId: jobListQueryApi().searchForm.value.spaceId,
       channel: 'MJ',
       priority: 0,
@@ -584,7 +581,7 @@ export function jobOptionApi() {
         paramsStr: '',
         commandType: 'IMAGINE',
         bootId: card.bootId,
-        mode: getPersonalSetting.mode,
+        mode: accountForm.mode,
       },
     };
     loadingRef.value = true;
@@ -616,23 +613,15 @@ export function jobOptionApi() {
     const customId = encodeURIComponent(idStr);
     console.log(customId);
     const token = userStore.getToken;
-    const getPersonalSetting = userStore.getPersonalSetting;
-    // varyRegionForm.value.refAccountId =
-    //   getPersonalSetting.userAccountId && getPersonalSetting.userAccountId != ''
-    //     ? getPersonalSetting.userAccountId
-    //     : card.refAccountId;
+
     varyRegionForm.value.refAccountId =
-      getPersonalSetting.userAccountId && getPersonalSetting.userAccountId != ''
-        ? getPersonalSetting.userAccountId
-        : null;
+      accountForm.useAccountId && accountForm.useAccountId != '' ? accountForm.useAccountId : null;
     varyRegionForm.value.card = card;
     varyRegionForm.value.customId = idStr;
-    varyRegionForm.value.mode = getPersonalSetting.mode;
+    varyRegionForm.value.mode = accountForm.mode;
     varyRegionForm.value.token = token;
     varyRegionForm.value.varyRegionUrl = '/mjTools.html?customId=' + customId;
     varyRegionForm.value.viewFlag = true;
-    console.log('openVaryRegion getPersonalSetting ' + getPersonalSetting);
-    console.log('openVaryRegion ' + varyRegionForm.value);
   };
 
   const remixCard = ref({});
@@ -706,9 +695,9 @@ export function jobOptionApi() {
         return; // 直接返回异常情况
       }
     }
-    const getPersonalSetting = userStore.getPersonalSetting;
+
     const addTaskParam: AddDrawTaskParams = {
-      refAccountId: getPersonalSetting.userAccountId,
+      refAccountId: accountForm.useAccountId,
       spaceId: jobListQueryApi().searchForm.value.spaceId,
       channel: 'MJ',
       priority: 0,
@@ -723,7 +712,7 @@ export function jobOptionApi() {
         index: remix.value.index,
         refTaskId: remixCard.value.id,
         customId: remix.value.customId,
-        mode: getPersonalSetting.mode,
+        mode: accountForm.mode,
       },
     };
     remix.value.loading = true;

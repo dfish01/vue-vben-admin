@@ -23,14 +23,14 @@
               :style="{}"
               style="padding: 0 5px; border-radius: 5px"
             >
-              <Icon icon="uil:search-alt" size="22" />
+              <SvgIcon name="list_search" />
             </a-button>
           </a-tooltip>
 
           <a-tooltip>
             <a-dropdown :trigger="['click']">
-              <a-button style="padding: 0 5px; border-radius: 5px"
-                ><Icon icon="tabler:picture-in-picture" size="22"
+              <a-button style="padding: 0 5px; border-radius: 5px">
+                <SvgIcon name="sys_setting03"
               /></a-button>
               <template #overlay>
                 <a-menu>
@@ -98,8 +98,8 @@
           </a-tooltip>
           <a-tooltip>
             <a-dropdown :trigger="['click']">
-              <a-button style="padding: 0 5px; border-radius: 5px"
-                ><Icon icon="icon-park-outline:setting-web" size="20"
+              <a-button style="padding: 0 5px; border-radius: 5px">
+                <SvgIcon name="sys_setting02"
               /></a-button>
               <template #overlay>
                 <a-menu>
@@ -112,6 +112,9 @@
                     >
                       📝{{ remix.enable_flag ? '关闭Remix' : '开启Remix' }}
                     </a-popconfirm>
+                  </a-menu-item>
+                  <a-menu-item key="4" class="delete" @click="showAccountConfig">
+                    🔌运行配置
                   </a-menu-item>
                 </a-menu>
               </template>
@@ -1004,7 +1007,7 @@
         v-model:open="remix.view"
         :title="remix.title"
         @ok="doZoomCus()"
-        :loading="remix.loading"
+        :confirmLoading="remix.loading"
       >
         <a-spin :spinning="remix.loading">
           <a-row style="padding: 15px">
@@ -1030,7 +1033,7 @@
       <a-modal
         v-model:open="drawTagForm.viewFlag"
         @ok="addDrawTaskTag()"
-        :loading="drawTagForm.loading"
+        :confirmLoading="drawTagForm.loading"
       >
         <template #title> <Icon icon="streamline-emojis:blossom" />添加标签 </template>
         <a-spin :spinning="drawTagForm.loading">
@@ -1389,6 +1392,46 @@
       </a-card>
       <Loading :loading="loadingRef" :absolute="false" :tip="infoData.tip" />
     </a-modal>
+
+    <!-- 运行账号配置-->
+    <div>
+      <a-modal v-model:open="accountForm.viewFlag" title="执行账号配置">
+        <template #footer>
+          <a-button type="primary" @click="closeAccountConfig">关闭窗口</a-button>
+        </template>
+        <a-card :bodyStyle="{ margin: '0px 15px' }">
+          <span style="margin-bottom: 30px; font-size: 11px"
+            >📢这里和绘画工作台的账号和执行模型是联动的！！！</span
+          >
+          <a-form layout="vertical" style="margin-top: 10px">
+            <a-form-item label="执行账号">
+              <a-select
+                placeholder="不选的话，随机选取账号，优先默认"
+                @change="handleAccountSetting"
+                style="width: 100%; height: 32px"
+                v-model:value="accountForm.useAccountId"
+                v-model="accountForm.useAccountId"
+                :size="accountForm.accountSelector.size"
+                :options="accountForm.accountSelector.options"
+              />
+            </a-form-item>
+            <a-form-item label="执行模式">
+              <a-select
+                @change="handleSetting('mode', accountForm.mode)"
+                v-model:value="accountForm.mode"
+                style="width: 100%; height: 32px"
+                placeholder="不选的话，默认休闲模式"
+              >
+                <!-- <a-select-option value="">不设置</a-select-option> -->
+                <a-select-option value="relax">休闲模式</a-select-option>
+                <a-select-option value="fast">快速模式</a-select-option>
+                <a-select-option value="turbo">涡轮模式</a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-form>
+        </a-card>
+      </a-modal>
+    </div>
   </a-layout>
 </template>
 
@@ -1400,6 +1443,7 @@
   import { api as viewerApi } from 'v-viewer';
   import 'viewerjs/dist/viewer.css';
   import Icon from '/@/components/Icon/Icon.vue';
+  import { SvgIcon } from '/@/components/Icon';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
   import { addSpaceTask, removeSpaceTask, allUserSpace } from '/@/api/df/workSpace';
   import {
@@ -1433,6 +1477,18 @@
   } from './tools';
   import { Empty } from 'ant-design-vue';
   import { useRoute } from 'vue-router';
+  import { accountInfoApi } from '../mj/accountInfo';
+
+  const {
+    accountForm,
+    initAccountList,
+    initAccountInfo,
+    doGetChannelsByGroup,
+    handleAccountSetting,
+    handleSetting,
+    showAccountConfig,
+    closeAccountConfig,
+  } = accountInfoApi();
 
   /** 页面高度计算开始 */
   const formRef = ref();
@@ -1539,6 +1595,7 @@
   onMounted(() => {
     searchForm.value.spaceId = ref(route.params.spaceId || route.query.spaceId);
     onSearch(1);
+    initAccountList();
     (window as any).varyRegionForm = varyRegionForm;
     loadTagList();
   });

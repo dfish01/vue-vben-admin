@@ -228,7 +228,7 @@
         <a-spin :spinning="discordSettingForm.loading" :tip="discordSettingForm.loadingTitle">
           <a-select
             style="width: 100%; height: 32px"
-            placeholder="请绑定执行的服务器~"
+            placeholder="请选择要绑定的服务器~"
             v-model:value="discordSettingForm.bindingServerName"
             :options="discordSettingForm.bindingServerNameOptions"
           />
@@ -266,6 +266,7 @@
   const discordSettingForm = ref({
     viewFlag: false,
     loading: false,
+    loadingTitle: '数据加载中...',
 
     discordId: null,
     bindingServerName: null,
@@ -286,8 +287,6 @@
       label: item.zoneName + '(' + item.availableNums + ')',
       value: item.zoneName,
     }));
-
-    console.log(111111);
     // 如果您想在转换后的数组前面添加一个特定的对象，可以使用以下方法：
     const finalList = [...transformedList];
     discordSettingForm.value.bindingServerNameOptions = finalList;
@@ -301,6 +300,7 @@
         bindingServerName: discordSettingForm.value.bindingServerName,
       });
       discordSettingForm.value.viewFlag = false;
+      onSearch();
     } finally {
       discordSettingForm.value.loading = false;
     }

@@ -50,8 +50,8 @@
           </a-tooltip>
 
           <a-tooltip title="市场">
-            <a-button disabled @click="openGoodsShop" style="padding: 0 5px; border-radius: 10px">
-              <Icon icon="ph:shopping-cart-bold" size="22" />
+            <a-button @click="goView('/goods/index')" style="padding: 0 5px; border-radius: 10px">
+              <SvgIcon name="shopping" />
             </a-button>
           </a-tooltip>
           <a-tooltip title="">
@@ -60,7 +60,7 @@
               @click.prevent
               style="padding: 0 5px; border-radius: 10px"
             >
-              <Icon icon="uil:search-alt" size="22" />
+              <SvgIcon name="list_search" />
             </a-button>
           </a-tooltip>
           <a-tooltip title="">
@@ -808,6 +808,8 @@
 <script lang="ts" setup>
   import { ref, onMounted, computed, unref } from 'vue';
   import { Loading } from '/@/components/Loading';
+  import { SvgIcon } from '/@/components/Icon';
+  import { Empty, message } from 'ant-design-vue';
   import {
     ListQueryParams,
     AccountListItem,
@@ -835,7 +837,6 @@
   import AccountGroup from './account_group.vue';
   import Discord from './discord.vue';
   import Icon from '/@/components/Icon/Icon.vue';
-  import { message } from 'ant-design-vue';
   import {
     discordAddToken,
     discordList,
@@ -846,6 +847,15 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
   import { discordApi } from './discord';
+
+  import { useGo } from '/@/hooks/web/usePage';
+
+  const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
+
+  const go = useGo();
+  const goView = async (routePath) => {
+    go(routePath);
+  };
   /** 页面高度计算开始 */
   const formRef = ref();
   //页面高度处理

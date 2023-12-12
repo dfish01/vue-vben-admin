@@ -22,15 +22,14 @@
               @click.prevent
               style="padding: 0 5px; border-radius: 5px"
             >
-              <Icon icon="uil:search-alt" size="22" />
+            <SvgIcon name="list_search" />
             </a-button>
           </a-tooltip>
 
           <a-tooltip>
             <a-dropdown :trigger="['click']">
               <a-button style="padding: 0 5px; border-radius: 5px"
-                ><Icon icon="tabler:picture-in-picture" size="22"
-              /></a-button>
+                > <SvgIcon name="sys_setting03" /></a-button>
               <template #overlay>
                 <a-menu>
                   <a-menu-item key="4">
@@ -60,7 +59,7 @@
           </a-tooltip>
           <a-tooltip title="保存查看进度">
             <a-button @click="saveProcess" style="padding: 0 5px; border-radius: 5px">
-              <Icon icon="akar-icons:save" size="22" />
+              <SvgIcon name="save" />
             </a-button>
           </a-tooltip>
         </div>
@@ -224,6 +223,7 @@ ref="waterfallRef"
   import loading from '/@/assets/images/lazy-loading.svg';
   import error from '/@/assets/images/lazy-error.svg';
   import Icon from '/@/components/Icon/Icon.vue';
+  import { SvgIcon } from '/@/components/Icon';
   import { useDrawCard } from './card';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
   import { useUserStore } from '/@/store/modules/user';

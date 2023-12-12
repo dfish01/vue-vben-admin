@@ -55,7 +55,7 @@
         </a-col>
         <a-col span="18">
           <a-select
-            @change="handleSetting('userAccountId', accountForm.useAccountId)"
+            @change="handleAccountSetting"
             style="width: 100%; height: 32px"
             placeholder="随机选取账号，优先默认"
             v-model:value="accountForm.useAccountId"
@@ -93,7 +93,7 @@
         </a-col>
         <a-col span="18">
           <a-select
-            @change="handleAccountSetting"
+            @change="handleSetting('mode', accountForm.mode)"
             v-model:value="accountForm.mode"
             style="width: 100%; height: 32px"
           >
@@ -151,16 +151,6 @@
     handleAccountSetting,
     handleSetting,
   } = accountInfoApi();
-
-  //初始化加载
-  const props = defineProps({
-    spaceId: {
-      type: String,
-      default: '',
-    },
-  });
-
-  const { spaceId } = toRefs(props);
 
   //页面高度处理
   const button = ref(null);
@@ -309,7 +299,7 @@
   const textFormLoading = ref(false);
   const startDrawing = async () => {
     const addTaskParam: AddDrawTaskParams = {
-      spaceId: spaceId.value,
+      spaceId: accountForm.currentSpaceId,
       refAccountId: accountForm.useAccountId,
       channel: 'MJ',
       priority: 0,

@@ -57,7 +57,9 @@
               "
             >
               <div style="margin-left: 10px">
-                <span style="font-weight: bold">🏢AI绘画工作区</span>-{{ currentSpace.title }}
+                <span style="font-weight: bold">🏢绘画工作区</span>-{{
+                  accountForm.currentSpaceTitle
+                }}
               </div>
               <div
                 style="
@@ -69,8 +71,19 @@
                 "
               >
                 <a-button-group>
-                  <a-tooltip title="🍧交流群~">
-                    <a-button @click="openCommunicateView" style="padding: 0 5px"
+                  <a-tooltip title="🥤系统相关操作说明以及Midjouney教程文档库 ~">
+                    <a-button
+                      @click="openTutorial"
+                      style="padding: 0 5px"
+                      v-if="systemInfoForm.tutorialInfo"
+                      ><SvgIcon name="jiaocheng"
+                    /></a-button>
+                  </a-tooltip>
+                  <a-tooltip title="🍸相关问题、建议、优化等可群内留言或者私聊群主 ~">
+                    <a-button
+                      @click="openCommunicateView"
+                      style="padding: 0 5px"
+                      v-if="systemInfoForm.communicateResp"
                       ><SvgIcon name="QQ"
                     /></a-button>
                   </a-tooltip>
@@ -105,7 +118,6 @@
                 style="text-align: center"
                 @startLoading="startLoadingHandler"
                 @endLoading="endLoadingHandler"
-                :spaceId="currentSpace.id"
               />
             </a-tab-pane>
             <a-tab-pane key="MixImage">
@@ -119,11 +131,7 @@
                   <b>混图</b>
                 </span>
               </template>
-              <Blend
-                @startLoading="startLoadingHandler"
-                @endLoading="endLoadingHandler"
-                :spaceId="currentSpace.id"
-              />
+              <Blend @startLoading="startLoadingHandler" @endLoading="endLoadingHandler" />
             </a-tab-pane>
             <a-tab-pane key="Describe">
               <template #tab>
@@ -137,11 +145,7 @@
                 </span>
               </template>
 
-              <Describe
-                @startLoading="startLoadingHandler"
-                @endLoading="endLoadingHandler"
-                :spaceId="currentSpace.id"
-              />
+              <Describe @startLoading="startLoadingHandler" @endLoading="endLoadingHandler" />
             </a-tab-pane>
             <a-tab-pane key="other" disabled tab="🎎其它" />
           </a-tabs>
@@ -150,16 +154,12 @@
 
       <a-col class="right-content">
         <a-content>
-          <JobList
-            :spaceId="currentSpace.id"
-            ref="jobListRef"
-            @openDrawer="isDrawerVisible = true"
-          />
+          <JobList ref="jobListRef" @openDrawer="isDrawerVisible = true" />
         </a-content>
       </a-col>
     </a-row>
     <div>
-      <a-modal width="80%" v-model:open="isShowWorkSpace" title="工作空间管理">
+      <a-modal width="80%" v-model:open="isShowWorkSpace" title="🏢工作空间管理">
         <template #footer>
           <a-button key="submit" :loading="compState.loading" @click="closeWorkSpace"
             >暂不操作</a-button
@@ -433,15 +433,15 @@
     </div>
 
     <!-- 交流群 -->
-    <a-modal v-model:open="communicateForm.viewFlag" title="🐵扫码进群吧~">
+    <a-modal v-model:open="viewForm.communicateViewFlag" title="🐵扫码进群吧~">
       <template #footer>
         <a-button key="back" @click="closeCommunicateView">我已知晓</a-button>
       </template>
-      <a-spin size="small" :spinning="communicateForm.loading">
+      <a-spin size="small" :spinning="viewForm.communicateLoading">
         <a-row>
           <a-col :span="24" style="display: flex; justify-content: center">
             <img
-              :src="communicateForm.wchatImage"
+              :src="systemInfoForm.communicateResp.wchatImage"
               @onload="handleImageLoad()"
               width="300"
               alt="微信二维码"
@@ -475,7 +475,8 @@
   } from '@ant-design/icons-vue';
   import { notification } from 'ant-design-vue';
   import { downloadImage, copyText } from './tools';
-  import { addSuggest, communicateInfo } from '/@/api/df/utils';
+  import { accountInfoApi } from './accountInfo';
+  import { addSuggest, communicateInfo, tutorialInfo, systemInfo } from '/@/api/df/utils';
   import type { NotificationPlacement } from 'ant-design-vue';
   import {
     saveUserSpace,
@@ -509,6 +510,15 @@
     queryDiscordList,
     queryAccountList,
   } = discordApi();
+  const {
+    accountForm,
+    initAccountList,
+    initAccountInfo,
+    doGetChannelsByGroup,
+    handleAccountSetting,
+    handleSetting,
+  } = accountInfoApi();
+
   const userStore = useUserStore();
 
   const route = useRoute();
@@ -519,11 +529,6 @@
   const isDrawerVisible = ref(false);
   const isMobile = ref(window.innerWidth < 768);
   const showTabs = ref(true);
-  const currentSpace = reactive<WorkSpaceSaveReq>({
-    id: null,
-    title: '',
-    remark: '',
-  });
 
   const toggleTabs = () => {
     showTabs.value = !showTabs.value;
@@ -554,6 +559,7 @@
   //===================================== 导入discod记录 ================================
   onMounted(async () => {
     await queryAccountList();
+    loadSystemInfoConfig();
   });
 
   const changeImportMode = () => {
@@ -675,22 +681,26 @@
     }
   };
 
+  //改用全局共享变量
   const selectSpace = (item) => {
-    currentSpace.title = item.title;
-    currentSpace.id = item.id;
+    accountForm.currentSpaceId = item.id;
+    accountForm.currentSpaceTitle = item.title;
+
     isShowWorkSpace.value = false;
     //缓存
-    const setting = {};
-    setting['spaceId'] = item.id;
-    setting['spaceName'] = item.title;
-    userStore.syncSetting(setting);
+    // const setting = {};
+    // setting['spaceId'] = item.id;
+    // setting['spaceName'] = item.title;
+    // userStore.syncSetting(setting);
   };
 
   onMounted(async () => {
     await querySpace();
-    const item = tableData.value[0];
-    currentSpace.id = item.id;
-    currentSpace.title = item.title;
+    if (accountForm.currentSpaceId === null) {
+      const item = tableData.value[0];
+      accountForm.currentSpaceId = item.id;
+      accountForm.currentSpaceTitle = item.title;
+    }
   });
 
   const addUserSpace = (item) => {
@@ -734,32 +744,52 @@
   };
 
   /****************************** 交流群 ******************************** */
-
-  const communicateForm = ref({
-    viewFlag: false,
-    wchatImage: '',
-    loading: false,
-    qqGroupList: [] as string[],
+  const systemInfoForm = ref({
+    communicateResp: {
+      wchatImage: null,
+      qqGroupList: [] as string[],
+    },
+    tutorialInfo: null,
   });
 
+  const viewForm = ref({
+    communicateViewFlag: false,
+    communicateLoading: false,
+  });
+
+  //加载配置
+  const loadSystemInfoConfig = async () => {
+    const resp = await systemInfo();
+    systemInfoForm.value = resp;
+  };
+
   const openCommunicateView = async () => {
-    communicateForm.value.loading = true;
-    try {
-      const resp = await communicateInfo({});
-      communicateForm.value.qqGroupList = resp.qqGroupList;
-      communicateForm.value.wchatImage = resp.wchatImage;
-      communicateForm.value.viewFlag = true;
-    } finally {
-      setTimeout(() => {
-        communicateForm.value.loading = false;
-      }, 3000);
+    if (systemInfoForm.value.communicateResp) {
+      viewForm.value.communicateViewFlag = true;
+    } else {
+      try {
+        const resp = await communicateInfo({});
+        systemInfoForm.value.communicateResp.qqGroupList = resp.qqGroupList;
+        systemInfoForm.value.communicateResp.wchatImage = resp.wchatImage;
+        viewForm.value.communicateLoading = true;
+      } finally {
+        setTimeout(() => {
+          viewForm.value.communicateLoading = false;
+        }, 2000);
+      }
     }
   };
   const closeCommunicateView = async () => {
-    communicateForm.value.viewFlag = false;
+    viewForm.value.communicateViewFlag = false;
   };
   const handleImageLoad = async () => {
-    communicateForm.value.loading = false;
+    viewForm.value.communicateLoading = false;
+  };
+
+  const openTutorial = async () => {
+    if (systemInfoForm.value.tutorialInfo) {
+      window.open(systemInfoForm.value.tutorialInfo, '_blank');
+    }
   };
 </script>
 

@@ -39,7 +39,7 @@
         </a-col>
         <a-col span="18">
           <a-select
-            @change="handleSetting('userAccountId', accountForm.useAccountId)"
+            @change="handleAccountSetting"
             style="width: 100%; height: 32px"
             placeholder="随机选取账号，优先默认"
             v-model:value="accountForm.useAccountId"
@@ -145,15 +145,6 @@
     upwardSpace,
     offsetHeightRef,
   );
-
-  //初始化加载
-  const props = defineProps({
-    spaceId: {
-      type: String,
-      default: '',
-    },
-  });
-  const { spaceId } = toRefs(props);
 
   const textToImgForm = reactive({
     invokeTimes: 1,
@@ -271,7 +262,7 @@
   const startDrawing = async () => {
     // emit('startLoading');
     const addTaskParam: AddDrawTaskParams = {
-      spaceId: spaceId.value,
+      spaceId: accountForm.currentSpaceId,
       refAccountId: accountForm.useAccountId,
       channel: 'MJ',
       priority: 0,

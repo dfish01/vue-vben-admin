@@ -179,6 +179,9 @@
               </a-menu>
             </template>
           </a-dropdown>
+          <a-button type="primary" @click="showAccountConfig">
+            <Icon icon="raphael:settings" class="vel-icon icon" aria-hidden="true" />运行配置
+          </a-button>
         </a-button-group>
       </a-space>
     </a-card>
@@ -1020,7 +1023,7 @@
         v-model:open="remix.view"
         :title="remix.title"
         @ok="doZoomCus()"
-        :loading="remix.loading"
+        :confirmLoading="remix.loading"
       >
         <a-spin :spinning="remix.loading">
           <a-row style="padding: 15px">
@@ -1046,7 +1049,7 @@
       <a-modal
         v-model:open="drawTagForm.viewFlag"
         @ok="addDrawTaskTag()"
-        :loading="drawTagForm.loading"
+        :confirmLoading="drawTagForm.loading"
       >
         <template #title> <Icon icon="streamline-emojis:blossom" />添加标签 </template>
         <a-spin :spinning="drawTagForm.loading">
@@ -1072,26 +1075,20 @@
     </div>
 
     <!-- 查看明细  -->
-    <a-modal
-      title="任务概况"
-      v-model:open="infoData.viewFlag"
-      width="100%"
-      wrap-class-name="full-modal "
-      :bodyStyle="{ padding: '0px' }"
-    >
+    <a-modal title="任务概况" v-model:open="infoData.viewFlag" style="top: 10px; min-width: 720px">
       <template #footer>
         <a-button key="submit" type="primary" :loading="loadingRef" @click="closeTaskInfo"
           >已知晓</a-button
         >
       </template>
-      <a-card :bodyStyle="{ padding: '0px ' }" :bordered="false">
+      <a-card :bodyStyle="{ padding: '0px 5px' }" :bordered="false">
         <a-card-grid
           style="display: flex; justify-content: center; width: 100%; text-align: center"
           :bodyStyle="{ padding: '0px 0px 0px 0px' }"
           bordered="true"
           :hoverable="false"
         >
-          <div style="width: 100%">
+          <div style="width: 50%">
             <a-card
               :bodyStyle="{ padding: '0px' }"
               style="width: 100%"
@@ -1106,18 +1103,18 @@
                 style="width: 49%; margin: 1px; padding: 0; border-radius: 15px; text-align: center"
               >
                 <!-- <div
-                v-show="!infoImage.loaded"
-                :style="{
-                  width: '100%',
-                  height: '100%',
-                  paddingBottom: `${
-                    (infoData.taskInfo.taskImage.imageHeight /
-                      infoData.taskInfo.taskImage.imageWidth) *
-                    100
-                  }%`,
-                }"
-              >
-              </div> -->
+                  v-show="!infoImage.loaded"
+                  :style="{
+                    width: '100%',
+                    height: '100%',
+                    paddingBottom: `${
+                      (infoData.taskInfo.taskImage.imageHeight /
+                        infoData.taskInfo.taskImage.imageWidth) *
+                      100
+                    }%`,
+                  }"
+                >
+                </div> -->
 
                 <img
                   @click="showInfoImage(getImageList(infoData.taskInfo), infoImage.url)"
@@ -1163,30 +1160,30 @@
           </div>
         </a-card-grid>
 
-        <a-card-grid style="width: 100%; text-align: left" :hoverable="false">
-          <a-descriptions bordered size="small" :column="2" layout="vertical">
-            <a-descriptions-item label="👨执行账户" :style="{ width: '48%' }">{{
+        <a-card-grid style="width: 100%; text-align: center" :hoverable="false">
+          <a-descriptions bordered size="small" :column="2">
+            <a-descriptions-item label="👨执行账户">{{
               infoData.taskInfo.accountName
             }}</a-descriptions-item>
-            <a-descriptions-item label="🍪任务类型" :style="{ width: '48%' }">
+            <a-descriptions-item label="🍪任务类型">
               <a-tag :color="stringToColor(infoData.taskInfo.commandTypeName)">{{
                 infoData.taskInfo.commandTypeName
               }}</a-tag>
             </a-descriptions-item>
-            <a-descriptions-item label="💎MJ账号" :style="{ width: '48%' }">{{
+            <a-descriptions-item label="💎MJ账号">{{
               infoData.taskInfo.discordUserName
             }}</a-descriptions-item>
 
-            <a-descriptions-item label="🤖执行机器人" :style="{ width: '48%' }">
+            <a-descriptions-item label="🤖执行机器人">
               <a-tag :color="infoData.taskInfo.bootName === 'niji' ? 'green' : ''"
                 >{{ infoData.taskInfo.bootName }} 机器人</a-tag
               >
             </a-descriptions-item>
-            <a-descriptions-item label="🍦服务器" :style="{ width: '48%' }">{{
+            <a-descriptions-item label="🍦服务器">{{
               infoData.taskInfo.guildName
             }}</a-descriptions-item>
 
-            <a-descriptions-item label="🍩运行模式" :style="{ width: '48%' }">
+            <a-descriptions-item label="🍩运行模式" :span="1">
               <a-tag
                 v-if="infoData.taskInfo.modeName"
                 :color="stringToColor(infoData.taskInfo.modeName)"
@@ -1214,6 +1211,7 @@
                 </a-button>
               </div>
             </a-descriptions-item>
+
             <a-descriptions-item
               label="📔原始Prompt"
               :span="2"
@@ -1289,7 +1287,7 @@
                 <div style="display: flex; flex-direction: row; justify-content: space-between">
                   <div><Icon icon="streamline-emojis:blossom" />任务标签 </div>
                   <a-button size="small" @click="showDrawTaskTagModel(infoData.card)">
-                    <a-span> <Icon icon="streamline-emojis:palm-tree" /> 添加标签 </a-span>
+                    <a-span> <Icon icon="streamline-emojis:palm-tree" />添加标签 </a-span>
                   </a-button>
                 </div>
               </template>
@@ -1315,6 +1313,7 @@
       <Loading :loading="loadingRef" :absolute="false" :tip="infoData.tip" />
     </a-modal>
 
+    <!-- 局部绘画  -->
     <a-modal
       v-model:open="varyRegionForm.viewFlag"
       title="🎨Midjourney局部变化"
@@ -1327,6 +1326,46 @@
         style="width: 100%; height: 80vh"
       ></iframe>
     </a-modal>
+
+    <!-- 运行账号配置-->
+    <div>
+      <a-modal v-model:open="accountForm.viewFlag" title="执行账号配置">
+        <template #footer>
+          <a-button type="primary" @click="closeAccountConfig">关闭窗口</a-button>
+        </template>
+        <a-card>
+          <span style="margin-bottom: 30px; font-size: 11px"
+            >📢这里和绘画工作台的账号和执行模型是联动的！！！</span
+          >
+          <a-form layout="vertical" style="margin-top: 10px">
+            <a-form-item label="执行账号">
+              <a-select
+                placeholder="不选的话，随机选取账号，优先默认"
+                @change="handleAccountSetting"
+                style="width: 100%; height: 32px"
+                v-model:value="accountForm.useAccountId"
+                v-model="accountForm.useAccountId"
+                :size="accountForm.accountSelector.size"
+                :options="accountForm.accountSelector.options"
+              />
+            </a-form-item>
+            <a-form-item label="执行模式">
+              <a-select
+                @change="handleSetting('mode', accountForm.mode)"
+                v-model:value="accountForm.mode"
+                style="width: 100%; height: 32px"
+                placeholder="不选的话，默认休闲模式"
+              >
+                <!-- <a-select-option value="">不设置</a-select-option> -->
+                <a-select-option value="relax">休闲模式</a-select-option>
+                <a-select-option value="fast">快速模式</a-select-option>
+                <a-select-option value="turbo">涡轮模式</a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-form>
+        </a-card>
+      </a-modal>
+    </div>
   </a-layout>
 </template>
 
@@ -1370,7 +1409,18 @@
     generateTooltipText,
   } from './tools';
   import { Empty } from 'ant-design-vue';
+  import { accountInfoApi } from '../mj/accountInfo';
 
+  const {
+    accountForm,
+    initAccountList,
+    initAccountInfo,
+    doGetChannelsByGroup,
+    handleAccountSetting,
+    handleSetting,
+    closeAccountConfig,
+    showAccountConfig,
+  } = accountInfoApi();
   const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
   const {
     closeTaskInfo,
@@ -1459,6 +1509,7 @@
 
   onMounted(() => {
     (window as any).varyRegionForm = varyRegionForm;
+    initAccountList();
     onSearch(1);
     loadTagList();
   });
@@ -1621,6 +1672,8 @@
       userSpaceTaskForm.value.loading = false;
     }
   };
+
+  /********************************** 账号配置 ************************************** */
 </script>
 
 <style scoped>
@@ -1875,22 +1928,5 @@
     border: none;
     background: transparent;
     box-shadow: none; /* 可能还需要禁用阴影 */
-  }
-</style>
-
-<style lang="less">
-  .full-modal {
-    .ant-modal {
-      top: 0;
-      max-width: 100%;
-      margin: 0;
-      padding: 0;
-      padding-bottom: 0;
-    }
-
-    .ant-modal-content {
-      display: flex;
-      flex-direction: column;
-    }
   }
 </style>

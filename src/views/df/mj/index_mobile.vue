@@ -23,9 +23,12 @@
                 >
                   <div style="display: flex; align-items: center">
                     <a-image src="./logo.png" :width="38" :height="38" :preview="false" />
-                    <span style="margin-left: 5px; font-size: 16px; font-weight: bold"
-                      >AI工作区</span
-                    >-{{ currentSpace.title }}
+                    <span style="margin-left: 5px; font-size: 16px; font-weight: bold">
+                      AI工作区 -
+                    </span>
+                    <span>
+                      {{ currentSpaceTitle }}
+                    </span>
                   </div>
                   <div style="display: flex; gap: 5px">
                     <a-tooltip title="">
@@ -57,14 +60,12 @@
                   style="text-align: center"
                   @startLoading="startLoadingHandler"
                   @endLoading="endLoadingHandler"
-                  :spaceId="currentSpace.id"
                 />
               </a-tab-pane>
               <a-tab-pane key="MixImage" tab="🌗混图">
                 <Blend
                   @startLoading="startLoadingHandler"
                   @endLoading="endLoadingHandler"
-                  :spaceId="currentSpace.id"
                   style="width: 100%"
                 />
               </a-tab-pane>
@@ -72,7 +73,6 @@
                 <Describe
                   @startLoading="startLoadingHandler"
                   @endLoading="endLoadingHandler"
-                  :spaceId="currentSpace.id"
                   style="width: 100%"
                 />
               </a-tab-pane>
@@ -220,25 +220,15 @@
     </div>
 
     <!-- 交流群 -->
-    <a-modal
-      v-model:open="communicateForm.viewFlag"
-      title="🐵扫码进群吧~"
-      width="100%"
-      :bodyStyle="{
-        padding: '0',
-        display: 'flex',
-        'justify-content': 'center',
-        'align-item': 'center',
-      }"
-    >
+    <a-modal v-model:open="viewForm.communicateViewFlag" title="🐵扫码进群吧~">
       <template #footer>
         <a-button key="back" @click="closeCommunicateView">我已知晓</a-button>
       </template>
-      <a-spin size="small" :spinning="communicateForm.loading">
+      <a-spin size="small" :spinning="viewForm.communicateLoading">
         <a-row>
           <a-col :span="24" style="display: flex; justify-content: center">
             <img
-              :src="communicateForm.wchatImage"
+              :src="systemInfoForm.communicateResp.wchatImage"
               @onload="handleImageLoad()"
               width="300"
               alt="微信二维码"
@@ -252,7 +242,7 @@
 
 <script lang="ts" setup>
   import Blend from './mobile/Blend.vue';
-  import { ref, onMounted, reactive } from 'vue';
+  import { ref, onMounted, reactive, nextTick, computed } from 'vue';
   import TextToImage from './mobile/TextToImg.vue';
   import Icon from '/@/components/Icon/Icon.vue';
   import { SvgIcon } from '/@/components/Icon';
@@ -269,12 +259,25 @@
     setTop,
   } from '/@/api/df/workSpace';
   import { downloadImage, copyText } from './tools';
-  import { addSuggest, communicateInfo } from '/@/api/df/utils';
+  import { addSuggest, communicateInfo, tutorialInfo, systemInfo } from '/@/api/df/utils';
   import { useGo } from '/@/hooks/web/usePage';
   import { useRoute } from 'vue-router';
   import { useUserStore } from '/@/store/modules/user';
   import { notification } from 'ant-design-vue';
   import type { NotificationPlacement } from 'ant-design-vue';
+  import { accountInfoApi } from './accountInfo';
+
+  const {
+    accountForm,
+    initAccountList,
+    initAccountInfo,
+    doGetChannelsByGroup,
+    handleAccountSetting,
+    handleSetting,
+  } = accountInfoApi();
+
+  // 使用 ref 包装，以确保 computed 可以正确监听变化
+  const currentSpaceTitle = ref(null);
 
   const userStore = useUserStore();
 
@@ -283,18 +286,8 @@
   const go = useGo();
   const loadingRef = ref(false);
   const jobListRef = ref();
-  const isDrawerVisible = ref(false);
   const isMobile = ref(window.innerWidth < 768);
   const showTabs = ref(true);
-  const currentSpace = reactive<WorkSpaceSaveReq>({
-    id: null,
-    title: '',
-    remark: '',
-  });
-
-  const toggleTabs = () => {
-    showTabs.value = !showTabs.value;
-  };
 
   window.addEventListener('resize', () => {
     isMobile.value = window.innerWidth < 768;
@@ -347,14 +340,9 @@
   };
 
   const showJobList = () => {
-    console.log('showJobList ' + currentSpace.id);
     // go('/jobList/index/' + currentSpace.id + '/' + currentSpace.title);
-    go('/jobList/index?spaceId=' + currentSpace.id + '&spaceTitle=' + currentSpace.title);
-    // go({
-    //   name: 'JobList', // 路由名称
-    //   params: { spaceId: currentSpace.id }, // 路由参数
-    //   query: { filter: 'active' }, // 查询参数
-    // });
+    // go('/jobList/index?spaceId=' + currentSpace.id + '&spaceTitle=' + currentSpace.title);
+    go('/jobList/index');
   };
 
   //工作空间列表
@@ -369,23 +357,25 @@
     }
   };
 
-  const selectSpace = (item) => {
-    currentSpace.title = item.title;
-    currentSpace.id = item.id;
+  const selectSpace = async (item) => {
+    accountForm.currentSpaceId = item.id;
+    accountForm.currentSpaceTitle = item.title;
     isShowWorkSpace.value = false;
-
-    //缓存
-    const setting = {};
-    setting['spaceId'] = item.id;
-    setting['spaceName'] = item.title;
-    userStore.syncSetting(setting);
+    currentSpaceTitle.value = item.title;
+    // console.log('selectSpace', accountForm.currentSpaceTitle);
   };
 
   onMounted(async () => {
     await querySpace();
-    const item = tableData.value[0];
-    currentSpace.id = item.id;
-    currentSpace.title = item.title;
+    if (accountForm.currentSpaceId) {
+      currentSpaceTitle.value = accountForm.currentSpaceTitle;
+    } else {
+      const item = tableData.value[0];
+      accountForm.currentSpaceId = item.id;
+      accountForm.currentSpaceTitle = item.title;
+      currentSpaceTitle.value = item.title;
+    }
+    loadSystemInfoConfig();
   });
 
   const addUserSpace = (item) => {
@@ -396,7 +386,6 @@
         }
       }
     } else {
-      console.log(111111);
       userSpaceForm.id = null;
       userSpaceForm.title = '';
       userSpaceForm.remark = '';
@@ -451,32 +440,52 @@
   };
 
   /****************************** 交流群 ******************************** */
-
-  const communicateForm = ref({
-    viewFlag: false,
-    wchatImage: '',
-    loading: false,
-    qqGroupList: [] as string[],
+  const systemInfoForm = ref({
+    communicateResp: {
+      wchatImage: null,
+      qqGroupList: [] as string[],
+    },
+    tutorialInfo: null,
   });
 
+  const viewForm = ref({
+    communicateViewFlag: false,
+    communicateLoading: false,
+  });
+
+  //加载配置
+  const loadSystemInfoConfig = async () => {
+    const resp = await systemInfo();
+    systemInfoForm.value = resp;
+  };
+
   const openCommunicateView = async () => {
-    communicateForm.value.loading = true;
-    try {
-      const resp = await communicateInfo({});
-      communicateForm.value.qqGroupList = resp.qqGroupList;
-      communicateForm.value.wchatImage = resp.wchatImage;
-      communicateForm.value.viewFlag = true;
-    } finally {
-      setTimeout(() => {
-        communicateForm.value.loading = false;
-      }, 3000);
+    if (systemInfoForm.value.communicateResp) {
+      viewForm.value.communicateViewFlag = true;
+    } else {
+      try {
+        const resp = await communicateInfo({});
+        systemInfoForm.value.communicateResp.qqGroupList = resp.qqGroupList;
+        systemInfoForm.value.communicateResp.wchatImage = resp.wchatImage;
+        viewForm.value.communicateLoading = true;
+      } finally {
+        setTimeout(() => {
+          viewForm.value.communicateLoading = false;
+        }, 2000);
+      }
     }
   };
   const closeCommunicateView = async () => {
-    communicateForm.value.viewFlag = false;
+    viewForm.value.communicateViewFlag = false;
   };
   const handleImageLoad = async () => {
-    communicateForm.value.loading = false;
+    viewForm.value.communicateLoading = false;
+  };
+
+  const openTutorial = async () => {
+    if (systemInfoForm.value.tutorialInfo) {
+      window.open(systemInfoForm.value.tutorialInfo, '_blank');
+    }
   };
 </script>
 

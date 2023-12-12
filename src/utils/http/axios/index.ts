@@ -115,7 +115,6 @@ const transform: AxiosTransform = {
         config.url = `${apiUrl}${config.url}`;
       }
     }
-    console.log('beforeRequestHook=========================' + config.url);
     const params = config.params || {};
     const data = config.data || false;
     formatDate && data && !isString(data) && formatRequestDate(data);

@@ -14,7 +14,7 @@
         <div style="display: flex; align-items: center">
           <a-image src="./logo.png" :width="38" :height="38" :preview="false" />
           <span style="margin-left: 5px; font-size: 16px; font-weight: bold"
-            >{{ spaceTitle }}
+            >{{ accountForm.currentSpaceTitle }}
           </span>
           工作区
         </div>
@@ -25,15 +25,15 @@
               @click.prevent
               style="padding: 0 5px; border-radius: 5px"
             >
-              <Icon icon="uil:search-alt" size="22" />
+              <SvgIcon name="list_search" />
             </a-button>
           </a-tooltip>
 
           <a-tooltip>
             <a-dropdown :trigger="['click']">
-              <a-button style="padding: 0 5px; border-radius: 5px"
-                ><Icon icon="tabler:picture-in-picture" size="22"
-              /></a-button>
+              <a-button style="padding: 0 5px; border-radius: 5px">
+                <SvgIcon name="sys_setting03" />
+              </a-button>
               <template #overlay>
                 <a-menu>
                   <a-menu-item key="11">
@@ -101,7 +101,7 @@
           <a-tooltip>
             <a-dropdown :trigger="['click']">
               <a-button style="padding: 0 5px; border-radius: 5px"
-                ><Icon icon="icon-park-outline:setting-web" size="20"
+                ><SvgIcon name="sys_setting02"
               /></a-button>
               <template #overlay>
                 <a-menu>
@@ -132,7 +132,7 @@
           <a-tooltip>
             <a-dropdown :trigger="['click']">
               <a-button style="padding: 0 5px; border-radius: 5px"
-                ><Icon icon="fluent:delete-12-filled" size="22"
+                ><SvgIcon name="delete"
               /></a-button>
               <template #overlay>
                 <a-menu>
@@ -1210,11 +1210,6 @@
       </a-modal>
     </div>
 
-    <a-modal v-model:open="isModalVisible" width="80%">
-      <template #title> 图片查看 </template>
-      <img :src="currentImage" style="width: 100%; height: auto" />
-    </a-modal>
-
     <a-modal
       v-model:open="varyRegionForm.viewFlag"
       title="🎨Midjourney局部变化"
@@ -1591,6 +1586,8 @@
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
   import { listCategory, queryDrawingSample, addDrawingSample } from '/@/api/df/drawingSample';
   import { addSpaceTask, removeSpaceTask, allUserSpace } from '/@/api/df/workSpace';
+  import { accountInfoApi } from '../accountInfo';
+  import { SvgIcon } from '/@/components/Icon';
   import {
     ref,
     computed,
@@ -1622,6 +1619,16 @@
     generateTooltipText,
   } from '../tools';
   import { useRoute } from 'vue-router';
+
+  const {
+    accountForm,
+    initAccountList,
+    initAccountInfo,
+    doGetChannelsByGroup,
+    handleAccountSetting,
+    handleSetting,
+  } = accountInfoApi();
+
   /** 页面高度计算开始 */
   const formRef = ref(null);
   //页面高度处理
@@ -1650,8 +1657,11 @@
   const doModelSearch = () => {
     // 验证消息来源和内容，然后关闭 iframe
     showQueryViewFlag.value = false;
+
+    searchForm.value.spaceId = accountForm.currentSpaceId;
     onSearch(1);
   };
+
   const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
   const {
     closeTaskInfo,
@@ -1725,11 +1735,10 @@
     onHide,
   } = lightBoxApi();
 
-  const spaceId = ref(route.query.spaceId || route.query.spaceId);
-  const spaceTitle = ref(route.params.spaceTitle || route.query.spaceTitle);
+  // 使用 ref 包装，以确保 computed 可以正确监听变化
+
   onMounted(() => {
-    console.log(1111);
-    searchForm.value.spaceId = ref(route.params.spaceId || route.query.spaceId);
+    searchForm.value.spaceId = accountForm.currentSpaceId;
     onSearch(1);
     (window as any).varyRegionForm = varyRegionForm;
     loadTagList();
@@ -1796,7 +1805,7 @@
         console.log(response);
         // 使用 map 方法转换数组
         const transformedList = response
-          .filter((item) => item.id !== spaceId.value)
+          .filter((item) => item.id !== accountForm.currentSpaceId)
           .map((item) => ({
             label: item.title,
             value: item.id,

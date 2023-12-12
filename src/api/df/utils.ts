@@ -8,8 +8,29 @@ enum Api {
   AnalysisLink = '/open/waterMask/analysis',
   addSuggest = '/open/userSuggest/add',
   CommunicateInfo = '/open/dataCache/communicate',
+  TutorialInfo = '/open/dataCache/tutorialInfo',
+  SystemInfo = '/open/dataCache/systemInfo',
 
   GetRecentNotice = '/open/notice/getRecentNotice',
+}
+
+/**
+ * 聚合系统配置
+ *
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function systemInfo(mode: ErrorMessageMode = 'message') {
+  return defHttp.post<any>(
+    {
+      url: Api.SystemInfo,
+      params: {},
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
 }
 
 /**
@@ -110,6 +131,24 @@ export function communicateInfo(params: {}, mode: ErrorMessageMode = 'message') 
   }>(
     {
       url: Api.CommunicateInfo,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
+}
+
+/**
+ * 教程信息
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function tutorialInfo(params: {}, mode: ErrorMessageMode = 'message') {
+  return defHttp.post(
+    {
+      url: Api.TutorialInfo,
       params,
     },
     {

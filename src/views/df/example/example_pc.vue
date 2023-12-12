@@ -197,10 +197,10 @@
   const { copyText, goDrawing, loadMore, initDrawingSampleCategory } = useDrawCard();
 
   onMounted(async () => {
-    handleLoadMore(500, true);
     categorySetting.value.categories = await initDrawingSampleCategory();
-    handleLoadMore(500, false);
-    handleLoadMore(500, false);
+    await handleLoadMore(500, true);
+    await handleLoadMore(500, false);
+    await handleLoadMore(500, false);
   });
 
   /****************************** 类目相关  ****************************** */

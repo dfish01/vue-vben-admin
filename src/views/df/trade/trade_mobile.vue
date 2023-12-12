@@ -18,12 +18,12 @@
         <div style="display: flex; gap: 5px">
           <a-tooltip title="订单查询">
             <a-button @click="showQueryView" style="padding: 0 5px; border-radius: 10px">
-              <Icon icon="uil:search-alt" size="22" />
+              <SvgIcon name="list_search" />
             </a-button>
           </a-tooltip>
           <a-tooltip title="市场">
             <a-button @click="goView('/goods/index')" style="padding: 0 5px; border-radius: 10px">
-              <Icon icon="ph:shopping-cart-bold" size="22" />
+              <SvgIcon name="shopping" />
             </a-button>
           </a-tooltip>
           <a-tooltip title="去激活">
@@ -209,6 +209,7 @@
   import { ref, onMounted, onUnmounted, computed, unref, toRefs, watch } from 'vue';
   import { QrCode, QrCodeActionType } from '/@/components/Qrcode/index';
   import LogoImg from '/@/assets/images/logo.png';
+  import { SvgIcon } from '/@/components/Icon';
   import {
     DeleteOutlined,
     InfoCircleOutlined,

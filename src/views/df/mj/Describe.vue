@@ -136,14 +136,6 @@
     handleSetting,
   } = accountInfoApi();
 
-  //初始化加载
-  const props = defineProps({
-    spaceId: {
-      type: String,
-      default: '',
-    },
-  });
-  const { spaceId } = toRefs(props);
   const formRef = ref();
   //页面高度处理
   const button = ref(null);
@@ -281,7 +273,7 @@
   const textFormLoading = ref(false);
   const startDrawing = async () => {
     const addTaskParam: AddDrawTaskParams = {
-      spaceId: spaceId.value,
+      spaceId: accountForm.currentSpaceId,
       refAccountId: accountForm.useAccountId,
       channel: 'MJ',
       priority: 0,

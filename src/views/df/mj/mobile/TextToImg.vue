@@ -500,7 +500,7 @@
                     :span="16"
                     style="display: flex; align-items: center; justify-content: right"
                   >
-                    <a-switch v-model:checked="versionParam.niji5.tile" />
+                    <a-switch v-model:checked="versionParam.niji5.tile" disabled />
                   </a-col>
                 </a-row>
               </a-tab-pane>
@@ -577,18 +577,6 @@
                 </a-row>
               </a-tab-pane>
               <a-tab-pane key="v5" tab="V 5">
-                <a-row style="justify-content: left">
-                  <a-col span="24" class="style-radio">
-                    <a-radio-group size="small" v-model:value="versionParam.v5.style">
-                      <a-tooltip title="默认风格">
-                        <a-radio-button value="">Default</a-radio-button>
-                      </a-tooltip>
-                      <a-tooltip title="原始风格，多实用于摄影，更写实的风格">
-                        <a-radio-button value="raw">RAW</a-radio-button>
-                      </a-tooltip>
-                    </a-radio-group>
-                  </a-col>
-                </a-row>
                 <a-row style="margin-top: 10px">
                   <a-col span="6">
                     <a-tooltip
@@ -699,7 +687,7 @@
                     :span="16"
                     style="display: flex; align-items: center; justify-content: right"
                   >
-                    <a-switch v-model:checked="versionParam.v5.tile" />
+                    <a-switch v-model:checked="versionParam.v5.tile" disabled />
                   </a-col>
                 </a-row>
               </a-tab-pane>
@@ -826,7 +814,7 @@
                     :span="16"
                     style="display: flex; align-items: center; justify-content: right"
                   >
-                    <a-switch v-model:checked="versionParam.v51.tile" />
+                    <a-switch v-model:checked="versionParam.v51.tile" disabled />
                   </a-col>
                 </a-row>
               </a-tab-pane>
@@ -953,7 +941,7 @@
                     :span="16"
                     style="display: flex; align-items: center; justify-content: right"
                   >
-                    <a-switch v-model:checked="versionParam.v52.tile" />
+                    <a-switch v-model:checked="versionParam.v52.tile" disabled />
                   </a-col>
                 </a-row>
               </a-tab-pane>
@@ -1353,7 +1341,7 @@
     //查询可用账户
     await initAccountList();
     //初始化偏好
-    initAccountInfo();
+    // initAccountInfo();
 
     //查询最近使用的tag
     const resp = await genTagList({});
@@ -1701,7 +1689,7 @@
       tile: null,
     },
     v5: {
-      style: 'raw',
+      style: null,
       quality: '0.25',
       chaos: 0,
       s: 100,

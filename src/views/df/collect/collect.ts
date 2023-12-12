@@ -44,7 +44,18 @@ import { addTag } from '/@/api/df/drawTaskTag';
 import { useAppInject } from '/@/hooks/web/useAppInject';
 import { useUserStore as useUserStoreApi } from '/@/store/modules/user';
 
+import { accountInfoApi } from '../mj/accountInfo';
+
 import { splitPrompt } from './tools';
+
+const {
+  accountForm,
+  initAccountList,
+  initAccountInfo,
+  doGetChannelsByGroup,
+  handleAccountSetting,
+  handleSetting,
+} = accountInfoApi();
 
 let jobListQueryApiInstance: any | null = null;
 let jobOptionApiInstance: any | null = null;
@@ -252,13 +263,13 @@ export function jobOptionApi() {
   /**************************** 画图任务相关 ************************* */
   const handleU = async (card, key, upscaleType) => {
     // 这里的 event.key 将是您点击的菜单项的 key
-    console.log('Selected card: ${JSON.stringify(card)}');
-    const getPersonalSetting = userStore.getPersonalSetting;
+    console.log('handleU card: ${JSON.stringify(card)}');
+    console.log('refAccountId : ${accountForm.useAccountId}');
     const buttonObj = card.buttonMap[key];
     const customId = buttonObj.id === undefined ? buttonObj.custom_id : buttonObj.id;
     const addTaskParam: AddDrawTaskParams = {
       spaceId: card.spaceId,
-      refAccountId: getPersonalSetting.userAccountId,
+      refAccountId: accountForm.useAccountId,
       channel: 'MJ',
       priority: 0,
       privacyMode: 'Y',
@@ -269,7 +280,7 @@ export function jobOptionApi() {
         upscaleType: upscaleType,
         commandType: 'UPSCALE',
         refTaskId: card.id,
-        mode: getPersonalSetting.mode,
+        mode: accountForm.mode,
       },
     };
     loadingRef.value = true;
@@ -289,13 +300,13 @@ export function jobOptionApi() {
       showZoomCustomer(card, customId);
       return;
     }
-    const getPersonalSetting = userStore.getPersonalSetting;
+
     // 这里的 event.key 将是您点击的菜单项的 key
     console.log('Selected card: ${JSON.stringify(card)}');
     console.log('Zoom option selected: ${event.key}');
     const addTaskParam: AddDrawTaskParams = {
       spaceId: card.spaceId,
-      refAccountId: getPersonalSetting.userAccountId,
+      refAccountId: accountForm.useAccountId,
       channel: 'MJ',
       priority: 0,
       privacyMode: 'Y',
@@ -305,7 +316,7 @@ export function jobOptionApi() {
         customId: customId,
         commandType: type,
         refTaskId: card.id,
-        mode: getPersonalSetting.mode,
+        mode: accountForm.mode,
       },
     };
     loadingRef.value = true;
@@ -333,13 +344,13 @@ export function jobOptionApi() {
       showPanRemixCustomer(card, type, event.key);
       return;
     }
-    const getPersonalSetting = userStore.getPersonalSetting;
+
     // 这里的 event.key 将是您点击的菜单项的 key
     console.log('Selected card: ${JSON.stringify(card)}');
     console.log('Zoom option selected: ${event.key}');
     const addTaskParam: AddDrawTaskParams = {
       spaceId: card.spaceId,
-      refAccountId: getPersonalSetting.userAccountId,
+      refAccountId: accountForm.useAccountId,
       channel: 'MJ',
       priority: 0,
       privacyMode: 'Y',
@@ -349,7 +360,7 @@ export function jobOptionApi() {
         index: event.key,
         commandType: type,
         refTaskId: card.id,
-        mode: getPersonalSetting.mode,
+        mode: accountForm.mode,
       },
     };
     loadingRef.value = true;
@@ -369,14 +380,11 @@ export function jobOptionApi() {
       showRemixCustomer(card, type, customId);
       return;
     }
-
-    const getPersonalSetting = userStore.getPersonalSetting;
-    console.log(55555);
     // 这里的 event.key 将是您点击的菜单项的 key
     console.log('Selected card: ${JSON.stringify(card)}');
     const addTaskParam: AddDrawTaskParams = {
       spaceId: card.spaceId,
-      refAccountId: getPersonalSetting.userAccountId,
+      refAccountId: accountForm.useAccountId,
       channel: 'MJ',
       priority: 0,
       privacyMode: 'Y',
@@ -387,7 +395,7 @@ export function jobOptionApi() {
         commandType: 'VARIATION',
         variationType: type,
         refTaskId: card.id,
-        mode: getPersonalSetting.mode,
+        mode: accountForm.mode,
       },
     };
     loadingRef.value = true;
@@ -419,9 +427,9 @@ export function jobOptionApi() {
       prompt = resultArray.join(' ');
       // promptArray = promptList;
     }
-    const getPersonalSetting = userStore.getPersonalSetting;
+
     const addTaskParam: AddDrawTaskParams = {
-      refAccountId: getPersonalSetting.userAccountId,
+      refAccountId: accountForm.useAccountId,
       spaceId: card.spaceId,
       channel: 'MJ',
       priority: 0,
@@ -437,7 +445,7 @@ export function jobOptionApi() {
         paramsStr: '',
         commandType: 'IMAGINE',
         bootId: card.bootId,
-        mode: getPersonalSetting.mode,
+        mode: accountForm.mode,
       },
     };
     loadingRef.value = true;
@@ -467,9 +475,9 @@ export function jobOptionApi() {
     const customId = encodeURIComponent(idStr);
     console.log(customId);
     const token = userStore.getToken;
-    const getPersonalSetting = userStore.getPersonalSetting;
-    varyRegionForm.value.refAccountId = getPersonalSetting.userAccountId
-      ? getPersonalSetting.userAccountId
+
+    varyRegionForm.value.refAccountId = accountForm.useAccountId
+      ? accountForm.useAccountId
       : card.refAccountId;
     varyRegionForm.value.card = card;
     varyRegionForm.value.customId = key;
@@ -547,9 +555,8 @@ export function jobOptionApi() {
         return; // 直接返回异常情况
       }
     }
-    const getPersonalSetting = userStore.getPersonalSetting;
     const addTaskParam: AddDrawTaskParams = {
-      refAccountId: getPersonalSetting.userAccountId,
+      refAccountId: accountForm.useAccountId,
       spaceId: remixCard.value.spaceId,
       channel: 'MJ',
       priority: 0,
@@ -564,7 +571,7 @@ export function jobOptionApi() {
         index: remix.value.index,
         refTaskId: remixCard.value.id,
         customId: remix.value.customId,
-        mode: getPersonalSetting.mode,
+        mode: accountForm.mode,
       },
     };
     remix.value.loading = true;
