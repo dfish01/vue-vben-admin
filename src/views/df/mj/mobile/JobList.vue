@@ -19,148 +19,142 @@
           工作区
         </div>
         <div style="display: flex; gap: 5px">
-          <a-tooltip>
-            <a-button
-              @click="showQueryView"
-              @click.prevent
-              style="padding: 0 5px; border-radius: 5px"
-            >
-              <SvgIcon name="list_search" />
-            </a-button>
-          </a-tooltip>
-
-          <a-tooltip>
-            <a-dropdown :trigger="['click']">
-              <a-button style="padding: 0 5px; border-radius: 5px">
-                <SvgIcon name="sys_setting03" />
+          <a-button-group>
+            <a-tooltip>
+              <a-button @click="showQueryView" @click.prevent style="padding: 5px">
+                <SvgIcon name="list_search" size="20" />
               </a-button>
-              <template #overlay>
-                <a-menu>
-                  <a-menu-item key="11">
-                    <a-popconfirm
-                      :title="
-                        userSetting.cardShow === 'SINGLE'
-                          ? '开启后，列表显示4图，点击可放大。明细页在右键列表~'
-                          : '开启后，列表显示单图，点击出现明细页~'
-                      "
-                      :ok-text="userSetting.cardShow === 'SINGLE' ? '立即开启' : '立即开启'"
-                      cancel-text="取消"
-                      @confirm="setCardShow()"
-                    >
-                      ✨{{ userSetting.cardShow === 'SINGLE' ? '列表4图模式' : '列表单图模式' }}
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-divider />
-                  <a-menu-item key="5">
-                    <a-popconfirm
-                      title="⚠️以卡片的方式进行预览，建议配合原图模式。"
-                      ok-text="立即预览"
-                      cancel-text="取消"
-                      @confirm="showAllImage(false)"
-                    >
-                      📺全量清晰预览
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-item key="5">
-                    <a-popconfirm
-                      title="⚠️以卡片的方式进行预览，建议配合原图模式。"
-                      ok-text="立即预览"
-                      cancel-text="取消"
-                      @confirm="showAllImage(true)"
-                    >
-                      📺全量预览
-                    </a-popconfirm>
-                  </a-menu-item>
+            </a-tooltip>
 
-                  <a-menu-divider />
-                  <a-menu-item key="4" disabled>
-                    <a-popconfirm
-                      title="该选项默认暂时未作存储，默认关闭状态，刷新就失效了！分割图场景适用~"
-                      :ok-text="userSetting.useUpImage ? '确认关闭' : '确认开启'"
-                      cancel-text="取消"
-                      @confirm="setUseUpImage()"
-                    >
-                      🍝{{ userSetting.useUpImage ? '开启缩略图' : '开启原图' }}
-                    </a-popconfirm>
-                  </a-menu-item>
+            <a-tooltip>
+              <a-dropdown :trigger="['click']">
+                <a-button style="padding: 5px">
+                  <SvgIcon name="sys_setting02" size="20" />
+                </a-button>
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item key="11">
+                      <a-popconfirm
+                        :title="
+                          userSetting.cardShow === 'SINGLE'
+                            ? '开启后，列表显示4图，点击可放大。明细页在右键列表~'
+                            : '开启后，列表显示单图，点击出现明细页~'
+                        "
+                        :ok-text="userSetting.cardShow === 'SINGLE' ? '立即开启' : '立即开启'"
+                        cancel-text="取消"
+                        @confirm="setCardShow()"
+                      >
+                        ✨{{ userSetting.cardShow === 'SINGLE' ? '列表4图模式' : '列表单图模式' }}
+                      </a-popconfirm>
+                    </a-menu-item>
+                    <a-menu-divider />
+                    <a-menu-item key="5">
+                      <a-popconfirm
+                        title="⚠️以卡片的方式进行预览，建议配合原图模式。"
+                        ok-text="立即预览"
+                        cancel-text="取消"
+                        @confirm="showAllImage(false)"
+                      >
+                        📺全量清晰预览
+                      </a-popconfirm>
+                    </a-menu-item>
+                    <a-menu-item key="5">
+                      <a-popconfirm
+                        title="⚠️以卡片的方式进行预览，建议配合原图模式。"
+                        ok-text="立即预览"
+                        cancel-text="取消"
+                        @confirm="showAllImage(true)"
+                      >
+                        📺全量预览
+                      </a-popconfirm>
+                    </a-menu-item>
 
-                  <a-menu-item key="5" disabled>
-                    <a-popconfirm
-                      title="我的网速无懈可击！！！"
-                      :ok-text="userSetting.usePersonNet ? '还是加速吧' : '就是要原连接'"
-                      cancel-text="取消"
-                      @confirm="setUsePersonNet()"
-                    >
-                      🏄{{ userSetting.usePersonNet ? '加速连接' : '使用原连接' }}
-                    </a-popconfirm>
-                  </a-menu-item>
-                </a-menu>
-              </template>
-            </a-dropdown>
-          </a-tooltip>
-          <a-tooltip>
-            <a-dropdown :trigger="['click']">
-              <a-button style="padding: 0 5px; border-radius: 5px"
-                ><SvgIcon name="sys_setting02"
-              /></a-button>
-              <template #overlay>
-                <a-menu>
-                  <a-menu-item key="3" class="delete">
-                    <a-popconfirm
-                      title="请确认相关账号的remix状态，这里只是控制弹窗而已（暂时未接入实时控制Remix）。如果remix状态不匹配，会导致任务失败!"
-                      :ok-text="remix.enable_flag ? '关闭Remix' : '开启Remix'"
-                      cancel-text="取消"
-                      @confirm="changeRemix()"
-                    >
-                      📝{{ remix.enable_flag ? '关闭Remix' : '开启Remix' }}
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-item key="5">
-                    <a-popconfirm
-                      title="提交任务自动刷新！！！"
-                      :ok-text="userSetting.taskRefresh ? '关闭刷新' : '开启刷新'"
-                      cancel-text="取消"
-                      @confirm="setTaskRefresh()"
-                    >
-                      💫{{ userSetting.taskRefresh ? '关闭刷新' : '开启刷新' }}
-                    </a-popconfirm>
-                  </a-menu-item>
-                </a-menu>
-              </template>
-            </a-dropdown>
-          </a-tooltip>
-          <a-tooltip>
-            <a-dropdown :trigger="['click']">
-              <a-button style="padding: 0 5px; border-radius: 5px"
-                ><SvgIcon name="delete"
-              /></a-button>
-              <template #overlay>
-                <a-menu>
-                  <a-menu-item key="1">
-                    <a-popconfirm
-                      title="将永久删除该空间下的全部排队记录，是否确认删除?"
-                      ok-text="确认删除"
-                      cancel-text="取消"
-                      @confirm="deleteBatchHandle('QUEUED')"
-                    >
-                      <a>❌排队</a>
-                    </a-popconfirm>
-                  </a-menu-item>
+                    <a-menu-divider />
+                    <a-menu-item key="4" disabled>
+                      <a-popconfirm
+                        title="该选项默认暂时未作存储，默认关闭状态，刷新就失效了！分割图场景适用~"
+                        :ok-text="userSetting.useUpImage ? '确认关闭' : '确认开启'"
+                        cancel-text="取消"
+                        @confirm="setUseUpImage()"
+                      >
+                        🍝{{ userSetting.useUpImage ? '开启缩略图' : '开启原图' }}
+                      </a-popconfirm>
+                    </a-menu-item>
 
-                  <a-menu-item key="2">
-                    <a-popconfirm
-                      title="将永久删除该空间下的全部失败记录，是否确认删除?"
-                      ok-text="确认删除"
-                      cancel-text="取消"
-                      @confirm="deleteBatchHandle('FAILED')"
-                    >
-                      <a>❌失败</a>
-                    </a-popconfirm>
-                  </a-menu-item>
-                </a-menu>
-              </template>
-            </a-dropdown>
-          </a-tooltip>
+                    <a-menu-item key="5" disabled>
+                      <a-popconfirm
+                        title="我的网速无懈可击！！！"
+                        :ok-text="userSetting.usePersonNet ? '还是加速吧' : '就是要原连接'"
+                        cancel-text="取消"
+                        @confirm="setUsePersonNet()"
+                      >
+                        🏄{{ userSetting.usePersonNet ? '加速连接' : '使用原连接' }}
+                      </a-popconfirm>
+                    </a-menu-item>
+                  </a-menu>
+                </template>
+              </a-dropdown>
+            </a-tooltip>
+            <a-tooltip>
+              <a-dropdown :trigger="['click']">
+                <a-button style="padding: 5px"><SvgIcon name="sys_setting03" size="20" /></a-button>
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item key="3" class="delete">
+                      <a-popconfirm
+                        title="请确认相关账号的remix状态，这里只是控制弹窗而已（暂时未接入实时控制Remix）。如果remix状态不匹配，会导致任务失败!"
+                        :ok-text="remix.enable_flag ? '关闭Remix' : '开启Remix'"
+                        cancel-text="取消"
+                        @confirm="changeRemix()"
+                      >
+                        📝{{ remix.enable_flag ? '关闭Remix' : '开启Remix' }}
+                      </a-popconfirm>
+                    </a-menu-item>
+                    <a-menu-item key="5">
+                      <a-popconfirm
+                        title="提交任务自动刷新！！！"
+                        :ok-text="userSetting.taskRefresh ? '关闭刷新' : '开启刷新'"
+                        cancel-text="取消"
+                        @confirm="setTaskRefresh()"
+                      >
+                        💫{{ userSetting.taskRefresh ? '关闭刷新' : '开启刷新' }}
+                      </a-popconfirm>
+                    </a-menu-item>
+                  </a-menu>
+                </template>
+              </a-dropdown>
+            </a-tooltip>
+            <a-tooltip>
+              <a-dropdown :trigger="['click']">
+                <a-button style="padding: 5px"><SvgIcon name="delete" size="20" /></a-button>
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item key="1">
+                      <a-popconfirm
+                        title="将永久删除该空间下的全部排队记录，是否确认删除?"
+                        ok-text="确认删除"
+                        cancel-text="取消"
+                        @confirm="deleteBatchHandle('QUEUED')"
+                      >
+                        <a>❌排队</a>
+                      </a-popconfirm>
+                    </a-menu-item>
+
+                    <a-menu-item key="2">
+                      <a-popconfirm
+                        title="将永久删除该空间下的全部失败记录，是否确认删除?"
+                        ok-text="确认删除"
+                        cancel-text="取消"
+                        @confirm="deleteBatchHandle('FAILED')"
+                      >
+                        <a>❌失败</a>
+                      </a-popconfirm>
+                    </a-menu-item>
+                  </a-menu>
+                </template>
+              </a-dropdown>
+            </a-tooltip>
+          </a-button-group>
         </div>
       </a-row>
     </a-card>

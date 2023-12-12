@@ -15,16 +15,18 @@
           <span style="margin-left: 5px; font-size: 16px; font-weight: bold">市场</span>
         </div>
         <div style="display: flex; gap: 5px">
-          <a-tooltip title="商品查询">
-            <a-button @click="showQueryView" style="padding: 0 5px; border-radius: 10px">
-              <SvgIcon name="list_search" />
-            </a-button>
-          </a-tooltip>
-          <a-tooltip title="交易记录">
-            <a-button @click="goView('/trade/index')" style="padding: 0 5px; border-radius: 10px">
-              <SvgIcon name="trade" />
-            </a-button>
-          </a-tooltip>
+          <a-button-group>
+            <a-tooltip title="商品查询">
+              <a-button @click="showQueryView" style="padding: 5px">
+                <SvgIcon name="list_search" size="20" />
+              </a-button>
+            </a-tooltip>
+            <a-tooltip title="交易记录">
+              <a-button @click="goView('/trade/index')" style="padding: 5px">
+                <SvgIcon name="trade" size="20" />
+              </a-button>
+            </a-tooltip>
+          </a-button-group>
         </div>
       </a-row>
     </a-card>

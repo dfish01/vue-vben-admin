@@ -31,24 +31,32 @@
                     </span>
                   </div>
                   <div style="display: flex; gap: 5px">
-                    <a-tooltip title="">
-                      <a-button
-                        @click="openCommunicateView"
-                        style="padding: 0 6px; border-radius: 5px"
-                      >
-                        <SvgIcon name="QQ" />
-                      </a-button>
-                    </a-tooltip>
-                    <a-tooltip title="任务列表">
-                      <a-button @click="showJobList" style="padding: 0 5px; border-radius: 5px">
-                        <SvgIcon name="task-list" />
-                      </a-button>
-                    </a-tooltip>
-                    <a-tooltip title="工作空间管理">
-                      <a-button @click="showWorkerSpace" style="padding: 0 5px; border-radius: 5px">
-                        <SvgIcon name="space" />
-                      </a-button>
-                    </a-tooltip>
+                    <a-button-group>
+                      <a-tooltip title="任务列表">
+                        <a-button @click="showJobList" style="padding: 5px">
+                          <SvgIcon name="task-list" size="20" />
+                        </a-button>
+                      </a-tooltip>
+                      <a-tooltip title="">
+                        <a-button @click="openCommunicateView" style="padding: 5px">
+                          <SvgIcon name="QQ" size="20" />
+                        </a-button>
+                      </a-tooltip>
+                      <a-tooltip title="🥤系统相关操作说明以及Midjouney教程文档库 ~">
+                        <a-button
+                          @click="openTutorial"
+                          style="padding: 5px"
+                          v-if="systemInfoForm.tutorialInfo"
+                          ><SvgIcon name="jiaocheng" size="20"
+                        /></a-button>
+                      </a-tooltip>
+
+                      <a-tooltip title="工作空间管理">
+                        <a-button @click="showWorkerSpace" style="padding: 5px">
+                          <SvgIcon name="space" size="20" />
+                        </a-button>
+                      </a-tooltip>
+                    </a-button-group>
                   </div>
                 </a-row>
               </a-card>

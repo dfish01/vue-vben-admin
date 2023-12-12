@@ -74,7 +74,7 @@
                   <a-tooltip title="🥤系统相关操作说明以及Midjouney教程文档库 ~">
                     <a-button
                       @click="openTutorial"
-                      style="padding: 0 5px"
+                      style="padding: 5px"
                       v-if="systemInfoForm.tutorialInfo"
                       ><SvgIcon name="jiaocheng"
                     /></a-button>
@@ -82,13 +82,13 @@
                   <a-tooltip title="🍸相关问题、建议、优化等可群内留言或者私聊群主 ~">
                     <a-button
                       @click="openCommunicateView"
-                      style="padding: 0 5px"
+                      style="padding: 5px"
                       v-if="systemInfoForm.communicateResp"
                       ><SvgIcon name="QQ"
                     /></a-button>
                   </a-tooltip>
                   <a-tooltip title="🍧导入DISCORD记录，可以将discord的图片导入进来进行管理哦~">
-                    <a-button @click="showImportView" style="padding: 0 5px"
+                    <a-button @click="showImportView" style="padding: 5px"
                       ><SvgIcon name="discord"
                     /></a-button>
                   </a-tooltip>

@@ -17,57 +17,55 @@
           <span style="margin-left: 5px; font-size: 16px; font-weight: bold">账号管理</span>
         </div>
         <div style="display: flex; gap: 5px">
-          <a-tooltip title="偷个懒，请去PC端添加~">
-            <a-dropdown :trigger="['click']" disabled>
-              <a-button style="padding: 0 5px; border-radius: 5px"
-                ><Icon icon="mdi:account-multiple-add" size="22"
-              /></a-button>
-              <template #overlay>
-                <a-menu disabled>
-                  <a-menu-item key="5" disabled>
-                    <a-popconfirm
-                      title="⚠️新增账号"
-                      ok-text="立即预览"
-                      cancel-text="取消"
-                      @confirm="onAdd"
-                    >
-                      📺新增账户
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-item key="5" disabled>
-                    <a-popconfirm
-                      title="⚠️创建账号组"
-                      ok-text="立即预览"
-                      cancel-text="取消"
-                      @confirm="onAdd"
-                    >
-                      📝创建账号组
-                    </a-popconfirm>
-                  </a-menu-item>
-                </a-menu>
-              </template>
-            </a-dropdown>
-          </a-tooltip>
+          <a-button-group>
+            <a-tooltip title="偷个懒，请去PC端添加Open ai和Discord账号~">
+              <a-dropdown :trigger="['click']" disabled>
+                <a-button style="padding: 5px"
+                  ><Icon icon="mdi:account-multiple-add" size="22"
+                /></a-button>
+                <template #overlay>
+                  <a-menu disabled>
+                    <a-menu-item key="5" disabled>
+                      <a-popconfirm
+                        title="⚠️新增账号"
+                        ok-text="立即预览"
+                        cancel-text="取消"
+                        @confirm="onAdd"
+                      >
+                        📺新增账户
+                      </a-popconfirm>
+                    </a-menu-item>
+                    <a-menu-item key="5" disabled>
+                      <a-popconfirm
+                        title="⚠️创建账号组"
+                        ok-text="立即预览"
+                        cancel-text="取消"
+                        @confirm="onAdd"
+                      >
+                        📝创建账号组
+                      </a-popconfirm>
+                    </a-menu-item>
+                  </a-menu>
+                </template>
+              </a-dropdown>
+            </a-tooltip>
+            <a-tooltip title="">
+              <a-button @click="showQueryView" @click.prevent style="padding: 5px">
+                <SvgIcon name="list_search" size="20" />
+              </a-button>
+            </a-tooltip>
+            <a-tooltip title="市场">
+              <a-button @click="goView('/goods/index')" style="padding: 5px">
+                <SvgIcon name="shopping" size="20" />
+              </a-button>
+            </a-tooltip>
 
-          <a-tooltip title="市场">
-            <a-button @click="goView('/goods/index')" style="padding: 0 5px; border-radius: 10px">
-              <SvgIcon name="shopping" />
-            </a-button>
-          </a-tooltip>
-          <a-tooltip title="">
-            <a-button
-              @click="showQueryView"
-              @click.prevent
-              style="padding: 0 5px; border-radius: 10px"
-            >
-              <SvgIcon name="list_search" />
-            </a-button>
-          </a-tooltip>
-          <a-tooltip title="">
-            <a-button @click="onShowActive" style="padding: 0 5px; border-radius: 10px">
-              <Icon icon="solar:key-square-2-linear" size="22" />
-            </a-button>
-          </a-tooltip>
+            <a-tooltip title="">
+              <a-button @click="onShowActive" style="padding: 5px">
+                <Icon icon="solar:key-square-2-linear" size="20" color="green" />
+              </a-button>
+            </a-tooltip>
+          </a-button-group>
         </div>
       </a-row>
     </a-card>

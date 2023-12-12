@@ -16,24 +16,23 @@
           <span style="margin-left: 5px; font-size: 16px; font-weight: bold">交易记录</span>
         </div>
         <div style="display: flex; gap: 5px">
-          <a-tooltip title="订单查询">
-            <a-button @click="showQueryView" style="padding: 0 5px; border-radius: 10px">
-              <SvgIcon name="list_search" />
-            </a-button>
-          </a-tooltip>
-          <a-tooltip title="市场">
-            <a-button @click="goView('/goods/index')" style="padding: 0 5px; border-radius: 10px">
-              <SvgIcon name="shopping" />
-            </a-button>
-          </a-tooltip>
-          <a-tooltip title="去激活">
-            <a-button
-              @click="goView('/accDiscord/index')"
-              style="padding: 0 5px; border-radius: 10px"
-            >
-              <Icon icon="solar:key-square-2-linear" size="20" />
-            </a-button>
-          </a-tooltip>
+          <a-button-group>
+            <a-tooltip title="订单查询">
+              <a-button @click="showQueryView" style="padding: 5px">
+                <SvgIcon name="list_search" size="20" />
+              </a-button>
+            </a-tooltip>
+            <a-tooltip title="市场">
+              <a-button @click="goView('/goods/index')" style="padding: 5px">
+                <SvgIcon name="shopping" size="20" />
+              </a-button>
+            </a-tooltip>
+            <a-tooltip title="去激活">
+              <a-button @click="goView('/accDiscord/index')" style="padding: 5px">
+                <Icon icon="solar:key-square-2-linear" size="20" color="green" />
+              </a-button>
+            </a-tooltip>
+          </a-button-group>
         </div>
       </a-row>
     </a-card>

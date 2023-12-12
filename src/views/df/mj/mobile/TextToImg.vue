@@ -86,22 +86,18 @@
         </template>
         <a-row>
           <a-col span="8">
-            <a-button style="width: 100%; background: #6ca0e3" size="small" @click="openTranslate"
+            <a-button style="width: 100%" size="small" @click="openTranslate"
               ><SvgIcon name="translate" />中英翻译</a-button
             >
           </a-col>
           <a-col span="8">
-            <a-button style="width: 100%; background: #d4237a" size="small" @click="openAiPrompt"
+            <a-button style="width: 100%" size="small" @click="openAiPrompt"
               ><SvgIcon name="gpt" />AI生成</a-button
             >
           </a-col>
           <a-col span="8">
-            <a-button
-              style="width: 100%; background-color: #ffa500"
-              size="small"
-              @click="openDrawerInC"
-            >
-              <SvgIcon name="book" /> 葵花宝典</a-button
+            <a-button style="width: 100%" size="small" @click="openDrawerInC">
+              <SvgIcon name="book" /> Prompt宝典</a-button
             >
           </a-col>
         </a-row>
@@ -112,9 +108,9 @@
         <template #title>
           <div class="ar-card2-title">
             <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
-              ><Icon icon="streamline-emojis:blossom" /> 添加标签
+              ><Icon icon="streamline-emojis:blossom" /> 账户配置
               <a-tooltip
-                title="用于对批次任务的标记，方便管理图片。多个标签'空格'隔开,最多5个标签。每个标签长度不超过16个字。~"
+                title="这里的账号配置针对任务列表以及个人收藏是通用的！每个账号的最大重复次数是有限制的，具体看主账号的配置。标签的话，主要用于对批次任务的标记，方便管理图片。多个标签'空格'隔开,最多5个标签。每个标签长度不超过16个字。~"
               >
                 <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
             ></span>
@@ -126,13 +122,13 @@
               style="text-align: left"
               v-model:value="textToImgForm.tagName"
               rows="3"
-              placeholder="用@可以触发最近使用的标签哦！多个标签'空格符'隔开,最多5个标签。每个标签长度不超过16个字。~"
+              placeholder="标签配置：用@可以触发最近使用的标签哦！多个标签'空格符'隔开,最多5个标签。每个标签长度不超过16个字。~"
               :options="textToImgForm.tagNameOptions"
               @select="onChangeLabel"
             />
           </a-col>
         </a-row>
-        <a-row style="margin-top: 10px">
+        <a-row style="margin-top: 5px">
           <a-col span="6">
             <a-tooltip title="这个是解放你双手和时间的参数">
               <a-tag class="quality-tag tag-no-right-border" color="default">重复次数</a-tag>
@@ -140,6 +136,7 @@
           </a-col>
           <a-col span="18">
             <a-input
+              style="height: 32px"
               align="center"
               justify="center"
               v-model:value="textToImgForm.invokeTimes"
@@ -149,7 +146,7 @@
             />
           </a-col>
         </a-row>
-        <a-row style="margin-top: 10px">
+        <a-row style="margin-top: 5px">
           <a-col span="6">
             <a-tooltip
               title="不指定账号的话，随机根据账号现有负载情况选择资源最空的一个账号，优先默认账号。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
@@ -169,7 +166,7 @@
             />
           </a-col>
         </a-row>
-        <a-row style="margin-top: 10px" v-if="accountForm.useAccountId">
+        <a-row style="margin-top: 5px" v-if="accountForm.useAccountId">
           <a-col span="6">
             <a-tooltip
               title="不指定频道的话，默认账户组中的频道。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
@@ -200,7 +197,7 @@
             <a-switch v-model:checked="textToImgForm.isPublic" />
           </a-col>
         </a-row> -->
-        <a-row style="margin-top: 10px">
+        <a-row style="margin-top: 5px">
           <a-col span="6">
             <a-tooltip
               title="休闲模式->快速模式->涡轮模式 速度依次递增。这里的模式是会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
@@ -1353,14 +1350,6 @@
   });
 
   const route = useRoute();
-  //初始化加载
-  const props = defineProps({
-    spaceId: {
-      type: String,
-      default: '',
-    },
-  });
-  const { spaceId } = toRefs(props);
 
   /** prompt 页面数据传递 */
   const isDrawerVisibleInC = ref(false); // 控制 C 页面的 Drawer 是否打开
@@ -1534,7 +1523,7 @@
       .validate()
       .then(async () => {
         const addTaskParam: AddDrawTaskParams = {
-          spaceId: spaceId.value,
+          spaceId: accountForm.currentSpaceId,
           refAccountId: accountForm.useAccountId,
           channel: 'MJ',
           priority: 0,
@@ -2006,7 +1995,7 @@
   }
 
   .row-wapper {
-    margin-top: 10px;
+    margin-top: 5px;
     border-radius: 4px;
   }
 
