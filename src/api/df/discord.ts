@@ -14,6 +14,29 @@ enum Api {
 
   GetZoneList = '/open/discord/getZoneList',
   UpdateServerZone = '/open/discord/updateServerZone',
+
+  ResetConUse = '/open/discord/resetConUse',
+}
+
+/**
+ * 重置账号使用次数
+ *
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function resetConUse(params: IdReq, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<{ zoneName: string; zoneCode: string; availableNums: number }[]>(
+    {
+      url: Api.ResetConUse,
+      params,
+      timeout: 30000,
+    },
+    {
+      errorMessageMode: mode,
+      successMessageMode: mode,
+    },
+  );
 }
 
 /**

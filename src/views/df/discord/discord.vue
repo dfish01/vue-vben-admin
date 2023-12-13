@@ -74,7 +74,21 @@
           key="useConcurrent"
           align="center"
           :width="100"
-        />
+        >
+          <template #default="{ record }">
+            {{ record.useConcurrent }}
+            <a-popconfirm
+              title="重置会将已并发数置为0，并将当前执行中的任务删除，是否确认操作?"
+              ok-text="重置"
+              cancel-text="取消"
+              @confirm="doResetConUse(record.id)"
+            >
+              <a-button size="small" :loading="discordSettingForm.loading" type="link">
+                <Icon icon="material-symbols:refresh"
+              /></a-button>
+            </a-popconfirm>
+          </template>
+        </a-table-column>
         <a-table-column
           title="MAX并发"
           dataIndex="maxConcurrent"
@@ -247,6 +261,7 @@
     getValidResult,
     getZoneList,
     updateServerZone,
+    resetConUse,
   } from '/@/api/df/discord';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { copyText as doCopyText } from '/@/utils/copyTextToClipboard';
@@ -306,6 +321,16 @@
     }
   };
 
+  //账号重置
+  const doResetConUse = async (id) => {
+    discordSettingForm.value.loading = true;
+    try {
+      await resetConUse({ id: id });
+      onSearch();
+    } finally {
+      discordSettingForm.value.loading = false;
+    }
+  };
   //************************************** discord 账号添加 ****************************************************//
   const discordFormRef = ref();
   const discordForm = ref({

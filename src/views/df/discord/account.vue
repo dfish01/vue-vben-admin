@@ -341,25 +341,31 @@
             v-if="statisticsForm.formData.ownerFlag === 'N'"
           >
             <span>
-              turbo次数: {{ statisticsForm.formData.authUseInfo.turboTimes }} /
+              turbo次数:
+              {{ statisticsForm.formData.authUseInfo.turboTimes }}
+              /
               {{
-                statisticsForm.formData.authUseInfo.totalTurboTimes
-                  ? statisticsForm.formData.authUseInfo.totalTurboTimes
-                  : ' ∞'
+                statisticsForm.formData.authUseInfo.totalTurboTimes === null
+                  ? ' 不限制'
+                  : statisticsForm.formData.authUseInfo.totalTurboTimes
               }}
               <br />
-              快速次数: {{ statisticsForm.formData.authUseInfo.fastTimes }} /
+              fast次数:
+              {{ statisticsForm.formData.authUseInfo.fastTimes }}
+              /
+
               {{
-                statisticsForm.formData.authUseInfo.totalFastTimes
-                  ? statisticsForm.formData.authUseInfo.totalFastTimes
-                  : ' ∞'
+                statisticsForm.formData.authUseInfo.totalFastTimes === null
+                  ? ' 不限制'
+                  : statisticsForm.formData.authUseInfo.totalFastTimes
               }}
               <br />
-              relax次数: {{ statisticsForm.formData.authUseInfo.relaxTimes }} /
-              {{
-                statisticsForm.formData.authUseInfo.totalRelaxTimes
-                  ? statisticsForm.formData.authUseInfo.totalRelaxTimes
-                  : ' ∞'
+              relax次数:
+              {{ statisticsForm.formData.authUseInfo.relaxTimes }}
+              /{{
+                statisticsForm.formData.authUseInfo.totalRelaxTimes === null
+                  ? ' 不限制'
+                  : statisticsForm.formData.authUseInfo.relaxTimes
               }}
               <br />
               <!-- 成功次数:{{ statisticsForm.formData.authUseInfo.numSuccess }} -->

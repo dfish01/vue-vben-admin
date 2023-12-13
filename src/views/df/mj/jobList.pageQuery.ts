@@ -472,7 +472,6 @@ export function jobOptionApi() {
   };
 
   const handlePan = async (card, type, event) => {
-    console.log(11122);
     if ('zoom-cus' === event.key) {
       return;
     }
@@ -860,7 +859,7 @@ export function userSettingApi() {
   const userSetting = ref({
     useUpImage: false,
     usePersonNet: false,
-    taskRefresh: false,
+    taskRefresh: true,
     cardShow: 'SINGLE',
   });
 
