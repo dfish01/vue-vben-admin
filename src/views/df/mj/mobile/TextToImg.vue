@@ -357,35 +357,31 @@
             <a-tabs v-model:activeKey="activeKey" type="card" @change="chooseVersion">
               <a-tab-pane key="niji5" tab="Niji 5">
                 <a-row style="justify-content: left">
-                  <a-col span="24" class="style-radio">
-                    <a-radio-group
-                      size="small"
-                      style="width: 100%"
-                      v-model:value="versionParam.niji5.style"
-                    >
-                      <a-tooltip title="默认的风格，效果很不错">
-                        <a-radio-button style="width: 20%" value="">Default</a-radio-button>
-                      </a-tooltip>
+                  <a-radio-group
+                    size="small"
+                    style="width: 100%"
+                    v-model:value="versionParam.niji5.style"
+                  >
+                    <a-tooltip title="默认的风格，效果很不错">
+                      <a-radio-button style="width: 20%" value="">Default</a-radio-button>
+                    </a-tooltip>
 
-                      <a-tooltip title=" 表现力风格，更精致的插图艺术风格">
-                        <a-radio-button style="width: 20%" value="expressive"
-                          >Expressive</a-radio-button
-                        >
-                      </a-tooltip>
-                      <a-tooltip title="可爱风格，能创造出迷人可爱的角色、道具和场景">
-                        <a-radio-button style="width: 20%" value="cute">Cute</a-radio-button>
-                      </a-tooltip>
+                    <a-tooltip title=" 表现力风格，更精致的插图艺术风格">
+                      <a-radio-button style="width: 20%" value="expressive"
+                        >Expressive</a-radio-button
+                      >
+                    </a-tooltip>
+                    <a-tooltip title="可爱风格，能创造出迷人可爱的角色、道具和场景">
+                      <a-radio-button style="width: 20%" value="cute">Cute</a-radio-button>
+                    </a-tooltip>
 
-                      <a-tooltip title="景色风格，在奇幻环境下作出美丽的背景和电影般的角色时刻">
-                        <a-radio-button style="width: 20%" value="scenic">Scenic</a-radio-button>
-                      </a-tooltip>
-                      <a-tooltip title="原始风格，在2023.5.26日之前的默认Niji5的风格">
-                        <a-radio-button style="width: 20%" value="original"
-                          >Original</a-radio-button
-                        >
-                      </a-tooltip>
-                    </a-radio-group>
-                  </a-col>
+                    <a-tooltip title="景色风格，在奇幻环境下作出美丽的背景和电影般的角色时刻">
+                      <a-radio-button style="width: 20%" value="scenic">Scenic</a-radio-button>
+                    </a-tooltip>
+                    <a-tooltip title="原始风格，在2023.5.26日之前的默认Niji5的风格">
+                      <a-radio-button style="width: 20%" value="original">Original</a-radio-button>
+                    </a-tooltip>
+                  </a-radio-group>
                 </a-row>
                 <a-row style="margin-top: 10px">
                   <a-col span="6">
@@ -1235,7 +1231,7 @@
                 placeholder="预设内容。比如：你将扮演一个漫画师。你将在一行中写下描述，不使用换行符。首先是图片概念描绘什么画面内容，流畅的附加这些关键字：绘画风格、绘画工具、构图、布局、色调等。控制在2-6行文字以内。然后内容后附加：“--ar ”画面比例整数用冒号隔开“ --niji 5 ” 如果觉得风格偏美式在内容结尾继续添加“ --style expressive ”。注意：返回英文结果。"
                 allow-clear
                 :maxlength="120"
-                :auto-size="{ minRows: 1, maxRows: 2 }"
+                :auto-size="{ minRows: 3, maxRows: 3 }"
               />
             </a-col>
             <a-col span="24" style="margin-top: 10px">
@@ -1245,7 +1241,7 @@
                 placeholder="请输入你要生成的关键词~"
                 allow-clear
                 :maxlength="2000"
-                :auto-size="{ minRows: 3, maxRows: 3 }"
+                :auto-size="{ minRows: 5, maxRows: 5 }"
               />
             </a-col>
 
@@ -1260,7 +1256,7 @@
               >
                 <a-textarea
                   v-model:value="modelData.aiOutputText"
-                  placeholder="请输入你要生成的关键词~"
+                  placeholder="AI生成的关键词~"
                   allow-clear
                   :maxlength="2000"
                   :auto-size="{ minRows: 5, maxRows: 5 }"
@@ -1587,7 +1583,7 @@
   const options = ref([
     { id: 10, value: '1:1', X: 1, Y: 1, label: '应用头像', span: 6, color: 'default' },
     { id: 20, value: '1:2', X: 1, Y: 2, label: '手机壁纸', span: 6, color: 'default' },
-    { id: 30, value: '16:9', X: 16, Y: 19, label: '电脑壁纸', span: 6, color: 'default' },
+    { id: 30, value: '16:9', X: 16, Y: 9, label: '电脑壁纸', span: 6, color: 'default' },
     { id: 40, value: '9:16', X: 9, Y: 16, label: '宣传海报', span: 6, color: 'default' },
     { id: 50, value: '4:3', X: 4, Y: 3, label: '文章配图', span: 6, color: 'default' },
     { id: 60, value: '3:4', X: 3, Y: 4, label: '媒体配图', span: 6, color: 'default' },
@@ -1661,45 +1657,45 @@
   const versionParam = ref({
     niji5: {
       style: '',
-      quality: '0.25',
+      quality: '1',
       chaos: 0,
-      s: 100,
+      s: 300,
       iw: 1,
       version: 'niji 5',
       tile: false,
     },
     v4: {
       style: null,
-      quality: '0.25',
+      quality: '1',
       chaos: 0,
-      s: 100,
+      s: 300,
       version: 'v 4',
       iw: null,
       tile: null,
     },
     v5: {
       style: null,
-      quality: '0.25',
+      quality: '1',
       chaos: 0,
-      s: 100,
+      s: 300,
       version: 'v 5',
       iw: 1,
       tile: false,
     },
     v51: {
       style: 'raw',
-      quality: '0.25',
+      quality: '1',
       chaos: 0,
-      s: 100,
+      s: 300,
       version: 'v 5.1',
       iw: 1,
       tile: false,
     },
     v52: {
       style: 'raw',
-      quality: '0.25',
+      quality: '1',
       chaos: 0,
-      s: 100,
+      s: 300,
       iw: 1,
       version: 'v 5.2',
       tile: false,
