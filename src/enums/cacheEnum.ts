@@ -1,4 +1,6 @@
 //自定义HOST
+export const MJ_TASK_ACCOUNT_KEY = 'MJ_TASK_ACCOUNT__';
+
 export const CUSTOM_HOST_KEY = 'CUSTOM_HOST__';
 
 // token key

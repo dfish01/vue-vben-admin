@@ -168,13 +168,12 @@
           </a-col>
           <a-col span="18">
             <a-select
-              placeholder="随机选取账号，优先默认"
               @change="handleAccountSetting"
+              placeholder="随机选取账号，优先默认"
               style="width: 100%; height: 32px"
               v-model:value="accountForm.useAccountId"
-              v-model="accountForm.useAccountId"
-              :size="accountForm.accountSelector.size"
-              :options="accountForm.accountSelector.options"
+              :size="accountViewForm.accountSelector.size"
+              :options="accountViewForm.accountSelector.options"
             />
           </a-col>
         </a-row>
@@ -190,11 +189,11 @@
           <a-col span="18">
             <a-select
               style="width: 100%"
-              @change="handleSetting('useChannelId', accountForm.useChannelId)"
+              @change="handleChannelSetting"
               placeholder="请选择ChannelId"
               v-model:value="accountForm.useChannelId"
-              :size="accountForm.accountSelector.size"
-              :options="accountForm.channelSelector.options"
+              :size="accountViewForm.accountSelector.size"
+              :options="accountViewForm.channelSelector.options"
             />
           </a-col>
         </a-row>
@@ -221,7 +220,6 @@
           <a-col span="18">
             <a-select
               placeholder="默认休闲模式"
-              @change="handleSetting('mode', accountForm.mode)"
               v-model:value="accountForm.mode"
               style="width: 100%; height: 32px"
             >
@@ -1259,10 +1257,12 @@
 
   const {
     accountForm,
+    accountViewForm,
     initAccountList,
     initAccountInfo,
     doGetChannelsByGroup,
     handleAccountSetting,
+    handleChannelSetting,
     handleSetting,
   } = accountInfoApi();
 

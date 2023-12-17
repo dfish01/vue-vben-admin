@@ -877,6 +877,7 @@
   const {
     accountFormRef,
     accountForm,
+    accountViewForm,
     onAdd,
     onSelectDiscordUser,
     onSelectGuild,

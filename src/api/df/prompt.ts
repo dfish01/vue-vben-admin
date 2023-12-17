@@ -17,6 +17,7 @@ enum Api {
  * @returns
  */
 export function promptDictQuery(params: PromptListReq, mode: ErrorMessageMode = 'message') {
+  console.log(111);
   return defHttp.post<PromptDictListResultModel>(
     {
       url: Api.PromptDictQuery,

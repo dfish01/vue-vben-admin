@@ -50,6 +50,7 @@ import { splitPrompt } from './tools';
 
 const {
   accountForm,
+  accountViewForm,
   initAccountList,
   initAccountInfo,
   doGetChannelsByGroup,
@@ -60,7 +61,7 @@ const {
 let jobListQueryApiInstance: any | null = null;
 let jobOptionApiInstance: any | null = null;
 let userSettingApiInstance: any | null = null;
-let jobTagApiInstance: any | null = null;
+const jobTagApiInstance: any | null = null;
 let lightBoxApiInstance: any | null = null;
 export const loadingRef = ref(false);
 
@@ -613,75 +614,6 @@ export function jobOptionApi() {
   return api;
 }
 
-export function jobTagApi() {
-  if (jobTagApiInstance) {
-    return jobTagApiInstance;
-  }
-  /*************************添加标签*************************** */
-  const drawTagForm = ref({
-    drawTaskId: '',
-    tagName: '',
-    viewFlag: false,
-    loading: false,
-    tagNameOptions: [] as { value: string; label: string }[],
-  });
-
-  const showDrawTaskTagModel = (card) => {
-    drawTagForm.value.drawTaskId = card.id;
-    drawTagForm.value.viewFlag = true;
-    loadTagList();
-  };
-
-  const addDrawTaskTag = async () => {
-    drawTagForm.value.loading = true;
-    try {
-      await addTag({
-        drawTaskId: drawTagForm.value.drawTaskId,
-        tagName: drawTagForm.value.tagName,
-      });
-      drawTagForm.value.viewFlag = false;
-    } finally {
-      drawTagForm.value.loading = false;
-    }
-  };
-
-  const loadTagList = async () => {
-    //查询最近使用的tag
-    const resp = await genTagList({});
-    const options = resp.map((item) => ({
-      value: item,
-      label: item,
-    }));
-    drawTagForm.value.tagNameOptions = options;
-  };
-
-  const onChangeLabel = (selectedOption) => {
-    console.log(selectedOption);
-    // 获取选中项的值，不包含 @ 符号
-    drawTagForm.value.tagName = drawTagForm.value.tagName.replace(/@/g, '');
-  };
-  const onChangeSearchLabel = (selectedOption) => {
-    console.log(selectedOption);
-    // 获取选中项的值，不包含 @ 符号
-    jobListQueryApi().searchForm.value.tagName = jobListQueryApi().searchForm.value.tagName.replace(
-      /@/g,
-      '',
-    );
-  };
-  const api = {
-    // 响应式引用
-    drawTagForm,
-
-    showDrawTaskTagModel,
-    addDrawTaskTag,
-    loadTagList,
-    onChangeLabel,
-    onChangeSearchLabel,
-  };
-  jobTagApiInstance = api;
-  return api;
-}
-
 /*********************************** 基础配置 ******************************** */
 export function userSettingApi() {
   if (userSettingApiInstance) {
@@ -691,7 +623,7 @@ export function userSettingApi() {
     useUpImage: false,
     usePersonNet: false,
     taskRefresh: false,
-    cardShow: 'SINGLE',
+    cardShow: 'MULTI',
   });
 
   const setCardShow = (): void => {

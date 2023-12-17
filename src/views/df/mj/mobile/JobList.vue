@@ -415,7 +415,7 @@
               </a-tooltip>
               <a-tooltip title="删除">
                 <a-popconfirm
-                  title="该操作将永久删除任务，是否确认删除?"
+                  title="是否确认移除任务?"
                   ok-text="确认删除"
                   cancel-text="取消"
                   @confirm="deleteCard(card)"
@@ -478,7 +478,7 @@
               </a-tooltip>
               <a-tooltip title="删除">
                 <a-popconfirm
-                  title="该操作将永久删除任务，是否确认删除?"
+                  title="是否确认移除任务?"
                   ok-text="确认删除"
                   cancel-text="取消"
                   @confirm="deleteCard(card)"
@@ -498,7 +498,7 @@
             <div class="card-tags">
               <div class="custom-radio-group">
                 <a-button-group size="small" buttonStyle="solid">
-                  <a-tooltip
+                  <!-- <a-tooltip
                     :title="
                       card.privacyMode === 'Y' ? '点击公开图片' : '当前公开图片，点击将关闭公开'
                     "
@@ -512,7 +512,54 @@
                         <Icon icon="material-symbols:public" size="14" color="#8ECDDD" />
                       </span>
                     </a-button>
-                  </a-tooltip>
+                  </a-tooltip> -->
+
+                  <a-dropdown :placement="placement" arrow trigger="click">
+                    <a-button class="card-icon-button"><SvgIcon name="menu" size="14" /></a-button>
+                    <template #overlay>
+                      <a-menu>
+                        <a-menu-item
+                          key="1"
+                          v-if="card.state === 'SUCCESS'"
+                          @click="() => showTaskInfo(card)"
+                          ><Icon icon="streamline-emojis:television" />任务明细</a-menu-item
+                        >
+                        <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)"
+                          ><Icon icon="streamline-emojis:blossom" /> 添加标签</a-menu-item
+                        >
+                        <a-menu-item key="3" @click="() => showSampleView(card)"
+                          ><Icon icon="streamline-emojis:globe-showing-europe-africa" />
+                          添加到官方案例</a-menu-item
+                        >
+                        <a-menu-item key="4" @click="() => copyText(card.messageHash)"
+                          ><Icon icon="fluent-emoji-flat:id-button" color="grey" />
+                          复制任务ID</a-menu-item
+                        >
+
+                        <a-menu-item key="5" @click="() => copyText(card.prompt)"
+                          ><Icon icon="streamline-emojis:baseball" color="grey" />
+                          复制Prompt</a-menu-item
+                        >
+                        <a-menu-item key="6" @click="showUserSpaceTask(card)"
+                          ><Icon icon="streamline-emojis:helicopter" /> 添加到其他空间</a-menu-item
+                        >
+                        <a-popconfirm
+                          title="是否确认移除任务?"
+                          ok-text="确认删除"
+                          cancel-text="取消"
+                          @confirm="deleteCard(card)"
+                        >
+                          <a-menu-item key="7" @click="deleteSpaceCard(card, spaceId)">
+                            <Icon icon="streamline-emojis:recycling-symbol" color="red" />
+                            从该空间移除</a-menu-item
+                          >
+                        </a-popconfirm>
+                        <a-menu-item key="8" @click="() => getSeed(card.id, false)"
+                          ><Icon icon="streamline-emojis:rocket" /> 获取Seed</a-menu-item
+                        >
+                      </a-menu>
+                    </template>
+                  </a-dropdown>
 
                   <a-tooltip
                     v-if="card.prompt"
@@ -842,7 +889,7 @@
               ><Icon icon="streamline-emojis:helicopter" /> 添加到其他空间</a-menu-item
             >
             <a-popconfirm
-              title="该操作将永久删除任务，是否确认删除?"
+              title="是否确认移除任务?"
               ok-text="确认删除"
               cancel-text="取消"
               @confirm="deleteCard(card)"
@@ -1140,7 +1187,7 @@
       <a-modal
         v-model:open="drawTagForm.viewFlag"
         title="🔥添加标签"
-        @ok="addDrawTaskTag()"
+        @ok="doAddDrawTaskTag()"
         :loading="drawTagForm.loading"
       >
         <a-spin :spinning="drawTagForm.loading">
@@ -1328,6 +1375,7 @@
       width="100%"
       wrap-class-name="full-modal "
       :bodyStyle="{ padding: '0px' }"
+      zIndex="999"
     >
       <template #footer>
         <a-button key="submit" type="primary" :loading="loadingRef" @click="closeTaskInfo"
@@ -1580,7 +1628,7 @@
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
   import { listCategory, queryDrawingSample, addDrawingSample } from '/@/api/df/drawingSample';
   import { addSpaceTask, removeSpaceTask, allUserSpace } from '/@/api/df/workSpace';
-  import { accountInfoApi } from '../accountInfo';
+  import { accountInfoApi, tagInfoApi } from '../accountInfo';
   import { SvgIcon } from '/@/components/Icon';
   import {
     ref,
@@ -1597,7 +1645,6 @@
     jobListQueryApi,
     exampleApi,
     jobOptionApi,
-    jobTagApi,
     userSettingApi,
     lightBoxApi,
     splitAndDownloadImage,
@@ -1611,11 +1658,13 @@
     handleDownloadByUrl,
     handleDownloadByUrls,
     generateTooltipText,
+    stringToColor,
   } from '../tools';
   import { useRoute } from 'vue-router';
 
   const {
     accountForm,
+    accountViewForm,
     initAccountList,
     initAccountInfo,
     doGetChannelsByGroup,
@@ -1703,6 +1752,7 @@
 
   const {
     // 响应式引用
+    initTag,
     drawTagForm,
 
     showDrawTaskTagModel,
@@ -1711,7 +1761,7 @@
     onChangeLabel,
     onChangeSearchLabel,
     removeDrawTaskTag,
-  } = jobTagApi();
+  } = tagInfoApi();
 
   const { userSetting, setCardShow, setUseUpImage, setUsePersonNet, setTaskRefresh } =
     userSettingApi();
@@ -1732,10 +1782,13 @@
   // 使用 ref 包装，以确保 computed 可以正确监听变化
 
   onMounted(() => {
-    searchForm.value.spaceId = accountForm.currentSpaceId;
-    onSearch(1);
     (window as any).varyRegionForm = varyRegionForm;
-    loadTagList();
+    initTag();
+  });
+  onMounted(async () => {
+    await initAccountInfo();
+    searchForm.value.spaceId = accountForm.currentSpaceId;
+    onSearch();
   });
 
   // 监听来自 iframe 的消息
@@ -1859,39 +1912,10 @@
     showExampleViewFlag.value = true;
     console.log(exampleForm.value);
   };
-  onMounted(async () => {
-    const response = await drawingSampleCategory();
-    console.log(111);
-    const transformedList = response.map((item) => ({
-      label: item.name,
-      value: item.code,
-    }));
 
-    const finalList = [...transformedList];
-    exampleForm.value.drawingSampleCategory = finalList;
-  });
-  //随机颜色
-  function stringToColor(str) {
-    // Convert the string to a hash code
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    // Generate a color based on the hash
-    const color = '#' + (hash & 0x00ffffff).toString(16).toUpperCase();
-
-    // Check if the color is too light (close to white or gray)
-    const threshold = 0xbbbbbb; // You can adjust this threshold as needed
-    const isLightColor = hash < threshold;
-
-    // If it's too light, generate a new color
-    return isLightColor ? stringToColor(str + 'salt') : color;
-  }
   const getImageList = (card) => {
     return card.taskImage.infoImageList.map((item) => item.url);
   };
-
   const showInfoImage = (infoImageList, showUrl) => {
     // 检查数组中是否存在 showUrl
     const showUrlIndex = infoImageList.findIndex((url) => url === showUrl);
@@ -1907,6 +1931,14 @@
 
     // 如果不存在 showUrl，则返回原数组
     viewerApi({ images: imageList });
+  };
+
+  //添加标签
+  const doAddDrawTaskTag = async () => {
+    await addDrawTaskTag();
+    if (infoData && infoData.id && infoData.id === drawTagForm.value.drawTaskId) {
+      infoData.tagList.push(drawTagForm.value.tagName);
+    }
   };
 </script>
 
@@ -2168,19 +2200,12 @@
   }
 
   .card-button {
-    height: 24px;
     padding: 0 7px;
-    border-radius: 5px;
     font-size: 10px;
   }
 
   .card-icon-button {
-    display: flex;
-    align-items: center;
-    height: 22px;
     padding: 0 5px;
-    border-radius: 1px;
-    font-size: 9px;
   }
 
   .check >>> .ant-checkbox + span {
@@ -2194,13 +2219,18 @@
       top: 0;
       max-width: 100%;
       margin: 0;
-      padding: 0;
       padding-bottom: 0;
     }
 
     .ant-modal-content {
       display: flex;
       flex-direction: column;
+      height: calc(100vh);
+      overflow-y: auto;
+    }
+
+    .ant-modal-body {
+      flex: 1;
     }
   }
 </style>

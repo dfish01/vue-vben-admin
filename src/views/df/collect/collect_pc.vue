@@ -40,41 +40,6 @@
         </a-button-group>
         <a-button-group>
           <a-dropdown :trigger="['click']">
-            <a-button type="primary" danger>
-              <Icon
-                icon="material-symbols:contract-delete-outline-rounded"
-                class="vel-icon icon"
-                aria-hidden="true"
-              />
-              删除
-            </a-button>
-            <template #overlay>
-              <a-menu>
-                <a-menu-item key="1">
-                  <a-popconfirm
-                    title="将永久删除该空间下的全部排队记录，是否确认删除?"
-                    ok-text="确认删除"
-                    cancel-text="取消"
-                    @confirm="deleteBatchHandle('QUEUED')"
-                  >
-                    <a>❌排队</a>
-                  </a-popconfirm>
-                </a-menu-item>
-
-                <a-menu-item key="2">
-                  <a-popconfirm
-                    title="将永久删除该空间下的全部失败记录，是否确认删除?"
-                    ok-text="确认删除"
-                    cancel-text="取消"
-                    @confirm="deleteBatchHandle('FAILED')"
-                  >
-                    <a>❌失败</a>
-                  </a-popconfirm>
-                </a-menu-item>
-              </a-menu>
-            </template>
-          </a-dropdown>
-          <a-dropdown :trigger="['click']">
             <a-button type="warning">
               <Icon
                 icon="icon-park-solid:setting-computer"
@@ -196,7 +161,7 @@
     <div
       v-else
       class="cards"
-      :style="{ height: `calc(${contentHeight}px - 40px)`, overflow: 'auto' }"
+      :style="{ height: `calc(${contentHeight}px - 50px)`, overflow: 'auto' }"
     >
       <a-dropdown v-for="card in cards" :key="card.id" :trigger="['contextmenu']">
         <a-card :bodyStyle="{ padding: '0px' }" class="card" :hoverable="false">
@@ -260,12 +225,15 @@
                 <a-card-grid
                   v-for="infoImage in card.taskImage.infoImageList"
                   :key="infoImage.url"
+                  :bordered="false"
+                  :hoverable="false"
                   style="
                     position: relative;
-                    width: 49%;
-                    margin: 1px;
+                    width: 50%;
+                    margin: 0;
                     padding: 0;
-                    border-radius: 15px;
+                    overflow: hidden;
+                    border-radius: 9px;
                     text-align: center;
                   "
                 >
@@ -285,11 +253,14 @@
                     />
                   </div> -->
                   <img
+                    @mouseenter="moveIn(infoImage)"
+                    @mouseleave="moveOut(infoImage)"
                     @click="showInfoImage(getImageList(card), infoImage.url)"
                     v-lazy.container="infoImage.mediaUrl"
-                    style="max-width: 100%; border-radius: 15px"
+                    style="max-width: 100%; transition: transform 0.3s ease; border-radius: 9px"
                     alt=""
                     @load="imageLoaded(infoImage)"
+                    :class="{ 'item-selected': infoImage && infoImage.enterFlag }"
                   />
                 </a-card-grid>
               </a-card>
@@ -303,14 +274,25 @@
                 ><a-card-grid
                   v-for="infoImage in card.taskImage.infoImageList"
                   :key="infoImage.url"
-                  style="width: 100%; padding: 0; border-radius: 15px; text-align: center"
+                  :bordered="false"
+                  :hoverable="false"
+                  style="
+                    width: 100%;
+                    padding: 0;
+                    overflow: hidden;
+                    border-radius: 9px;
+                    text-align: center;
+                  "
                 >
                   <img
+                    @mouseenter="moveIn(infoImage)"
+                    @mouseleave="moveOut(infoImage)"
                     @click="showInfoImage(getImageList(card), infoImage.url)"
                     v-lazy.container="infoImage.mediaUrl"
-                    style="max-width: 100%; border-radius: 15px"
+                    style="max-width: 100%; transition: transform 0.3s ease; border-radius: 9px"
                     alt=""
                     @load="imageLoaded(card)"
+                    :class="{ 'item-selected': infoImage && infoImage.enterFlag }"
                   />
                 </a-card-grid>
               </a-card>
@@ -319,16 +301,20 @@
               <a-card
                 :bodyStyle="{ padding: '0px' }"
                 class="my-transparent-card"
-                style="width: 100%; border: none; background: transparent"
+                style="width: 100%; overflow: hidden; border: none; background: transparent"
                 :bordered="false"
-                :hoverable="false"
+                :hoverable="true"
               >
                 <img
-                  @click="showTaskInfo(card)"
+                  @mouseenter="card.taskImage.enterFlag = true"
+                  @mouseleave="card.taskImage.enterFlag = false"
+                  @click="showInfoImage([card.taskImage.imageUrl], card.taskImage.imageUrl)"
                   v-lazy.container="card.taskImage.mediaImageUrl"
                   fallback=""
                   alt=""
+                  style="max-width: 100%; transition: transform 0.3s ease; border-radius: 9px"
                   @load="imageLoaded(card)"
+                  :class="{ 'item-selected': card.taskImage && card.taskImage.enterFlag }"
                 />
               </a-card>
             </div>
@@ -370,18 +356,6 @@
                   <Icon icon="ic:baseline-add-alarm" size="14" color="#EE9322" />
                 </a-radio-button>
               </a-tooltip>
-              <a-tooltip title="删除">
-                <a-popconfirm
-                  title="该操作将永久删除任务，是否确认删除?"
-                  ok-text="确认删除"
-                  cancel-text="取消"
-                  @confirm="deleteCard(card)"
-                >
-                  <a-radio-button value="c">
-                    <Icon icon="ic:baseline-delete-forever" size="14" color="#FF6969" />
-                  </a-radio-button>
-                </a-popconfirm>
-              </a-tooltip>
             </a-radio-group>
           </div>
 
@@ -392,7 +366,7 @@
             <div class="card-tags">
               <div class="custom-radio-group">
                 <a-button-group size="small" buttonStyle="solid">
-                  <a-tooltip
+                  <!-- <a-tooltip
                     :title="
                       card.privacyMode === 'Y' ? '点击公开图片' : '当前公开图片，点击将关闭公开'
                     "
@@ -406,8 +380,53 @@
                         <Icon icon="material-symbols:public" size="14" color="#8ECDDD" />
                       </span>
                     </a-button>
-                  </a-tooltip>
+                  </a-tooltip> -->
+                  <a-dropdown :placement="placement" arrow trigger="click">
+                    <a-button class="card-icon-button"><SvgIcon name="menu" size="14" /></a-button>
+                    <template #overlay>
+                      <a-menu>
+                        <a-menu-item
+                          key="1"
+                          v-if="card.state === 'SUCCESS'"
+                          @click="() => showTaskInfo(card)"
+                          ><Icon icon="streamline-emojis:television" />任务明细</a-menu-item
+                        >
+                        <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)"
+                          ><Icon icon="streamline-emojis:blossom" /> 添加标签</a-menu-item
+                        >
+                        <a-menu-item key="3" @click="() => showSampleView(card)"
+                          ><Icon icon="streamline-emojis:globe-showing-europe-africa" />
+                          添加到官方案例</a-menu-item
+                        >
+                        <a-menu-item key="4" @click="() => copyText(card.messageHash)"
+                          ><Icon icon="fluent-emoji-flat:id-button" color="grey" />
+                          复制任务ID</a-menu-item
+                        >
 
+                        <a-menu-item key="5" @click="() => copyText(card.prompt)"
+                          ><Icon icon="streamline-emojis:baseball" color="grey" />
+                          复制Prompt</a-menu-item
+                        >
+                        <a-menu-item key="6" @click="showUserSpaceTask(card)"
+                          ><Icon icon="streamline-emojis:helicopter" /> 添加到其他空间</a-menu-item
+                        >
+                        <a-popconfirm
+                          title="是否确认移除任务?"
+                          ok-text="确认删除"
+                          cancel-text="取消"
+                          @confirm="deleteCard(card)"
+                        >
+                          <a-menu-item key="7" @click="deleteSpaceCard(card, spaceId)">
+                            <Icon icon="streamline-emojis:recycling-symbol" color="red" />
+                            从该空间移除</a-menu-item
+                          >
+                        </a-popconfirm>
+                        <a-menu-item key="8" @click="() => getSeed(card.id, false)"
+                          ><Icon icon="streamline-emojis:rocket" /> 获取Seed</a-menu-item
+                        >
+                      </a-menu>
+                    </template>
+                  </a-dropdown>
                   <a-tooltip
                     v-if="card.prompt"
                     :overlayStyle="{ maxWidth: '500px' }"
@@ -435,19 +454,6 @@
                     <a-button class="card-icon-button">
                       <Icon icon="ic:baseline-add-alarm" size="14" color="#EE9322" />
                     </a-button>
-                  </a-tooltip>
-
-                  <a-tooltip title="删除">
-                    <a-popconfirm
-                      title="该操作将永久删除任务，是否确认删除?"
-                      ok-text="确认删除"
-                      cancel-text="取消"
-                      @confirm="deleteCard(card)"
-                    >
-                      <a-button class="card-icon-button">
-                        <Icon icon="ic:baseline-delete-forever" size="14" color="#FF6969" />
-                      </a-button>
-                    </a-popconfirm>
                   </a-tooltip>
 
                   <a-tooltip
@@ -716,10 +722,7 @@
 
         <template #overlay>
           <a-menu>
-            <a-menu-item
-              key="1"
-              v-if="userSetting.cardShow === 'MULTI' && card.state === 'SUCCESS'"
-              @click="() => showTaskInfo(card)"
+            <a-menu-item key="1" v-if="card.state === 'SUCCESS'" @click="() => showTaskInfo(card)"
               ><Icon icon="streamline-emojis:television" /> 任务明细</a-menu-item
             >
             <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)"
@@ -739,17 +742,7 @@
             <a-menu-item key="6" @click="showUserSpaceTask(card)"
               ><Icon icon="streamline-emojis:helicopter" /> 添加到其他空间</a-menu-item
             >
-            <a-popconfirm
-              title="该操作将永久删除任务，是否确认删除?"
-              ok-text="确认删除"
-              cancel-text="取消"
-              @confirm="deleteCard(card)"
-            >
-              <a-menu-item key="7" @click="deleteSpaceCard(card, spaceId)">
-                <Icon icon="streamline-emojis:recycling-symbol" color="red" />
-                从该空间移除</a-menu-item
-              >
-            </a-popconfirm>
+
             <a-menu-item key="8" @click="() => getSeed(card.id, false)"
               ><Icon icon="streamline-emojis:rocket" /> 获取Seed</a-menu-item
             >
@@ -1048,7 +1041,7 @@
     <div>
       <a-modal
         v-model:open="drawTagForm.viewFlag"
-        @ok="addDrawTaskTag()"
+        @ok="doAddDrawTaskTag()"
         :confirmLoading="drawTagForm.loading"
       >
         <template #title> <Icon icon="streamline-emojis:blossom" />添加标签 </template>
@@ -1075,7 +1068,13 @@
     </div>
 
     <!-- 查看明细  -->
-    <a-modal title="任务概况" v-model:open="infoData.viewFlag" style="top: 10px; min-width: 720px">
+    <a-modal
+      title="任务概况"
+      width="50%"
+      v-model:open="infoData.viewFlag"
+      style="top: 10px; min-width: 720px"
+      zIndex="999"
+    >
       <template #footer>
         <a-button key="submit" type="primary" :loading="loadingRef" @click="closeTaskInfo"
           >已知晓</a-button
@@ -1267,7 +1266,7 @@
               <template #label>
                 <div style="display: flex; flex-direction: row; justify-content: space-between">
                   <div><Icon icon="streamline-emojis:blossom" />任务标签 </div>
-                  <a-button size="small" @click="showDrawTaskTagModel(infoData.card)">
+                  <a-button size="small" @click="showDrawTaskTagModel(infoData)">
                     <a-span> <Icon icon="streamline-emojis:palm-tree" />添加标签 </a-span>
                   </a-button>
                 </div>
@@ -1329,7 +1328,7 @@
 
     <!-- 运行账号配置-->
     <div>
-      <a-modal v-model:open="accountForm.viewFlag" title="执行账号配置">
+      <a-modal v-model:open="accountViewForm.viewFlag" title="执行账号配置">
         <template #footer>
           <a-button type="primary" @click="closeAccountConfig">关闭窗口</a-button>
         </template>
@@ -1345,13 +1344,12 @@
                 style="width: 100%; height: 32px"
                 v-model:value="accountForm.useAccountId"
                 v-model="accountForm.useAccountId"
-                :size="accountForm.accountSelector.size"
-                :options="accountForm.accountSelector.options"
+                :size="accountViewForm.accountSelector.size"
+                :options="accountViewForm.accountSelector.options"
               />
             </a-form-item>
             <a-form-item label="执行模式">
               <a-select
-                @change="handleSetting('mode', accountForm.mode)"
                 v-model:value="accountForm.mode"
                 style="width: 100%; height: 32px"
                 placeholder="不选的话，默认休闲模式"
@@ -1366,6 +1364,45 @@
         </a-card>
       </a-modal>
     </div>
+    <!-- 添加到其他空间  -->
+    <div>
+      <a-modal
+        v-model:open="userSpaceTaskForm.viewFlag"
+        title="🎈添加到其他空间"
+        ok-text="立即执行"
+        @ok="addSpaceCard"
+        :confirmLoading="userSpaceTaskForm.loading"
+      >
+        <a-card>
+          <a-spin :spinning="userSpaceTaskForm.loading">
+            <a-form :model="userSpaceTaskForm" layout="vertical" ref="userSpaceTaskFormRef">
+              <a-row gutter="24">
+                <a-col :span="24">
+                  <a-form-item
+                    label="工作空间"
+                    :rules="[
+                      {
+                        required: true,
+                        message: '工作空间不能为空',
+                      },
+                    ]"
+                    name="spaceId"
+                  >
+                    <a-select
+                      @change="handleSpaceChange"
+                      v-model:value="userSpaceTaskForm.spaceId"
+                      style="width: 100%"
+                      placeholder="请选择导入空间"
+                      :options="userSpaceTaskForm.spaceOptions"
+                    />
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-form>
+          </a-spin>
+        </a-card>
+      </a-modal>
+    </div>
   </a-layout>
 </template>
 
@@ -1376,6 +1413,7 @@
   import VueLazyload from 'vue-lazyload';
   import { api as viewerApi } from 'v-viewer';
   import Icon from '/@/components/Icon/Icon.vue';
+  import { SvgIcon } from '/@/components/Icon';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
   import { addSpaceTask, removeSpaceTask, allUserSpace } from '/@/api/df/workSpace';
   import {
@@ -1406,13 +1444,15 @@
     splitInInfo,
     handleDownloadByUrl,
     handleDownloadByUrls,
+    stringToColor,
     generateTooltipText,
-  } from './tools';
+  } from '../mj/tools';
   import { Empty } from 'ant-design-vue';
-  import { accountInfoApi } from '../mj/accountInfo';
+  import { accountInfoApi, tagInfoApi } from '../mj/accountInfo';
 
   const {
     accountForm,
+    accountViewForm,
     initAccountList,
     initAccountInfo,
     doGetChannelsByGroup,
@@ -1472,7 +1512,8 @@
     loadTagList,
     onChangeLabel,
     onChangeSearchLabel,
-  } = jobTagApi();
+    initTag,
+  } = tagInfoApi();
 
   const { userSetting, setUseUpImage, setCardShow, setUsePersonNet, setTaskRefresh } =
     userSettingApi();
@@ -1506,12 +1547,17 @@
     upwardSpace,
     offsetHeightRef,
   );
-
+  const screenWidth = ref(window.innerWidth);
   onMounted(() => {
+    if (window.innerWidth > 1500 || window.innerHeight > 900) {
+      pagination.value.pageSizeOptions = ['30', '48', '60', '78'];
+      pagination.value.pageSize = 30;
+    }
+
     (window as any).varyRegionForm = varyRegionForm;
     initAccountList();
     onSearch(1);
-    loadTagList();
+    initTag();
   });
 
   // 监听来自 iframe 的消息
@@ -1540,24 +1586,6 @@
     showExampleViewFlag.value = true;
     console.log(exampleForm.value);
   };
-
-  function stringToColor(str) {
-    // Convert the string to a hash code
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    // Generate a color based on the hash
-    const color = '#' + (hash & 0x00ffffff).toString(16).toUpperCase();
-
-    // Check if the color is too light (close to white or gray)
-    const threshold = 0xbbbbbb; // You can adjust this threshold as needed
-    const isLightColor = hash < threshold;
-
-    // If it's too light, generate a new color
-    return isLightColor ? stringToColor(str + 'salt') : color;
-  }
 
   //下载
   const doDownload = async (card) => {
@@ -1637,12 +1665,10 @@
         const response = await allUserSpace({});
         console.log(response);
         // 使用 map 方法转换数组
-        const transformedList = response
-          .filter((item) => item.id !== spaceId.value)
-          .map((item) => ({
-            label: item.title,
-            value: item.id,
-          }));
+        const transformedList = response.map((item) => ({
+          label: item.title,
+          value: item.id,
+        }));
         // 如果您想在转换后的数组前面添加一个特定的对象，可以使用以下方法：
         const finalList = [...transformedList];
         userSpaceTaskForm.value.spaceOptions = finalList;
@@ -1654,6 +1680,7 @@
 
   //添加空间卡片
   const addSpaceCard = async () => {
+    console.log(11123);
     userSpaceTaskForm.value.loading = true;
     try {
       await userSpaceTaskFormRef.value.validate();
@@ -1673,11 +1700,76 @@
     }
   };
 
+  const moveIn = (imageInfo) => {
+    imageInfo.enterFlag = true;
+  };
+  const moveOut = (imageInfo) => {
+    imageInfo.enterFlag = false;
+  };
+
+  //添加标签
+  const doAddDrawTaskTag = async () => {
+    await addDrawTaskTag();
+    if (infoData && infoData.id && infoData.id === drawTagForm.value.drawTaskId) {
+      infoData.tagList.push(drawTagForm.value.tagName);
+    }
+  };
   /********************************** 账号配置 ************************************** */
 </script>
 
 <style scoped>
   /* 增加移动端样式 */
+  @media screen and (max-width: 3048px) {
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      flex: 1;
+      align-content: start;
+      padding: 5px;
+      overflow: auto;
+      gap: 7px;
+    }
+
+    .card {
+      min-width: 310px;
+      border-radius: 7%;
+    }
+  }
+
+  @media screen and (max-width: 2260px) {
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      flex: 1;
+      align-content: start;
+      padding: 5px;
+      overflow: auto;
+      gap: 7px;
+    }
+
+    .card {
+      min-width: 310px;
+      border-radius: 7%;
+    }
+  }
+
+  @media screen and (max-width: 1680px) {
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      flex: 1;
+      align-content: start;
+      padding: 5px;
+      overflow: auto;
+      gap: 7px;
+    }
+
+    .card {
+      min-width: 210px;
+      border-radius: 7%;
+    }
+  }
+
   @media screen and (max-width: 767px) {
     .search-row {
       display: flex;
@@ -1700,21 +1792,6 @@
     justify-content: space-between;
     height: 10vh;
     padding: 20px;
-  }
-
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-    flex: 1;
-    align-content: start;
-    padding: 5px;
-    overflow: auto;
-    gap: 7px;
-  }
-
-  .card {
-    min-width: 210px;
-    border-radius: 7%;
   }
 
   .card >>> img {
@@ -1906,7 +1983,6 @@
   .card-icon-button {
     display: flex;
     align-items: center;
-    height: 24px;
     padding: 0 7px;
   }
 
@@ -1928,5 +2004,9 @@
     border: none;
     background: transparent;
     box-shadow: none; /* 可能还需要禁用阴影 */
+  }
+
+  .item-selected {
+    transform: scale(1.1);
   }
 </style>

@@ -346,6 +346,8 @@
     loadAllData.value = false;
     //执行查询
     await handleLoadMore(500, true);
+    await handleLoadMore(500, false);
+    await handleLoadMore(500, false);
   };
 
   // 加载更多
