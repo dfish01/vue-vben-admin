@@ -365,7 +365,7 @@
               /{{
                 statisticsForm.formData.authUseInfo.totalRelaxTimes === null
                   ? ' 不限制'
-                  : statisticsForm.formData.authUseInfo.relaxTimes
+                  : statisticsForm.formData.authUseInfo.totalRelaxTimes
               }}
               <br />
               <!-- 成功次数:{{ statisticsForm.formData.authUseInfo.numSuccess }} -->

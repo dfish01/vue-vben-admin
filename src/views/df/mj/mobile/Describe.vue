@@ -130,10 +130,11 @@
   const formRef = ref();
   //页面高度处理
   const button = ref(null);
-  const substractSpaceRefs = ref([]);
+  const card = ref();
+  const substractSpaceRefs = ref([card]);
   const upwardSpace = computed(() => 1);
   //移动设备底部导航栏
-  const offsetHeightRef = ref(45);
+  const offsetHeightRef = ref(47);
   const subtractHeightRefs = ref([button]);
 
   // 使用hook
@@ -309,9 +310,7 @@
     right: 5px;
     bottom: 0;
     width: 100%;
-
-    /* background: #f0f0f0; */
-    height: 6vh;
+    height: 50px;
   }
 
   .description {
@@ -324,12 +323,7 @@
     bottom: 0;
     left: 0;
     width: 10%;
-    height: 10vh;
     text-align: left;
-  }
-
-  .form-container {
-    padding-bottom: 50px; /* 为固定在底部的按钮留出空间 */
   }
 
   /* you can make up upload button and sample style by using stylesheets */

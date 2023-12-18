@@ -150,7 +150,7 @@
   const substractSpaceRefs = ref([card]);
   const upwardSpace = computed(() => 1);
   //移动设备底部导航栏
-  const offsetHeightRef = ref(45);
+  const offsetHeightRef = ref(47);
   const subtractHeightRefs = ref([button]);
 
   // 使用hook
@@ -325,15 +325,11 @@
     right: 5px;
     bottom: 0;
     width: 100%;
-    height: 6vh;
+    height: 50px;
   }
 
   .description {
     /* 这里可以添加样式来改变操作说明的外观 */
-  }
-
-  .form-container {
-    padding-bottom: 50px; /* 为固定在底部的按钮留出空间 */
   }
 
   /* you can make up upload button and sample style by using stylesheets */

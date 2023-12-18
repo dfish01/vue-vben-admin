@@ -1369,7 +1369,6 @@
     modelData.aiInputText = textToImgForm.command;
   };
   const openAiPrompt = () => {
-    console.log(11111111111);
     modelData.isOpenAiPrompt = true;
   };
   const cancelModal = (name) => {
@@ -1452,7 +1451,7 @@
   const substractSpaceRefs = ref([card]);
   const upwardSpace = computed(() => 1);
   //移动设备底部导航栏
-  const offsetHeightRef = ref(45);
+  const offsetHeightRef = ref(47);
   const subtractHeightRefs = ref([button]);
 
   // 使用hook
@@ -1906,7 +1905,7 @@
     width: 100%;
 
     /* background: #f0f0f0; */
-    height: 6vh;
+    height: 50px;
   }
 
   .ar-item {

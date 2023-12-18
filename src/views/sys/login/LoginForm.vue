@@ -9,8 +9,8 @@
     @keypress.enter="handleLogin"
   >
     <FormItem class="enter-x">
-      <span style="font-size: 15px">托管地址：</span>
-      <a-dropdown trigger="click" @click="handleMenuClick">
+      <span style="font-size: 15px; font-weight: bold">托管地址：</span>
+      <a-dropdown trigger="click">
         <a class="ant-dropdown-link" @click.prevent>
           {{ customHostData.menuName }}
           <DownOutlined />
@@ -127,16 +127,7 @@
                     <a-select-option value="Https://">Https://</a-select-option>
                   </a-select>
                 </template>
-                <!-- <template #addonAfter>
-        <a-select v-model:value="value4" style="width: 80px">
-          <a-select-option value=".com">.com</a-select-option>
-          <a-select-option value=".jp">.jp</a-select-option>
-          <a-select-option value=".cn">.cn</a-select-option>
-          <a-select-option value=".org">.org</a-select-option>
-        </a-select>
-      </template> -->
               </a-input>
-
               <!-- <a-input v-model:value="customHostData.customHost" placeholder="输入托管地址" /> -->
             </a-form-item>
           </a-col>

@@ -1893,12 +1893,18 @@
       top: 0;
       max-width: 100%;
       margin: 0;
-      padding: 0;
+      padding-bottom: 0;
     }
 
     .ant-modal-content {
       display: flex;
       flex-direction: column;
+      height: calc(100vh);
+      overflow-y: auto; /* 添加垂直滚动条 */
+    }
+
+    .ant-modal-body {
+      flex: 1;
     }
   }
 </style>
