@@ -13,21 +13,36 @@ import {
   defineProps,
   defineExpose,
 } from 'vue';
-
+import { addTag, removeTaskTag } from '/@/api/df/drawTaskTag';
+import { genPromptList, genTagList } from '/@/api/df/dataCache';
 import { ListQueryParams, ListResultModel, AccountListItem } from '/@/api/df/model/accountModel';
 import { availableList, getChannelsByGroup } from '/@/api/df/account';
 import type { UploadFile } from 'ant-design-vue/es/upload/interface';
 import { message, UploadProps, Upload } from 'ant-design-vue';
 import { useRoute } from 'vue-router';
-import { useUserStore } from '/@/store/modules/user';
 import { useMessage } from '/@/hooks/web/useMessage';
-
-const userStore = useUserStore();
+import { getCustomCache, setCustomCache } from '/@/utils/custom';
+import { Persistent, BasicKeys } from '/@/utils/cache/persistent';
+import { MJ_TASK_ACCOUNT_KEY } from '/@/enums/cacheEnum';
 
 const { createMessage, createSuccessModal, createErrorModal, createInfoModal } = useMessage();
 
 let accountInstance: any | null = null;
+let tagInstance: any | null = null;
 export const loadingRef = ref(false);
+
+// 在你的代码中获取 accountForm 对象的引用
+const { accountForm } = accountInfoApi();
+
+// 使用 watch 监视 accountForm 对象的变化
+watch(
+  () => accountForm,
+  (newVal) => {
+    // 在这里执行你的方法
+    setCustomCache(MJ_TASK_ACCOUNT_KEY, newVal);
+  },
+  { deep: true }, // 使用 deep 选项以便深度监视对象内部属性的变化
+);
 
 //查询相关API
 export function accountInfoApi() {
@@ -36,17 +51,18 @@ export function accountInfoApi() {
   }
 
   const accountForm = reactive({
-    viewFlag: false,
-    loading: false,
     useAccountId: null as string | null | undefined,
     useAccountName: null as string | null | undefined,
     useChannelId: null as string | null | undefined,
-
+    useChannelName: null as string | null | undefined,
     mode: 'relax' as string | undefined,
-
     currentSpaceId: null,
     currentSpaceTitle: null,
+  });
 
+  const accountViewForm = reactive({
+    viewFlag: false,
+    loading: false,
     accountSelector: {
       size: 'default',
       options: [
@@ -59,52 +75,70 @@ export function accountInfoApi() {
       size: 'default',
       options: [{ label: '默认', value: '' }],
     },
+    spaceOptions: [{ label: '默认', value: '' }],
+    drawingSampleCategory: [],
   });
 
   const showAccountConfig = () => {
-    accountForm.viewFlag = true;
-    accountForm.loading = false;
+    accountViewForm.viewFlag = true;
+    accountViewForm.loading = false;
   };
   const closeAccountConfig = () => {
-    accountForm.viewFlag = false;
-    accountForm.loading = false;
+    accountViewForm.viewFlag = false;
+    accountViewForm.loading = false;
   };
 
   const initAccountInfo = async () => {
     //初始化偏好
-    const getPersonalSetting = userStore.getPersonalSetting;
+    console.log('初始化偏好');
+    const getPersonalSetting = getCustomCache(MJ_TASK_ACCOUNT_KEY);
     if (getPersonalSetting) {
       accountForm.mode = getPersonalSetting.mode;
-      if (getPersonalSetting.userAccountId === null || getPersonalSetting.userAccountId === '') {
+      accountForm.currentSpaceId = getPersonalSetting.currentSpaceId;
+      accountForm.currentSpaceTitle = getPersonalSetting.currentSpaceTitle;
+      accountForm.useAccountId = getPersonalSetting.useAccountId;
+      accountForm.useAccountName = getPersonalSetting.useAccountName;
+
+      if (accountViewForm.accountSelector.options.length === 1) {
+        await initAccountList();
+      }
+
+      if (getPersonalSetting.useAccountId === null || getPersonalSetting.useAccountId === '') {
         return;
       }
-      const isAvaliable = accountForm.accountSelector.options.some((obj) =>
-        obj.value.includes(getPersonalSetting.userAccountId as string),
+      const isAvaliable = accountViewForm.accountSelector.options.some((obj) =>
+        obj.value.includes(getPersonalSetting.useAccountId as string),
       );
-      if (isAvaliable && getPersonalSetting.userAccountId != '') {
-        accountForm.useAccountId = getPersonalSetting.userAccountId;
+      if (isAvaliable && getPersonalSetting.useAccountId !== '') {
+        accountForm.useAccountId = getPersonalSetting.useAccountId;
         //渲染频道下拉
-        await doGetChannelsByGroup(accountForm.useAccountId);
+        if (accountViewForm.channelSelector.options.length === 1) {
+          await doGetChannelsByGroup(accountForm.useAccountId);
+        }
+
         accountForm.useChannelId = getPersonalSetting.useChannelId;
+        accountForm.useChannelName = getPersonalSetting.useChannelName;
         console.log(getPersonalSetting.useChannelId);
-        const channelAvaliable = accountForm.channelSelector.options.some((obj) =>
+        const channelAvaliable = accountViewForm.channelSelector.options.some((obj) =>
           obj.value.includes(getPersonalSetting.useChannelId as string),
         );
         if (!channelAvaliable) {
           accountForm.useChannelId = null;
-          userStore.syncSetting({ userAccountId: null });
+          accountForm.useChannelName = null;
         }
       } else {
-        userStore.syncSetting({ userAccountId: null });
+        accountForm.useAccountId = null;
+        accountForm.useAccountName = null;
+        accountForm.useChannelId = null;
+        accountForm.useChannelName = null;
       }
     }
   };
-
   const doGetChannelsByGroup = async (id) => {
     if (!id) {
       return;
     }
-    accountForm.loading = true;
+    accountViewForm.loading = true;
     try {
       const response = await getChannelsByGroup({ id: id });
       // 使用 map 方法转换数组
@@ -113,29 +147,21 @@ export function accountInfoApi() {
         value: item.id,
       }));
       // 如果您想在转换后的数组前面添加一个特定的对象，可以使用以下方法：
-      const finalList = [...transformedList];
-      accountForm.channelSelector.options = finalList;
+      const finalList = [{ label: '默认频道', value: '' }, ...transformedList];
+      accountViewForm.channelSelector.options = finalList;
     } finally {
-      accountForm.loading = false;
+      accountViewForm.loading = false;
     }
   };
 
   const handleAccountSetting = async (value, option) => {
     accountForm.useAccountName = option.label;
-
-    const setting = {};
-    setting['userAccountId'] = value;
-    setting['userAccountName'] = option.label;
-    userStore.syncSetting(setting);
     accountForm.useChannelId = null;
-
     await doGetChannelsByGroup(value);
   };
 
-  const handleSetting = (key, value) => {
-    const setting = {};
-    setting[key] = value;
-    userStore.syncSetting(setting);
+  const handleChannelSetting = async (value, option) => {
+    accountForm.useChannelName = option.label;
   };
 
   const initAccountList = async () => {
@@ -152,19 +178,132 @@ export function accountInfoApi() {
 
     // 如果您想在转换后的数组前面添加一个特定的对象，可以使用以下方法：
     const finalList = [{ label: '默认账号', value: '' }, ...transformedList];
-    accountForm.accountSelector.options = finalList;
+    accountViewForm.accountSelector.options = finalList;
+  };
+
+  const doSetCustomCache = () => {
+    // 在这里添加 setCustomCache 的实现，根据你的需求
+    // 例如：setCustomCache(MJ_TASK_ACCOUNT_KEY, accountForm);
+    setCustomCache(MJ_TASK_ACCOUNT_KEY, accountForm);
   };
 
   const api = {
+    doSetCustomCache,
+    accountViewForm,
     accountForm,
     initAccountList,
     handleAccountSetting,
-    handleSetting,
+    handleChannelSetting,
     initAccountInfo,
     doGetChannelsByGroup,
     showAccountConfig,
     closeAccountConfig,
   };
   accountInstance = api;
+  return api;
+}
+
+//标签相关API
+export function tagInfoApi() {
+  if (tagInstance) {
+    return tagInstance;
+  }
+
+  const initTag = () => {
+    drawTagForm.value.drawTaskId = null;
+    drawTagForm.value.tagName = null;
+    drawTagForm.value.viewFlag = false;
+    drawTagForm.value.loading = false;
+    if (drawTagForm.value.tagNameOptions.length === 0) {
+      loadTagList();
+    }
+  };
+  /*************************添加标签*************************** */
+  const drawTagForm = ref({
+    drawTaskId: null,
+    tagName: null,
+    viewFlag: false,
+    loading: false,
+    tagNameOptions: [] as { value: string; label: string }[],
+    infoData: null,
+  });
+
+  const showDrawTaskTagModel = (card) => {
+    drawTagForm.value.drawTaskId = card.id;
+    drawTagForm.value.viewFlag = true;
+  };
+
+  const addDrawTaskTag = async () => {
+    drawTagForm.value.loading = true;
+    try {
+      await addTag({
+        drawTaskId: drawTagForm.value.drawTaskId,
+        tagName: drawTagForm.value.tagName,
+      });
+      drawTagForm.value.viewFlag = false;
+      console.log(11123);
+      // if (taskInfo && taskInfo.id && taskInfo.id === drawTagForm.value.drawTaskId) {
+      //   taskInfo.tagList.push(drawTagForm.value.tagName);
+      // }
+
+      //加载新的
+      const resp = await genTagList({});
+      const options = resp.map((item) => ({
+        value: item,
+        label: item,
+      }));
+      drawTagForm.value.tagNameOptions = options;
+    } finally {
+      drawTagForm.value.loading = false;
+    }
+  };
+
+  const removeDrawTaskTag = async (id, tagName) => {
+    loadingRef.value = true;
+    try {
+      await removeTaskTag({
+        drawTaskId: id,
+        tagName: tagName,
+      });
+    } finally {
+      loadingRef.value = false;
+    }
+  };
+
+  const loadTagList = async () => {
+    // if (drawTagForm.value.tagNameOptions.length > 0) {
+    //   return;
+    // }
+    //查询最近使用的tag
+    const resp = await genTagList({});
+    const options = resp.map((item) => ({
+      value: item,
+      label: item,
+    }));
+    drawTagForm.value.tagNameOptions = options;
+  };
+
+  const onChangeLabel = (selectedOption) => {
+    console.log(selectedOption);
+    // 获取选中项的值，不包含 @ 符号
+    drawTagForm.value.tagName = drawTagForm.value.tagName.replace(/@/g, '');
+  };
+  const onChangeSearchLabel = (selectedOption) => {
+    console.log(selectedOption);
+    // 获取选中项的值，不包含 @ 符号
+    drawTagForm.value.tagName = drawTagForm.value.tagName.replace(/@/g, '');
+  };
+  const api = {
+    // 响应式引用
+    initTag,
+    drawTagForm,
+    showDrawTaskTagModel,
+    addDrawTaskTag,
+    removeDrawTaskTag,
+    loadTagList,
+    onChangeLabel,
+    onChangeSearchLabel,
+  };
+  tagInstance = api;
   return api;
 }

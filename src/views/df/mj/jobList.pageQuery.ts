@@ -2,7 +2,6 @@ import { SvgIcon } from '/@/components/Icon';
 
 import {
   ref,
-  onMounted,
   onUnmounted,
   onBeforeUnmount,
   computed,
@@ -54,6 +53,7 @@ import account from 'mock/demo/account';
 
 const {
   accountForm,
+  accountViewForm,
   initAccountList,
   initAccountInfo,
   doGetChannelsByGroup,
@@ -65,7 +65,7 @@ const { createMessage, createSuccessModal, createErrorModal, createInfoModal } =
 let jobListQueryApiInstance: any | null = null;
 let jobOptionApiInstance: any | null = null;
 let userSettingApiInstance: any | null = null;
-let jobTagApiInstance: any | null = null;
+const jobTagApiInstance: any | null = null;
 let lightBoxApiInstance: any | null = null;
 let exampleApiInstance: any | null = null;
 export const loadingRef = ref(false);
@@ -77,10 +77,15 @@ export function exampleApi() {
   }
   //初始化类目
   const drawingSampleCategory = async () => {
-    return await listCategory({});
+    if (accountViewForm.drawingSampleCategory.length > 0) {
+      return accountViewForm.drawingSampleCategory;
+    }
+    accountViewForm.drawingSampleCategory = await listCategory({});
+    return accountViewForm.drawingSampleCategory;
   };
   const doAddDrawingSample = async (params) => {
     await addDrawingSample(params);
+    accountViewForm.drawingSampleCategory = await listCategory({});
   };
 
   const api = {
@@ -757,100 +762,6 @@ export function jobOptionApi() {
   return api;
 }
 
-export function jobTagApi() {
-  if (jobTagApiInstance) {
-    return jobTagApiInstance;
-  }
-
-  /*************************添加标签*************************** */
-  const drawTagForm = ref({
-    drawTaskId: '',
-    tagName: '',
-    viewFlag: false,
-    loading: false,
-    tagNameOptions: [] as { value: string; label: string }[],
-  });
-
-  const showDrawTaskTagModel = (card) => {
-    drawTagForm.value.drawTaskId = card.id;
-    drawTagForm.value.viewFlag = true;
-    loadTagList();
-  };
-
-  const addDrawTaskTag = async () => {
-    drawTagForm.value.loading = true;
-    try {
-      await addTag({
-        drawTaskId: drawTagForm.value.drawTaskId,
-        tagName: drawTagForm.value.tagName,
-      });
-      if (
-        jobListQueryApiInstance.infoData.id &&
-        jobListQueryApiInstance.infoData.id === drawTagForm.value.drawTaskId
-      ) {
-        jobListQueryApiInstance.infoData.tagList.push(drawTagForm.value.tagName);
-      }
-      drawTagForm.value.viewFlag = false;
-    } finally {
-      drawTagForm.value.loading = false;
-    }
-  };
-
-  const removeDrawTaskTag = async (id, tagName) => {
-    loadingRef.value = true;
-    try {
-      await removeTaskTag({
-        drawTaskId: id,
-        tagName: tagName,
-      });
-      if (jobListQueryApiInstance.infoData.id && jobListQueryApiInstance.infoData.id === id) {
-        jobListQueryApiInstance.infoData.tagList = jobListQueryApiInstance.infoData.tagList.filter(
-          (element) => element !== tagName,
-        );
-      }
-    } finally {
-      loadingRef.value = false;
-    }
-  };
-
-  const loadTagList = async () => {
-    //查询最近使用的tag
-    const resp = await genTagList({});
-    const options = resp.map((item) => ({
-      value: item,
-      label: item,
-    }));
-    drawTagForm.value.tagNameOptions = options;
-  };
-
-  const onChangeLabel = (selectedOption) => {
-    console.log(selectedOption);
-    // 获取选中项的值，不包含 @ 符号
-    drawTagForm.value.tagName = drawTagForm.value.tagName.replace(/@/g, '');
-  };
-  const onChangeSearchLabel = (selectedOption) => {
-    console.log(selectedOption);
-    // 获取选中项的值，不包含 @ 符号
-    jobListQueryApi().searchForm.value.tagName = jobListQueryApi().searchForm.value.tagName.replace(
-      /@/g,
-      '',
-    );
-  };
-  const api = {
-    // 响应式引用
-    drawTagForm,
-
-    showDrawTaskTagModel,
-    addDrawTaskTag,
-    removeDrawTaskTag,
-    loadTagList,
-    onChangeLabel,
-    onChangeSearchLabel,
-  };
-  jobTagApiInstance = api;
-  return api;
-}
-
 /*********************************** 基础配置 ******************************** */
 export function userSettingApi() {
   if (userSettingApiInstance) {
@@ -860,7 +771,7 @@ export function userSettingApi() {
     useUpImage: false,
     usePersonNet: false,
     taskRefresh: true,
-    cardShow: 'SINGLE',
+    cardShow: 'MULTI',
   });
 
   const setCardShow = (): void => {

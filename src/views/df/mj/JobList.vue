@@ -341,12 +341,15 @@
                 <a-card-grid
                   v-for="infoImage in card.taskImage.infoImageList"
                   :key="infoImage.url"
+                  :bordered="false"
+                  :hoverable="false"
                   style="
                     position: relative;
-                    width: 49%;
-                    margin: 1px;
+                    width: 50%;
+                    margin: 0;
                     padding: 0;
-                    border-radius: 15px;
+                    overflow: hidden;
+                    border-radius: 9px;
                     text-align: center;
                   "
                 >
@@ -366,11 +369,14 @@
                     />
                   </div> -->
                   <img
+                    @mouseenter="moveIn(infoImage)"
+                    @mouseleave="moveOut(infoImage)"
                     @click="showInfoImage(getImageList(card), infoImage.url)"
                     v-lazy.container="infoImage.mediaUrl"
-                    style="max-width: 100%; border-radius: 15px"
+                    style="max-width: 100%; transition: transform 0.3s ease; border-radius: 9px"
                     alt=""
                     @load="imageLoaded(infoImage)"
+                    :class="{ 'item-selected': infoImage && infoImage.enterFlag }"
                   />
                 </a-card-grid>
               </a-card>
@@ -384,14 +390,25 @@
                 ><a-card-grid
                   v-for="infoImage in card.taskImage.infoImageList"
                   :key="infoImage.url"
-                  style="width: 100%; padding: 0; border-radius: 15px; text-align: center"
+                  :bordered="false"
+                  :hoverable="false"
+                  style="
+                    width: 100%;
+                    padding: 0;
+                    overflow: hidden;
+                    border-radius: 9px;
+                    text-align: center;
+                  "
                 >
                   <img
+                    @mouseenter="moveIn(infoImage)"
+                    @mouseleave="moveOut(infoImage)"
                     @click="showInfoImage(getImageList(card), infoImage.url)"
                     v-lazy.container="infoImage.mediaUrl"
-                    style="max-width: 100%; border-radius: 15px"
+                    style="max-width: 100%; transition: transform 0.3s ease; border-radius: 9px"
                     alt=""
                     @load="imageLoaded(card)"
+                    :class="{ 'item-selected': infoImage && infoImage.enterFlag }"
                   />
                 </a-card-grid>
               </a-card>
@@ -400,16 +417,20 @@
               <a-card
                 :bodyStyle="{ padding: '0px' }"
                 class="my-transparent-card"
-                style="width: 100%; border: none; background: transparent"
+                style="width: 100%; overflow: hidden; border: none; background: transparent"
                 :bordered="false"
-                :hoverable="false"
+                :hoverable="true"
               >
                 <img
-                  @click="showTaskInfo(card)"
+                  @mouseenter="card.taskImage.enterFlag = true"
+                  @mouseleave="card.taskImage.enterFlag = false"
+                  @click="showInfoImage([card.taskImage.imageUrl], card.taskImage.imageUrl)"
                   v-lazy.container="card.taskImage.mediaImageUrl"
                   fallback=""
                   alt=""
+                  style="max-width: 100%; transition: transform 0.3s ease; border-radius: 9px"
                   @load="imageLoaded(card)"
+                  :class="{ 'item-selected': card.taskImage && card.taskImage.enterFlag }"
                 />
               </a-card>
             </div>
@@ -465,7 +486,7 @@
               </a-tooltip>
               <a-tooltip title="删除">
                 <a-popconfirm
-                  title="该操作将永久删除任务，是否确认删除?"
+                  title="是否确认移除任务?"
                   ok-text="确认删除"
                   cancel-text="取消"
                   @confirm="deleteCard(card)"
@@ -485,7 +506,7 @@
             <div class="card-tags">
               <div class="custom-radio-group">
                 <a-button-group size="small" buttonStyle="solid">
-                  <a-tooltip
+                  <!-- <a-tooltip
                     :title="
                       card.privacyMode === 'Y' ? '点击公开图片' : '当前公开图片，点击将关闭公开'
                     "
@@ -499,8 +520,53 @@
                         <Icon icon="material-symbols:public" size="14" color="#8ECDDD" />
                       </span>
                     </a-button>
-                  </a-tooltip>
+                  </a-tooltip> -->
+                  <a-dropdown :placement="placement" arrow trigger="click">
+                    <a-button class="card-icon-button"><SvgIcon name="menu" size="14" /></a-button>
+                    <template #overlay>
+                      <a-menu>
+                        <a-menu-item
+                          key="1"
+                          v-if="card.state === 'SUCCESS'"
+                          @click="() => showTaskInfo(card)"
+                          ><Icon icon="streamline-emojis:television" />任务明细</a-menu-item
+                        >
+                        <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)"
+                          ><Icon icon="streamline-emojis:blossom" /> 添加标签</a-menu-item
+                        >
+                        <a-menu-item key="3" @click="() => showSampleView(card)"
+                          ><Icon icon="streamline-emojis:globe-showing-europe-africa" />
+                          添加到官方案例</a-menu-item
+                        >
+                        <a-menu-item key="4" @click="() => copyText(card.messageHash)"
+                          ><Icon icon="fluent-emoji-flat:id-button" color="grey" />
+                          复制任务ID</a-menu-item
+                        >
 
+                        <a-menu-item key="5" @click="() => copyText(card.prompt)"
+                          ><Icon icon="streamline-emojis:baseball" color="grey" />
+                          复制Prompt</a-menu-item
+                        >
+                        <a-menu-item key="6" @click="showUserSpaceTask(card)"
+                          ><Icon icon="streamline-emojis:helicopter" /> 添加到其他空间</a-menu-item
+                        >
+                        <a-popconfirm
+                          title="是否确认移除任务?"
+                          ok-text="确认删除"
+                          cancel-text="取消"
+                          @confirm="deleteCard(card)"
+                        >
+                          <a-menu-item key="7" @click="deleteSpaceCard(card, spaceId)">
+                            <Icon icon="streamline-emojis:recycling-symbol" color="red" />
+                            从该空间移除</a-menu-item
+                          >
+                        </a-popconfirm>
+                        <a-menu-item key="8" @click="() => getSeed(card.id, false)"
+                          ><Icon icon="streamline-emojis:rocket" /> 获取Seed</a-menu-item
+                        >
+                      </a-menu>
+                    </template>
+                  </a-dropdown>
                   <a-tooltip
                     v-if="card.prompt"
                     :overlayStyle="{ maxWidth: '500px' }"
@@ -567,7 +633,7 @@
                     </a-popover> -->
 
                     <a-popconfirm
-                      title="该操作将永久删除任务，是否确认删除?"
+                      title="是否确认移除任务?"
                       ok-text="确认删除"
                       cancel-text="取消"
                       @confirm="deleteCard(card)"
@@ -604,7 +670,7 @@
               </div>
             </div>
             <div class="card-date-actions">
-              <a-button-group style="border-radius: 2px">
+              <a-button-group>
                 <div>
                   <div
                     v-if="
@@ -845,10 +911,7 @@
 
         <template #overlay>
           <a-menu>
-            <a-menu-item
-              key="1"
-              v-if="userSetting.cardShow === 'MULTI' && card.state === 'SUCCESS'"
-              @click="() => showTaskInfo(card)"
+            <a-menu-item key="1" v-if="card.state === 'SUCCESS'" @click="() => showTaskInfo(card)"
               ><Icon icon="streamline-emojis:television" />任务明细</a-menu-item
             >
             <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)"
@@ -869,7 +932,7 @@
               ><Icon icon="streamline-emojis:helicopter" /> 添加到其他空间</a-menu-item
             >
             <a-popconfirm
-              title="该操作将移除任务，是否确认?"
+              title="是否确认移除任务?"
               ok-text="确认删除"
               cancel-text="取消"
               @confirm="deleteCard(card)"
@@ -1176,7 +1239,7 @@
         <a-button
           key="submit"
           type="primary"
-          @click="addDrawTaskTag()"
+          @click="doAddDrawTaskTag()"
           :loading="drawTagForm.loading"
           >添加标签</a-button
         >
@@ -1243,7 +1306,13 @@
   </div>
 
   <!-- 查看明细  -->
-  <a-modal title="任务概况" v-model:open="infoData.viewFlag" style="top: 10px; min-width: 720px">
+  <a-modal
+    title="任务概况"
+    v-model:open="infoData.viewFlag"
+    width="50%"
+    class="task-info"
+    zIndex="999"
+  >
     <template #footer>
       <a-button key="submit" type="primary" :loading="loadingRef" @click="closeTaskInfo"
         >已知晓</a-button
@@ -1578,14 +1647,16 @@
     splitPrompt,
     splitInInfo,
     handleDownloadByUrl,
+    stringToColor,
     generateTooltipText,
   } from './tools';
   import { Empty, message } from 'ant-design-vue';
   import { info } from 'console';
-  import { accountInfoApi } from './accountInfo';
+  import { accountInfoApi, tagInfoApi } from './accountInfo';
 
   const {
     accountForm,
+    accountViewForm,
     initAccountList,
     initAccountInfo,
     doGetChannelsByGroup,
@@ -1645,7 +1716,7 @@
     loadTagList,
     onChangeLabel,
     onChangeSearchLabel,
-  } = jobTagApi();
+  } = tagInfoApi();
 
   const { userSetting, setUseUpImage, setUsePersonNet, setTaskRefresh, setCardShow } =
     userSettingApi();
@@ -1725,6 +1796,10 @@
   };
 
   onMounted(() => {
+    if (window.innerWidth > 1500 || window.innerHeight > 900) {
+      pagination.value.pageSizeOptions = ['30', '48', '60', '78'];
+      pagination.value.pageSize = 30;
+    }
     window.addEventListener('message', handleMessage, false);
   });
 
@@ -1842,36 +1917,22 @@
   const showSampleView = (card) => {
     exampleForm.value.drawTaskId = card.id;
     showExampleViewFlag.value = true;
-    console.log(exampleForm.value);
   };
   onMounted(async () => {
-    const response = await drawingSampleCategory();
-    const transformedList = response.map((item) => ({
-      label: item.name,
-      value: item.code,
-    }));
+    if (accountViewForm.drawingSampleCategory.length === 0) {
+      const response = await drawingSampleCategory();
+      const transformedList = response.map((item) => ({
+        label: item.name,
+        value: item.code,
+      }));
 
-    const finalList = [...transformedList];
-    exampleForm.value.drawingSampleCategory = finalList;
-  });
-
-  function stringToColor(str) {
-    // Convert the string to a hash code
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      const finalList = [...transformedList];
+      exampleForm.value.drawingSampleCategory = finalList;
+      accountViewForm.drawingSampleCategory = finalList;
+    } else {
+      exampleForm.value.drawingSampleCategory = accountViewForm.drawingSampleCategory;
     }
-
-    // Generate a color based on the hash
-    const color = '#' + (hash & 0x00ffffff).toString(16).toUpperCase();
-
-    // Check if the color is too light (close to white or gray)
-    const threshold = 0xbbbbbb; // You can adjust this threshold as needed
-    const isLightColor = hash < threshold;
-
-    // If it's too light, generate a new color
-    return isLightColor ? stringToColor(str + 'salt') : color;
-  }
+  });
 
   /*************************************** 相关包装方法 ********************************************* */
 
@@ -1913,21 +1974,88 @@
     viewerApi({ images: imageList });
   }
 
+  const moveIn = (imageInfo) => {
+    imageInfo.enterFlag = true;
+  };
+  const moveOut = (imageInfo) => {
+    imageInfo.enterFlag = false;
+  };
+  //添加标签
+  const doAddDrawTaskTag = async () => {
+    await addDrawTaskTag();
+    if (infoData && infoData.id && infoData.id === drawTagForm.value.drawTaskId) {
+      infoData.tagList.push(drawTagForm.value.tagName);
+    }
+  };
   // 导出此方法以便外部访问
   defineExpose({ onSearch });
 </script>
 
 <style scoped>
   /* 增加移动端样式 */
-  @media screen and (max-width: 767px) {
-    .search-row {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
+  @media screen and (max-width: 3048px) {
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      flex: 1;
+      align-content: start;
+      padding: 5px;
+      overflow: auto;
+      gap: 7px;
     }
 
-    .search-input {
-      margin-top: 10px;
+    .card {
+      min-width: 310px;
+      border-radius: 7%;
+    }
+
+    .task-info {
+      top: 10px;
+      width: 1280px;
+    }
+  }
+
+  @media screen and (max-width: 2260px) {
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      flex: 1;
+      align-content: start;
+      padding: 5px;
+      overflow: auto;
+      gap: 7px;
+    }
+
+    .card {
+      min-width: 310px;
+      border-radius: 7%;
+    }
+
+    .task-info {
+      top: 10px;
+      width: 980px;
+    }
+  }
+
+  @media screen and (max-width: 1680px) {
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      flex: 1;
+      align-content: start;
+      padding: 5px;
+      overflow: auto;
+      gap: 7px;
+    }
+
+    .card {
+      min-width: 210px;
+      border-radius: 7%;
+    }
+
+    .task-info {
+      top: 10px;
+      width: 720px;
     }
   }
 
@@ -2159,9 +2287,6 @@
   }
 
   .card-icon-button {
-    display: flex;
-    align-items: center;
-    height: 24px;
     padding: 0 7px;
   }
 
@@ -2185,5 +2310,9 @@
     border: none;
     background: transparent;
     box-shadow: none; /* 可能还需要禁用阴影 */
+  }
+
+  .item-selected {
+    transform: scale(1.1);
   }
 </style>

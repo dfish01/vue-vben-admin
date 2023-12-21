@@ -5,6 +5,7 @@ import type { RouteLocationNormalized } from 'vue-router';
 import { createLocalStorage, createSessionStorage } from '/@/utils/cache';
 import { Memory } from './memory';
 import {
+  MJ_TASK_ACCOUNT_KEY,
   CUSTOM_HOST_KEY,
   TOKEN_KEY,
   USER_INFO_KEY,
@@ -21,6 +22,7 @@ import { toRaw } from 'vue';
 import { pick, omit } from 'lodash-es';
 
 interface BasicStore {
+  [MJ_TASK_ACCOUNT_KEY]: string | number | null | undefined;
   [CUSTOM_HOST_KEY]: string | number | null | undefined;
   [TOKEN_KEY]: string | number | null | undefined;
   [USER_INFO_KEY]: UserInfo;

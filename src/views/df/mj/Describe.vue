@@ -43,8 +43,8 @@
             style="width: 100%; height: 32px"
             placeholder="随机选取账号，优先默认"
             v-model:value="accountForm.useAccountId"
-            :size="accountForm.accountSelector.size"
-            :options="accountForm.accountSelector.options"
+            :size="accountViewForm.accountSelector.size"
+            :options="accountViewForm.accountSelector.options"
           />
         </a-col>
       </a-row>
@@ -60,11 +60,11 @@
         <a-col span="18">
           <a-select
             style="width: 100%"
-            @change="handleSetting('useChannelId', accountForm.useChannelId)"
+            @change="handleChannelSetting"
             placeholder="请选择ChannelId"
             v-model:value="accountForm.useChannelId"
-            :size="accountForm.accountSelector.size"
-            :options="accountForm.channelSelector.options"
+            :size="accountViewForm.accountSelector.size"
+            :options="accountViewForm.channelSelector.options"
           />
         </a-col>
       </a-row>
@@ -76,11 +76,7 @@
           ></a-tooltip>
         </a-col>
         <a-col span="18">
-          <a-select
-            @change="handleSetting('mode', accountForm.mode)"
-            v-model:value="accountForm.mode"
-            style="width: 100%; height: 32px"
-          >
+          <a-select v-model:value="accountForm.mode" style="width: 100%; height: 32px">
             <!-- <a-select-option value="">不设置</a-select-option> -->
             <a-select-option value="relax">休闲模式</a-select-option>
             <a-select-option value="fast">快速模式</a-select-option>
@@ -129,10 +125,12 @@
 
   const {
     accountForm,
+    accountViewForm,
     initAccountList,
     initAccountInfo,
     doGetChannelsByGroup,
     handleAccountSetting,
+    handleChannelSetting,
     handleSetting,
   } = accountInfoApi();
 

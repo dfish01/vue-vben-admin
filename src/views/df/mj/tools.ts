@@ -136,3 +136,43 @@ export const generateTooltipText = (card) => {
 
   return textArray;
 };
+
+export const stringToColor = (str) => {
+  if (str === null) {
+    return;
+  }
+  // Convert the string to a hash code
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  // Specify a range of colors
+  const colorRange = [
+    '#1B9C85',
+    '#FFE194',
+    '#ECCDB4',
+    '#7743DB',
+    '#D2001A',
+    '#F86F03',
+    '#CDE990',
+    '#AACB73',
+    '#92B4EC',
+    '#05595B',
+    '#FFB72B',
+    '#AEE6E6',
+    '#EA907A',
+    '#A0C334',
+    '#E5D429',
+    '#78B7BB',
+    '#09A599',
+    '#B4BB72',
+    '#F7C873',
+    '#EB89B5',
+  ];
+
+  // Use modulo to get an index within the range
+  const index = Math.abs(hash) % colorRange.length;
+
+  return colorRange[index];
+};

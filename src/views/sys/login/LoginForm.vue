@@ -156,7 +156,7 @@
   import { LoginStateEnum, useLoginState, useFormRules, useFormValid } from './useLogin';
   import { useDesign } from '/@/hooks/web/useDesign';
   //import { onKeyStroke } from '@vueuse/core';
-  import { getCustomHost, setCustomHost } from '/@/utils/custom';
+  import { getCustomHost, setCustomCache } from '/@/utils/custom';
   import { CacheTypeEnum, CUSTOM_HOST_KEY } from '/@/enums/cacheEnum';
 
   const ACol = Col;
@@ -199,12 +199,12 @@
   async function handleLogin() {
     //设置托管地址
     // if (formData.customHost === '自绘记录' || formData.customHost === '') {
-    //   setCustomHost(CUSTOM_HOST_KEY, null);
+    //   setCustomCache(CUSTOM_HOST_KEY, null);
     // } else {
     //   if (!isValidDomainWithPrefix(formData.customHost)) {
     //     message.error('请输入正确的托管地址~');
     //   }
-    //   setCustomHost(CUSTOM_HOST_KEY, formData.customHost);
+    //   setCustomCache(CUSTOM_HOST_KEY, formData.customHost);
     // }
     const data = await validForm();
     if (!data) return;
@@ -237,7 +237,7 @@
     console.log(`Click on item ${key}`);
     if (key === '1') {
       customHostData.menuName = '自绘记录';
-      setCustomHost(CUSTOM_HOST_KEY, null);
+      setCustomCache(CUSTOM_HOST_KEY, null);
     } else {
       customHostData.menuName = '自定义托管';
       customHostData.viewFlag = true;
@@ -250,7 +250,7 @@
       return;
     }
     //设置托管地址
-    setCustomHost(CUSTOM_HOST_KEY, customHostData.ssl + customHostData.customHost);
+    setCustomCache(CUSTOM_HOST_KEY, customHostData.ssl + customHostData.customHost);
     customHostData.menuName = customHostData.customHost;
     customHostData.viewFlag = false;
   };
@@ -258,7 +258,7 @@
   const closeCustomHost = () => {
     if (!isValidDomainWithPort(customHostData.customHost)) {
       customHostData.menuName = '自绘记录';
-      setCustomHost(CUSTOM_HOST_KEY, null);
+      setCustomCache(CUSTOM_HOST_KEY, null);
     }
     customHostData.viewFlag = false;
   };

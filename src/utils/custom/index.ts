@@ -6,20 +6,21 @@ const { permissionCacheType } = projectSetting;
 const isLocal = permissionCacheType === CacheTypeEnum.LOCAL;
 
 export function getCustomHost() {
-  return getCustomHostCache(CUSTOM_HOST_KEY);
+  return getCustomCache(CUSTOM_HOST_KEY);
 }
 
-export function getCustomHostCache<T>(key: BasicKeys) {
+export function getCustomCache<T>(key: BasicKeys) {
   const fn = isLocal ? Persistent.getLocal : Persistent.getSession;
   return fn(key) as T;
 }
 
-export function setCustomHost(key: BasicKeys, value) {
+export function setCustomCache(key: BasicKeys, value) {
+  console.log('key:' + key + '   value:' + JSON.stringify(value));
   const fn = isLocal ? Persistent.setLocal : Persistent.setSession;
   return fn(key, value, true);
 }
 
-export function clearCustomHostCache(immediate = true) {
+export function clearCustomCache(immediate = true) {
   const fn = isLocal ? Persistent.clearLocal : Persistent.clearSession;
   return fn(immediate);
 }

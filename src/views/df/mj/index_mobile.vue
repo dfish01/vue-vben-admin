@@ -26,9 +26,7 @@
                     <span style="margin-left: 5px; font-size: 16px; font-weight: bold">
                       AI工作区 -
                     </span>
-                    <span>
-                      {{ currentSpaceTitle }}
-                    </span>
+                    <span> {{ accountForm.currentSpaceTitle }}</span>
                   </div>
                   <div style="display: flex; gap: 5px">
                     <a-button-group>
@@ -274,21 +272,45 @@
   import { notification } from 'ant-design-vue';
   import type { NotificationPlacement } from 'ant-design-vue';
   import { accountInfoApi } from './accountInfo';
+  import { spaceInfoApi, systemInfoApi } from './index';
 
   const {
     accountForm,
+    accountViewForm,
     initAccountList,
     initAccountInfo,
     doGetChannelsByGroup,
     handleAccountSetting,
     handleSetting,
   } = accountInfoApi();
+  const {
+    tableData,
+    isShowWorkSpace,
+    isShowUserSpaceSave,
+    userSpaceFormRef,
+    compState,
+    doSetTop,
+    querySpace,
+    doGenCode,
+    userSpaceForm,
+    showWorkerSpace,
+    closeWorkSpace,
+    selectSpace,
+    addUserSpace,
+    onSubmitUserSpace,
+    deleteHandle,
+  } = spaceInfoApi();
+  const {
+    systemInfoForm,
+    viewForm,
+    loadSystemInfoConfig,
+    openCommunicateView,
+    closeCommunicateView,
+    handleImageLoad,
+    openTutorial,
+  } = systemInfoApi();
 
   // 使用 ref 包装，以确保 computed 可以正确监听变化
-  const currentSpaceTitle = ref(null);
-
-  const userStore = useUserStore();
-
   const route = useRoute();
   const activeTab = ref(route.query.activeTab || 'TextToImageForm');
   const go = useGo();
@@ -316,184 +338,24 @@
     }
   };
 
-  //=====================================工作空间相关====================================
-  const compState = reactive({
-    absolute: true,
-    loading: false,
-    tip: '加载中...',
+  onMounted(async () => {
+    await initAccountInfo();
+    if (tableData.value.length > 1) {
+      return;
+    }
+    await querySpace();
+    if (accountForm.currentSpaceId === null) {
+      const item = tableData.value[0];
+      accountForm.currentSpaceId = item.id;
+      accountForm.currentSpaceTitle = item.title;
+    }
+    loadSystemInfoConfig();
   });
-
-  const isShowWorkSpace = ref(false);
-  const isShowUserSpaceSave = ref(false);
-  const userSpaceFormRef = ref();
-  const userSpaceForm = reactive<WorkSpaceSaveReq>({
-    id: null,
-    title: '',
-    remark: '',
-  });
-
-  // 主table 数据
-  const tableData = ref<WorkSpaceListResp[]>([
-    // 更多数据...
-  ]);
-  //显示工作空间
-  const showWorkerSpace = () => {
-    isShowWorkSpace.value = true;
-    compState.loading = false;
-  };
-
-  const closeWorkSpace = () => {
-    isShowWorkSpace.value = false;
-    compState.loading = false;
-  };
 
   const showJobList = () => {
     // go('/jobList/index/' + currentSpace.id + '/' + currentSpace.title);
     // go('/jobList/index?spaceId=' + currentSpace.id + '&spaceTitle=' + currentSpace.title);
     go('/jobList/index');
-  };
-
-  //工作空间列表
-  const querySpace = async () => {
-    compState.loading = true;
-    try {
-      const response = await allUserSpace({});
-      console.log(response);
-      tableData.value = response;
-    } finally {
-      compState.loading = false;
-    }
-  };
-
-  const selectSpace = async (item) => {
-    accountForm.currentSpaceId = item.id;
-    accountForm.currentSpaceTitle = item.title;
-    isShowWorkSpace.value = false;
-    currentSpaceTitle.value = item.title;
-    // console.log('selectSpace', accountForm.currentSpaceTitle);
-  };
-
-  onMounted(async () => {
-    await querySpace();
-    if (accountForm.currentSpaceId) {
-      currentSpaceTitle.value = accountForm.currentSpaceTitle;
-    } else {
-      const item = tableData.value[0];
-      accountForm.currentSpaceId = item.id;
-      accountForm.currentSpaceTitle = item.title;
-      currentSpaceTitle.value = item.title;
-    }
-    loadSystemInfoConfig();
-  });
-
-  const addUserSpace = (item) => {
-    if (item) {
-      for (let key in userSpaceForm) {
-        if (item[key] !== undefined) {
-          userSpaceForm[key] = item[key];
-        }
-      }
-    } else {
-      userSpaceForm.id = null;
-      userSpaceForm.title = '';
-      userSpaceForm.remark = '';
-    }
-    isShowUserSpaceSave.value = true;
-  };
-
-  const onSubmitUserSpace = async () => {
-    try {
-      compState.loading = true;
-      await userSpaceFormRef.value.validate();
-      console.log('Form is valid, submitting...');
-      await saveUserSpace(userSpaceForm);
-      isShowUserSpaceSave.value = false;
-      querySpace();
-    } catch (error) {
-      console.log('Form validation failed:', error);
-    } finally {
-      compState.loading = false;
-    }
-  };
-  const deleteHandle = async (id) => {
-    compState.loading = true;
-    console.log('Form is valid, submitting...');
-    try {
-      await deleteSpace({ id });
-      querySpace();
-    } finally {
-      compState.loading = false;
-    }
-  };
-
-  const doSetTop = async (record) => {
-    compState.loading = true;
-    try {
-      await setTop({ id: record.id });
-      querySpace();
-    } finally {
-      compState.loading = false;
-    }
-  };
-
-  //显示工作空间
-  const doGenCode = async (record, placement: NotificationPlacement) => {
-    const result = await genCode({ id: record.id });
-    copyText(result);
-    notification.open({
-      message: '【' + result + '】空间码生成成功！已复制到剪切板~',
-      description: '导入的空间编码在5分钟内有效，请及时使用~',
-      placement,
-    });
-  };
-
-  /****************************** 交流群 ******************************** */
-  const systemInfoForm = ref({
-    communicateResp: {
-      wchatImage: null,
-      qqGroupList: [] as string[],
-    },
-    tutorialInfo: null,
-  });
-
-  const viewForm = ref({
-    communicateViewFlag: false,
-    communicateLoading: false,
-  });
-
-  //加载配置
-  const loadSystemInfoConfig = async () => {
-    const resp = await systemInfo();
-    systemInfoForm.value = resp;
-  };
-
-  const openCommunicateView = async () => {
-    if (systemInfoForm.value.communicateResp) {
-      viewForm.value.communicateViewFlag = true;
-    } else {
-      try {
-        const resp = await communicateInfo({});
-        systemInfoForm.value.communicateResp.qqGroupList = resp.qqGroupList;
-        systemInfoForm.value.communicateResp.wchatImage = resp.wchatImage;
-        viewForm.value.communicateLoading = true;
-      } finally {
-        setTimeout(() => {
-          viewForm.value.communicateLoading = false;
-        }, 2000);
-      }
-    }
-  };
-  const closeCommunicateView = async () => {
-    viewForm.value.communicateViewFlag = false;
-  };
-  const handleImageLoad = async () => {
-    viewForm.value.communicateLoading = false;
-  };
-
-  const openTutorial = async () => {
-    if (systemInfoForm.value.tutorialInfo) {
-      window.open(systemInfoForm.value.tutorialInfo, '_blank');
-    }
   };
 </script>
 

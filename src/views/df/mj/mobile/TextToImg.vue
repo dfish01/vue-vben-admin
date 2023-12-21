@@ -161,8 +161,8 @@
               style="width: 100%; height: 32px"
               v-model:value="accountForm.useAccountId"
               v-model="accountForm.useAccountId"
-              :size="accountForm.accountSelector.size"
-              :options="accountForm.accountSelector.options"
+              :size="accountViewForm.accountSelector.size"
+              :options="accountViewForm.accountSelector.options"
             />
           </a-col>
         </a-row>
@@ -178,11 +178,11 @@
           <a-col span="18">
             <a-select
               style="width: 100%"
-              @change="handleSetting('useChannelId', accountForm.useChannelId)"
               placeholder="请选择ChannelId"
+              @change="handleChannelSetting"
               v-model:value="accountForm.useChannelId"
-              :size="accountForm.accountSelector.size"
-              :options="accountForm.channelSelector.options"
+              :size="accountViewForm.accountSelector.size"
+              :options="accountViewForm.channelSelector.options"
             />
           </a-col>
         </a-row>
@@ -209,7 +209,6 @@
           </a-col>
           <a-col span="18">
             <a-select
-              @change="handleSetting('mode', accountForm.mode)"
               v-model:value="accountForm.mode"
               style="width: 100%; height: 32px"
               placeholder="不选的话，默认休闲模式"
@@ -1320,10 +1319,12 @@
 
   const {
     accountForm,
+    accountViewForm,
     initAccountList,
     initAccountInfo,
     doGetChannelsByGroup,
     handleAccountSetting,
+    handleChannelSetting,
     handleSetting,
   } = accountInfoApi();
 
@@ -1332,9 +1333,9 @@
   //初始化数据
   onMounted(async () => {
     //查询可用账户
-    await initAccountList();
+    // await initAccountList();
     //初始化偏好
-    // initAccountInfo();
+    initAccountInfo();
 
     //查询最近使用的tag
     const resp = await genTagList({});
