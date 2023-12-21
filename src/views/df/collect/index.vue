@@ -1,11 +1,12 @@
 <template>
   <CollectMobile v-if="getIsMobile" />
-  <CollectPc v-else />
+  <IndexPc v-else />
 </template>
 
 <script lang="ts" setup>
   import CollectMobile from './collect_mobile.vue';
-  import CollectPc from './collect_pc.vue';
+  import IndexPc from './index_pc.vue';
+  import CollectCategory from './collect_category.vue';
   import { useAppInject } from '/@/hooks/web/useAppInject';
 
   const { getIsMobile } = useAppInject();
