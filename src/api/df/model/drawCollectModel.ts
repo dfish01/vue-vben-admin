@@ -2,6 +2,28 @@ import { BasicPageParams, BasePageResult } from '/@/api/model/baseModel';
 import { DrawTaskListResp } from '/@/api/df/model/drawTaskModel';
 
 /**
+ * 请求参数：添加收藏/移动收藏
+ */
+export interface DrawCollectAddReq {
+  /** 任务id */
+  taskIds: string[];
+  /** 收藏夹ID */
+  categoryId: string | null;
+  /** 原类目ID */
+  oriCategoryId: string | null;
+}
+
+/**
+ * 请求参数：删除收藏
+ */
+export interface DrawCollectRemoveReq {
+  /** 任务id */
+  taskIds: string[];
+  /** 收藏夹ID */
+  categoryId: string | null;
+}
+
+/**
  * 请求参数：添加收藏
  */
 export interface AddDrawCollectReq {

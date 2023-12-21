@@ -1,35 +1,110 @@
 <template>
-  <a-menu
-    v-model:openKeys="openKeys"
-    v-model:selectedKeys="selectedKeys"
-    style="width: 240px"
-    mode="inline"
-  >
-    <a-menu-item v-for="item in items" :key="item.key">
-      <a-icon :type="item.icon" />
-      <span>{{ item.label }}</span>
-      <a-button @click="handleActions(item)">操作</a-button>
-      <template #popup>
-        <a-menu>
-          <a-menu-item @click="handleButton1(item)">按钮1</a-menu-item>
-          <a-menu-item @click="handleButton2(item)">按钮2</a-menu-item>
-        </a-menu>
-      </template>
-    </a-menu-item>
-  </a-menu>
+  <div>
+    <a-menu
+      v-model:openKeys="openKeys"
+      v-model:selectedKeys="selectedKeys"
+      style="width: 256px"
+      mode="inline"
+    >
+      <!-- <a-menu-item key="" icon="MailOutlined" title="默认分类">
+        <span> 默认分类 </span>
+      </a-menu-item> -->
+
+      <div v-for="categoryItem in categoryList" :key="categoryItem.key">
+        <a-sub-menu v-if="categoryItem.children" :key="categoryItem.key" icon="AppstoreOutlined">
+          <template #title>
+            <div class="menu-item-content">
+              <span>{{ categoryItem.title }}</span>
+              <a-dropdown :placement="placement">
+                <a-button type="text"><SvgIcon name="menu2" /></a-button>
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item>
+                      <a target="_blank" rel="noopener noreferrer" href="http://www.alipay.com/">
+                        删除分类
+                      </a>
+                    </a-menu-item>
+                    <a-menu-item>
+                      <a target="_blank" rel="noopener noreferrer" href="http://www.taobao.com/">
+                        修改分类
+                      </a>
+                    </a-menu-item>
+                    <a-menu-item>
+                      <a target="_blank" rel="noopener noreferrer" href="http://www.tmall.com/">
+                        新增子分类
+                      </a>
+                    </a-menu-item>
+                  </a-menu>
+                </template>
+              </a-dropdown>
+            </div>
+          </template>
+          <a-menu-item
+            v-for="childItem in categoryItem.children"
+            :key="childItem.key"
+            icon="MailOutlined"
+            title="Navigation One"
+          >
+            <div class="menu-item-content">
+              <span>{{ childItem.title }}</span>
+              <a-dropdown :placement="placement">
+                <a-button type="text"> <SvgIcon name="menu2" /></a-button>
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item>
+                      <a target="_blank" rel="noopener noreferrer" href="http://www.alipay.com/">
+                        删除分类
+                      </a>
+                    </a-menu-item>
+                    <a-menu-item>
+                      <a target="_blank" rel="noopener noreferrer" href="http://www.taobao.com/">
+                        修改分类
+                      </a>
+                    </a-menu-item>
+                    <!-- <a-menu-item v-if="childItem.parentId === 0">
+                      <a target="_blank" rel="noopener noreferrer" href="http://www.tmall.com/">
+                        新增子分类
+                      </a>
+                    </a-menu-item> -->
+                  </a-menu>
+                </template>
+              </a-dropdown>
+            </div>
+          </a-menu-item>
+        </a-sub-menu>
+        <a-menu-item v-else :key="categoryItem.key" icon="MailOutlined" title="Navigation One">
+          <div class="menu-item-content">
+            <span>{{ categoryItem.title }}</span>
+            <a-dropdown :placement="placement">
+              <a-button type="text"> <SvgIcon name="menu2" /></a-button>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item>
+                    <a target="_blank" rel="noopener noreferrer" href="http://www.alipay.com/">
+                      删除分类
+                    </a>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a target="_blank" rel="noopener noreferrer" href="http://www.taobao.com/">
+                      修改分类
+                    </a>
+                  </a-menu-item>
+                  <a-menu-item v-if="childItem.parentId === 0">
+                    <a target="_blank" rel="noopener noreferrer" href="http://www.tmall.com/">
+                      新增子分类
+                    </a>
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+          </div>
+        </a-menu-item>
+      </div>
+    </a-menu>
+  </div>
 </template>
 
 <script lang="ts" setup>
-  import { Loading } from '/@/components/Loading';
-  import 'vue-easy-lightbox/external-css/vue-easy-lightbox.css';
-  import VueEasyLightbox from 'vue-easy-lightbox';
-  import VueLazyload from 'vue-lazyload';
-  import { api as viewerApi } from 'v-viewer';
-  import Icon from '/@/components/Icon/Icon.vue';
-  import { SvgIcon } from '/@/components/Icon';
-  import { useContentHeight } from '/@/hooks/web/useContentHeight';
-  import { addSpaceTask, removeSpaceTask, allUserSpace } from '/@/api/df/workSpace';
-
   import { h, ref } from 'vue';
   import {
     MailOutlined,
@@ -37,88 +112,100 @@
     AppstoreOutlined,
     SettingOutlined,
   } from '@ant-design/icons-vue';
-  import type { MenuProps } from 'ant-design-vue';
+  import type { MenuTheme } from 'ant-design-vue';
+  import { SvgIcon } from '/@/components/Icon';
+  import Icon from '/@/components/Icon/Icon.vue';
 
-  const items = ref([
+  const theme = ref<MenuTheme>('dark');
+  const selectedKeys = ref(['1']);
+  const openKeys = ref(['sub1']);
+  const categoryList = ref([
     {
-      key: 'idea1',
-      icon: () => h(LightbulbOutlined),
-      label: '创意点子',
-      color: 'blue',
+      key: '1',
+      icon: () => h(MailOutlined),
+      label: 'Navigation One',
+      title: 'Navigation One',
+    },
+    {
+      key: '2',
+      icon: () => h(CalendarOutlined),
+      label: 'Navigation Two',
+      title: 'Navigation Two',
+    },
+    {
+      key: 'sub1',
+      icon: () => h(AppstoreOutlined),
+      label: 'Navigation Three',
+      title: 'Navigation Three',
       children: [
         {
-          key: 'idea1-1',
-          icon: () => h(FileOutlined),
-          label: '新产品创意',
+          key: '3',
+          label: 'Option 3',
+          title: 'Option 3',
         },
         {
-          key: 'idea1-2',
-          icon: () => h(ChatOutlined),
-          label: '营销活动创意',
+          key: '4',
+          label: 'Option 4',
+          title: 'Option 4',
         },
         {
-          key: 'idea1-3',
-          icon: () => h(DocumentOutlined),
-          label: 'UI/UX 设计创意',
+          key: 'sub1-2',
+          label: 'Submenu',
+          title: 'Submenu',
+          children: [
+            {
+              key: '5',
+              label: 'Option 5',
+              title: 'Option 5',
+            },
+            {
+              key: '6',
+              label: 'Option 6',
+              title: 'Option 6',
+            },
+          ],
         },
       ],
     },
     {
-      key: 'idea2',
-      icon: () => h(BookOutlined),
-      label: '学习资料',
-      color: 'green',
+      key: 'sub2',
+      icon: () => h(SettingOutlined),
+      label: 'Navigation Four',
+      title: 'Navigation Four',
       children: [
         {
-          key: 'idea2-1',
-          icon: () => h(FileOutlined),
-          label: '技术书籍',
+          key: '7',
+          label: 'Option 7',
+          title: 'Option 7',
         },
         {
-          key: 'idea2-2',
-          icon: () => h(ChatOutlined),
-          label: '学习网站',
+          key: '8',
+          label: 'Option 8',
+          title: 'Option 8',
         },
         {
-          key: 'idea2-3',
-          icon: () => h(DocumentOutlined),
-          label: '在线课程',
-        },
-      ],
-    },
-    {
-      key: 'idea3',
-      icon: () => h(HeartOutlined),
-      label: '生活灵感',
-      color: 'red',
-      children: [
-        {
-          key: 'idea3-1',
-          icon: () => h(FileOutlined),
-          label: '旅行攻略',
+          key: '9',
+          label: 'Option 9',
+          title: 'Option 9',
         },
         {
-          key: 'idea3-2',
-          icon: () => h(ChatOutlined),
-          label: '美食推荐',
-        },
-        {
-          key: 'idea3-3',
-          icon: () => h(DocumentOutlined),
-          label: '电影影评',
+          key: '10',
+          label: 'Option 10',
+          title: 'Option 10',
         },
       ],
     },
   ]);
-  const openKeys = ref(items.value.map((item) => item.key));
-  const selectedKeys = ref([]);
-
-  const handleButton1 = (item: MenuItem) => {
-    console.log('点击按钮1', item);
-  };
-
-  const handleButton2 = (item: MenuItem) => {
-    console.log('点击按钮2', item);
+  const changeTheme = (checked: boolean) => {
+    theme.value = checked ? 'dark' : 'light';
   };
 </script>
-<style scoped></style>
+
+<style scoped>
+  .menu-item-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+</style>

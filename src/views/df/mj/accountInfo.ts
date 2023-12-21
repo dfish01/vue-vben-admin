@@ -29,6 +29,7 @@ const { createMessage, createSuccessModal, createErrorModal, createInfoModal } =
 
 let accountInstance: any | null = null;
 let tagInstance: any | null = null;
+let drawCollectCategoryInstance: any | null = null;
 export const loadingRef = ref(false);
 
 // 在你的代码中获取 accountForm 对象的引用
@@ -305,5 +306,115 @@ export function tagInfoApi() {
     onChangeSearchLabel,
   };
   tagInstance = api;
+  return api;
+}
+
+//收藏类目API
+export function drawCollectCategoryApi() {
+  if (drawCollectCategoryInstance) {
+    return drawCollectCategoryInstance;
+  }
+
+  const collectTaskViewForm = ref({
+    title: '',
+    viewFlag: false,
+    loading: false,
+    collectCategoryOptions: [] as { value: string; label: string }[],
+  });
+
+  const collectTaskForm = ref({
+    taskIds: [],
+    oriCategoryId: null,
+    categoryId: null,
+  });
+
+  const showAddCollectCategoryModel = (card) => {
+    collectTaskForm.value.taskIds = [card.id];
+    collectTaskForm.value.oriCategoryId = null;
+    collectTaskViewForm.value.title = '添加到收藏';
+    collectTaskViewForm.value.loading = false;
+    collectTaskViewForm.value.viewFlag = true;
+  };
+
+  const showMoveCollectCategoryModel = (card, oriCategoryId) => {
+    collectTaskForm.value.taskIds = [card.id];
+    collectTaskForm.value.oriCategoryId = oriCategoryId;
+    collectTaskViewForm.value.title = '移动收藏分类';
+    collectTaskViewForm.value.loading = false;
+    collectTaskViewForm.value.viewFlag = true;
+  };
+
+  const addDrawTaskTag = async () => {
+    drawTagForm.value.loading = true;
+    try {
+      await addTag({
+        drawTaskId: drawTagForm.value.drawTaskId,
+        tagName: drawTagForm.value.tagName,
+      });
+      drawTagForm.value.viewFlag = false;
+      console.log(11123);
+      // if (taskInfo && taskInfo.id && taskInfo.id === drawTagForm.value.drawTaskId) {
+      //   taskInfo.tagList.push(drawTagForm.value.tagName);
+      // }
+
+      //加载新的
+      const resp = await genTagList({});
+      const options = resp.map((item) => ({
+        value: item,
+        label: item,
+      }));
+      drawTagForm.value.tagNameOptions = options;
+    } finally {
+      drawTagForm.value.loading = false;
+    }
+  };
+
+  const removeDrawTaskTag = async (id, tagName) => {
+    loadingRef.value = true;
+    try {
+      await removeTaskTag({
+        drawTaskId: id,
+        tagName: tagName,
+      });
+    } finally {
+      loadingRef.value = false;
+    }
+  };
+
+  const loadTagList = async () => {
+    // if (drawTagForm.value.tagNameOptions.length > 0) {
+    //   return;
+    // }
+    //查询最近使用的tag
+    const resp = await genTagList({});
+    const options = resp.map((item) => ({
+      value: item,
+      label: item,
+    }));
+    drawTagForm.value.tagNameOptions = options;
+  };
+
+  const onChangeLabel = (selectedOption) => {
+    console.log(selectedOption);
+    // 获取选中项的值，不包含 @ 符号
+    drawTagForm.value.tagName = drawTagForm.value.tagName.replace(/@/g, '');
+  };
+  const onChangeSearchLabel = (selectedOption) => {
+    console.log(selectedOption);
+    // 获取选中项的值，不包含 @ 符号
+    drawTagForm.value.tagName = drawTagForm.value.tagName.replace(/@/g, '');
+  };
+  const api = {
+    // 响应式引用
+    initTag,
+    drawTagForm,
+    showDrawTaskTagModel,
+    addDrawTaskTag,
+    removeDrawTaskTag,
+    loadTagList,
+    onChangeLabel,
+    onChangeSearchLabel,
+  };
+  drawCollectCategoryInstance = api;
   return api;
 }

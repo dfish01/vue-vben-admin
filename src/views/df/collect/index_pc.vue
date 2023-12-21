@@ -58,7 +58,7 @@
 
       <a-col class="right-content">
         <a-content>
-          <CollectPc />
+          <!-- <CollectPc /> -->
         </a-content>
       </a-col>
     </a-row>
