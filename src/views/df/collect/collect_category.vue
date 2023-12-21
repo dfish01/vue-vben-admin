@@ -2,11 +2,21 @@
   <a-menu
     v-model:openKeys="openKeys"
     v-model:selectedKeys="selectedKeys"
-    style="width: 100%; height: 100vh"
-    mode="vertical"
-    :items="items"
-    @click="handleClick"
-  />
+    style="width: 240px"
+    mode="inline"
+  >
+    <a-menu-item v-for="item in items" :key="item.key">
+      <a-icon :type="item.icon" />
+      <span>{{ item.label }}</span>
+      <a-button @click="handleActions(item)">操作</a-button>
+      <template #popup>
+        <a-menu>
+          <a-menu-item @click="handleButton1(item)">按钮1</a-menu-item>
+          <a-menu-item @click="handleButton2(item)">按钮2</a-menu-item>
+        </a-menu>
+      </template>
+    </a-menu-item>
+  </a-menu>
 </template>
 
 <script lang="ts" setup>
@@ -29,87 +39,86 @@
   } from '@ant-design/icons-vue';
   import type { MenuProps } from 'ant-design-vue';
 
-  const selectedKeys = ref([]);
-  const openKeys = ref([]);
   const items = ref([
     {
-      key: '1',
-      icon: () => h(MailOutlined),
-      label: 'Navigation One',
-      title: 'Navigation One',
-    },
-    {
-      key: '2',
-      icon: () => h(CalendarOutlined),
-      label: 'Navigation Two',
-      title: 'Navigation Two',
-    },
-    {
-      key: 'sub1',
-      icon: () => h(AppstoreOutlined),
-      label: 'Navigation ThreeNavigation ThreeNavigation ThreeNavigation ThreeNavigation Three',
-      title: 'Navigation ThreeNavigation ThreeNavigation ThreeNavigation ThreeNavigation Three',
+      key: 'idea1',
+      icon: () => h(LightbulbOutlined),
+      label: '创意点子',
+      color: 'blue',
       children: [
         {
-          key: '3',
-          label: 'Option 3',
-          title: 'Option 3',
+          key: 'idea1-1',
+          icon: () => h(FileOutlined),
+          label: '新产品创意',
         },
         {
-          key: '4',
-          label: 'Option 4',
-          title: 'Option 4',
+          key: 'idea1-2',
+          icon: () => h(ChatOutlined),
+          label: '营销活动创意',
         },
         {
-          key: 'sub1-2',
-          label: 'Submenu',
-          title: 'Submenu',
-          children: [
-            {
-              key: '5',
-              label: 'Option 5',
-              title: 'Option 5',
-            },
-            {
-              key: '6',
-              label: 'Option 6',
-              title: 'Option 6',
-            },
-          ],
+          key: 'idea1-3',
+          icon: () => h(DocumentOutlined),
+          label: 'UI/UX 设计创意',
         },
       ],
     },
     {
-      key: 'sub2',
-      icon: () => h(SettingOutlined),
-      label: 'Navigation Four',
-      title: 'Navigation Four',
+      key: 'idea2',
+      icon: () => h(BookOutlined),
+      label: '学习资料',
+      color: 'green',
       children: [
         {
-          key: '7',
-          label: 'Option 7',
-          title: 'Option 7',
+          key: 'idea2-1',
+          icon: () => h(FileOutlined),
+          label: '技术书籍',
         },
         {
-          key: '8',
-          label: 'Option 8',
-          title: 'Option 8',
+          key: 'idea2-2',
+          icon: () => h(ChatOutlined),
+          label: '学习网站',
         },
         {
-          key: '9',
-          label: 'Option 9',
-          title: 'Option 9',
+          key: 'idea2-3',
+          icon: () => h(DocumentOutlined),
+          label: '在线课程',
+        },
+      ],
+    },
+    {
+      key: 'idea3',
+      icon: () => h(HeartOutlined),
+      label: '生活灵感',
+      color: 'red',
+      children: [
+        {
+          key: 'idea3-1',
+          icon: () => h(FileOutlined),
+          label: '旅行攻略',
         },
         {
-          key: '10',
-          label: 'Option 10',
-          title: 'Option 10',
+          key: 'idea3-2',
+          icon: () => h(ChatOutlined),
+          label: '美食推荐',
+        },
+        {
+          key: 'idea3-3',
+          icon: () => h(DocumentOutlined),
+          label: '电影影评',
         },
       ],
     },
   ]);
-  const handleClick: MenuProps['onClick'] = (menuInfo) => {
-    console.log('click ', menuInfo);
+  const openKeys = ref(items.value.map((item) => item.key));
+  const selectedKeys = ref([]);
+
+  const handleButton1 = (item: MenuItem) => {
+    console.log('点击按钮1', item);
+  };
+
+  const handleButton2 = (item: MenuItem) => {
+    console.log('点击按钮2', item);
   };
 </script>
 <style scoped></style>
