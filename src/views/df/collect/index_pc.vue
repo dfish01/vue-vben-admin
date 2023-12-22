@@ -37,7 +37,7 @@
               "
             >
               <div style="margin-left: 10px">
-                <span style="font-weight: bold">🏢绘画工作区</span>
+                <span style="font-weight: bold">🏢绘画收藏夹</span>
               </div>
               <div
                 style="
@@ -48,6 +48,7 @@
                   font-size: 15px;
                 "
               >
+                <a-button type="text" @click="showAddView"><SvgIcon name="add" /></a-button>
               </div>
             </div>
           </template>
@@ -77,6 +78,19 @@
   import { useRoute } from 'vue-router';
   import { useUserStore } from '/@/store/modules/user';
   import { useMessage } from '/@/hooks/web/useMessage';
+  import { collectCategoryApi } from './category';
+
+  const {
+    categoryDataForm,
+    categoryDataViewForm,
+    // 方法
+    init,
+    showAddView,
+    closedView,
+    modifyView,
+    addCollectCategory,
+    deleteCollectCategory,
+  } = collectCategoryApi();
 
   const { createMessage, createSuccessModal, createErrorModal, createInfoModal } = useMessage();
 

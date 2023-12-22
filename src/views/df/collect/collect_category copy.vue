@@ -35,30 +35,32 @@
               </a-dropdown>
             </div>
           </template>
-          <div v-for="childItem in categoryItem.children" :key="childItem.id">
-            <a-menu-item icon="MailOutlined">
-              <div class="menu-item-content">
-                <span>{{ childItem.title }}</span>
-                <a-dropdown>
-                  <a-button type="text"> <SvgIcon name="menu2" /></a-button>
-                  <template #overlay>
-                    <a-menu>
-                      <a-popconfirm
-                        :title="'【' + childItem.title + '】删除提示'"
-                        ok-text="立即删除"
-                        cancel-text="取消"
-                        @confirm="deleteCollectCategory(childItem.id)"
-                      >
-                        <a-menu-item> 删除分类 </a-menu-item>
-                      </a-popconfirm>
+          <a-menu-item
+            v-for="childItem in categoryItem.children"
+            :key="childItem.key"
+            icon="MailOutlined"
+          >
+            <div class="menu-item-content">
+              <span>{{ childItem.title }}</span>
+              <a-dropdown>
+                <a-button type="text"> <SvgIcon name="menu2" /></a-button>
+                <template #overlay>
+                  <a-menu>
+                    <a-popconfirm
+                      :title="'【' + childItem.title + '】删除提示'"
+                      ok-text="立即删除"
+                      cancel-text="取消"
+                      @confirm="deleteCollectCategory(childItem.id)"
+                    >
+                      <a-menu-item> 删除分类 </a-menu-item>
+                    </a-popconfirm>
 
-                      <a-menu-item @click="() => modifyView(childItem)"> 修改分类 </a-menu-item>
-                    </a-menu>
-                  </template>
-                </a-dropdown>
-              </div>
-            </a-menu-item>
-          </div>
+                    <a-menu-item @click="() => modifyView(childItem)"> 修改分类 </a-menu-item>
+                  </a-menu>
+                </template>
+              </a-dropdown>
+            </div>
+          </a-menu-item>
         </a-sub-menu>
         <!-- <a-menu-item v-else :key="categoryItem.id" icon="MailOutlined">
           <div class="menu-item-content">

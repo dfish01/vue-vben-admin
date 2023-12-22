@@ -135,7 +135,6 @@ export function jobListQueryApi() {
     pagination.value.total = response.total;
 
     loadingRef.value = false;
-    console.log(111111111111);
   };
 
   /***********************************明细*************************** */

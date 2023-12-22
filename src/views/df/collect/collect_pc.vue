@@ -381,7 +381,7 @@
                       </span>
                     </a-button>
                   </a-tooltip> -->
-                  <a-dropdown :placement="placement" arrow trigger="click">
+                  <a-dropdown trigger="click">
                     <a-button class="card-icon-button"><SvgIcon name="menu" size="14" /></a-button>
                     <template #overlay>
                       <a-menu>

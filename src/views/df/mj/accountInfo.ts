@@ -24,6 +24,18 @@ import { useMessage } from '/@/hooks/web/useMessage';
 import { getCustomCache, setCustomCache } from '/@/utils/custom';
 import { Persistent, BasicKeys } from '/@/utils/cache/persistent';
 import { MJ_TASK_ACCOUNT_KEY } from '/@/enums/cacheEnum';
+import {
+  DrawCollectCategoryAddReq,
+  DrawCollectCategoryListResp,
+} from '/@/api/df/model/drawCollectCategoryModel';
+import {
+  deleteCategory,
+  allCollectCategory,
+  saveCategory,
+  selectOptions,
+  setTop,
+} from '/@/api/df/drawCollectCategory';
+import { addToCategory, removeFromCategory } from '/@/api/df/drawCollect';
 
 const { createMessage, createSuccessModal, createErrorModal, createInfoModal } = useMessage();
 
@@ -315,11 +327,12 @@ export function drawCollectCategoryApi() {
     return drawCollectCategoryInstance;
   }
 
-  const collectTaskViewForm = ref({
+  const collectCategoryViewForm = ref({
     title: '',
     viewFlag: false,
     loading: false,
-    collectCategoryOptions: [] as { value: string; label: string }[],
+    collectCategoryOptions: [] as TransformedItem[],
+    collectCategoryList: [] as DrawCollectCategoryListResp[],
   });
 
   const collectTaskForm = ref({
@@ -328,92 +341,117 @@ export function drawCollectCategoryApi() {
     categoryId: null,
   });
 
+  // 监听 collectCategoryList 的变化
+  watch(
+    () => collectCategoryViewForm.value.collectCategoryList,
+    (newList) => {
+      // 提取新的 collectCategoryOptions
+      collectCategoryViewForm.value.collectCategoryOptions = transformCategoryList(newList);
+    },
+  );
+
   const showAddCollectCategoryModel = (card) => {
     collectTaskForm.value.taskIds = [card.id];
     collectTaskForm.value.oriCategoryId = null;
-    collectTaskViewForm.value.title = '添加到收藏';
-    collectTaskViewForm.value.loading = false;
-    collectTaskViewForm.value.viewFlag = true;
+    collectCategoryViewForm.value.title = '添加到收藏';
+    collectCategoryViewForm.value.loading = false;
+    collectCategoryViewForm.value.viewFlag = true;
   };
 
   const showMoveCollectCategoryModel = (card, oriCategoryId) => {
     collectTaskForm.value.taskIds = [card.id];
     collectTaskForm.value.oriCategoryId = oriCategoryId;
-    collectTaskViewForm.value.title = '移动收藏分类';
-    collectTaskViewForm.value.loading = false;
-    collectTaskViewForm.value.viewFlag = true;
+    collectCategoryViewForm.value.title = '移动收藏分类';
+    collectCategoryViewForm.value.loading = false;
+    collectCategoryViewForm.value.viewFlag = true;
   };
 
-  const addDrawTaskTag = async () => {
-    drawTagForm.value.loading = true;
-    try {
-      await addTag({
-        drawTaskId: drawTagForm.value.drawTaskId,
-        tagName: drawTagForm.value.tagName,
-      });
-      drawTagForm.value.viewFlag = false;
-      console.log(11123);
-      // if (taskInfo && taskInfo.id && taskInfo.id === drawTagForm.value.drawTaskId) {
-      //   taskInfo.tagList.push(drawTagForm.value.tagName);
-      // }
+  const closeCollectCategoryModel = () => {
+    collectTaskForm.value.taskIds = [];
+    collectTaskForm.value.oriCategoryId = null;
+    collectCategoryViewForm.value.title = '';
+    collectCategoryViewForm.value.loading = false;
+    collectCategoryViewForm.value.viewFlag = false;
+  };
 
-      //加载新的
-      const resp = await genTagList({});
-      const options = resp.map((item) => ({
-        value: item,
-        label: item,
-      }));
-      drawTagForm.value.tagNameOptions = options;
+  /**
+   *
+   * @returns 初始化类目
+   */
+  const initAllCollectCategory = async () => {
+    if (collectCategoryViewForm.value.collectCategoryList.length > 0) {
+      return collectCategoryViewForm.value.collectCategoryList;
+    }
+    const resp = await allCollectCategory({});
+    collectCategoryViewForm.value.collectCategoryList = resp;
+    // collectCategoryViewForm.value.collectCategoryOptions = transformCategoryList(resp);
+    return resp;
+  };
+
+  const refreshCollectCategory = async () => {
+    const resp = await allCollectCategory({});
+    collectCategoryViewForm.value.collectCategoryList = resp;
+    return resp;
+  };
+
+  interface TransformedItem {
+    label: string;
+    value: string;
+    children?: TransformedItem[];
+  }
+
+  function transformCategoryList(list: DrawCollectCategoryListResp[]): TransformedItem[] {
+    return list.map((item) => {
+      const transformedItem: TransformedItem = {
+        label: item.title || '',
+        value: item.id || '',
+      };
+
+      if (item.children && item.children.length > 0) {
+        transformedItem.children = transformCategoryList(item.children);
+      }
+
+      return transformedItem;
+    });
+  }
+
+  /**
+   * 任务添加到收藏类目收藏
+   */
+  const addToCollectCategory = async () => {
+    collectCategoryViewForm.value.loading = true;
+    try {
+      await addToCategory(collectTaskForm.value);
+      collectCategoryViewForm.value.viewFlag = false;
     } finally {
-      drawTagForm.value.loading = false;
+      collectCategoryViewForm.value.loading = false;
     }
   };
 
-  const removeDrawTaskTag = async (id, tagName) => {
-    loadingRef.value = true;
+  /**
+   * 任务移除收藏类目收藏
+   */
+  const removeFromCollectCategory = async () => {
+    collectCategoryViewForm.value.loading = true;
     try {
-      await removeTaskTag({
-        drawTaskId: id,
-        tagName: tagName,
-      });
+      await removeFromCategory(collectTaskForm.value);
+      collectCategoryViewForm.value.viewFlag = false;
     } finally {
-      loadingRef.value = false;
+      collectCategoryViewForm.value.loading = false;
     }
   };
 
-  const loadTagList = async () => {
-    // if (drawTagForm.value.tagNameOptions.length > 0) {
-    //   return;
-    // }
-    //查询最近使用的tag
-    const resp = await genTagList({});
-    const options = resp.map((item) => ({
-      value: item,
-      label: item,
-    }));
-    drawTagForm.value.tagNameOptions = options;
-  };
-
-  const onChangeLabel = (selectedOption) => {
-    console.log(selectedOption);
-    // 获取选中项的值，不包含 @ 符号
-    drawTagForm.value.tagName = drawTagForm.value.tagName.replace(/@/g, '');
-  };
-  const onChangeSearchLabel = (selectedOption) => {
-    console.log(selectedOption);
-    // 获取选中项的值，不包含 @ 符号
-    drawTagForm.value.tagName = drawTagForm.value.tagName.replace(/@/g, '');
-  };
   const api = {
-    // 响应式引用
-    initTag,
-    drawTagForm,
-    showDrawTaskTagModel,
-    addDrawTaskTag,
-    removeDrawTaskTag,
-    loadTagList,
-    onChangeLabel,
-    onChangeSearchLabel,
+    refreshCollectCategory,
+    collectCategoryViewForm,
+    collectTaskForm,
+    initAllCollectCategory,
+    showAddCollectCategoryModel,
+    showMoveCollectCategoryModel,
+    closeCollectCategoryModel,
+
+    addToCollectCategory,
+    removeFromCollectCategory,
   };
   drawCollectCategoryInstance = api;
   return api;

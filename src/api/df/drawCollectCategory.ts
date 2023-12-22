@@ -22,7 +22,10 @@ enum Api {
  * @param mode - 错误信息模式
  * @returns
  */
-export function saveCategory(params: DrawCollectCategoryAddReq, mode: ErrorMessageMode = 'modal') {
+export function saveCategory(
+  params: DrawCollectCategoryAddReq,
+  mode: ErrorMessageMode = 'message',
+) {
   return defHttp.post(
     {
       url: Api.Save,
@@ -41,7 +44,7 @@ export function saveCategory(params: DrawCollectCategoryAddReq, mode: ErrorMessa
  * @param mode - 错误信息模式
  * @returns
  */
-export function removeFromCategory(params: {}, mode: ErrorMessageMode = 'modal') {
+export function allCollectCategory(params: {}, mode: ErrorMessageMode = 'message') {
   return defHttp.post<DrawCollectCategoryListResp[]>(
     {
       url: Api.AllCategory,
@@ -59,7 +62,7 @@ export function removeFromCategory(params: {}, mode: ErrorMessageMode = 'modal')
  * @param mode - 错误信息模式
  * @returns
  */
-export function deleteCategory(params: IdReq, mode: ErrorMessageMode = 'modal') {
+export function deleteCategory(params: IdReq, mode: ErrorMessageMode = 'message') {
   return defHttp.post(
     {
       url: Api.Delete,
@@ -78,7 +81,7 @@ export function deleteCategory(params: IdReq, mode: ErrorMessageMode = 'modal') 
  * @param mode - 错误信息模式
  * @returns
  */
-export function setTop(params: IdReq, mode: ErrorMessageMode = 'modal') {
+export function setTop(params: IdReq, mode: ErrorMessageMode = 'message') {
   return defHttp.post(
     {
       url: Api.SetTop,
@@ -96,7 +99,7 @@ export function setTop(params: IdReq, mode: ErrorMessageMode = 'modal') {
  * @param mode - 错误信息模式
  * @returns
  */
-export function selectOptions(params: {}, mode: ErrorMessageMode = 'modal') {
+export function selectOptions(params: {}, mode: ErrorMessageMode = 'message') {
   return defHttp.post<any[]>(
     {
       url: Api.SelectOptions,
