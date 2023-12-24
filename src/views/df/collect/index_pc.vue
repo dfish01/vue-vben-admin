@@ -59,7 +59,7 @@
 
       <a-col class="right-content">
         <a-content>
-          <!-- <CollectPc /> -->
+          <CollectPc />
         </a-content>
       </a-col>
     </a-row>
@@ -73,7 +73,7 @@
   import CollectPc from './collect_pc.vue';
   import CollectCategory from './collect_category.vue';
 
-  import { ref, onMounted, reactive } from 'vue';
+  import { ref, onMounted, reactive, watch } from 'vue';
 
   import { useRoute } from 'vue-router';
   import { useUserStore } from '/@/store/modules/user';
@@ -81,6 +81,7 @@
   import { collectCategoryApi } from './category';
 
   const {
+    globalForm,
     categoryDataForm,
     categoryDataViewForm,
     // 方法

@@ -3,7 +3,7 @@
     <a-menu
       v-model:openKeys="openKeys"
       v-model:selectedKeys="selectedKeys"
-      style="width: 256px"
+      style="width: 456px"
       :style="{ height: `calc(${contentHeight - 1}px`, overflow: 'auto' }"
       mode="inline"
     >
@@ -14,19 +14,19 @@
         <a-sub-menu :key="categoryItem.id" icon="AppstoreOutlined">
           <template #title>
             <div class="menu-item-content">
-              <span>{{ categoryItem.title }}</span>
+              <span>{{ categoryItem.title }} - {{ categoryItem.id }}</span>
               <a-dropdown>
                 <a-button type="text"><SvgIcon name="menu2" trigger="click" /></a-button>
                 <template #overlay>
                   <a-menu>
-                    <a-popconfirm
+                    <!-- <a-popconfirm
                       :title="'【' + categoryItem.title + '】删除提示'"
                       ok-text="立即删除"
                       cancel-text="取消"
                       @confirm="deleteCollectCategory(categoryItem.id)"
                     >
                       <a-menu-item> 删除分类 </a-menu-item>
-                    </a-popconfirm>
+                    </a-popconfirm> -->
 
                     <a-menu-item @click="() => modifyView(categoryItem)"> 修改分类 </a-menu-item>
                     <a-menu-item @click="() => showAddView(categoryItem)"> 新增子分类 </a-menu-item>
@@ -35,32 +35,33 @@
               </a-dropdown>
             </div>
           </template>
-          <a-menu-item
-            v-for="childItem in categoryItem.children"
-            :key="childItem.key"
-            icon="MailOutlined"
-          >
-            <div class="menu-item-content">
-              <span>{{ childItem.title }}</span>
-              <a-dropdown>
-                <a-button type="text"> <SvgIcon name="menu2" /></a-button>
-                <template #overlay>
-                  <a-menu>
-                    <a-popconfirm
-                      :title="'【' + childItem.title + '】删除提示'"
-                      ok-text="立即删除"
-                      cancel-text="取消"
-                      @confirm="deleteCollectCategory(childItem.id)"
-                    >
-                      <a-menu-item> 删除分类 </a-menu-item>
-                    </a-popconfirm>
+          <div v-for="childItem in categoryItem.children" :key="childItem.id">
+            <a-menu-item icon="MailOutlined" :key="childItem.id" v-if="!childItem.hideFlag">
+              <div class="menu-item-content">
+                <span>{{ childItem.title }} - {{ childItem.id }}</span>
+                <a-dropdown>
+                  <a-button type="text"> <SvgIcon name="menu2" /></a-button>
+                  <template #overlay>
+                    <a-menu>
+                      <a-menu-item @click="() => deleteCollectCategory(childItem)">
+                        删除分类
+                        <!-- <a-popconfirm
+                          :title="'【' + childItem.title + '】删除提示'"
+                          ok-text="立即删除"
+                          cancel-text="取消"
+                          @confirm="deleteCollectCategory(childItem.id)"
+                        >
+                          删除分类
+                        </a-popconfirm> -->
+                      </a-menu-item>
 
-                    <a-menu-item @click="() => modifyView(childItem)"> 修改分类 </a-menu-item>
-                  </a-menu>
-                </template>
-              </a-dropdown>
-            </div>
-          </a-menu-item>
+                      <a-menu-item @click="() => modifyView(childItem)"> 修改分类 </a-menu-item>
+                    </a-menu>
+                  </template>
+                </a-dropdown>
+              </div>
+            </a-menu-item>
+          </div>
         </a-sub-menu>
         <!-- <a-menu-item v-else :key="categoryItem.id" icon="MailOutlined">
           <div class="menu-item-content">

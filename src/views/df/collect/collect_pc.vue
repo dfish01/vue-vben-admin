@@ -391,6 +391,13 @@
                           @click="() => showTaskInfo(card)"
                           ><Icon icon="streamline-emojis:television" />任务明细</a-menu-item
                         >
+                        <a-menu-item
+                          key="2"
+                          @click="
+                            () => showMoveCollectCategoryModel(card, searchForm.value.categoryId)
+                          "
+                          ><Icon icon="streamline-emojis:blossom" /> 添加收藏分类</a-menu-item
+                        >
                         <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)"
                           ><Icon icon="streamline-emojis:blossom" /> 添加标签</a-menu-item
                         >
@@ -1403,6 +1410,54 @@
         </a-card>
       </a-modal>
     </div>
+    <!-- 添加到到收藏分类  -->
+    <div>
+      <a-modal
+        v-model:open="collectCategoryViewForm.viewFlag"
+        title="🎈添加到其他分类"
+        ok-text="立即执行"
+        @ok="addToCollectCategory"
+        :confirmLoading="collectCategoryViewForm.loading"
+      >
+        <a-card>
+          <a-spin :spinning="collectCategoryViewForm.loading">
+            <a-form :model="collectTaskForm" layout="vertical" ref="collectTaskFormRef">
+              <a-row gutter="24">
+                <a-col :span="24">
+                  <a-form-item
+                    label="收藏分类"
+                    :rules="[
+                      {
+                        required: true,
+                        message: '收藏分类不能为空',
+                      },
+                    ]"
+                    name="categoryId"
+                  >
+                    <a-tree-select
+                      v-model:value="collectTaskForm.categoryId"
+                      show-search
+                      style="width: 100%"
+                      :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+                      placeholder="请选择收藏分类"
+                      allow-clear
+                      tree-default-expand-all
+                      :tree-data="collectCategoryViewForm.collectCategoryOptions"
+                      tree-node-filter-prop="label"
+                    >
+                      <template #title="{ value: val, label }">
+                        <b v-if="val === 'parent 1-1'" style="color: #08c">sss</b>
+                        <template v-else>{{ label }}</template>
+                      </template>
+                    </a-tree-select>
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-form>
+          </a-spin>
+        </a-card>
+      </a-modal>
+    </div>
   </a-layout>
 </template>
 
@@ -1448,7 +1503,34 @@
     generateTooltipText,
   } from '../mj/tools';
   import { Empty } from 'ant-design-vue';
-  import { accountInfoApi, tagInfoApi } from '../mj/accountInfo';
+  import { accountInfoApi, tagInfoApi, drawCollectCategoryApi } from '../mj/accountInfo';
+  import { collectCategoryApi } from './category';
+
+  const {
+    refreshCollectCategory,
+    collectCategoryViewForm,
+    collectTaskForm,
+    initAllCollectCategory,
+    showAddCollectCategoryModel,
+    showMoveCollectCategoryModel,
+    closeCollectCategoryModel,
+
+    addToCollectCategory,
+    removeFromCollectCategory,
+  } = drawCollectCategoryApi();
+
+  const {
+    globalForm,
+    categoryDataForm,
+    categoryDataViewForm,
+    // 方法
+    init,
+    showAddView,
+    closedView,
+    modifyView,
+    addCollectCategory,
+    deleteCollectCategory,
+  } = collectCategoryApi();
 
   const {
     accountForm,
@@ -1554,11 +1636,27 @@
       pagination.value.pageSize = 30;
     }
 
+    console.log('currentCategoryId currentCategoryId:' + globalForm.value.currentCategoryId);
     (window as any).varyRegionForm = varyRegionForm;
     initAccountList();
-    onSearch(1);
     initTag();
   });
+
+  // 监听收藏分类ID的变化
+  watch(
+    globalForm,
+    (newGlobalForm, oldGlobalForm) => {
+      if (newGlobalForm) {
+        console.log('globalForm change');
+        console.log('New currentCategoryId2:', newGlobalForm.currentCategoryId);
+        console.log('Old currentCategoryId2:', oldGlobalForm.currentCategoryId);
+        // 在这里执行其他逻辑
+        searchForm.value.categoryId = newGlobalForm.currentCategoryId;
+        onSearch(1);
+      }
+    },
+    { deep: true },
+  );
 
   // 监听来自 iframe 的消息
   const handleMessage = (event: MessageEvent) => {

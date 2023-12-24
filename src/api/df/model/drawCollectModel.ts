@@ -45,6 +45,8 @@ export interface DrawCollectListQueryReq extends BasicPageParams {
   tagName: string | null;
 
   spaceId: string | null;
+
+  categoryId: string | null;
 }
 
 /**

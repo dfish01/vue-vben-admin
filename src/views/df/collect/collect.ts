@@ -76,6 +76,7 @@ export function jobListQueryApi() {
     state: null,
     commandType: null,
     spaceId: null,
+    categoryId: null,
   });
   // 分页
   const pagination = ref({
@@ -123,11 +124,12 @@ export function jobListQueryApi() {
     pagination.value.current = current;
     loadingRef.value = true;
 
+    console.log('111   ' + searchForm.value.categoryId);
     const response = await listCollects({
+      collectCategoryId: searchForm.value.categoryId,
       tagName: searchForm.value.tagName,
       spaceId: null,
       commandType: searchForm.value.commandType,
-      collectCategoryId: null,
       current: pagination.value.current,
       pageSize: pagination.value.pageSize,
     });

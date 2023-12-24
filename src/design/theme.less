@@ -30,6 +30,27 @@ html[data-theme='light'] {
     background-color: @card-bg-light;
   }
 
+  //自定义菜单分类
+  .item-selected {
+    background-color: #e6f4ff;
+    color: #1677ff; /* 选中时的边框颜色 */
+  }
+
+  .parent-item-selected {
+    color: #1677ff;
+  }
+
+
+
+  .item-background {
+    background: rgb(0 0 0 / 2%);
+  }
+
+
+  //自定义菜单分类 END
+
+
+
   //自定义
   .row-wapper {
     border: 1px solid #d9d9d9;
@@ -54,6 +75,31 @@ html[data-theme='light'] {
 }
 
 [data-theme='dark'] {
+  //自定义菜单分类
+  .custom-menu {
+    color: #ffffffb3
+  }
+
+  .item-selected {
+    background-color: #0960bd;
+    color: #fff;
+  }
+
+  .parent-item-selected {
+    color: #fff;
+  }
+
+  .item-mouseover {
+    // background-color: #2D2D2D;
+    color: #fff;
+  }
+
+  //子菜单背景
+  .item-background {
+    background-color: #212427d4;
+  }
+  //自定义菜单分类 END
+
   body {
     background-color: #000;
     color: @text-color-base;

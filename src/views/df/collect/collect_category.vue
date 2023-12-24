@@ -1,9 +1,7 @@
 <template>
   <div ref="formRef">
-    <a-menu
-      v-model:openKeys="openKeys"
-      v-model:selectedKeys="selectedKeys"
-      style="width: 256px"
+    <div
+      style="width: 270px"
       :style="{ height: `calc(${contentHeight - 1}px`, overflow: 'auto' }"
       mode="inline"
     >
@@ -11,75 +9,107 @@
         v-for="categoryItem in collectCategoryViewForm.collectCategoryList"
         :key="categoryItem.id"
       >
-        <a-sub-menu :key="categoryItem.id" icon="AppstoreOutlined">
-          <template #title>
-            <div class="menu-item-content">
-              <span>{{ categoryItem.title }}</span>
+        <div
+          style="margin: 4px; padding-left: 14px"
+          class="custom-menu"
+          @mouseover="doMouseover(categoryItem)"
+          :class="calItemClass(categoryItem)"
+        >
+          <a-row style="height: 40px">
+            <a-col flex="auto" style="height: 100%" @click="doClick(categoryItem)">
+              <span
+                :class="{
+                  'parent-item-selected': isParentItemSelected(categoryItem),
+                }"
+                style="display: flex; align-items: center; height: 40px; font-size: 14px"
+                >{{ categoryItem.title }}</span
+              >
+            </a-col>
+            <a-col
+              flex="50px"
+              style="display: flex; align-items: center; justify-content: flex-end; height: 40px"
+            >
+              <span @click="setChildrenShow(categoryItem)" v-if="categoryItem.children.length > 0">
+                <SvgIcon
+                  v-if="categoryItem.childShow && categoryItem.childShow === true"
+                  name="up"
+                />
+                <SvgIcon v-else name="down" />
+              </span>
               <a-dropdown>
-                <a-button type="text"><SvgIcon name="menu2" trigger="click" /></a-button>
+                <span style="padding: 8px"> <SvgIcon name="menu2" /> </span>
                 <template #overlay>
                   <a-menu>
                     <a-popconfirm
                       :title="'【' + categoryItem.title + '】删除提示'"
                       ok-text="立即删除"
                       cancel-text="取消"
-                      @confirm="deleteCollectCategory(categoryItem.id)"
+                      @confirm="deleteCollectCategory(categoryItem)"
                     >
-                      <a-menu-item> 删除分类 </a-menu-item>
+                      <a-menu-item v-if="categoryItem.sort > 0"> 删除分类 </a-menu-item>
                     </a-popconfirm>
 
                     <a-menu-item @click="() => modifyView(categoryItem)"> 修改分类 </a-menu-item>
+                    <a-menu-item v-if="categoryItem.sort > 0" @click="() => setTop(categoryItem)">
+                      置顶
+                    </a-menu-item>
                     <a-menu-item @click="() => showAddView(categoryItem)"> 新增子分类 </a-menu-item>
                   </a-menu>
                 </template>
               </a-dropdown>
-            </div>
-          </template>
+            </a-col>
+          </a-row>
+        </div>
+        <div
+          v-if="categoryItem.childShow && categoryItem.childShow === true"
+          class="item-background"
+        >
           <div v-for="childItem in categoryItem.children" :key="childItem.id">
-            <a-menu-item icon="MailOutlined">
-              <div class="menu-item-content">
-                <span>{{ childItem.title }}</span>
-                <a-dropdown>
-                  <a-button type="text"> <SvgIcon name="menu2" /></a-button>
-                  <template #overlay>
-                    <a-menu>
-                      <a-popconfirm
-                        :title="'【' + childItem.title + '】删除提示'"
-                        ok-text="立即删除"
-                        cancel-text="取消"
-                        @confirm="deleteCollectCategory(childItem.id)"
-                      >
-                        <a-menu-item> 删除分类 </a-menu-item>
-                      </a-popconfirm>
+            <div
+              style="margin: 4px"
+              class="custom-menu"
+              @click="doClick(childItem)"
+              @mouseover="doMouseover(childItem)"
+              :class="calItemClass(childItem)"
+            >
+              <a-row style="height: 40px; padding-left: 32px">
+                <a-col flex="auto" style="height: 100%">
+                  <span style="display: flex; align-items: center; height: 40px">{{
+                    childItem.title
+                  }}</span>
+                </a-col>
 
-                      <a-menu-item @click="() => modifyView(childItem)"> 修改分类 </a-menu-item>
-                    </a-menu>
-                  </template>
-                </a-dropdown>
-              </div>
-            </a-menu-item>
-          </div>
-        </a-sub-menu>
-        <!-- <a-menu-item v-else :key="categoryItem.id" icon="MailOutlined">
-          <div class="menu-item-content">
-            <span>{{ categoryItem.title }}</span>
+                <a-col
+                  flex="32px"
+                  style="display: flex; align-items: center; justify-content: right; height: 40px"
+                >
+                  <a-dropdown>
+                    <span style="padding: 8px"> <SvgIcon name="menu2" /> </span>
+                    <template #overlay>
+                      <a-menu>
+                        <a-popconfirm
+                          :title="'【' + childItem.title + '】删除提示'"
+                          ok-text="立即删除"
+                          cancel-text="取消"
+                          @confirm="deleteCollectCategory(childItem)"
+                        >
+                          <a-menu-item> 删除分类 </a-menu-item>
+                        </a-popconfirm>
 
-            <a-dropdown>
-              <a-button type="text"><SvgIcon name="menu2" trigger="click" /></a-button>
-              <template #overlay>
-                <a-menu>
-                  <a-menu-item @click="() => deleteCollectCategory(categoryItem.id)">
-                    删除分类
-                  </a-menu-item>
-                  <a-menu-item @click="() => modifyView(categoryItem)"> 修改分类 </a-menu-item>
-                  <a-menu-item @click="() => showAddView(categoryItem)"> 新增子分类 </a-menu-item>
-                </a-menu>
-              </template>
-            </a-dropdown>
+                        <a-menu-item @click="() => modifyView(childItem)"> 修改分类 </a-menu-item>
+                        <a-menu-item @click="() => showAddView(childItem)">
+                          新增子分类
+                        </a-menu-item>
+                      </a-menu>
+                    </template>
+                  </a-dropdown>
+                </a-col>
+              </a-row>
+            </div>
           </div>
-        </a-menu-item> -->
+        </div>
       </div>
-    </a-menu>
+    </div>
 
     <!-- 编辑封面类 -->
     <a-modal
@@ -95,7 +125,12 @@
           <a-row gutter="24">
             <a-col :span="24">
               <a-form-item label="收藏分类名称">
-                <a-input v-model:value="categoryDataForm.title" placeholder="输入分类名称" />
+                <a-input
+                  v-model:value="categoryDataForm.title"
+                  placeholder="输入分类名称"
+                  show-count
+                  :maxlength="13"
+                />
               </a-form-item>
             </a-col>
           </a-row>
@@ -106,14 +141,13 @@
 </template>
 
 <script lang="ts" setup>
-  import { h, ref, onMounted, unref, computed } from 'vue';
+  import { h, ref, onMounted, unref, computed, reactive, watch } from 'vue';
   import {
     MailOutlined,
     CalendarOutlined,
     AppstoreOutlined,
     SettingOutlined,
   } from '@ant-design/icons-vue';
-  import type { MenuTheme } from 'ant-design-vue';
   import { SvgIcon } from '/@/components/Icon';
   import Icon from '/@/components/Icon/Icon.vue';
   import {
@@ -130,8 +164,10 @@
   const {
     categoryDataForm,
     categoryDataViewForm,
+    globalForm,
     // 方法
     init,
+    clickMenu,
     showAddView,
     closedView,
     modifyView,
@@ -169,8 +205,47 @@
     offsetHeightRef,
   );
 
-  const selectedKeys = ref(['1']);
-  const openKeys = ref(['sub1']);
+  const menuEventForm = reactive({
+    clickItem: null,
+    mouseoverItem: null,
+  });
+
+  const doMouseover = (item) => {
+    menuEventForm.mouseoverItem = item;
+  };
+
+  const doClick = (item) => {
+    menuEventForm.clickItem = item;
+    // globalForm.value.currentCategoryId = item.id;
+    // globalForm.value.currentCategoryTitle = item.title;
+    clickMenu(item);
+    console.log(globalForm.value.currentCategoryId);
+  };
+  const setChildrenShow = (item) => {
+    if (item.childShow === null) {
+      item.childShow = true;
+    } else {
+      item.childShow = !item.childShow;
+    }
+  };
+
+  const calItemClass = (item) => {
+    if (menuEventForm.clickItem && menuEventForm.clickItem.id === item.id) {
+      return {
+        'item-selected': true,
+        'item-mouseover': false,
+      };
+    }
+
+    return {
+      'item-selected': menuEventForm.clickItem && menuEventForm.clickItem.id === item.id,
+      'item-mouseover': menuEventForm.mouseoverItem && menuEventForm.mouseoverItem.id === item.id,
+    };
+  };
+
+  const isParentItemSelected = (item) => {
+    return menuEventForm.clickItem && menuEventForm.clickItem.parentId === item.id;
+  };
 
   onMounted(() => {
     init();
@@ -178,10 +253,21 @@
 </script>
 
 <style scoped>
-  .menu-item-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
+  .custom-menu {
+    transition:
+      border 0.3s ease,
+      border-radius 0.3s ease; /* 添加过渡效果 */
+
+    border: 1px solid transparent; /* 初始边框样式 */
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  .item-mouseover {
+    background: rgb(0 0 0 / 6%);
+  }
+
+  .custom-menu p {
+    margin: 0; /* 清除段落的默认外边距 */
   }
 </style>

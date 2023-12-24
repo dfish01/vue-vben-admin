@@ -78,7 +78,7 @@ export function collectCategoryApi() {
 
   const globalForm = ref({
     currentCategoryId: null,
-    title: null,
+    currentCategoryTitle: null,
   });
 
   const categoryDataForm = ref({
@@ -194,10 +194,11 @@ export function collectCategoryApi() {
   /**
    * 删除分类
    */
-  const deleteCollectCategory = async (id) => {
+  const deleteCollectCategory = async (item) => {
     globalLoading.value = true;
     try {
-      await deleteCategory({ id: id });
+      await deleteCategory({ id: item.id });
+      // item.hideFlag = true;
       await refreshCollectCategory();
       //移除数据
       // collectCategoryViewForm.value.collectCategoryList =
@@ -210,9 +211,9 @@ export function collectCategoryApi() {
   /**
    * 选择菜单
    */
-  const clickMenu = async (item) => {
+  const clickMenu = (item) => {
     globalForm.value.currentCategoryId = item.id;
-    globalForm.value.title = item.title;
+    globalForm.value.currentCategoryTitle = item.title;
   };
 
   /**
@@ -225,7 +226,7 @@ export function collectCategoryApi() {
       //首个默认分类
       const item = collectCategoryViewForm.value.collectCategoryList[0];
       globalForm.value.currentCategoryId = item.id;
-      globalForm.value.title = item.title;
+      globalForm.value.currentCategoryTitle = item.title;
     } finally {
       globalLoading.value = false;
     }
