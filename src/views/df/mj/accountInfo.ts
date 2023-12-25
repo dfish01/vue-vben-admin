@@ -358,9 +358,10 @@ export function drawCollectCategoryApi() {
     collectCategoryViewForm.value.viewFlag = true;
   };
 
-  const showMoveCollectCategoryModel = (card, oriCategoryId) => {
+  const showMoveCollectCategoryModel = (card) => {
+    console.log('showMoveCollectCategoryModel');
     collectTaskForm.value.taskIds = [card.id];
-    collectTaskForm.value.oriCategoryId = oriCategoryId;
+    collectTaskForm.value.oriCategoryId = card.collectCategoryId;
     collectCategoryViewForm.value.title = '移动收藏分类';
     collectCategoryViewForm.value.loading = false;
     collectCategoryViewForm.value.viewFlag = true;
@@ -431,10 +432,10 @@ export function drawCollectCategoryApi() {
   /**
    * 任务移除收藏类目收藏
    */
-  const removeFromCollectCategory = async () => {
+  const removeFromCollectCategory = async (card) => {
     collectCategoryViewForm.value.loading = true;
     try {
-      await removeFromCategory(collectTaskForm.value);
+      await removeFromCategory({ categoryId: card.collectCategoryId, taskIds: [card.id] });
       collectCategoryViewForm.value.viewFlag = false;
     } finally {
       collectCategoryViewForm.value.loading = false;

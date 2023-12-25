@@ -25,7 +25,7 @@ enum Api {
  * @param mode - 错误信息模式
  * @returns
  */
-export function addToCategory(params: DrawCollectAddReq, mode: ErrorMessageMode = 'modal') {
+export function addToCategory(params: DrawCollectAddReq, mode: ErrorMessageMode = 'message') {
   return defHttp.post(
     {
       url: Api.AddToCategory,
@@ -44,7 +44,10 @@ export function addToCategory(params: DrawCollectAddReq, mode: ErrorMessageMode 
  * @param mode - 错误信息模式
  * @returns
  */
-export function removeFromCategory(params: DrawCollectRemoveReq, mode: ErrorMessageMode = 'modal') {
+export function removeFromCategory(
+  params: DrawCollectRemoveReq,
+  mode: ErrorMessageMode = 'message',
+) {
   return defHttp.post(
     {
       url: Api.RemoveFromCategory,
@@ -63,7 +66,7 @@ export function removeFromCategory(params: DrawCollectRemoveReq, mode: ErrorMess
  * @param mode - 错误信息模式
  * @returns
  */
-export function createCollect(params: AddDrawCollectReq, mode: ErrorMessageMode = 'modal') {
+export function createCollect(params: AddDrawCollectReq, mode: ErrorMessageMode = 'message') {
   return defHttp.post(
     {
       url: Api.CreateCollect,

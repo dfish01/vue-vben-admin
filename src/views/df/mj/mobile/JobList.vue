@@ -1613,6 +1613,54 @@
       </a-card>
       <Loading :loading="loadingRef" :absolute="false" :tip="infoData.tip" />
     </a-modal>
+    <!-- 添加到到收藏分类  -->
+    <div>
+      <a-modal
+        v-model:open="collectCategoryViewForm.viewFlag"
+        title="🎈添加到其他分类"
+        ok-text="立即执行"
+        @ok="doAddToCollectCategory"
+        :confirmLoading="collectCategoryViewForm.loading"
+      >
+        <a-card>
+          <a-spin :spinning="collectCategoryViewForm.loading">
+            <a-form :model="collectTaskForm" layout="vertical" ref="collectTaskFormRef">
+              <a-row gutter="24">
+                <a-col :span="24">
+                  <a-form-item
+                    label="收藏分类"
+                    :rules="[
+                      {
+                        required: true,
+                        message: '收藏分类不能为空',
+                      },
+                    ]"
+                    name="categoryId"
+                  >
+                    <a-tree-select
+                      v-model:value="collectTaskForm.categoryId"
+                      show-search
+                      style="width: 100%"
+                      :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+                      placeholder="请选择收藏分类"
+                      allow-clear
+                      tree-default-expand-all
+                      :tree-data="collectCategoryViewForm.collectCategoryOptions"
+                      tree-node-filter-prop="label"
+                    >
+                      <template #title="{ value: val, label }">
+                        <b v-if="val === 'parent 1-1'" style="color: #08c">sss</b>
+                        <template v-else>{{ label }}</template>
+                      </template>
+                    </a-tree-select>
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-form>
+          </a-spin>
+        </a-card>
+      </a-modal>
+    </div>
   </a-layout>
 </template>
 
@@ -1663,6 +1711,19 @@
   import { useRoute } from 'vue-router';
 
   const {
+    refreshCollectCategory,
+    collectCategoryViewForm,
+    collectTaskForm,
+    initAllCollectCategory,
+    showAddCollectCategoryModel,
+    showMoveCollectCategoryModel,
+    closeCollectCategoryModel,
+
+    addToCollectCategory,
+    removeFromCollectCategory,
+  } = drawCollectCategoryApi();
+
+  const {
     accountForm,
     accountViewForm,
     initAccountList,
@@ -1670,6 +1731,8 @@
     doGetChannelsByGroup,
     handleAccountSetting,
     handleSetting,
+    closeAccountConfig,
+    showAccountConfig,
   } = accountInfoApi();
 
   /** 页面高度计算开始 */
@@ -1938,6 +2001,30 @@
     await addDrawTaskTag();
     if (infoData && infoData.id && infoData.id === drawTagForm.value.drawTaskId) {
       infoData.tagList.push(drawTagForm.value.tagName);
+    }
+  };
+
+  /********************************** 收藏分类 ************************************** */
+
+  const doAddToCollectCategory = async () => {
+    loadingRef.value = true;
+    try {
+      addToCollectCategory(pagination.value.current);
+      if (collectTaskForm.value.oriCategoryId !== null) {
+        onSearch(pagination.value.current);
+      }
+    } finally {
+      loadingRef.value = false;
+    }
+  };
+
+  const doRemoveFromCollectCategory = async (card) => {
+    loadingRef.value = true;
+    try {
+      removeFromCollectCategory(card);
+      onSearch(pagination.value.current);
+    } finally {
+      loadingRef.value = false;
     }
   };
 </script>
