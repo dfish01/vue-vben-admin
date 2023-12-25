@@ -521,40 +521,47 @@
                       </span>
                     </a-button>
                   </a-tooltip> -->
-                  <a-button class="card-icon-button" @click="() => showTaskInfo(card)">
-                    <Icon icon="streamline-emojis:television" size="14" />
-                  </a-button>
+                  <a-tooltip title="任务概况">
+                    <a-button class="card-icon-button" @click="() => showTaskInfo(card)">
+                      <Icon icon="streamline-emojis:television" size="14" />
+                    </a-button>
+                  </a-tooltip>
 
                   <!-- prompt 相关 -->
-                  <a-dropdown trigger="click">
-                    <a-button class="card-icon-button">
-                      <Icon icon="streamline-emojis:bell" size="14" color="#FFCC70" />
-                    </a-button>
-                    <template #overlay>
-                      <a-menu>
-                        <a-menu-item key="5" @click="() => copyText(card.prompt)"
-                          ><Icon icon="streamline-emojis:artist-palette" color="grey" />
-                          画同款</a-menu-item
-                        >
-                        <a-menu-item key="5" @click="() => copyText(card.prompt)"
-                          ><Icon icon="streamline-emojis:baseball" color="grey" />
-                          复制Prompt</a-menu-item
-                        >
-                        <a-menu-item key="4" @click="() => copyText(card.messageHash)"
-                          ><Icon icon="fluent-emoji-flat:id-button" color="grey" />
-                          复制任务ID</a-menu-item
-                        >
-                      </a-menu>
-                    </template>
-                  </a-dropdown>
+                  <a-tooltip title="Prompt操作">
+                    <a-dropdown trigger="click">
+                      <a-button class="card-icon-button">
+                        <Icon icon="streamline-emojis:bell" size="14" color="#FFCC70" />
+                      </a-button>
+                      <template #overlay>
+                        <a-menu>
+                          <a-menu-item key="5" @click="() => setPrompt(card.prompt)"
+                            ><Icon icon="streamline-emojis:artist-palette" color="grey" />
+                            画同款</a-menu-item
+                          >
+                          <a-menu-item key="5" @click="() => copyText(card.prompt)"
+                            ><Icon icon="streamline-emojis:baseball" color="grey" />
+                            复制Prompt</a-menu-item
+                          >
+                          <a-menu-item key="4" @click="() => copyText(card.messageHash)"
+                            ><Icon icon="fluent-emoji-flat:id-button" color="grey" />
+                            复制任务ID</a-menu-item
+                          >
+                        </a-menu>
+                      </template>
+                    </a-dropdown>
+                  </a-tooltip>
 
                   <!-- 添加到收藏 -->
-                  <a-button
-                    class="card-icon-button"
-                    @click="() => showAddCollectCategoryModel(card)"
-                  >
-                    <Icon icon="streamline-emojis:heart-with-arrow" size="14" color="#4F709C" />
-                  </a-button>
+                  <a-tooltip title="添加到收藏">
+                    <a-button
+                      class="card-icon-button"
+                      @click="() => showAddCollectCategoryModel(card)"
+                    >
+                      <Icon icon="streamline-emojis:heart-with-arrow" size="14" color="#4F709C" />
+                    </a-button>
+                  </a-tooltip>
+
                   <!-- <a-tooltip
                     v-if="card.prompt"
                     :overlayStyle="{ maxWidth: '500px' }"
@@ -627,7 +634,7 @@
                       @confirm="deleteCard(card)"
                     >
                       <a-button class="card-icon-button">
-                        <Icon icon="ic:baseline-delete-forever" size="14" color="#FF6969" />
+                        <SvgIcon name="delete" size="14" />
                       </a-button>
                     </a-popconfirm>
                   </a-tooltip>
@@ -1445,7 +1452,7 @@
                   <a-span> <Icon icon="streamline-emojis:office-building" />任务空间 </a-span>
                 </div>
                 <a-button size="small" @click="showUserSpaceTask(infoData.card)">
-                  <a-span> <Icon icon="streamline-emojis:palm-tree" />添加空间 </a-span>
+                  <a-span> <Icon icon="streamline-emojis:writing-hand-1" />添加空间 </a-span>
                 </a-button>
               </div>
             </template>
@@ -1461,6 +1468,48 @@
           </a-descriptions-item>
         </a-descriptions>
       </a-card-grid>
+      <!-- 收藏分类 -->
+      <a-card-grid style="width: 100%; text-align: left" :hoverable="false">
+        <a-descriptions bordered layout="vertical">
+          <a-descriptions-item
+            :span="2"
+            v-if="infoData.collectCategoryList && infoData.collectCategoryList.length > 0"
+          >
+            <template #label>
+              <div style="display: flex; flex-direction: row; justify-content: space-between">
+                <div>
+                  <a-span> <Icon icon="streamline-emojis:heart-with-arrow" />收藏分类 </a-span>
+                </div>
+                <a-button size="small" @click="showAddCollectCategoryModel(infoData.card)">
+                  <a-span> <Icon icon="streamline-emojis:writing-hand-1" />添加收藏 </a-span>
+                </a-button>
+              </div>
+            </template>
+            <a-tag
+              v-for="collectCategory in infoData.collectCategoryList"
+              :key="collectCategory.categoryId"
+              :bordered="false"
+              closable
+              @close="doRemoveFromCollectCategory(infoData.card, collectCategory.categoryId)"
+              :color="stringToColor(collectCategory.categoryId)"
+              >{{ collectCategory.categoryTitle }}
+            </a-tag>
+          </a-descriptions-item>
+          <a-descriptions-item :span="2" v-else>
+            <template #label>
+              <div style="display: flex; flex-direction: row; justify-content: space-between">
+                <div>
+                  <a-span> <Icon icon="streamline-emojis:heart-with-arrow" />收藏分类 </a-span>
+                </div>
+                <a-button size="small" @click="showAddCollectCategoryModel(infoData.card)">
+                  <a-span> <Icon icon="streamline-emojis:writing-hand-1" />添加收藏 </a-span>
+                </a-button>
+              </div>
+            </template>
+            <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" />
+          </a-descriptions-item>
+        </a-descriptions>
+      </a-card-grid>
       <a-card-grid style="width: 100%; text-align: left" :hoverable="false">
         <a-descriptions bordered layout="vertical">
           <a-descriptions-item :span="2" v-if="infoData.tagList && infoData.tagList.length > 0">
@@ -1468,7 +1517,7 @@
               <div style="display: flex; flex-direction: row; justify-content: space-between">
                 <div><Icon icon="streamline-emojis:blossom" />任务标签 </div>
                 <a-button size="small" @click="showDrawTaskTagModel(infoData.card)">
-                  <a-span> <Icon icon="streamline-emojis:palm-tree" />添加标签 </a-span>
+                  <a-span> <Icon icon="streamline-emojis:writing-hand-1" />添加标签 </a-span>
                 </a-button>
               </div>
             </template>
@@ -1487,7 +1536,7 @@
               <div style="display: flex; flex-direction: row; justify-content: space-between">
                 <div><Icon icon="streamline-emojis:blossom" />任务标签 </div>
                 <a-button size="small" @click="showDrawTaskTagModel(infoData.card)">
-                  <a-span> <Icon icon="streamline-emojis:palm-tree" /> 添加标签 </a-span>
+                  <a-span> <Icon icon="streamline-emojis:writing-hand-1" /> 添加标签 </a-span>
                 </a-button>
               </div>
             </template>
@@ -1559,7 +1608,7 @@
   <div>
     <a-modal
       v-model:open="collectCategoryViewForm.viewFlag"
-      title="🎈添加到其他分类"
+      title="🎈添加到收藏分类"
       ok-text="立即执行"
       @ok="doAddToCollectCategory"
       :confirmLoading="collectCategoryViewForm.loading"
@@ -1580,6 +1629,7 @@
                   name="categoryId"
                 >
                   <a-tree-select
+                    @change="handleCollectCategoryChange"
                     v-model:value="collectTaskForm.categoryId"
                     show-search
                     style="width: 100%"
@@ -1638,6 +1688,7 @@
     userSettingApi,
     lightBoxApi,
     splitAndDownloadImage,
+    textFormApi,
   } from './jobList.pageQuery';
   import {
     handleDownloadByUrls,
@@ -1655,6 +1706,7 @@
   import { info } from 'console';
   import { accountInfoApi, tagInfoApi, drawCollectCategoryApi } from './accountInfo';
 
+  const { setPrompt } = textFormApi();
   const {
     refreshCollectCategory,
     collectCategoryViewForm,
@@ -2007,24 +2059,37 @@
   };
 
   /********************************** 收藏分类 ************************************** */
+  const handleCollectCategoryChange = async (value, label, extra) => {
+    collectTaskForm.value.categoryId = value;
+    collectTaskForm.value.categoryTitle = label[0];
+  };
 
   const doAddToCollectCategory = async () => {
     loadingRef.value = true;
     try {
-      addToCollectCategory(pagination.value.current);
-      if (collectTaskForm.value.oriCategoryId !== null) {
-        onSearch(pagination.value.current);
+      await addToCollectCategory(collectTaskForm.value);
+
+      if (infoData.id && infoData.id === collectTaskForm.value.taskId) {
+        infoData.collectCategoryList.push({
+          categoryId: collectTaskForm.value.categoryId,
+          categoryTitle: collectTaskForm.value.categoryTitle,
+        });
       }
     } finally {
       loadingRef.value = false;
     }
   };
 
-  const doRemoveFromCollectCategory = async (card) => {
+  const doRemoveFromCollectCategory = async (card, categoryId) => {
+    console.log(1112);
     loadingRef.value = true;
     try {
-      removeFromCollectCategory(card);
-      onSearch(pagination.value.current);
+      await removeFromCollectCategory(categoryId, card.id);
+      if (infoData.id && infoData.id === card.id) {
+        infoData.collectCategoryList = infoData.collectCategoryList.filter(
+          (item) => item.categoryId !== categoryId,
+        );
+      }
     } finally {
       loadingRef.value = false;
     }

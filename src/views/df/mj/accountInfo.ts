@@ -336,9 +336,10 @@ export function drawCollectCategoryApi() {
   });
 
   const collectTaskForm = ref({
-    taskIds: [],
+    taskId: null,
     oriCategoryId: null,
     categoryId: null,
+    categoryTitle: null,
   });
 
   // 监听 collectCategoryList 的变化
@@ -351,7 +352,7 @@ export function drawCollectCategoryApi() {
   );
 
   const showAddCollectCategoryModel = (card) => {
-    collectTaskForm.value.taskIds = [card.id];
+    collectTaskForm.value.taskId = card.id;
     collectTaskForm.value.oriCategoryId = null;
     collectCategoryViewForm.value.title = '添加到收藏';
     collectCategoryViewForm.value.loading = false;
@@ -360,7 +361,7 @@ export function drawCollectCategoryApi() {
 
   const showMoveCollectCategoryModel = (card) => {
     console.log('showMoveCollectCategoryModel');
-    collectTaskForm.value.taskIds = [card.id];
+    collectTaskForm.value.taskId = card.id;
     collectTaskForm.value.oriCategoryId = card.collectCategoryId;
     collectCategoryViewForm.value.title = '移动收藏分类';
     collectCategoryViewForm.value.loading = false;
@@ -368,7 +369,7 @@ export function drawCollectCategoryApi() {
   };
 
   const closeCollectCategoryModel = () => {
-    collectTaskForm.value.taskIds = [];
+    collectTaskForm.value.taskId = null;
     collectTaskForm.value.oriCategoryId = null;
     collectCategoryViewForm.value.title = '';
     collectCategoryViewForm.value.loading = false;
@@ -419,10 +420,14 @@ export function drawCollectCategoryApi() {
   /**
    * 任务添加到收藏类目收藏
    */
-  const addToCollectCategory = async () => {
+  const addToCollectCategory = async (param: {
+    taskIds: any[];
+    oriCategoryId: any;
+    categoryId: any;
+  }) => {
     collectCategoryViewForm.value.loading = true;
     try {
-      await addToCategory(collectTaskForm.value);
+      await addToCategory(param);
       collectCategoryViewForm.value.viewFlag = false;
     } finally {
       collectCategoryViewForm.value.loading = false;
@@ -432,10 +437,10 @@ export function drawCollectCategoryApi() {
   /**
    * 任务移除收藏类目收藏
    */
-  const removeFromCollectCategory = async (card) => {
+  const removeFromCollectCategory = async (collectCategoryId, taskId) => {
     collectCategoryViewForm.value.loading = true;
     try {
-      await removeFromCategory({ categoryId: card.collectCategoryId, taskIds: [card.id] });
+      await removeFromCategory({ categoryId: collectCategoryId, taskId: taskId });
       collectCategoryViewForm.value.viewFlag = false;
     } finally {
       collectCategoryViewForm.value.loading = false;

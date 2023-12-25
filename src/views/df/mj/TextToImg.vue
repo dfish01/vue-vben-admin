@@ -481,78 +481,6 @@
                   </a-col>
                 </a-row>
               </a-tab-pane>
-              <a-tab-pane key="v4" tab="V 4">
-                <a-row style="margin-top: 10px">
-                  <a-col span="6">
-                    <a-tooltip
-                      title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
-                    >
-                      <a-tag class="quality-tag" color="default"
-                        >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
-                    ></a-tooltip>
-                  </a-col>
-                  <a-col span="18">
-                    <a-select
-                      v-model:value="versionParam.v4.quality"
-                      style="width: 100%; height: 32px"
-                    >
-                      <a-select-option value="0.25">0.25x</a-select-option>
-                      <a-select-option value="0.5">0.5x</a-select-option>
-                      <a-select-option value="1">1x</a-select-option>
-                    </a-select>
-                  </a-col>
-                </a-row>
-                <a-row class="row-wapper">
-                  <a-col
-                    span="6"
-                    style="display: flex; align-items: center; justify-content: start"
-                  >
-                    <span class="quality-tag"
-                      >风格化
-
-                      <a-tooltip
-                        title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" />
-                      </a-tooltip>
-                    </span>
-                  </a-col>
-                  <a-col :span="18">
-                    <a-slider
-                      style="margin-left: 3px"
-                      v-model:value="versionParam.v4.s"
-                      :min="1"
-                      :step="1"
-                      :max="1000"
-                    />
-                  </a-col>
-                </a-row>
-                <a-row class="row-wapper">
-                  <a-col
-                    span="6"
-                    style="display: flex; align-items: center; justify-content: start"
-                  >
-                    <span class="quality-tag"
-                      >多样性
-
-                      <a-tooltip
-                        title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" />
-                      </a-tooltip>
-                    </span>
-                  </a-col>
-                  <a-col :span="18">
-                    <a-slider
-                      style="margin-left: 3px"
-                      v-model:value="versionParam.v4.chaos"
-                      :min="1"
-                      :step="1"
-                      :max="100"
-                    />
-                  </a-col>
-                </a-row>
-              </a-tab-pane>
               <a-tab-pane key="v5" tab="V 5">
                 <a-row style="justify-content: left">
                   <a-col span="24" class="style-radio">
@@ -864,6 +792,111 @@
                     style="display: flex; align-items: center; justify-content: right"
                   >
                     <a-switch v-model:checked="versionParam.v52.tile" disabled />
+                  </a-col>
+                </a-row>
+              </a-tab-pane>
+              <a-tab-pane key="v6" tab="V 6">
+                <a-row style="justify-content: left">
+                  <a-col span="24" class="style-radio">
+                    <a-radio-group size="small" v-model:value="versionParam.v6.style">
+                      <a-tooltip title="默认风格">
+                        <a-radio-button value="">Default</a-radio-button>
+                      </a-tooltip>
+                      <a-tooltip title="原始风格，多实用于摄影，更写实的风格">
+                        <a-radio-button value="raw">RAW</a-radio-button>
+                      </a-tooltip>
+                    </a-radio-group>
+                  </a-col>
+                </a-row>
+                <a-row style="margin-top: 10px">
+                  <a-col span="6">
+                    <a-tooltip
+                      title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
+                    >
+                      <a-tag class="quality-tag" color="default"
+                        >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
+                    ></a-tooltip>
+                  </a-col>
+                  <a-col span="18">
+                    <a-select
+                      v-model:value="versionParam.v6.quality"
+                      style="width: 100%; height: 32px"
+                    >
+                      <a-select-option value="0.25">0.25x</a-select-option>
+                      <a-select-option value="0.5">0.5x</a-select-option>
+                      <a-select-option value="1">1x</a-select-option>
+                    </a-select>
+                  </a-col>
+                </a-row>
+                <a-row class="row-wapper">
+                  <a-col
+                    span="6"
+                    style="display: flex; align-items: center; justify-content: start"
+                  >
+                    <span class="quality-tag"
+                      >风格化
+
+                      <a-tooltip
+                        title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
+                      >
+                        <ExclamationCircleOutlined class="icon-hint" />
+                      </a-tooltip>
+                    </span>
+                  </a-col>
+                  <a-col :span="18">
+                    <a-slider
+                      style="margin-left: 3px"
+                      v-model:value="versionParam.v6.s"
+                      :min="1"
+                      :step="1"
+                      :max="1000"
+                    />
+                  </a-col>
+                </a-row>
+                <a-row class="row-wapper">
+                  <a-col
+                    span="6"
+                    style="display: flex; align-items: center; justify-content: start"
+                  >
+                    <span class="quality-tag"
+                      >多样性
+
+                      <a-tooltip
+                        title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
+                      >
+                        <ExclamationCircleOutlined class="icon-hint" />
+                      </a-tooltip>
+                    </span>
+                  </a-col>
+                  <a-col :span="18">
+                    <a-slider
+                      style="margin-left: 3px"
+                      v-model:value="versionParam.v6.chaos"
+                      :min="1"
+                      :step="1"
+                      :max="100"
+                    />
+                  </a-col>
+                </a-row>
+
+                <a-row class="row-wapper">
+                  <a-col
+                    span="8"
+                    style="display: flex; align-items: center; justify-content: center"
+                  >
+                    <span class="quality-tag"
+                      >无缝图案
+                      <a-tooltip
+                        title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
+                      >
+                        <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
+                    ></span>
+                  </a-col>
+                  <a-col
+                    :span="16"
+                    style="display: flex; align-items: center; justify-content: right"
+                  >
+                    <a-switch v-model:checked="versionParam.v6.tile" disabled />
                   </a-col>
                 </a-row>
               </a-tab-pane>
@@ -1254,6 +1287,9 @@
   import { useRoute } from 'vue-router';
 
   import { accountInfoApi } from './accountInfo';
+  import { textFormApi } from './jobList.pageQuery';
+
+  const { textToImgForm } = textFormApi();
 
   const {
     accountForm,
@@ -1416,20 +1452,6 @@
 
   const { createMessage } = useMessage();
   const textFormLoading = ref(false);
-  const textToImgForm = reactive({
-    command: null,
-    commandEN: null,
-    aiPrompt: null,
-    robotSelect: '1022952195194359889',
-    invokeTimes: 1,
-    // useAccountId: null,
-    // useChannelId: null,
-    isPublic: false,
-    // mode: 'relax',
-    enableTranslate: false,
-    tagName: '',
-    tagNameOptions: [] as { value: string; label: string }[],
-  });
 
   const onChangeLabel = (selectedOption) => {
     console.log(selectedOption);
@@ -1641,7 +1663,7 @@
     },
     v5: {
       style: null,
-      quality: '0.25',
+      quality: '1',
       chaos: 0,
       s: 100,
       version: 'v 5',
@@ -1650,7 +1672,7 @@
     },
     v51: {
       style: 'raw',
-      quality: '0.25',
+      quality: '1',
       chaos: 0,
       s: 100,
       version: 'v 5.1',
@@ -1659,11 +1681,20 @@
     },
     v52: {
       style: 'raw',
-      quality: '0.25',
+      quality: '1',
       chaos: 0,
       s: 100,
       iw: 1,
       version: 'v 5.2',
+      tile: false,
+    },
+    v6: {
+      style: 'raw',
+      quality: '1',
+      chaos: 0,
+      s: 100,
+      iw: 1,
+      version: 'v 6',
       tile: false,
     },
   });
@@ -1701,6 +1732,7 @@
       versionParam.value.v5.iw = paramDataValue.value.iw;
       versionParam.value.v51.iw = paramDataValue.value.iw;
       versionParam.value.v52.iw = paramDataValue.value.iw;
+      versionParam.value.v6.iw = paramDataValue.value.iw;
     }
   };
 

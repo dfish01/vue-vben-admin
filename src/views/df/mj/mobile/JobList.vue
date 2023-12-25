@@ -167,7 +167,7 @@
       <a-empty :image="simpleImage" />
     </div>
     <div v-else class="cards" :style="{ height: `calc(${contentHeight}px `, overflow: 'auto' }">
-      <a-dropdown v-for="card in cards" :key="card.id" :trigger="['contextmenu']">
+      <div v-for="card in cards" :key="card.id" :trigger="['contextmenu']">
         <a-card :bodyStyle="{ padding: '0px' }" class="card" hoverable>
           <div v-if="card.state === 'QUEUED'" class="mask-queued label-front">
             <div
@@ -504,7 +504,7 @@
                     "
                     v-if="card.state === 'SUCCESS' && card.commandType != 'DESCRIBE'"
                   >
-                    <a-button class="card-icon-button" @click="toggleVisibility(card)">
+                    <a-button @click="toggleVisibility(card)" class="card-icon-button">
                       <span v-if="card.privacyMode === 'Y'">
                         <Icon icon="material-symbols:public-off" size="14" color="#B4B4B3" />
                       </span>
@@ -513,55 +513,48 @@
                       </span>
                     </a-button>
                   </a-tooltip> -->
+                  <a-tooltip title="任务概况">
+                    <a-button class="card-icon-button" @click="() => showTaskInfo(card)">
+                      <Icon icon="streamline-emojis:television" size="14" />
+                    </a-button>
+                  </a-tooltip>
 
-                  <a-dropdown :placement="placement" arrow trigger="click">
-                    <a-button class="card-icon-button"><SvgIcon name="menu" size="14" /></a-button>
-                    <template #overlay>
-                      <a-menu>
-                        <a-menu-item
-                          key="1"
-                          v-if="card.state === 'SUCCESS'"
-                          @click="() => showTaskInfo(card)"
-                          ><Icon icon="streamline-emojis:television" />任务明细</a-menu-item
-                        >
-                        <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)"
-                          ><Icon icon="streamline-emojis:blossom" /> 添加标签</a-menu-item
-                        >
-                        <a-menu-item key="3" @click="() => showSampleView(card)"
-                          ><Icon icon="streamline-emojis:globe-showing-europe-africa" />
-                          添加到官方案例</a-menu-item
-                        >
-                        <a-menu-item key="4" @click="() => copyText(card.messageHash)"
-                          ><Icon icon="fluent-emoji-flat:id-button" color="grey" />
-                          复制任务ID</a-menu-item
-                        >
-
-                        <a-menu-item key="5" @click="() => copyText(card.prompt)"
-                          ><Icon icon="streamline-emojis:baseball" color="grey" />
-                          复制Prompt</a-menu-item
-                        >
-                        <a-menu-item key="6" @click="showUserSpaceTask(card)"
-                          ><Icon icon="streamline-emojis:helicopter" /> 添加到其他空间</a-menu-item
-                        >
-                        <a-popconfirm
-                          title="是否确认移除任务?"
-                          ok-text="确认删除"
-                          cancel-text="取消"
-                          @confirm="deleteCard(card)"
-                        >
-                          <a-menu-item key="7" @click="deleteSpaceCard(card, spaceId)">
-                            <Icon icon="streamline-emojis:recycling-symbol" color="red" />
-                            从该空间移除</a-menu-item
+                  <!-- prompt 相关 -->
+                  <a-tooltip title="Prompt操作">
+                    <a-dropdown trigger="click">
+                      <a-button class="card-icon-button">
+                        <Icon icon="streamline-emojis:bell" size="14" color="#FFCC70" />
+                      </a-button>
+                      <template #overlay>
+                        <a-menu>
+                          <a-menu-item key="5" @click="() => setPrompt(card.prompt)"
+                            ><Icon icon="streamline-emojis:artist-palette" color="grey" />
+                            画同款</a-menu-item
                           >
-                        </a-popconfirm>
-                        <a-menu-item key="8" @click="() => getSeed(card.id, false)"
-                          ><Icon icon="streamline-emojis:rocket" /> 获取Seed</a-menu-item
-                        >
-                      </a-menu>
-                    </template>
-                  </a-dropdown>
+                          <a-menu-item key="5" @click="() => copyText(card.prompt)"
+                            ><Icon icon="streamline-emojis:baseball" color="grey" />
+                            复制Prompt</a-menu-item
+                          >
+                          <a-menu-item key="4" @click="() => copyText(card.messageHash)"
+                            ><Icon icon="fluent-emoji-flat:id-button" color="grey" />
+                            复制任务ID</a-menu-item
+                          >
+                        </a-menu>
+                      </template>
+                    </a-dropdown>
+                  </a-tooltip>
 
-                  <a-tooltip
+                  <!-- 添加到收藏 -->
+                  <a-tooltip title="添加到收藏">
+                    <a-button
+                      class="card-icon-button"
+                      @click="() => showAddCollectCategoryModel(card)"
+                    >
+                      <Icon icon="streamline-emojis:heart-with-arrow" size="14" color="#4F709C" />
+                    </a-button>
+                  </a-tooltip>
+
+                  <!-- <a-tooltip
                     v-if="card.prompt"
                     :overlayStyle="{ maxWidth: '500px' }"
                     trigger="click"
@@ -574,7 +567,7 @@
                     <a-button class="card-icon-button">
                       <Icon icon="ic:outline-info" size="14" color="#FFCC70" />
                     </a-button>
-                  </a-tooltip>
+                  </a-tooltip> -->
                   <a-tooltip>
                     <template #title>
                       <p
@@ -591,14 +584,49 @@
                   </a-tooltip>
 
                   <a-tooltip title="删除">
+                    <!-- <a-popover trigger="click">
+                      <a-button class="card-icon-button">
+                        <Icon icon="ic:baseline-delete-forever" size="14" color="#FF6969" />
+                      </a-button>
+                      <template #title></template>
+                      <template #content>
+                        <div style="width: 300px">
+                          <a-row>
+                            <p style="width: 300px">⚠ 相关操作不可逆，请小心操作~</p>
+                          </a-row>
+                          <a-row style="justify-content: right">
+                            <a-button size="small" @click="handleCustomButton1">取消</a-button>
+                            <a-tooltip title="从全部空间移除该任务！">
+                              <a-popconfirm
+                                title="该操作不可逆，是否确认删除?"
+                                ok-text="确认删除"
+                                cancel-text="取消"
+                                @confirm="deleteCard(card)"
+                              >
+                                <a-button size="small" type="danger">删除任务</a-button>
+                              </a-popconfirm>
+                            </a-tooltip>
+                            <a-tooltip title="移除当前空间的任务！">
+                              <a-button
+                                size="small"
+                                type="primary"
+                                @click="deleteSpaceCard(card, spaceId)"
+                                >移除任务</a-button
+                              >
+                            </a-tooltip>
+                          </a-row>
+                        </div>
+                      </template>
+                    </a-popover> -->
+
                     <a-popconfirm
-                      title="该操作将永久删除任务，是否确认删除?"
+                      title="是否确认移除任务?"
                       ok-text="确认删除"
                       cancel-text="取消"
                       @confirm="deleteCard(card)"
                     >
                       <a-button class="card-icon-button">
-                        <Icon icon="ic:baseline-delete-forever" size="14" color="#FF6969" />
+                        <SvgIcon name="delete" size="14" />
                       </a-button>
                     </a-popconfirm>
                   </a-tooltip>
@@ -611,20 +639,24 @@
                       <Icon icon="bx:bxs-cloud-download" size="14" color="#4F709C" />
                     </a-button>
                   </a-tooltip>
-                  <a-tooltip
-                    title="加入收藏"
-                    v-if="card.state === 'SUCCESS' && card.commandType != 'DESCRIBE'"
-                  >
-                    <a-button class="card-icon-button" @click="addDrawCollect(card)">
-                      <Icon
-                        v-if="card.collectFlag === 'N'"
-                        icon="material-symbols:heart-plus-outline"
-                        size="14"
-                        color="#213555"
-                      />
-                      <Icon v-else icon="material-symbols:heart-plus" size="14" color="#c85762" />
-                    </a-button>
-                  </a-tooltip>
+                  <!-- 其他设置 -->
+                  <a-dropdown trigger="click">
+                    <a-button class="card-icon-button"><SvgIcon name="menu" size="14" /></a-button>
+                    <template #overlay>
+                      <a-menu>
+                        <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)"
+                          ><Icon icon="streamline-emojis:blossom" /> 添加标签</a-menu-item
+                        >
+                        <a-menu-item key="3" @click="() => showSampleView(card)"
+                          ><Icon icon="streamline-emojis:globe-showing-europe-africa" />
+                          添加到官方案例</a-menu-item
+                        >
+                        <a-menu-item key="8" @click="() => getSeed(card.id, false)"
+                          ><Icon icon="streamline-emojis:rocket" /> 获取Seed</a-menu-item
+                        >
+                      </a-menu>
+                    </template>
+                  </a-dropdown>
                 </a-button-group>
               </div>
             </div>
@@ -865,46 +897,7 @@
           </div>
           <!-- 更多卡片内容 -->
         </a-card>
-
-        <template #overlay>
-          <a-menu>
-            <a-menu-item key="1" v-if="card.state === 'SUCCESS'" @click="() => showTaskInfo(card)"
-              ><Icon icon="streamline-emojis:television" />任务明细</a-menu-item
-            >
-            <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)"
-              ><Icon icon="streamline-emojis:blossom" /> 添加标签</a-menu-item
-            >
-            <a-menu-item key="3" @click="() => showSampleView(card)"
-              ><Icon icon="streamline-emojis:globe-showing-europe-africa" />
-              添加到官方案例</a-menu-item
-            >
-            <a-menu-item key="4" @click="() => copyText(card.messageHash)"
-              ><Icon icon="fluent-emoji-flat:id-button" color="grey" /> 复制任务ID</a-menu-item
-            >
-
-            <a-menu-item key="5" @click="() => copyText(card.prompt)"
-              ><Icon icon="streamline-emojis:baseball" color="grey" /> 复制Prompt</a-menu-item
-            >
-            <a-menu-item key="6" @click="showUserSpaceTask(card)"
-              ><Icon icon="streamline-emojis:helicopter" /> 添加到其他空间</a-menu-item
-            >
-            <a-popconfirm
-              title="是否确认移除任务?"
-              ok-text="确认删除"
-              cancel-text="取消"
-              @confirm="deleteCard(card)"
-            >
-              <a-menu-item key="7" @click="deleteSpaceCard(card, spaceId)">
-                <Icon icon="streamline-emojis:recycling-symbol" color="red" />
-                从该空间移除</a-menu-item
-              >
-            </a-popconfirm>
-            <a-menu-item key="8" @click="() => getSeed(card.id, false)"
-              ><Icon icon="streamline-emojis:rocket" /> 获取Seed</a-menu-item
-            >
-          </a-menu>
-        </template>
-      </a-dropdown>
+      </div>
       <!-- 灯箱-->
       <vue-easy-lightbox
         :visible="lightBoxOptions.visibleRef"
@@ -1562,6 +1555,48 @@
             </a-descriptions-item>
           </a-descriptions>
         </a-card-grid>
+        <!-- 收藏分类 -->
+        <a-card-grid style="width: 100%; text-align: left" :hoverable="false">
+          <a-descriptions bordered layout="vertical">
+            <a-descriptions-item
+              :span="2"
+              v-if="infoData.collectCategoryList && infoData.collectCategoryList.length > 0"
+            >
+              <template #label>
+                <div style="display: flex; flex-direction: row; justify-content: space-between">
+                  <div>
+                    <a-span> <Icon icon="streamline-emojis:heart-with-arrow" />收藏分类 </a-span>
+                  </div>
+                  <a-button size="small" @click="showAddCollectCategoryModel(infoData.card)">
+                    <a-span> <Icon icon="streamline-emojis:writing-hand-1" />添加收藏 </a-span>
+                  </a-button>
+                </div>
+              </template>
+              <a-tag
+                v-for="collectCategory in infoData.collectCategoryList"
+                :key="collectCategory.categoryId"
+                :bordered="false"
+                closable
+                @close="doRemoveFromCollectCategory(infoData.card, collectCategory.categoryId)"
+                :color="stringToColor(collectCategory.categoryId)"
+                >{{ collectCategory.categoryTitle }}
+              </a-tag>
+            </a-descriptions-item>
+            <a-descriptions-item :span="2" v-else>
+              <template #label>
+                <div style="display: flex; flex-direction: row; justify-content: space-between">
+                  <div>
+                    <a-span> <Icon icon="streamline-emojis:heart-with-arrow" />收藏分类 </a-span>
+                  </div>
+                  <a-button size="small" @click="showAddCollectCategoryModel(infoData.card)">
+                    <a-span> <Icon icon="streamline-emojis:writing-hand-1" />添加收藏 </a-span>
+                  </a-button>
+                </div>
+              </template>
+              <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" />
+            </a-descriptions-item>
+          </a-descriptions>
+        </a-card-grid>
         <a-card-grid style="width: 100%; margin-top: 5px; text-align: left" :hoverable="false">
           <a-descriptions bordered layout="vertical">
             <a-descriptions-item v-if="infoData.tagList && infoData.tagList.length > 0">
@@ -1617,7 +1652,7 @@
     <div>
       <a-modal
         v-model:open="collectCategoryViewForm.viewFlag"
-        title="🎈添加到其他分类"
+        title="🎈添加到收藏分类"
         ok-text="立即执行"
         @ok="doAddToCollectCategory"
         :confirmLoading="collectCategoryViewForm.loading"
@@ -1638,6 +1673,7 @@
                     name="categoryId"
                   >
                     <a-tree-select
+                      @change="handleCollectCategoryChange"
                       v-model:value="collectTaskForm.categoryId"
                       show-search
                       style="width: 100%"
@@ -1676,7 +1712,7 @@
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
   import { listCategory, queryDrawingSample, addDrawingSample } from '/@/api/df/drawingSample';
   import { addSpaceTask, removeSpaceTask, allUserSpace } from '/@/api/df/workSpace';
-  import { accountInfoApi, tagInfoApi } from '../accountInfo';
+  import { accountInfoApi, tagInfoApi, drawCollectCategoryApi } from '../accountInfo';
   import { SvgIcon } from '/@/components/Icon';
   import {
     ref,
@@ -1696,6 +1732,7 @@
     userSettingApi,
     lightBoxApi,
     splitAndDownloadImage,
+    textFormApi,
   } from '../jobList.pageQuery';
   import {
     downloadImage,
@@ -1710,6 +1747,7 @@
   } from '../tools';
   import { useRoute } from 'vue-router';
 
+  const { setPrompt } = textFormApi();
   const {
     refreshCollectCategory,
     collectCategoryViewForm,
@@ -2005,24 +2043,37 @@
   };
 
   /********************************** 收藏分类 ************************************** */
+  const handleCollectCategoryChange = async (value, label, extra) => {
+    collectTaskForm.value.categoryId = value;
+    collectTaskForm.value.categoryTitle = label[0];
+  };
 
   const doAddToCollectCategory = async () => {
     loadingRef.value = true;
     try {
-      addToCollectCategory(pagination.value.current);
-      if (collectTaskForm.value.oriCategoryId !== null) {
-        onSearch(pagination.value.current);
+      await addToCollectCategory(collectTaskForm.value);
+
+      if (infoData.id && infoData.id === collectTaskForm.value.taskId) {
+        infoData.collectCategoryList.push({
+          categoryId: collectTaskForm.value.categoryId,
+          categoryTitle: collectTaskForm.value.categoryTitle,
+        });
       }
     } finally {
       loadingRef.value = false;
     }
   };
 
-  const doRemoveFromCollectCategory = async (card) => {
+  const doRemoveFromCollectCategory = async (card, categoryId) => {
+    console.log(1112);
     loadingRef.value = true;
     try {
-      removeFromCollectCategory(card);
-      onSearch(pagination.value.current);
+      await removeFromCollectCategory(categoryId, card.id);
+      if (infoData.id && infoData.id === card.id) {
+        infoData.collectCategoryList = infoData.collectCategoryList.filter(
+          (item) => item.categoryId !== categoryId,
+        );
+      }
     } finally {
       loadingRef.value = false;
     }

@@ -6,7 +6,7 @@ import { DrawTaskListResp } from '/@/api/df/model/drawTaskModel';
  */
 export interface DrawCollectAddReq {
   /** 任务id */
-  taskIds: string[];
+  taskId: string | null;
   /** 收藏夹ID */
   categoryId: string | null;
   /** 原类目ID */
@@ -18,7 +18,7 @@ export interface DrawCollectAddReq {
  */
 export interface DrawCollectRemoveReq {
   /** 任务id */
-  taskIds: string[];
+  taskId: string | null;
   /** 收藏夹ID */
   categoryId: string | null;
 }

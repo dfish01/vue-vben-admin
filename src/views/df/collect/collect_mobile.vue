@@ -424,7 +424,7 @@
                     title="是否从该分类移除?"
                     ok-text="立即移除"
                     cancel-text="取消"
-                    @confirm="doRemoveFromCollectCategory(card)"
+                    @confirm="doRemoveFromCollectCategory(card, card.collectCategoryId)"
                   >
                     <a-button class="card-icon-button">
                       <Icon icon="streamline-emojis:cross-mark" size="14" color="#4F709C" />
@@ -1036,6 +1036,30 @@
         :bordered="false"
         :bodyStyle="{ padding: '1px 3px', width: '100%', 'align-items': 'center' }"
       >
+        <a-row type="flex" :gutter="[0, 2]" style="margin-top: 7px">
+          <a-col flex="80px">
+            <a-tag class="quality-tag" color="default">🍊分类 </a-tag>
+          </a-col>
+          <a-col flex="auto">
+            <a-tree-select
+              @change="handleCollectCategoryChange"
+              v-model:value="globalForm.currentCategoryId"
+              show-search
+              style="width: 100%"
+              :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+              placeholder="请选择收藏分类"
+              allow-clear
+              tree-default-expand-all
+              :tree-data="collectCategoryViewForm.collectCategoryOptions"
+              tree-node-filter-prop="label"
+            >
+              <template #title="{ value: val, label }">
+                <b v-if="val === 'parent 1-1'" style="color: #08c">sss</b>
+                <template v-else>{{ label }}</template>
+              </template>
+            </a-tree-select>
+          </a-col>
+        </a-row>
         <a-row :gutter="[0, 2]" type="flex">
           <a-col flex="80px">
             <a-tag class="quality-tag" color="default">🍺状态 </a-tag>
@@ -1288,6 +1312,48 @@
             </a-descriptions-item>
           </a-descriptions>
         </a-card-grid>
+        <!-- 收藏分类 -->
+        <a-card-grid style="width: 100%; text-align: left" :hoverable="false">
+          <a-descriptions bordered layout="vertical">
+            <a-descriptions-item
+              :span="2"
+              v-if="infoData.collectCategoryList && infoData.collectCategoryList.length > 0"
+            >
+              <template #label>
+                <div style="display: flex; flex-direction: row; justify-content: space-between">
+                  <div>
+                    <a-span> <Icon icon="streamline-emojis:heart-with-arrow" />收藏分类 </a-span>
+                  </div>
+                  <a-button size="small" @click="showAddCollectCategoryModel(infoData.card)">
+                    <a-span> <Icon icon="streamline-emojis:writing-hand-1" />添加收藏 </a-span>
+                  </a-button>
+                </div>
+              </template>
+              <a-tag
+                v-for="collectCategory in infoData.collectCategoryList"
+                :key="collectCategory.categoryId"
+                :bordered="false"
+                closable
+                @close="doRemoveFromCollectCategory(infoData.card, collectCategory.categoryId)"
+                :color="stringToColor(collectCategory.categoryId)"
+                >{{ collectCategory.categoryTitle }}
+              </a-tag>
+            </a-descriptions-item>
+            <a-descriptions-item :span="2" v-else>
+              <template #label>
+                <div style="display: flex; flex-direction: row; justify-content: space-between">
+                  <div>
+                    <a-span> <Icon icon="streamline-emojis:heart-with-arrow" />收藏分类 </a-span>
+                  </div>
+                  <a-button size="small" @click="showAddCollectCategoryModel(infoData.card)">
+                    <a-span> <Icon icon="streamline-emojis:writing-hand-1" />添加收藏 </a-span>
+                  </a-button>
+                </div>
+              </template>
+              <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" />
+            </a-descriptions-item>
+          </a-descriptions>
+        </a-card-grid>
         <a-card-grid style="width: 100%; margin-top: 5px; text-align: left" :hoverable="false">
           <a-descriptions bordered layout="vertical">
             <a-descriptions-item v-if="infoData.tagList && infoData.tagList.length > 0">
@@ -1339,50 +1405,11 @@
       </a-card>
       <Loading :loading="loadingRef" :absolute="false" :tip="infoData.tip" />
     </a-modal>
-
-    <!-- 运行账号配置-->
-    <div>
-      <a-modal v-model:open="accountViewForm.viewFlag" title="执行账号配置">
-        <template #footer>
-          <a-button type="primary" @click="closeAccountConfig">关闭窗口</a-button>
-        </template>
-        <a-card :bodyStyle="{ margin: '0px 15px' }">
-          <span style="margin-bottom: 30px; font-size: 11px"
-            >📢这里和绘画工作台的账号和执行模型是联动的！！！</span
-          >
-          <a-form layout="vertical" style="margin-top: 10px">
-            <a-form-item label="执行账号">
-              <a-select
-                placeholder="不选的话，随机选取账号，优先默认"
-                @change="handleAccountSetting"
-                style="width: 100%; height: 32px"
-                v-model:value="accountForm.useAccountId"
-                v-model="accountForm.useAccountId"
-                :size="accountViewForm.accountSelector.size"
-                :options="accountViewForm.accountSelector.options"
-              />
-            </a-form-item>
-            <a-form-item label="执行模式">
-              <a-select
-                v-model:value="accountForm.mode"
-                style="width: 100%; height: 32px"
-                placeholder="不选的话，默认休闲模式"
-              >
-                <!-- <a-select-option value="">不设置</a-select-option> -->
-                <a-select-option value="relax">休闲模式</a-select-option>
-                <a-select-option value="fast">快速模式</a-select-option>
-                <a-select-option value="turbo">涡轮模式</a-select-option>
-              </a-select>
-            </a-form-item>
-          </a-form>
-        </a-card>
-      </a-modal>
-    </div>
     <!-- 添加到到收藏分类  -->
     <div>
       <a-modal
         v-model:open="collectCategoryViewForm.viewFlag"
-        title="🎈添加到其他分类"
+        title="🎈添加到收藏分类"
         ok-text="立即执行"
         @ok="doAddToCollectCategory"
         :confirmLoading="collectCategoryViewForm.loading"
@@ -1403,6 +1430,7 @@
                     name="categoryId"
                   >
                     <a-tree-select
+                      @change="handleCollectCategoryChange"
                       v-model:value="collectTaskForm.categoryId"
                       show-search
                       style="width: 100%"
@@ -1540,6 +1568,7 @@
   const doModelSearch = () => {
     // 验证消息来源和内容，然后关闭 iframe
     showQueryViewFlag.value = false;
+    searchForm.value.categoryId = globalForm.value.currentCategoryId;
     onSearch(1);
   };
   const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
@@ -1675,12 +1704,22 @@
   };
 
   /********************************** 收藏分类 ************************************** */
+  const handleCollectCategoryChange = async (value, label, extra) => {
+    collectTaskForm.value.categoryId = value;
+    collectTaskForm.value.categoryTitle = label[0];
+  };
 
   const doAddToCollectCategory = async () => {
     loadingRef.value = true;
     try {
-      addToCollectCategory(pagination.value.current);
-      if (collectTaskForm.value.oriCategoryId !== null) {
+      await addToCollectCategory(collectTaskForm.value);
+
+      if (infoData.id && infoData.id === collectTaskForm.value.taskId) {
+        infoData.collectCategoryList.push({
+          categoryId: collectTaskForm.value.categoryId,
+          categoryTitle: collectTaskForm.value.categoryTitle,
+        });
+      } else {
         onSearch(pagination.value.current);
       }
     } finally {
@@ -1688,11 +1727,17 @@
     }
   };
 
-  const doRemoveFromCollectCategory = async (card) => {
+  const doRemoveFromCollectCategory = async (card, categoryId) => {
     loadingRef.value = true;
     try {
-      removeFromCollectCategory(card);
-      onSearch(pagination.value.current);
+      await removeFromCollectCategory(categoryId, card.id);
+      if (infoData.id && infoData.id === card.id) {
+        infoData.collectCategoryList = infoData.collectCategoryList.filter(
+          (item) => item.categoryId !== categoryId,
+        );
+      } else {
+        onSearch(pagination.value.current);
+      }
     } finally {
       loadingRef.value = false;
     }

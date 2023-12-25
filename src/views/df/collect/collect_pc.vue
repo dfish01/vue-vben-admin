@@ -429,7 +429,7 @@
                     title="是否从该分类移除?"
                     ok-text="立即移除"
                     cancel-text="取消"
-                    @confirm="doRemoveFromCollectCategory(card)"
+                    @confirm="doRemoveFromCollectCategory(card, card.collectCategoryId)"
                   >
                     <a-button class="card-icon-button">
                       <Icon icon="streamline-emojis:cross-mark" size="14" color="#4F709C" />
@@ -1021,9 +1021,9 @@
     <!-- 查看明细  -->
     <a-modal
       title="任务概况"
-      width="50%"
       v-model:open="infoData.viewFlag"
-      style="top: 10px; min-width: 720px"
+      width="50%"
+      class="task-info"
       zIndex="999"
     >
       <template #footer>
@@ -1053,18 +1053,18 @@
                 style="width: 49%; margin: 1px; padding: 0; border-radius: 15px; text-align: center"
               >
                 <!-- <div
-                  v-show="!infoImage.loaded"
-                  :style="{
-                    width: '100%',
-                    height: '100%',
-                    paddingBottom: `${
-                      (infoData.taskInfo.taskImage.imageHeight /
-                        infoData.taskInfo.taskImage.imageWidth) *
-                      100
-                    }%`,
-                  }"
-                >
-                </div> -->
+                v-show="!infoImage.loaded"
+                :style="{
+                  width: '100%',
+                  height: '100%',
+                  paddingBottom: `${
+                    (infoData.taskInfo.taskImage.imageHeight /
+                      infoData.taskInfo.taskImage.imageWidth) *
+                    100
+                  }%`,
+                }"
+              >
+              </div> -->
 
                 <img
                   @click="showInfoImage(getImageList(infoData.taskInfo), infoImage.url)"
@@ -1112,19 +1112,33 @@
 
         <a-card-grid style="width: 100%; text-align: center" :hoverable="false">
           <a-descriptions bordered size="small" :column="2">
-            <a-descriptions-item label="👨执行账户">{{
-              infoData.taskInfo.accountName
-            }}</a-descriptions-item>
-            <a-descriptions-item label="🍪任务类型">
+            <a-descriptions-item
+              label="👨执行账户"
+              :labelStyle="{ width: '25%' }"
+              :contentStyle="{ width: '25%' }"
+              >{{ infoData.taskInfo.accountName }}</a-descriptions-item
+            >
+            <a-descriptions-item
+              label="🍪任务类型"
+              :labelStyle="{ width: '25%' }"
+              :contentStyle="{ width: '25%' }"
+            >
               <a-tag :color="stringToColor(infoData.taskInfo.commandTypeName)">{{
                 infoData.taskInfo.commandTypeName
               }}</a-tag>
             </a-descriptions-item>
-            <a-descriptions-item label="💎MJ账号">{{
-              infoData.taskInfo.discordUserName
-            }}</a-descriptions-item>
+            <a-descriptions-item
+              label="💎MJ账号"
+              :labelStyle="{ width: '25%' }"
+              :contentStyle="{ width: '25%' }"
+              >{{ infoData.taskInfo.discordUserName }}</a-descriptions-item
+            >
 
-            <a-descriptions-item label="🤖执行机器人">
+            <a-descriptions-item
+              label="🤖执行机器人"
+              :labelStyle="{ width: '25%' }"
+              :contentStyle="{ width: '25%' }"
+            >
               <a-tag :color="infoData.taskInfo.bootName === 'niji' ? 'green' : ''"
                 >{{ infoData.taskInfo.bootName }} 机器人</a-tag
               >
@@ -1161,7 +1175,6 @@
                 </a-button>
               </div>
             </a-descriptions-item>
-
             <a-descriptions-item
               label="📔原始Prompt"
               :span="2"
@@ -1195,7 +1208,7 @@
                     <a-span> <Icon icon="streamline-emojis:office-building" />任务空间 </a-span>
                   </div>
                   <a-button size="small" @click="showUserSpaceTask(infoData.card)">
-                    <a-span> <Icon icon="streamline-emojis:palm-tree" />添加空间 </a-span>
+                    <a-span> <Icon icon="streamline-emojis:writing-hand-1" />添加空间 </a-span>
                   </a-button>
                 </div>
               </template>
@@ -1211,14 +1224,56 @@
             </a-descriptions-item>
           </a-descriptions>
         </a-card-grid>
+        <!-- 收藏分类 -->
+        <a-card-grid style="width: 100%; text-align: left" :hoverable="false">
+          <a-descriptions bordered layout="vertical">
+            <a-descriptions-item
+              :span="2"
+              v-if="infoData.collectCategoryList && infoData.collectCategoryList.length > 0"
+            >
+              <template #label>
+                <div style="display: flex; flex-direction: row; justify-content: space-between">
+                  <div>
+                    <a-span> <Icon icon="streamline-emojis:heart-with-arrow" />收藏分类 </a-span>
+                  </div>
+                  <a-button size="small" @click="showAddCollectCategoryModel(infoData.card)">
+                    <a-span> <Icon icon="streamline-emojis:writing-hand-1" />添加收藏 </a-span>
+                  </a-button>
+                </div>
+              </template>
+              <a-tag
+                v-for="collectCategory in infoData.collectCategoryList"
+                :key="collectCategory.categoryId"
+                :bordered="false"
+                closable
+                @close="doRemoveFromCollectCategory(infoData.card, collectCategory.categoryId)"
+                :color="stringToColor(collectCategory.categoryId)"
+                >{{ collectCategory.categoryTitle }}
+              </a-tag>
+            </a-descriptions-item>
+            <a-descriptions-item :span="2" v-else>
+              <template #label>
+                <div style="display: flex; flex-direction: row; justify-content: space-between">
+                  <div>
+                    <a-span> <Icon icon="streamline-emojis:heart-with-arrow" />收藏分类 </a-span>
+                  </div>
+                  <a-button size="small" @click="showAddCollectCategoryModel(infoData.card)">
+                    <a-span> <Icon icon="streamline-emojis:writing-hand-1" />添加收藏 </a-span>
+                  </a-button>
+                </div>
+              </template>
+              <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" />
+            </a-descriptions-item>
+          </a-descriptions>
+        </a-card-grid>
         <a-card-grid style="width: 100%; text-align: left" :hoverable="false">
           <a-descriptions bordered layout="vertical">
             <a-descriptions-item :span="2" v-if="infoData.tagList && infoData.tagList.length > 0">
               <template #label>
                 <div style="display: flex; flex-direction: row; justify-content: space-between">
                   <div><Icon icon="streamline-emojis:blossom" />任务标签 </div>
-                  <a-button size="small" @click="showDrawTaskTagModel(infoData)">
-                    <a-span> <Icon icon="streamline-emojis:palm-tree" />添加标签 </a-span>
+                  <a-button size="small" @click="showDrawTaskTagModel(infoData.card)">
+                    <a-span> <Icon icon="streamline-emojis:writing-hand-1" />添加标签 </a-span>
                   </a-button>
                 </div>
               </template>
@@ -1237,7 +1292,7 @@
                 <div style="display: flex; flex-direction: row; justify-content: space-between">
                   <div><Icon icon="streamline-emojis:blossom" />任务标签 </div>
                   <a-button size="small" @click="showDrawTaskTagModel(infoData.card)">
-                    <a-span> <Icon icon="streamline-emojis:palm-tree" />添加标签 </a-span>
+                    <a-span> <Icon icon="streamline-emojis:writing-hand-1" /> 添加标签 </a-span>
                   </a-button>
                 </div>
               </template>
@@ -1358,7 +1413,7 @@
     <div>
       <a-modal
         v-model:open="collectCategoryViewForm.viewFlag"
-        title="🎈添加到其他分类"
+        title="🎈添加到收藏分类"
         ok-text="立即执行"
         @ok="doAddToCollectCategory"
         :confirmLoading="collectCategoryViewForm.loading"
@@ -1379,6 +1434,7 @@
                     name="categoryId"
                   >
                     <a-tree-select
+                      @change="handleCollectCategoryChange"
                       v-model:value="collectTaskForm.categoryId"
                       show-search
                       style="width: 100%"
@@ -1756,12 +1812,24 @@
       infoData.tagList.push(drawTagForm.value.tagName);
     }
   };
+
   /********************************** 收藏分类 ************************************** */
+  const handleCollectCategoryChange = async (value, label, extra) => {
+    collectTaskForm.value.categoryId = value;
+    collectTaskForm.value.categoryTitle = label[0];
+  };
 
   const doAddToCollectCategory = async () => {
     loadingRef.value = true;
     try {
-      addToCollectCategory(pagination.value.current);
+      await addToCollectCategory(collectTaskForm.value);
+
+      if (infoData.id && infoData.id === collectTaskForm.value.taskId) {
+        infoData.collectCategoryList.push({
+          categoryId: collectTaskForm.value.categoryId,
+          categoryTitle: collectTaskForm.value.categoryTitle,
+        });
+      }
       if (collectTaskForm.value.oriCategoryId !== null) {
         onSearch(pagination.value.current);
       }
@@ -1770,11 +1838,18 @@
     }
   };
 
-  const doRemoveFromCollectCategory = async (card) => {
+  const doRemoveFromCollectCategory = async (card, categoryId) => {
+    console.log(11223);
     loadingRef.value = true;
     try {
-      removeFromCollectCategory(card);
-      onSearch(pagination.value.current);
+      await removeFromCollectCategory(categoryId, card.id);
+      if (infoData.id && infoData.id === card.id) {
+        infoData.collectCategoryList = infoData.collectCategoryList.filter(
+          (item) => item.categoryId !== categoryId,
+        );
+      } else {
+        onSearch(pagination.value.current);
+      }
     } finally {
       loadingRef.value = false;
     }

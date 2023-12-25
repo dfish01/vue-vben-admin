@@ -65,7 +65,7 @@ const { createMessage, createSuccessModal, createErrorModal, createInfoModal } =
 let jobListQueryApiInstance: any | null = null;
 let jobOptionApiInstance: any | null = null;
 let userSettingApiInstance: any | null = null;
-const jobTagApiInstance: any | null = null;
+let textFormApiInstance: any | null = null;
 let lightBoxApiInstance: any | null = null;
 let exampleApiInstance: any | null = null;
 export const loadingRef = ref(false);
@@ -946,4 +946,38 @@ export function splitAndDownloadImage(card) {
     loadingRef.value = false;
   };
   image.src = imageUrl;
+}
+
+//文生图
+export function textFormApi() {
+  if (textFormApiInstance) {
+    return textFormApiInstance;
+  }
+
+  const textToImgForm = reactive({
+    command: null,
+    commandEN: null,
+    aiPrompt: null,
+    robotSelect: '1022952195194359889',
+    invokeTimes: 1,
+    // useAccountId: null,
+    // useChannelId: null,
+    isPublic: false,
+    // mode: 'relax',
+    enableTranslate: false,
+    tagName: '',
+    tagNameOptions: [] as { value: string; label: string }[],
+  });
+
+  const setPrompt = async (prompt) => {
+    textToImgForm.command = prompt;
+  };
+
+  const api = {
+    // 响应式对象
+    textToImgForm,
+    setPrompt,
+  };
+  textFormApiInstance = api;
+  return api;
 }
