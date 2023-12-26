@@ -10,18 +10,19 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: 'gfishfont@dfish.xyz'
-          password: 'Aa1234565.'
+      - name: 构建并推送 Docker 镜像 - Auth 模块
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          # 获取标签名称
+          tag_name=$(echo "${{ github.ref }}" | sed 's/refs\/tags\///')
+          echo "推送标签: $tag_name"
 
-      - name: Build Docker Image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile  # Dockerfile 的路径
-          push: true
-          tags: |
-            gfishfont/gfish-ui:latest
-            gfishfont/gfish-ui:$(echo "${{ github.ref }}" | sed 's/refs\/tags\///')
+          # 构建并添加标签
+          docker build -t gfishfont/gfish-ui:${tag_name} -f Dockerfile . || exit 1
+          # 登录到 Docker Hub 或其他镜像仓库（如果需要）
+          docker login -u 'gfishfont@dfish.xyz' -p 'Aa1234565.' || exit 1
+          # 推送带有指定标签的镜像
+          docker push gfishfont/gfish-ui:${tag_name} || exit 1
+          # 推送 latest 标签
+          docker tag gfishfont/gfish-ui:${tag_name} gfishfont/gfish-ui:latest || exit 1
+          docker push gfishfont/gfish-ui:latest || exit 1
