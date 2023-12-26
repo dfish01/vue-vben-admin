@@ -15,8 +15,8 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          username: 'gfishfont@dfish.xyz'
+          password: 'Aa1234565.'
 
       - name: Build Docker Image
         uses: docker/build-push-action@v2
@@ -25,5 +25,5 @@ jobs:
           file: ./Dockerfile  # Dockerfile 的路径
           push: true
           tags: |
-            your-dockerhub-username/your-repo-name:latest
-            your-dockerhub-username/your-repo-name:${{ github.sha }}
+            gfishfont/gfish-ui:latest
+            gfishfont/gfish-ui:${{ github.sha }}
