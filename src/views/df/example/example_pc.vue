@@ -392,7 +392,7 @@
     const response = await getRecentNotice();
     if (response) {
       noticeForm.value.viewFlag = true;
-      noticeForm.value.content = response.content;
+      noticeForm.value.content = response;
     }
   });
   /*********************************** 基础配置 ******************************** */

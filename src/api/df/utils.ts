@@ -41,7 +41,7 @@ export function systemInfo(mode: ErrorMessageMode = 'message') {
  * @returns
  */
 export function getRecentNotice(mode: ErrorMessageMode = 'message') {
-  return defHttp.post<{ id: string; content: string }>(
+  return defHttp.post<string>(
     {
       url: Api.GetRecentNotice,
       params: {},
