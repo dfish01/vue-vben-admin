@@ -1,142 +1,114 @@
 <template>
-  <a-form
-    ref="pandoraFormRef"
-    :model="extendConfigForm"
-    :rules="rules"
-    :label-col="labelCol"
-    :wrapper-col="wrapperCol"
-  >
-    <a-form-item label="百度翻译" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-      <a-form-item label="appid" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-        <a-input v-model:value="extendConfigForm.translateConfigReq.appid" />
-      </a-form-item>
-      <a-form-item label="appSecret" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-        <a-input v-model:value="extendConfigForm.translateConfigReq.appSecret" />
-      </a-form-item>
-    </a-form-item>
+  <a-layout loading-tip="加载中..." style="overflow: hidden">
+    <a-card :bodyStyle="{ padding: '0px 20px 0px 20px' }">
+      <!-- <a-card :bodyStyle="{ padding: '0px 20px 0px 20px', height: 'auto' }"> -->
 
-    <a-form-item label="pandora配置" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-      <a-form-item ref="name" label="HOST地址" name="host">
-        <a-input v-model:value="extendConfigForm.pandoraConfigReq.host">
-          <template #addonBefore>
-            <a-select style="width: 90px">
-              <a-select-option value="Http://">Http://</a-select-option>
-              <a-select-option value="Https://" selected>Https://</a-select-option>
-            </a-select>
+      <a-tabs ref="formRef" v-model:activeKey="activeKey">
+        <a-tab-pane key="1">
+          <template #tab>
+            <span>扩展功能</span>
           </template>
-        </a-input>
-      </a-form-item>
-      <a-form-item label="API前缀" name="apiPrefix">
-        <a-input
-          v-model:value="extendConfigForm.pandoraConfigReq.apiPrefix"
-          placeholder="请输入API前缀"
-        />
-      </a-form-item>
-      <a-form-item label="PoolToken" name="poolToken">
-        <a-textarea
-          v-model:value="extendConfigForm.pandoraConfigReq.poolToken"
-          placeholder="请输入PoolToken"
-          :rows="3"
-        />
-      </a-form-item>
-
-      <a-form-item label="自动刷新" name="enableAutoRefresh">
-        <a-switch
-          v-model:checked="extendConfigForm.pandoraConfigReq.enableAutoRefresh"
-          checked-children="开启"
-          un-checked-children="关闭"
-        />
-      </a-form-item>
-
-      <div v-if="extendConfigForm.enableAutoRefresh === true">
-        <a-form-item label="账号名" name="accountName">
-          <a-input
-            v-model:value="extendConfigForm.pandoraConfigReq.accountName"
-            placeholder="请输入账号名"
+          <ExtendConfig
+            :contentHeight="contentHeight"
+            :scrollable="scrollableFlag"
+            ref="extendConfigRef"
           />
-        </a-form-item>
-
-        <a-form-item label="密码" name="password">
-          <a-input-password
-            v-model:value="extendConfigForm.pandoraConfigReq.password"
-            placeholder="请输入账号密码"
+        </a-tab-pane>
+        <a-tab-pane key="2">
+          <template #tab>
+            <span> MJ配置</span>
+          </template>
+          <MjConfig :contentHeight="contentHeight" :scrollable="scrollableFlag" ref="mjConfigRef" />
+        </a-tab-pane>
+        <a-tab-pane key="3">
+          <template #tab>
+            <span> 活动信息</span>
+          </template>
+          <ActivityInfoConfig
+            :contentHeight="contentHeight"
+            :scrollable="scrollableFlag"
+            ref="activityInfoConfigRef"
           />
-        </a-form-item>
+        </a-tab-pane>
+      </a-tabs>
+      <div style="display: flex; justify-content: right">
+        <a-button class="bottom-button" @click="handleSubmit" type="primary" ref="buttonRef"
+          >立即保存</a-button
+        >
       </div>
-    </a-form-item>
-    <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-      <a-button type="primary" @click="onSubmit">保存</a-button>
-    </a-form-item>
-  </a-form>
+    </a-card>
+  </a-layout>
 </template>
 <script lang="ts" setup>
-  import { reactive, ref, toRaw } from 'vue';
+  import { onMounted, reactive, ref, toRaw, computed, unref } from 'vue';
   import type { UnwrapRef } from 'vue';
-  import type { Rule } from 'ant-design-vue/es/form';
+  import ExtendConfig from './extend_config.vue';
+  import MjConfig from './mj_config.vue';
+  import ActivityInfoConfig from './activity_info_config.vue';
+  import { useMessage } from '/@/hooks/web/useMessage';
+  import { useContentHeight } from '/@/hooks/web/useContentHeight';
+  import { Loading } from '/@/components/Loading';
+  import { loadingFormApi } from './system';
 
-  import {
-    ActivityInfoConfigReq,
-    ActivityInfoConfigResp,
-    ExtendConfigResp,
-    ExtendConfigReq,
-    MjConfigReq,
-    MjConfigResp,
-  } from '/@/api/df/model/systemModel';
-  import {
-    saveExtendConfig,
-    extendConfigInfo,
-    saveMjConfig,
-    mjConfigInfo,
-    saveActivityConfig,
-    activityConfigInfo,
-  } from '/@/api/df/system';
+  const { loadingForm } = loadingFormApi();
 
-  const labelCol = { span: 5 };
-  const wrapperCol = { span: 13 };
-  const pandoraFormRef = ref();
+  /** 页面高度计算开始 */
+  const scrollableFlag = ref(true);
+  const formRef = ref();
+  const buttonRef = ref();
+  //页面高度处理
+  const substractSpaceRefs = ref([]);
+  const upwardSpace = computed(() => 0);
+  const offsetHeightRef = ref(0);
+  const subtractHeightRefs = ref([buttonRef]);
 
-  const rules: Record<string, Rule[]> = {
-    'pandoraConfigReq.host': [{ required: true, message: '请输入Pandora地址', trigger: 'change' }],
-    'pandoraConfigReq.poolToken': [
-      { required: true, message: '请输入初始的PoolToken', trigger: 'change' },
-    ],
-    'pandoraConfigReq.apiPrefix': [
-      { required: true, message: '请输入Pandora Api前缀', trigger: 'change' },
-    ],
-    'pandoraConfigReq.accountName': [
-      { required: true, message: '请输入OpenAi账号', trigger: 'change' },
-    ],
-    'pandoraConfigReq.password': [
-      { required: true, message: '请输入OpenAi密码', trigger: 'change' },
-    ],
-  };
+  // const contentHeight = ref(400);
+  // 使用hook
+  const { contentHeight } = useContentHeight(
+    computed(() => true),
+    formRef,
+    unref(subtractHeightRefs), // 使用 unref 获取数组值
+    unref(substractSpaceRefs),
+    upwardSpace,
+    offsetHeightRef,
+  );
+  const activeKey = ref('1');
+  const extendConfigRef = ref();
+  const mjConfigRef = ref();
+  const activityInfoConfigRef = ref();
 
-  const extendConfigForm: ExtendConfigReq = reactive({
-    translateConfigReq: {
-      appid: '',
-      appSecret: '',
-    },
-    pandoraConfigReq: {
-      host: '',
-      poolToken: '',
-      accountName: '',
-      password: '',
-      apiPrefix: '',
-      autoRefresh: false,
-      expireTime: '',
-    },
-    discordImageProxyList: [],
-    promptProxyList: [],
-  });
-
-  const onSubmit = () => {
-    pandoraFormRef.value
-      .validate()
-      .then(() => {
-        console.log('values', extendConfigForm, toRaw(extendConfigForm));
-      })
-      .catch((error) => {
-        console.log('error', error);
-      });
+  const handleSubmit = async () => {
+    console.log(3324);
+    loadingForm.globalLoading = true;
+    loadingForm.tips = '正在提交数据...';
+    try {
+      // 在这里触发相应页面的 form 提交
+      if (activeKey.value === '1') {
+        await extendConfigRef.value?.onSubmit();
+        // extendConfigRef.value?.loadData();
+      } else if (activeKey.value === '2') {
+        await mjConfigRef.value?.onSubmit();
+        // mjConfigRef.value?.loadData();
+      } else if (activeKey.value === '3') {
+        await activityInfoConfigRef.value?.onSubmit();
+        // activityInfoConfigRef.value?.loadData();
+      }
+      // loadingForm.value.tips = '正在加载数据...';
+    } finally {
+      loadingForm.tips = '加载中...';
+      loadingForm.globalLoading = false;
+    }
   };
 </script>
+
+<style scoped>
+  .bottom-button {
+    right: 8px;
+    bottom: 0;
+
+    /* background: #f0f0f0; */
+    height: 32px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+</style>

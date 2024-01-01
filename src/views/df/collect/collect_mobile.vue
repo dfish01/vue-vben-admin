@@ -387,7 +387,7 @@
                     </a-button>
                     <template #overlay>
                       <a-menu>
-                        <a-menu-item key="5" @click="() => copyText(card.prompt)"
+                        <a-menu-item key="5" @click="() => goDrawing(card.prompt)"
                           ><Icon icon="streamline-emojis:artist-palette" color="grey" />
                           画同款</a-menu-item
                         >
@@ -1060,7 +1060,7 @@
             </a-tree-select>
           </a-col>
         </a-row>
-        <a-row :gutter="[0, 2]" type="flex">
+        <a-row :gutter="[0, 2]" type="flex" style="margin-top: 7px">
           <a-col flex="80px">
             <a-tag class="quality-tag" color="default">🍺状态 </a-tag>
           </a-col>
@@ -1501,7 +1501,9 @@
   import { useRoute } from 'vue-router';
   import { accountInfoApi, tagInfoApi, drawCollectCategoryApi } from '../mj/accountInfo';
   import { collectCategoryApi } from './category';
+  import { useDrawCard } from '../example/card';
 
+  const { goDrawing } = useDrawCard();
   const {
     refreshCollectCategory,
     collectCategoryViewForm,
@@ -1659,6 +1661,7 @@
 
   onMounted(() => {
     window.addEventListener('message', handleMessage, false);
+    init();
   });
 
   onBeforeUnmount(() => {

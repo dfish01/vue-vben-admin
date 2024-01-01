@@ -527,7 +527,7 @@
                       </a-button>
                       <template #overlay>
                         <a-menu>
-                          <a-menu-item key="5" @click="() => setPrompt(card.prompt)"
+                          <a-menu-item key="5" @click="() => goDrawing(card.prompt)"
                             ><Icon icon="streamline-emojis:artist-palette" color="grey" />
                             画同款</a-menu-item
                           >
@@ -1746,7 +1746,9 @@
     stringToColor,
   } from '../tools';
   import { useRoute } from 'vue-router';
+  import { useDrawCard } from '/@/views/df/example/card';
 
+  const { goDrawing } = useDrawCard();
   const { setPrompt } = textFormApi();
   const {
     refreshCollectCategory,
@@ -1905,6 +1907,7 @@
 
   onMounted(() => {
     window.addEventListener('message', handleMessage, false);
+    initAllCollectCategory();
   });
 
   onBeforeUnmount(() => {

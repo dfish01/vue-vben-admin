@@ -392,7 +392,7 @@
                     </a-button>
                     <template #overlay>
                       <a-menu>
-                        <a-menu-item key="5" @click="() => copyText(card.prompt)"
+                        <a-menu-item key="5" @click="() => goDrawing(card.prompt)"
                           ><Icon icon="streamline-emojis:artist-palette" color="grey" />
                           画同款</a-menu-item
                         >
@@ -1505,6 +1505,9 @@
   import { Empty } from 'ant-design-vue';
   import { accountInfoApi, tagInfoApi, drawCollectCategoryApi } from '../mj/accountInfo';
   import { collectCategoryApi } from './category';
+  import { useDrawCard } from '../example/card';
+
+  const { goDrawing } = useDrawCard();
 
   const {
     refreshCollectCategory,

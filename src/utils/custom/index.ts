@@ -3,7 +3,7 @@ import { CacheTypeEnum, CUSTOM_HOST_KEY } from '/@/enums/cacheEnum';
 import projectSetting from '/@/settings/projectSetting';
 
 const { permissionCacheType } = projectSetting;
-const isLocal = permissionCacheType === CacheTypeEnum.LOCAL;
+const isLocal = permissionCacheType === CacheTypeEnum.SESSION;
 
 export function getCustomHost() {
   return getCustomCache(CUSTOM_HOST_KEY);

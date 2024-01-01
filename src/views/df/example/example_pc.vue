@@ -1,5 +1,6 @@
 <template>
   <a-layout style="width: 100%; overflow: hidden">
+    <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
     <div>
       <a-card :bodyStyle="{ padding: '8px' }">
         <a-row :wrap="false" style="display: flex; align-items: center">
@@ -159,7 +160,9 @@
         >
       </template>
       <a-spin :spinning="noticeForm.loading">
-        <div style="padding: 10px 20px" v-html="noticeForm.content"></div>
+        <div style="padding: 10px 20px">
+          <MarkdownViewer :value="noticeForm.content" />
+        </div>
       </a-spin>
     </a-modal>
   </a-layout>
@@ -167,6 +170,7 @@
 
 <script setup lang="ts">
   import { onMounted, onUnmounted, ref, reactive, createVNode } from 'vue';
+  import { MarkDown, MarkDownActionType, MarkdownViewer } from '/@/components/Markdown';
   import { LazyImg, Waterfall } from 'vue-waterfall-plugin-next';
   import 'vue-waterfall-plugin-next/dist/style.css';
   import { Loading } from '/@/components/Loading';

@@ -217,6 +217,20 @@ export function collectCategoryApi() {
   };
 
   /**
+   * 置顶菜单
+   */
+  const doSetTop = async (item) => {
+    console.log(11212);
+    globalLoading.value = true;
+    try {
+      await setTop(item);
+      await refreshCollectCategory();
+    } finally {
+      globalLoading.value = false;
+    }
+  };
+
+  /**
    * 初始化
    */
   const init = async () => {
@@ -239,6 +253,7 @@ export function collectCategoryApi() {
     categoryDataViewForm,
     // 方法
     init,
+    doSetTop,
     clickMenu,
     showAddView,
     closedView,

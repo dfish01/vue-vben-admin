@@ -1,5 +1,6 @@
 <template>
   <a-layout v-loading="loadingRef" loading-tip="加载中...">
+    <Loading :loading="globalLoading" :absolute="false" tip="加载中" />
     <a-row class="flex-container">
       <!-- 抽屉部分，仅在移动端显示 -->
       <div v-if="!isMobile && !showTabs" class="toggle-button-left" @click="toggleTabs">
@@ -37,7 +38,7 @@
               "
             >
               <div style="margin-left: 10px">
-                <span style="font-weight: bold">🏢绘画收藏夹</span>
+                <span style="font-weight: bold">🌋绘画收藏夹{{ globalLoading }}</span>
               </div>
               <div
                 style="
@@ -79,11 +80,13 @@
   import { useUserStore } from '/@/store/modules/user';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { collectCategoryApi } from './category';
+  import { Loading } from '/@/components/Loading';
 
   const {
     globalForm,
     categoryDataForm,
     categoryDataViewForm,
+    globalLoading,
     // 方法
     init,
     showAddView,

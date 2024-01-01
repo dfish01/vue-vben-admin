@@ -50,7 +50,7 @@
                     </a-popconfirm>
 
                     <a-menu-item @click="() => modifyView(categoryItem)"> 修改分类 </a-menu-item>
-                    <a-menu-item v-if="categoryItem.sort > 0" @click="() => setTop(categoryItem)">
+                    <a-menu-item v-if="categoryItem.sort > 0" @click="() => doSetTop(categoryItem)">
                       置顶
                     </a-menu-item>
                     <a-menu-item @click="() => showAddView(categoryItem)"> 新增子分类 </a-menu-item>
@@ -165,8 +165,10 @@
     categoryDataForm,
     categoryDataViewForm,
     globalForm,
+    globalLoading,
     // 方法
     init,
+    doSetTop,
     clickMenu,
     showAddView,
     closedView,

@@ -157,7 +157,8 @@
   import { useDesign } from '/@/hooks/web/useDesign';
   //import { onKeyStroke } from '@vueuse/core';
   import { getCustomHost, setCustomCache } from '/@/utils/custom';
-  import { CacheTypeEnum, CUSTOM_HOST_KEY } from '/@/enums/cacheEnum';
+  import { CacheTypeEnum, CUSTOM_HOST_KEY, MJ_TASK_ACCOUNT_KEY } from '/@/enums/cacheEnum';
+  import { Persistent, BasicKeys } from '/@/utils/cache/persistent';
 
   const ACol = Col;
   const ARow = Row;
@@ -215,6 +216,10 @@
         email: data.email,
         mode: 'none', //不要默认的错误提示
       });
+
+      //清除历史缓存
+      // clearCustomCache();
+
       if (userInfo) {
         notification.success({
           message: t('sys.login.loginSuccessTitle'),

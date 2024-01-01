@@ -1,13 +1,6 @@
 import { defHttp } from '/@/utils/http/axios';
 import { ErrorMessageMode } from '/#/axios';
-import {
-  ActivityInfoConfigReq,
-  ActivityInfoConfigResp,
-  ExtendConfigResp,
-  ExtendConfigReq,
-  MjConfigReq,
-  MjConfigResp,
-} from '/@/api/df/model/systemModel';
+import { ActivityInfoConfig, ExtendConfig, MjConfig } from '/@/api/df/model/systemModel';
 import { IdReq } from '/@/api/model/baseModel';
 
 enum Api {
@@ -25,7 +18,7 @@ enum Api {
  * @param mode
  * @returns
  */
-export function saveExtendConfig(params: ExtendConfigReq, mode: ErrorMessageMode = 'message') {
+export function saveExtendConfig(params: ExtendConfig, mode: ErrorMessageMode = 'message') {
   return defHttp.post(
     {
       url: Api.SaveExtendConfig,
@@ -44,15 +37,14 @@ export function saveExtendConfig(params: ExtendConfigReq, mode: ErrorMessageMode
  * @param mode
  * @returns
  */
-export function extendConfig(params: MjConfigReq, mode: ErrorMessageMode = 'message') {
-  return defHttp.post<ExtendConfigResp>(
+export function extendConfigInfo(params: {}, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<ExtendConfig>(
     {
       url: Api.ExtendConfigInfo,
       params,
     },
     {
       errorMessageMode: mode,
-      successMessageMode: mode,
     },
   );
 }
@@ -63,8 +55,8 @@ export function extendConfig(params: MjConfigReq, mode: ErrorMessageMode = 'mess
  * @param mode
  * @returns
  */
-export function saveMjConfig(params: any, mode: ErrorMessageMode = 'message') {
-  return defHttp.post<MjConfigResp>(
+export function saveMjConfig(params: MjConfig, mode: ErrorMessageMode = 'message') {
+  return defHttp.post(
     {
       url: Api.SaveMjConfig,
       params,
@@ -83,14 +75,13 @@ export function saveMjConfig(params: any, mode: ErrorMessageMode = 'message') {
  * @returns
  */
 export function mjConfigInfo(params: {}, mode: ErrorMessageMode = 'message') {
-  return defHttp.post<any>(
+  return defHttp.post<MjConfig>(
     {
       url: Api.MjConfigInfo,
       params,
     },
     {
       errorMessageMode: mode,
-      successMessageMode: mode,
     },
   );
 }
@@ -101,10 +92,7 @@ export function mjConfigInfo(params: {}, mode: ErrorMessageMode = 'message') {
  * @param mode
  * @returns
  */
-export function saveActivityConfig(
-  params: ActivityInfoConfigReq,
-  mode: ErrorMessageMode = 'message',
-) {
+export function saveActivityConfig(params: ActivityInfoConfig, mode: ErrorMessageMode = 'message') {
   return defHttp.post(
     {
       url: Api.SaveActivityConfig,
@@ -124,14 +112,13 @@ export function saveActivityConfig(
  * @returns
  */
 export function activityConfigInfo(params: {}, mode: ErrorMessageMode = 'message') {
-  return defHttp.post<ActivityInfoConfigResp>(
+  return defHttp.post<ActivityInfoConfig>(
     {
       url: Api.ActivityConfigInfo,
       params,
     },
     {
       errorMessageMode: mode,
-      successMessageMode: mode,
     },
   );
 }
