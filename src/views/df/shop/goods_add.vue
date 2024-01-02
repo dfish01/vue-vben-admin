@@ -152,7 +152,7 @@
 <script lang="ts" setup>
   import { ref, onMounted, onUnmounted, computed, unref, toRefs, watch } from 'vue';
   import { QrCode, QrCodeActionType } from '/@/components/Qrcode/index';
-  import LogoImg from './logo.png';
+  import LogoImg from '/logo.png';
   import {
     DeleteOutlined,
     InfoCircleOutlined,
