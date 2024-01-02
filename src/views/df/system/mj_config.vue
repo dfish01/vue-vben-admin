@@ -59,6 +59,49 @@
           />
         </a-form-item>
         <a-form-item
+          label="任务超时时间"
+          :name="['mjTaskConfig', 'taskTimeoutMinus']"
+          :rules="[{ required: false, message: '请输入任务超时时间（分钟）' }]"
+        >
+          <a-input
+            v-model:value="mjConfigForm.mjTaskConfig.taskTimeoutMinus"
+            placeholder="请输入任务超时时间（分钟）"
+          />
+        </a-form-item>
+        <a-form-item
+          label="敏感词校验"
+          :name="['mjTaskConfig', 'enableBanCheck']"
+          :rules="[{ required: false, message: '启用敏感词校验' }]"
+        >
+          <a-switch
+            v-model:checked="mjConfigForm.mjTaskConfig.enableBanCheck"
+            checked-children="开启"
+            un-checked-children="关闭"
+          />
+        </a-form-item>
+        <a-form-item
+          label="中文翻译敏感词校验"
+          :name="['mjTaskConfig', 'chineseBanCheck']"
+          :rules="[{ required: false, message: '启用中文翻译英文敏感词校验' }]"
+        >
+          <a-switch
+            v-model:checked="mjConfigForm.mjTaskConfig.chineseBanCheck"
+            checked-children="开启"
+            un-checked-children="关闭"
+          />
+        </a-form-item>
+        <a-form-item
+          label="参数合法性校验"
+          :name="['mjTaskConfig', 'enableParamCheck']"
+          :rules="[{ required: false, message: '启用参数合法性校验' }]"
+        >
+          <a-switch
+            v-model:checked="mjConfigForm.mjTaskConfig.enableParamCheck"
+            checked-children="开启"
+            un-checked-children="关闭"
+          />
+        </a-form-item>
+        <a-form-item
           label="敏感词"
           name="midjourneyBan"
           :rules="[{ required: true, message: '请输入PoolToken' }]"
@@ -118,6 +161,12 @@
     proxyConfig: {
       promptImageProxy: null,
       discordImageProxy: null,
+    },
+    mjTaskConfig: {
+      taskTimeoutMinus: 20,
+      enableBanCheck: true,
+      chineseBanCheck: true,
+      enableParamCheck: true,
     },
   });
   onMounted(async () => {

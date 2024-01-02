@@ -52,13 +52,28 @@
           />
         </a-form-item>
         <a-form-item
+          label="系统活动"
+          name="activityNotice"
+          :rules="[{ required: false, message: '请输入系统活动内容' }]"
+        >
+          <MarkDown
+            v-model:value="activityInfoConfigForm.activityNotice"
+            placeholder="请输入系统活动内容"
+          />
+          <!-- <a-textarea
+          v-model:value="activityInfoConfigForm.systemNotice"
+          placeholder="请输入系统公告"
+          :rows="8"
+        /> -->
+        </a-form-item>
+
+        <a-form-item
           label="系统公告"
           name="systemNotice"
           :rules="[{ required: true, message: '请输入系统公告' }]"
         >
           <MarkDown
             v-model:value="activityInfoConfigForm.systemNotice"
-            @change="handleChange"
             placeholder="请输入公告内容"
           />
           <!-- <a-textarea
@@ -116,6 +131,7 @@
     },
     tutorialInfo: null,
     systemNotice: null,
+    activityNotice: null,
   });
   onMounted(async () => {
     loadData();
