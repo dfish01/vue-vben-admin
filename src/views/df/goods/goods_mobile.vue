@@ -11,7 +11,7 @@
         "
       >
         <div style="display: flex; align-items: center">
-          <a-image src="./logo.png" :width="38" :height="38" :preview="false" />
+          <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
           <span style="margin-left: 5px; font-size: 16px; font-weight: bold">市场</span>
         </div>
         <div style="display: flex; gap: 5px">
@@ -212,7 +212,7 @@
 <script lang="ts" setup>
   import { ref, onMounted, onUnmounted, computed, unref, toRefs, watch } from 'vue';
   import { QrCode, QrCodeActionType } from '/@/components/Qrcode/index';
-  import LogoImg from '/@/assets/images/logo.png';
+  import LogoImg from '/logo.png';
   import { SvgIcon } from '/@/components/Icon';
   import {
     DeleteOutlined,

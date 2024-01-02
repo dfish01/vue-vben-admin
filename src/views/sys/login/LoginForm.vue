@@ -159,6 +159,10 @@
   import { getCustomHost, setCustomCache } from '/@/utils/custom';
   import { CacheTypeEnum, CUSTOM_HOST_KEY, MJ_TASK_ACCOUNT_KEY } from '/@/enums/cacheEnum';
   import { Persistent, BasicKeys } from '/@/utils/cache/persistent';
+  import { websiteConfigInfo } from '/@/api/df/anon';
+  import { useGlobSetting } from '/@/hooks/setting';
+
+  const { title: websiteTitle } = useGlobSetting();
 
   const ACol = Col;
   const ARow = Row;
@@ -179,9 +183,9 @@
   const customHostData = reactive({
     ssl: 'https://',
     customHost: '',
-    menuName: '自绘记录',
+    menuName: websiteTitle,
     dropdownItems: [
-      { key: '1', name: '自绘记录' },
+      { key: '1', name: websiteTitle },
       { key: '2', name: '自定义托管' },
     ],
     viewFlag: false,
@@ -241,7 +245,7 @@
   const onClick: MenuProps['onClick'] = ({ key }) => {
     console.log(`Click on item ${key}`);
     if (key === '1') {
-      customHostData.menuName = '自绘记录';
+      customHostData.menuName = websiteTitle;
       setCustomCache(CUSTOM_HOST_KEY, null);
     } else {
       customHostData.menuName = '自定义托管';
@@ -262,7 +266,7 @@
 
   const closeCustomHost = () => {
     if (!isValidDomainWithPort(customHostData.customHost)) {
-      customHostData.menuName = '自绘记录';
+      customHostData.menuName = websiteTitle;
       setCustomCache(CUSTOM_HOST_KEY, null);
     }
     customHostData.viewFlag = false;

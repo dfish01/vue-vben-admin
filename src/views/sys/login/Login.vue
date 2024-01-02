@@ -47,34 +47,39 @@
       </div>
     </div>
     <!-- ...原有的代码... -->
-    <div
-      class="absolute bottom-4 left-0 w-full text-right"
-      style="display: flex; flex-direction: column"
-    >
-      <span>
-        <a-tag color="#CE5A67" class="text-sm" style="font-size: 10px; font-weight: bold"
-          >Copyright © 2023 自绘记录</a-tag
-        >
 
-        <a href="https://beian.miit.gov.cn/" target="_blank">
-          <a-tag color="#29ADB2" class="text-sm" style="font-size: 10px; font-weight: bold">
-            闽ICP备2023010181号-1
+    <div v-if="footer === 'default'">
+      <div
+        class="absolute bottom-4 left-0 w-full text-right"
+        style="display: flex; flex-direction: column"
+      >
+        <span>
+          <a-tag color="#CE5A67" class="text-sm" style="font-size: 10px; font-weight: bold">
+            Copyright © 2023 {{ title }}
           </a-tag>
-        </a>
-        <span class="text-sm">
-          <a href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral" target="_blank"
-            ><a-tag color="#8B9A46" style="font-size: 10px; font-weight: bold">
-              本网站由<img :src="ypyImg" alt="Upyun Logo" width="40" />
-              提供CDN加速/云存储服务
+          <a href="https://beian.miit.gov.cn/" target="_blank">
+            <a-tag color="#29ADB2" class="text-sm" style="font-size: 10px; font-weight: bold">
+              闽ICP备2023010181号-1
             </a-tag>
           </a>
+          <span class="text-sm">
+            <a
+              href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral"
+              target="_blank"
+            >
+              <a-tag color="#8B9A46" style="font-size: 10px; font-weight: bold">
+                本网站由<img :src="ypyImg" alt="Upyun Logo" width="40" /> 提供CDN加速/云存储服务
+              </a-tag>
+            </a>
+          </span>
         </span>
-      </span>
+      </div>
     </div>
+    <div v-else v-html="footer"></div>
   </div>
 </template>
 <script lang="ts" setup>
-  import { computed, onMounted } from 'vue';
+  import { computed, onMounted, ref } from 'vue';
   import { AppLogo, AppLocalePicker, AppDarkModeToggle } from '/@/components/Application';
   import LoginForm from './LoginForm.vue';
   import ForgetPasswordForm from './ForgetPasswordForm.vue';
@@ -82,13 +87,16 @@
   import MobileForm from './MobileForm.vue';
   import EmailForm from './EmailForm.vue';
   import QrCodeForm from './QrCodeForm.vue';
-  import { useGlobSetting } from '/@/hooks/setting';
+
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { useLocaleStore } from '/@/store/modules/locale';
   import { useRoute } from 'vue-router';
   import { SvgIcon } from '/@/components/Icon';
   import ypyImg from '/@/assets/images/又拍云_logo5.png';
+  import { footerInfo } from '/@/api/df/anon';
+  import { Tag } from 'ant-design-vue';
+  import { useGlobSetting } from '/@/hooks/setting';
 
   const route = useRoute();
   defineProps({
@@ -97,10 +105,12 @@
     },
   });
 
-  onMounted(() => {
+  const footer = ref('');
+  onMounted(async () => {
     // 获取 URL 参数
     const queryParam = route.query.someParam;
     console.log('Query Parameter2:', queryParam);
+    footer.value = await footerInfo({});
   });
 
   const globSetting = useGlobSetting();

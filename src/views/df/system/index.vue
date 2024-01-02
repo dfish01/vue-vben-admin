@@ -30,6 +30,22 @@
             ref="activityInfoConfigRef"
           />
         </a-tab-pane>
+        <a-tab-pane key="4">
+          <template #tab>
+            <span> 支付配置</span>
+          </template>
+          <Pay :contentHeight="contentHeight" :scrollable="scrollableFlag" ref="payConfigRef" />
+        </a-tab-pane>
+        <a-tab-pane key="5">
+          <template #tab>
+            <span> 站点配置</span>
+          </template>
+          <Website
+            :contentHeight="contentHeight"
+            :scrollable="scrollableFlag"
+            ref="websiteConfigRef"
+          />
+        </a-tab-pane>
       </a-tabs>
       <div style="display: flex; justify-content: right">
         <a-button class="bottom-button" @click="handleSubmit" type="primary" ref="buttonRef"
@@ -45,6 +61,8 @@
   import ExtendConfig from './extend_config.vue';
   import MjConfig from './mj_config.vue';
   import ActivityInfoConfig from './activity_info_config.vue';
+  import Website from './website.vue';
+  import Pay from './pay.vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
   import { Loading } from '/@/components/Loading';
@@ -76,6 +94,8 @@
   const extendConfigRef = ref();
   const mjConfigRef = ref();
   const activityInfoConfigRef = ref();
+  const websiteConfigRef = ref();
+  const payConfigRef = ref();
 
   const handleSubmit = async () => {
     console.log(3324);
@@ -91,6 +111,12 @@
         // mjConfigRef.value?.loadData();
       } else if (activeKey.value === '3') {
         await activityInfoConfigRef.value?.onSubmit();
+        // activityInfoConfigRef.value?.loadData();
+      } else if (activeKey.value === '4') {
+        await payConfigRef.value?.onSubmit();
+        // activityInfoConfigRef.value?.loadData();
+      } else if (activeKey.value === '5') {
+        await websiteConfigRef.value?.onSubmit();
         // activityInfoConfigRef.value?.loadData();
       }
       // loadingForm.value.tips = '正在加载数据...';

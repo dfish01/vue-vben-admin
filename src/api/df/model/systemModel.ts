@@ -95,3 +95,26 @@ interface CommunicateInfo {
    */
   qqGroupList: string[];
 }
+
+export interface WebsiteConfig {
+  /**
+   * 站点底部内容
+   */
+  footer: string;
+}
+
+export interface PayConfig {
+  aliFace2FaceConfig: AliFace2FaceConfig;
+  rateConfig: RateConfig;
+}
+
+interface AliFace2FaceConfig {
+  alipayPublicKey: string;
+  privateKey: string;
+  appId: string;
+  notifyUrl: string;
+}
+
+interface RateConfig {
+  userPayRate: string;
+}

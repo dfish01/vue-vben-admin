@@ -13,7 +13,7 @@
         "
       >
         <div style="display: flex; align-items: center">
-          <a-image src="./logo.png" :width="38" :height="38" :preview="false" />
+          <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
           <span style="margin-left: 5px; font-size: 16px; font-weight: bold"> 小红书笔记解析 </span>
         </div>
         <div style="display: flex; gap: 5px"> </div>

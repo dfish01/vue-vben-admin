@@ -137,7 +137,7 @@
       <template #footer>
         <a-button type="primary" @click="closeView"> 我已完成支付 </a-button>
       </template>
-      <CollapseContainer title="本地logo示例" class="text-center mb-6 qrcode-demo-item">
+      <CollapseContainer title="支付码" class="text-center mb-6 qrcode-demo-item">
         <QrCode :value="payForm.qrCodeUrl" :logo="LogoImg" :width="400" />
       </CollapseContainer>
     </a-modal>
@@ -147,7 +147,7 @@
 <script lang="ts" setup>
   import { ref, onMounted, onUnmounted, computed, unref, toRefs, watch } from 'vue';
   import { QrCode, QrCodeActionType } from '/@/components/Qrcode/index';
-  import LogoImg from '/@/assets/images/logo.png';
+  import LogoImg from '/logo.png';
   import {
     DeleteOutlined,
     InfoCircleOutlined,

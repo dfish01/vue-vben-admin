@@ -12,7 +12,7 @@
         "
       >
         <div style="display: flex; align-items: center">
-          <a-image src="./logo.png" :width="38" :height="38" :preview="false" />
+          <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
           <span style="margin-left: 5px; font-size: 16px; font-weight: bold">交易记录</span>
         </div>
         <div style="display: flex; gap: 5px">
@@ -146,7 +146,7 @@
       <template #footer>
         <a-button type="primary" @click="closeView"> 我已完成支付 </a-button>
       </template>
-      <CollapseContainer title="本地logo示例" class="text-center mb-6 qrcode-demo-item">
+      <CollapseContainer title="支付码" class="text-center mb-6 qrcode-demo-item">
         <QrCode :value="payForm.qrCodeUrl" :logo="LogoImg" :width="400" />
       </CollapseContainer>
     </a-modal>
@@ -207,7 +207,7 @@
 <script lang="ts" setup>
   import { ref, onMounted, onUnmounted, computed, unref, toRefs, watch } from 'vue';
   import { QrCode, QrCodeActionType } from '/@/components/Qrcode/index';
-  import LogoImg from '/@/assets/images/logo.png';
+  import LogoImg from '/logo.png';
   import { SvgIcon } from '/@/components/Icon';
   import {
     DeleteOutlined,

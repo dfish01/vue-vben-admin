@@ -7,7 +7,7 @@
 
       <a @click="openWindow(DOC_URL)">{{ t('layout.footer.onlineDocument') }}</a>
     </div>
-    <div>Copyright &copy;2023 自绘记录</div>
+    <div>Copyright &copy;2023 {{ title }}</div>
   </Footer>
 </template>
 
@@ -25,6 +25,7 @@
   import { useRouter } from 'vue-router';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { useLayoutHeight } from '../content/useContentViewHeight';
+  import { useGlobSetting } from '/@/hooks/setting';
 
   export default defineComponent({
     name: 'LayoutFooter',
@@ -34,7 +35,7 @@
       const { getShowFooter } = useRootSetting();
       const { currentRoute } = useRouter();
       const { prefixCls } = useDesign('layout-footer');
-
+      const { title } = useGlobSetting();
       const footerRef = ref<ComponentRef>(null);
       const { setFooterHeight } = useLayoutHeight();
 
@@ -57,6 +58,7 @@
         SITE_URL,
         openWindow,
         footerRef,
+        title,
       };
     },
   });

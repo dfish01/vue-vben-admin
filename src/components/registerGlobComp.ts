@@ -42,7 +42,6 @@ export function registerGlobComp(app: App) {
       ],
     ),
   });
-
   app
     .use(Button)
     .use(antd)
