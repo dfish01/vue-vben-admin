@@ -195,14 +195,14 @@
           />
         </a-col>
       </a-row>
-      <a-row style="margin-top: 30px">
+      <!-- <a-row style="margin-top: 30px">
         <a-col :span="24">
           📢
           <span style="font-size: 12px"
             >感谢您提交的反馈！同类型的反馈我们会按照时间进行排序，确认无误后，我们会给您一些“授权码”。届时请注意查收邮件~~~
           </span>
         </a-col>
-      </a-row>
+      </a-row> -->
       <Loading :loading="loading" absolute="true" tip="正在加载中~" />
     </a-modal>
 

@@ -85,7 +85,7 @@ export function collectCategoryApi() {
     id: null as null | string,
     title: null,
     parentId: null as null | string,
-    sort: null as null | number,
+    sort: 99 as null | number,
   });
 
   const categoryDataViewForm = ref({

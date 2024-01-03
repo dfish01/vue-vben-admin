@@ -29,7 +29,7 @@ export function discordApi() {
     discordFilterUserOptions: [] as { label: string; value: string }[],
   });
 
-  const onAdd = () => {
+  const onAdd = async () => {
     accountForm.value.accountName = null;
     accountForm.value.numExecute = 50;
     accountForm.value.guildId = null;
@@ -37,6 +37,12 @@ export function discordApi() {
     accountForm.value.discordUserId = null;
     accountForm.value.viewFlag = true;
     accountForm.value.discordUserIds = null;
+    accountForm.value.loading = true;
+    try {
+      await queryDiscordList({});
+    } finally {
+      accountForm.value.loading = false;
+    }
   };
 
   const onSelectDiscordUser = async (value, option) => {

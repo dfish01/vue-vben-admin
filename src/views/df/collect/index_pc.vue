@@ -38,7 +38,7 @@
               "
             >
               <div style="margin-left: 10px">
-                <span style="font-weight: bold">🌋绘画收藏夹{{ globalLoading }}</span>
+                <span style="font-weight: bold">🌋绘画收藏夹</span>
               </div>
               <div
                 style="

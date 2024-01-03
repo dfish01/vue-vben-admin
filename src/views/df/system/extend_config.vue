@@ -69,7 +69,7 @@
           />
         </a-form-item>
       </a-card>
-      <a-card title="百度翻译配置">
+      <a-card title="百度翻译配置" style="margin-top: 10px">
         <a-form-item
           label="appid"
           :name="['translateConfig', 'appid']"

@@ -17,7 +17,7 @@
           <a-textarea
             v-model:value="mjConfigForm.proxyConfig.discordImageProxy"
             placeholder="请输入Discord图片代理,多个使用“,”隔开"
-            :rows="4"
+            :rows="2"
           />
         </a-form-item>
 
@@ -29,7 +29,7 @@
           <a-textarea
             v-model:value="mjConfigForm.proxyConfig.promptImageProxy"
             placeholder="请输入Discord图片代理,多个使用“,”隔开"
-            :rows="4"
+            :rows="2"
           />
         </a-form-item>
         <!-- <div style="display: flex; justify-content: right">
@@ -37,27 +37,7 @@
       </div> -->
       </a-card>
 
-      <a-card title="Midjourney使用限制">
-        <a-form-item
-          label="导入额度"
-          name="discordImportLimit"
-          :rules="[{ required: true, message: '请输入Discord导入额度限制' }]"
-        >
-          <a-input
-            v-model:value="mjConfigForm.discordImportLimit"
-            placeholder="请输入Discord导入额度限制"
-          />
-        </a-form-item>
-        <a-form-item
-          label="默认discord账号"
-          name="defaultDiscordId"
-          :rules="[{ required: true, message: '请输入默认discord账号ID' }]"
-        >
-          <a-input
-            v-model:value="mjConfigForm.defaultDiscordId"
-            placeholder="请输入默认discord账号ID"
-          />
-        </a-form-item>
+      <a-card title="Midjourney任务配置" style="margin-top: 10px">
         <a-form-item
           label="任务超时时间"
           :name="['mjTaskConfig', 'taskTimeoutMinus']"
@@ -114,10 +94,53 @@
             :rows="10"
           />
         </a-form-item>
+      </a-card>
 
-        <!-- <div style="display: flex; justify-content: right">
-        <a-button type="primary" @click="onSubmit">保存</a-button>
-      </div> -->
+      <a-card title="Midjourneye额度相关配置" style="margin-top: 10px">
+        <a-form-item
+          label="导入额度"
+          :name="['mjQuotaConfig', 'discordImportLimit']"
+          :rules="[{ required: true, message: '请输入Discord导入额度限制' }]"
+        >
+          <a-input
+            v-model:value="mjConfigForm.mjQuotaConfig.discordImportLimit"
+            placeholder="请输入Discord导入额度限制"
+          />
+        </a-form-item>
+        <a-form-item
+          label="账户组账号唯一"
+          :name="['mjQuotaConfig', 'discordGroupUnique']"
+          :rules="[{ required: false, message: '请选择账户组账号唯一' }]"
+        >
+          <a-switch
+            v-model:checked="mjConfigForm.mjQuotaConfig.discordGroupUnique"
+            checked-children="开启"
+            un-checked-children="关闭"
+          />
+        </a-form-item>
+        <a-form-item
+          label="帐户组队列数上限"
+          :name="['mjQuotaConfig', 'taskQueueLimit']"
+          :rules="[{ required: true, message: '请输入帐户组队列数上限' }]"
+        >
+          <a-input
+            v-model:value="mjConfigForm.mjQuotaConfig.taskQueueLimit"
+            placeholder="请输入帐户组队列数上限"
+          />
+        </a-form-item>
+        <a-form-item
+          label="默认discord账号"
+          :name="['mjQuotaConfig', 'defaultDiscordId']"
+          :rules="[{ required: true, message: '请输入默认discord账号ID' }]"
+        >
+          <a-input
+            v-model:value="mjConfigForm.mjQuotaConfig.defaultDiscordId"
+            placeholder="请输入默认discord账号ID"
+          />
+          <span style="color: red; font-size: 10px"
+            >用于同步discord的相关任务ID，不设置则随机选取可用账号</span
+          >
+        </a-form-item>
       </a-card>
     </a-form>
   </div>
@@ -157,8 +180,6 @@
   const mjConfigFormRef = ref();
 
   const mjConfigForm: MjConfig = ref({
-    discordImportLimit: null,
-    defaultDiscordId: null,
     midjourneyBan: null,
     proxyConfig: {
       promptImageProxy: null,
@@ -169,6 +190,12 @@
       enableBanCheck: true,
       chineseBanCheck: true,
       enableParamCheck: true,
+    },
+    mjQuotaConfig: {
+      discordImportLimit: 500,
+      defaultDiscordId: null,
+      discordGroupUnique: false,
+      taskQueueLimit: 50,
     },
   });
   onMounted(async () => {

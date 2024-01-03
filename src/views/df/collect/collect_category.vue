@@ -97,9 +97,9 @@
                         </a-popconfirm>
 
                         <a-menu-item @click="() => modifyView(childItem)"> 修改分类 </a-menu-item>
-                        <a-menu-item @click="() => showAddView(childItem)">
+                        <!-- <a-menu-item @click="() => showAddView(childItem)">
                           新增子分类
-                        </a-menu-item>
+                        </a-menu-item> -->
                       </a-menu>
                     </template>
                   </a-dropdown>
