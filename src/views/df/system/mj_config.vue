@@ -85,10 +85,12 @@
           :rules="[{ required: false, message: '启用中文翻译英文敏感词校验' }]"
         >
           <a-switch
+            disabled
             v-model:checked="mjConfigForm.mjTaskConfig.chineseBanCheck"
             checked-children="开启"
             un-checked-children="关闭"
           />
+          <span style="margin-left: 10px; color: red; font-size: 10px">默认开启，暂时无法编辑</span>
         </a-form-item>
         <a-form-item
           label="参数合法性校验"

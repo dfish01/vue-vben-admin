@@ -20,7 +20,14 @@
         <a-row>
           <!-- 头像 -->
           <a-col>
+            <SvgIcon
+              v-if="userInfo.avatar && !userInfo.avatar.startsWith('http')"
+              style="display: block; width: 100px; height: 100px; border-radius: 15%"
+              :name="userInfo.avatar"
+            />
+
             <a-image
+              v-else
               :src="userInfo.avatar"
               style="display: block; width: 100px; height: 100px; border-radius: 15%"
             >
@@ -52,6 +59,7 @@
         <div class="setting">
           <div v-for="appData in appObj.setting" :key="appData.key" class="cards">
             <a-card
+              v-if="appData.showFlag && appData.showFlag === true"
               @click="handleClick(appData)"
               class="rounded-card"
               :bodyStyle="{
@@ -198,25 +206,27 @@
       <Loading :loading="loading" absolute="true" tip="正在加载中~" />
     </a-modal>
 
-    <!-- 交流群 -->
-    <a-modal
-      v-model:open="communicateForm.viewFlag"
-      title="🐵扫码进群吧~"
-      :bodyStyle="{ padding: '0' }"
-    >
-      <template #footer>
-        <a-button key="back" @click="closeCommunicateView">我已知晓</a-button>
+    <!-- 通用MD信息 -->
+    <a-modal v-model:open="systemConfigViewForm.viewFlag">
+      <template #title>
+        <Icon icon="streamline-emojis:bell" />
+        <span> {{ systemConfigViewForm.title }}</span>
       </template>
-      <a-row>
-        <a-col :span="24" style="display: flex; justify-content: center; margin: 10px">
-          <img
-            :src="communicateForm.wchatImage"
-            @onload="handleImageLoad()"
-            width="300"
-            alt="微信二维码"
-          />
-        </a-col>
-      </a-row>
+
+      <template #footer>
+        <a-button
+          key="submit"
+          type="primary"
+          @click="closeView"
+          :loading="systemConfigViewForm.loading"
+          >已知悉</a-button
+        >
+      </template>
+      <a-spin :spinning="systemConfigViewForm.loading">
+        <div style="padding: 10px 20px">
+          <MarkdownViewer :value="systemConfigViewForm.content" />
+        </div>
+      </a-spin>
     </a-modal>
 
     <!-- 邀新 -->
@@ -250,29 +260,7 @@
       </a-row>
       <a-divider dashed :style="{ margin: '10px 0' }" />
       <a-row :gutter="[1, 6]">
-        <a-col :span="24">
-          <span style="font-size: 14px; text-decoration: line-through">
-            📢 注册活动：
-            <span style="font-size: 14px">注册后注意下邮箱，有体验礼包哦~</span>
-          </span>
-        </a-col>
-        <a-col :span="24">
-          <span style="font-size: 14px; text-decoration: line-through">
-            📢 邀新活动1：<span style="font-size: 14px"
-              >每邀请1个好友注册并绑定手机号可叠加6次作图~</span
-            >
-          </span>
-        </a-col>
-        <a-col :span="24">
-          <span style="font-size: 14px; text-decoration: line-through">
-            📢 邀新活动2：
-            <span style="font-size: 14px">邀请5个好友注册并绑定手机号即可免费使用一天~</span>
-          </span>
-        </a-col>
-        <a-col :span="24">
-          📢 更多活动：
-          <span style="font-size: 14px">要体验的或者其他建议的找站长私聊吧~ </span>
-        </a-col>
+        <MarkdownViewer :value="systemConfigForm.activityNotice" />
       </a-row>
     </a-modal>
 
@@ -340,6 +328,59 @@
       </a-card>
     </a-modal>
 
+    <!-- 修改头像 -->
+    <a-modal
+      title="修改头像"
+      v-model:open="headerForm.viewFlag"
+      @ok="saveUserIcon"
+      :confirm-loading="headerForm.loading"
+      ok-text="立即修改"
+    >
+      <a-card>
+        <a-form layout="vertical">
+          <a-form-item label="自定义头像">
+            <a-switch
+              v-model:checked="headerForm.enableCustomer"
+              checked-children="开启"
+              un-checked-children="关闭"
+              @change="changeEnable"
+            />
+            <span style="margin-left: 10px; color: red; font-size: 10px"
+              >更新头像后，请主动刷新下页面。</span
+            >
+          </a-form-item>
+          <div v-if="headerForm.enableCustomer">
+            <a-form-item label="">
+              <span style="display: flex; justify-content: center; font-size: 12px">
+                <a-space>
+                  <a href="https://image.dooo.ng/upload" target="_blank">免费图床1</a>
+                  <a href="https://tuchuang.wvv.free.hr/" target="_blank">免费图床2</a>
+                  <a href="https://png.cm/" target="_blank">免费图床3</a>
+                  <a href="https://img.ax/" target="_blank">免费图床4</a>
+                  <a href="https://www.locimg.com/" target="_blank">免费图床5</a>
+                </a-space>
+              </span>
+            </a-form-item>
+            <a-form-item label="头像链接" name="iconUrl">
+              <a-input v-model:value="headerForm.iconUrl" placeholder="请输入您的头像链接" />
+            </a-form-item>
+          </div>
+          <a-form-item label="默认可选头像" v-else>
+            <div class="flex justify-around flex-wrap">
+              <div
+                v-for="item in headerForm.example"
+                :key="item"
+                @click="selectIcon(item)"
+                :class="{ 'choose-svg': headerForm.iconUrl === item }"
+              >
+                <SvgIcon :name="item" size="32" />
+              </div>
+            </div>
+          </a-form-item>
+        </a-form>
+      </a-card>
+    </a-modal>
+
     <!-- 密码模态窗 -->
     <a-modal
       title="更改密码"
@@ -396,6 +437,11 @@
   import { CountdownInput } from '/@/components/CountDown';
   import type { Rule } from 'ant-design-vue/es/form';
   import { copyText as doCopyText } from '/@/utils/copyTextToClipboard';
+  import { SystemConfig } from '/@/api/df/model/systemModel';
+  import { systemConfigInfo } from '/@/api/df/system';
+  import { MarkdownViewer } from '/@/components/Markdown';
+  import { changeUserIcon } from '/@/api/df/user';
+  import { SvgIcon } from '/@/components/Icon/index';
 
   /** 页面高度计算开始 */
   const formRef = ref();
@@ -429,6 +475,7 @@
     viewFlag: false,
     title: '',
     content: '',
+    defaultIcons: [{}],
   });
 
   const openSuggestView = async () => {
@@ -446,37 +493,97 @@
     }
   };
 
-  /****************************** 交流群 ******************************** */
+  /****************************** 交流群 && 教程 && 公告 && 活动 && 售后 ******************************** */
 
-  const communicateForm = ref({
-    viewFlag: false,
-    wchatImage: '',
-    qqGroupList: [] as string[],
+  const systemConfigForm: SystemConfig = ref({
+    groupInfo: '',
+    afterSaleInfo: '',
+    tutorialInfo: '',
+    systemNotice: '',
+    activityNotice: '',
   });
 
-  const openCommunicateView = async () => {
-    loading.value = true;
+  const systemConfigViewForm = ref({
+    viewFlag: false,
+    content: '',
+    title: '',
+    loading: false,
+  });
+
+  onMounted(async () => {
+    const data = await systemConfigInfo({});
+    systemConfigForm.value = data;
+  });
+
+  const openGroupView = async () => {
+    systemConfigViewForm.value.title = '交流群信息';
+    systemConfigViewForm.value.content = systemConfigForm.value.groupInfo;
+    systemConfigViewForm.value.viewFlag = true;
+  };
+  const openAfterSaleView = async () => {
+    systemConfigViewForm.value.title = '售后客服';
+    systemConfigViewForm.value.content = systemConfigForm.value.afterSaleInfo;
+    systemConfigViewForm.value.viewFlag = true;
+  };
+  const openTutorialView = async () => {
+    systemConfigViewForm.value.title = 'AI知识库';
+    systemConfigViewForm.value.content = systemConfigForm.value.tutorialInfo;
+    systemConfigViewForm.value.viewFlag = true;
+  };
+  const openSystemNoticeView = async () => {
+    console.log(1111);
+    systemConfigViewForm.value.title = '系统公告信息';
+    systemConfigViewForm.value.content = systemConfigForm.value.systemNotice;
+    systemConfigViewForm.value.viewFlag = true;
+  };
+  const openActivityNoticeView = async () => {
+    systemConfigViewForm.value.title = '活动公告';
+    systemConfigViewForm.value.content = systemConfigForm.value.activityNotice;
+    systemConfigViewForm.value.viewFlag = true;
+  };
+  const closeView = async () => {
+    systemConfigViewForm.value.title = '';
+    systemConfigViewForm.value.content = '';
+    systemConfigViewForm.value.viewFlag = false;
+  };
+
+  const headerForm = ref({
+    loading: false,
+    viewFlag: false,
+    iconUrl: null,
+    enableCustomer: false,
+    example: [
+      'dynamic-avatar-1',
+      'dynamic-avatar-2',
+      'dynamic-avatar-3',
+      'dynamic-avatar-4',
+      'dynamic-avatar-5',
+      'dynamic-avatar-6',
+      'dynamic-avatar-7',
+      'dynamic-avatar-8',
+    ],
+  });
+  const openIconView = async () => {
+    headerForm.value.viewFlag = true;
+  };
+
+  const selectIcon = (value) => {
+    headerForm.value.iconUrl = value;
+  };
+  const changeEnable = () => {
+    headerForm.value.iconUrl = null;
+  };
+
+  const saveUserIcon = async () => {
+    console.log(111);
+    headerForm.value.loading = true;
     try {
-      const resp = await communicateInfo({});
-      communicateForm.value.qqGroupList = resp.qqGroupList;
-      communicateForm.value.wchatImage = resp.wchatImage;
-      communicateForm.value.viewFlag = true;
+      await changeUserIcon({ iconUrl: headerForm.value.iconUrl });
+      headerForm.value.viewFlag = false;
     } finally {
-      setTimeout(() => {
-        loading.value = false;
-      }, 2000);
+      headerForm.value.loading = false;
     }
   };
-
-  const handleImageLoad = async () => {
-    loading.value = false;
-  };
-  const closeCommunicateView = async () => {
-    //提交建议
-
-    communicateForm.value.viewFlag = false;
-  };
-
   /****************************** 账号密码邮箱手机号设置 ******************************** */
   const viewAgg = ref({
     loading: false,
@@ -489,11 +596,6 @@
     viewAgg.value.phoneShow = type === 'changePhone';
     viewAgg.value.emailShow = type === 'changeMail';
     viewAgg.value.passwordShow = type === 'changePassword';
-
-    console.log(viewAgg.value.showFlag);
-    console.log(viewAgg.value.phoneShow);
-    console.log(viewAgg.value.emailShow);
-    console.log(viewAgg.value.passwordShow);
   };
   const formData = reactive({
     phone: '',
@@ -600,8 +702,6 @@
     return true;
   }
 
-  /****************************** 教程 ******************************** */
-
   /****************************** 邀新有礼 ******************************** */
   const inviteForm = ref({
     viewFlag: false,
@@ -610,8 +710,10 @@
 
   const openInviteView = async () => {
     inviteForm.value.viewFlag = true;
+    const currentDomain = window.location.origin;
+
     inviteForm.value.ownerLink =
-      'https://gfish.top/#/login?inviteCode=' + userInfo.value.accountCode;
+      currentDomain + '/#/login?inviteCode=' + userInfo.value.accountCode;
   };
   const closeInviteView = async () => {
     inviteForm.value.viewFlag = false;
@@ -661,6 +763,7 @@
         svgName: 'gridicons:phone',
         routeUrl: '',
         type: 'model',
+        showFlag: true,
       },
       {
         name: '修改密码',
@@ -668,6 +771,7 @@
         svgName: 'mdi:password',
         routeUrl: '',
         type: 'model',
+        showFlag: true,
       },
       {
         name: '修改邮箱',
@@ -675,24 +779,54 @@
         svgName: 'icon-park-solid:email-lock',
         routeUrl: '',
         type: 'model',
+        showFlag: true,
+      },
+      {
+        name: '替换头像',
+        key: 'userIcon',
+        svgName: 'solar:user-circle-outline',
+        routeUrl: '',
+        type: 'func',
+        showFlag: true,
+        func: openIconView,
       },
     ],
     chat: [
       {
+        name: '限时活动',
+        key: 'activityNotice',
+        svgName: 'material-symbols:notifications-active-outline-sharp',
+        routeUrl: '',
+        type: 'func',
+        showFlag: systemConfigForm.value.activityNotice !== null,
+        func: openInviteView,
+      },
+      {
         name: '交流群',
-        key: 'chat',
+        key: 'groupInfo',
         svgName: 'icon-park-outline:wechat',
         routeUrl: '',
         type: 'func',
-        func: openCommunicateView,
+        showFlag: systemConfigForm.value.groupInfo !== null,
+        func: openGroupView,
       },
       {
-        name: '客服',
-        key: 'customer',
+        name: '知识库',
+        key: 'chat',
+        svgName: 'gis:map-book',
+        routeUrl: '',
+        type: 'func',
+        showFlag: systemConfigForm.value.tutorialInfo !== null,
+        func: openTutorialView,
+      },
+      {
+        name: '售后服务',
+        key: 'afterSaleInfo',
         svgName: 'ri:customer-service-2-line',
         routeUrl: '',
         type: 'func',
-        func: openCommunicateView,
+        showFlag: systemConfigForm.value.afterSaleInfo !== null,
+        func: openAfterSaleView,
       },
       {
         name: '改进建议',
@@ -701,14 +835,16 @@
         routeUrl: '',
         type: 'func',
         func: openSuggestView,
+        showFlag: true,
       },
       {
-        name: '限时活动',
-        key: 'activity',
-        svgName: 'game-icons:happy-skull',
+        name: '系统公告',
+        key: 'systemNotice',
+        svgName: 'pepicons-pop:bulletin-notice',
         routeUrl: '',
         type: 'func',
-        func: openInviteView,
+        func: openSystemNoticeView,
+        showFlag: systemConfigForm.value.systemNotice !== null,
       },
     ],
     trade: [
@@ -720,6 +856,7 @@
         type: 'route',
         hover: false,
         color: '',
+        showFlag: true,
       },
       {
         name: '下单记录',
@@ -729,6 +866,7 @@
         type: 'route',
         hover: true,
         color: '',
+        showFlag: true,
       },
       {
         name: '拉新记录',
@@ -738,6 +876,7 @@
         type: 'route',
         hover: false,
         color: 'red',
+        showFlag: true,
       },
     ],
   });
@@ -768,6 +907,13 @@
     padding: 5px;
     overflow-x: hidden;
     overflow-y: auto;
+  }
+
+  .choose-svg {
+    /* 添加其他样式，如 padding、margin 或者其他样式 */
+
+    /* 改变边框为蓝色 */
+    border: 1px solid blue;
   }
 </style>
 <style lang="less">

@@ -1,7 +1,12 @@
 <template>
   <Dropdown placement="bottomLeft" :overlayClassName="`${prefixCls}-dropdown-overlay`">
     <span :class="[prefixCls, `${prefixCls}--${theme}`]" class="flex">
-      <img :class="`${prefixCls}__header`" :src="getUserInfo.avatar" />
+      <SvgIcon
+        v-if="getUserInfo.avatar && !getUserInfo.avatar.startsWith('http')"
+        :class="`${prefixCls}__header`"
+        :name="getUserInfo.avatar"
+      />
+      <img v-else :class="`${prefixCls}__header`" :src="getUserInfo.avatar" />
       <span :class="`${prefixCls}__info hidden md:block`">
         <span :class="`${prefixCls}__name`" class="truncate">
           {{ getUserInfo.realName }}
@@ -45,7 +50,8 @@
   // components
   import { Dropdown, Menu } from 'ant-design-vue';
   import type { MenuInfo } from 'ant-design-vue/lib/menu/src/interface';
-
+  import { SvgIcon } from '/@/components/Icon';
+  import Icon from '@/components/Icon/Icon.vue';
   import { defineComponent, computed } from 'vue';
 
   import { DOC_URL } from '/@/settings/siteSetting';
@@ -68,6 +74,7 @@
     name: 'UserDropdown',
     components: {
       Dropdown,
+      SvgIcon,
       Menu,
       MenuItem: createAsyncComponent(() => import('./DropMenuItem.vue')),
       MenuDivider: Menu.Divider,

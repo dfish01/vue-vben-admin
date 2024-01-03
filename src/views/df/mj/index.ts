@@ -207,16 +207,16 @@ export function systemInfoApi() {
   }
   const systemInfoForm = ref({
     loaded: false,
-    communicateResp: {
-      wchatImage: null,
-      qqGroupList: [] as string[],
-    },
+    groupInfo: null,
+    afterSaleInfo: null,
     tutorialInfo: null,
   });
 
   const viewForm = ref({
-    communicateViewFlag: false,
-    communicateLoading: false,
+    viewFlag: false,
+    loading: false,
+    content: '',
+    title: '',
   });
 
   //加载配置
@@ -231,42 +231,40 @@ export function systemInfoApi() {
   };
 
   const openCommunicateView = async () => {
-    if (systemInfoForm.value.communicateResp) {
-      viewForm.value.communicateViewFlag = true;
-    } else {
-      try {
-        const resp = await communicateInfo({});
-        systemInfoForm.value.communicateResp.qqGroupList = resp.qqGroupList;
-        systemInfoForm.value.communicateResp.wchatImage = resp.wchatImage;
-        viewForm.value.communicateLoading = true;
-      } finally {
-        setTimeout(() => {
-          viewForm.value.communicateLoading = false;
-        }, 2000);
-      }
-    }
+    viewForm.value.content = systemInfoForm.value.groupInfo;
+    viewForm.value.title = '交流群';
+    viewForm.value.viewFlag = true;
   };
-  const closeCommunicateView = async () => {
-    viewForm.value.communicateViewFlag = false;
+
+  const openTutorialView = async () => {
+    viewForm.value.content = systemInfoForm.value.tutorialInfo;
+    viewForm.value.title = '教程信息';
+    viewForm.value.viewFlag = true;
   };
+  const closeView = () => {
+    viewForm.value.content = null;
+    viewForm.value.title = '';
+    viewForm.value.viewFlag = false;
+  };
+
   const handleImageLoad = async () => {
     viewForm.value.communicateLoading = false;
   };
 
-  const openTutorial = async () => {
-    if (systemInfoForm.value.tutorialInfo) {
-      window.open(systemInfoForm.value.tutorialInfo, '_blank');
-    }
-  };
+  // const openTutorial = async () => {
+  //   if (systemInfoForm.value.tutorialInfo) {
+  //     window.open(systemInfoForm.value.tutorialInfo, '_blank');
+  //   }
+  // };
 
   const api = {
     systemInfoForm,
     viewForm,
     loadSystemInfoConfig,
     openCommunicateView,
-    closeCommunicateView,
+    openTutorialView,
+    closeView,
     handleImageLoad,
-    openTutorial,
   };
   systemInfoInstance = api;
   return api;

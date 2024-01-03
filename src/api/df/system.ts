@@ -1,7 +1,7 @@
 import { defHttp } from '/@/utils/http/axios';
 import { ErrorMessageMode } from '/#/axios';
 import {
-  ActivityInfoConfig,
+  SystemConfig,
   ExtendConfig,
   MjConfig,
   WebsiteConfig,
@@ -14,8 +14,8 @@ enum Api {
   ExtendConfigInfo = '/open/dict/extendConfigInfo',
   SaveMjConfig = '/open/dict/saveMjConfig',
   MjConfigInfo = '/open/dict/mjConfigInfo',
-  SaveActivityConfig = '/open/dict/saveActivityConfig',
-  ActivityConfigInfo = '/open/dict/activityConfigInfo',
+  SaveSystemConfig = '/open/dict/saveSystemConfig',
+  SystemConfigInfo = '/open/dict/systemConfigInfo',
 
   SaveWebsiteConfig = '/open/dict/saveWebsiteConfig',
   WebsiteConfigInfo = '/open/dict/websiteConfigInfo',
@@ -104,10 +104,10 @@ export function mjConfigInfo(params: {}, mode: ErrorMessageMode = 'message') {
  * @param mode
  * @returns
  */
-export function saveActivityConfig(params: ActivityInfoConfig, mode: ErrorMessageMode = 'message') {
+export function saveSystemConfig(params: SystemConfig, mode: ErrorMessageMode = 'message') {
   return defHttp.post(
     {
-      url: Api.SaveActivityConfig,
+      url: Api.SaveSystemConfig,
       params,
     },
     {
@@ -123,10 +123,10 @@ export function saveActivityConfig(params: ActivityInfoConfig, mode: ErrorMessag
  * @param mode
  * @returns
  */
-export function activityConfigInfo(params: {}, mode: ErrorMessageMode = 'message') {
-  return defHttp.post<ActivityInfoConfig>(
+export function systemConfigInfo(params: {}, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<SystemConfig>(
     {
-      url: Api.ActivityConfigInfo,
+      url: Api.SystemConfigInfo,
       params,
     },
     {
@@ -161,7 +161,7 @@ export function saveWebsiteConfig(params: WebsiteConfig, mode: ErrorMessageMode 
  * @returns
  */
 export function websiteConfigInfo(params: {}, mode: ErrorMessageMode = 'message') {
-  return defHttp.post<ActivityInfoConfig>(
+  return defHttp.post<SystemConfig>(
     {
       url: Api.WebsiteConfigInfo,
       params,

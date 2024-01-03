@@ -179,7 +179,9 @@
         >
       </template>
       <a-spin :spinning="noticeForm.loading">
-        <div style="padding: 10px 20px" v-html="noticeForm.content"></div>
+        <div style="padding: 10px 20px">
+          <MarkdownViewer :value="noticeForm.content" />
+        </div>
       </a-spin>
     </a-modal>
   </a-layout>

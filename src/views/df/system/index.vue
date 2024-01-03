@@ -22,9 +22,9 @@
         </a-tab-pane>
         <a-tab-pane key="3">
           <template #tab>
-            <span> 活动信息</span>
+            <span> 系统配置</span>
           </template>
-          <ActivityInfoConfig
+          <SystemConfig
             :contentHeight="contentHeight"
             :scrollable="scrollableFlag"
             ref="activityInfoConfigRef"
@@ -60,7 +60,7 @@
   import type { UnwrapRef } from 'vue';
   import ExtendConfig from './extend_config.vue';
   import MjConfig from './mj_config.vue';
-  import ActivityInfoConfig from './activity_info_config.vue';
+  import SystemConfig from './system_config.vue';
   import Website from './website.vue';
   import Pay from './pay.vue';
   import { useMessage } from '/@/hooks/web/useMessage';

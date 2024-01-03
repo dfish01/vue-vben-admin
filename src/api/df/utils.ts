@@ -8,6 +8,7 @@ enum Api {
   AnalysisLink = '/open/waterMask/analysis',
   addSuggest = '/open/userSuggest/add',
   CommunicateInfo = '/open/dataCache/communicate',
+  AfterSaleInfo = '/open/dataCache/afterSale',
   TutorialInfo = '/open/dataCache/tutorialInfo',
   SystemInfo = '/open/dataCache/systemInfo',
 
@@ -125,12 +126,27 @@ export function addSuggest(
  * @returns
  */
 export function communicateInfo(params: {}, mode: ErrorMessageMode = 'message') {
-  return defHttp.post<{
-    wchatImage: string;
-    qqGroupList: string[];
-  }>(
+  return defHttp.post<string>(
     {
       url: Api.CommunicateInfo,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
+}
+
+/**
+ * 售后信息
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function afterSaleInfo(params: {}, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<string>(
+    {
+      url: Api.AfterSaleInfo,
       params,
     },
     {

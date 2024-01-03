@@ -12,43 +12,40 @@
         <a-form-item label="">
           <span style="display: flex; justify-content: center; font-size: 12px">
             <a-space>
-              <a ref="https://image.dooo.ng/upload" target="_blank">免费图床1</a>
-              <a ref="https://tuchuang.wvv.free.hr/" target="_blank">免费图床2</a>
-              <a ref="https://png.cm/" target="_blank">免费图床3</a>
-              <a ref="https://img.ax/" target="_blank">免费图床4</a>
-              <a ref="https://www.locimg.com/" target="_blank">免费图床5</a>
+              <a href="https://image.dooo.ng/upload" target="_blank">免费图床1</a>
+              <a href="https://tuchuang.wvv.free.hr/" target="_blank">免费图床2</a>
+              <a href="https://png.cm/" target="_blank">免费图床3</a>
+              <a href="https://img.ax/" target="_blank">免费图床4</a>
+              <a href="https://www.locimg.com/" target="_blank">免费图床5</a>
             </a-space>
           </span>
         </a-form-item>
 
         <a-form-item
-          label="群图片链接"
-          :name="['communicateInfo', 'wchatImage']"
-          :rules="[{ required: true, message: '请输入群图片链接' }]"
+          label="群信息"
+          name="groupInfo"
+          :rules="[{ required: false, message: '请输入群信息' }]"
         >
-          <a-input
-            v-model:value="activityInfoConfigForm.communicateInfo.wchatImage"
-            placeholder="请输入群图片链接"
+          <MarkDown v-model:value="activityInfoConfigForm.groupInfo" placeholder="请输入群信息" />
+        </a-form-item>
+        <a-form-item
+          label="售后信息"
+          name="afterSaleInfo"
+          :rules="[{ required: false, message: '请输入售后信息' }]"
+        >
+          <MarkDown
+            v-model:value="activityInfoConfigForm.afterSaleInfo"
+            placeholder="请输入售后信息"
           />
         </a-form-item>
         <a-form-item
-          label="QQ群号"
-          :name="['communicateInfo', 'qqGroupList']"
-          :rules="[{ required: false, message: '请输入QQ群号' }]"
-        >
-          <a-input
-            v-model:value="activityInfoConfigForm.communicateInfo.qqGroupList"
-            placeholder="请输入QQ群号,多个“,”隔开"
-          />
-        </a-form-item>
-        <a-form-item
-          label="教程地址"
+          label="教程内容"
           name="tutorialInfo"
-          :rules="[{ required: true, message: '请输入教程地址' }]"
+          :rules="[{ required: true, message: '请输入教程内容' }]"
         >
-          <a-input
+          <MarkDown
             v-model:value="activityInfoConfigForm.tutorialInfo"
-            placeholder="请输入教程地址"
+            placeholder="请输入教程内容"
           />
         </a-form-item>
         <a-form-item
@@ -95,22 +92,8 @@
   import type { UnwrapRef } from 'vue';
   import type { Rule } from 'ant-design-vue/es/form';
   import { MarkDown, MarkDownActionType, MarkdownViewer } from '/@/components/Markdown';
-  import {
-    ActivityInfoConfig,
-    ActivityInfoConfigResp,
-    ExtendConfigResp,
-    ExtendConfig,
-    MjConfigReq,
-    MjConfigResp,
-  } from '/@/api/df/model/systemModel';
-  import {
-    saveExtendConfig,
-    extendConfigInfo,
-    saveMjConfig,
-    mjConfigInfo,
-    saveActivityConfig,
-    activityConfigInfo,
-  } from '/@/api/df/system';
+  import { SystemConfig } from '/@/api/df/model/systemModel';
+  import { saveSystemConfig, systemConfigInfo } from '/@/api/df/system';
   import { loadingFormApi } from './system';
   import { Loading } from '/@/components/Loading';
 
@@ -124,11 +107,9 @@
   const wrapperCol = { span: 13 };
   const activityInfoConfigFormRef = ref();
 
-  const activityInfoConfigForm: ActivityInfoConfig = ref({
-    communicateInfo: {
-      wchatImage: '',
-      qqGroupList: '',
-    },
+  const activityInfoConfigForm: SystemConfig = ref({
+    groupInfo: null,
+    afterSaleInfo: null,
     tutorialInfo: null,
     systemNotice: null,
     activityNotice: null,
@@ -141,7 +122,7 @@
   const loadData = async () => {
     loadingForm.globalLoading = true;
     try {
-      const data = await activityConfigInfo();
+      const data = await systemConfigInfo();
       activityInfoConfigForm.value = data;
     } finally {
       loadingForm.globalLoading = false;
@@ -152,7 +133,7 @@
     loadingForm.globalLoading = true;
     try {
       await activityInfoConfigFormRef.value.validate();
-      await saveActivityConfig(activityInfoConfigForm.value);
+      await saveSystemConfig(activityInfoConfigForm.value);
     } catch (error) {
       console.error('error', error);
     } finally {

@@ -234,7 +234,7 @@
         <a-row>
           <a-col :span="24" style="display: flex; justify-content: center">
             <img
-              :src="systemInfoForm.communicateResp.wchatImage"
+              :src="systemInfoForm.communicateResp.groupUrl"
               @onload="handleImageLoad()"
               width="300"
               alt="微信二维码"

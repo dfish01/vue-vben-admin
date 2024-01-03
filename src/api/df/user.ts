@@ -23,6 +23,27 @@ enum Api {
   TestRetry = '/testRetry',
   ResetPasswordByPhone = '/resetPasswordByPhone',
   ResetPasswordByEmail = '/resetPasswordByEmail',
+
+  ChangeUserIcon = '/open/user/changeUserIcon',
+}
+
+/**
+ * 变更头像
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function changeUserIcon(params: { iconUrl: string }, mode: ErrorMessageMode = 'message') {
+  return defHttp.post(
+    {
+      url: Api.ChangeUserIcon,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+      successMessageMode: mode,
+    },
+  );
 }
 
 /**

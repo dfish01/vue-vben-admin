@@ -60,11 +60,21 @@ export interface MjConfig {
 /**
  * ActivityInfoConfigReq 接口定义
  */
-export interface ActivityInfoConfig {
+export interface SystemConfig {
   /**
-   * 微信群和教程连接配置
+   * 群信息
    */
-  communicateInfo: CommunicateInfo;
+  groupInfo: string;
+
+  /**
+   * 售后信息
+   */
+  afterSaleInfo: string;
+
+  /**
+   * 活动通知信息
+   */
+  activityNotice: string;
 
   /**
    * 教程连接
@@ -75,25 +85,6 @@ export interface ActivityInfoConfig {
    * 系统通知
    */
   systemNotice: string;
-}
-
-/**
- * ActivityInfoConfigReq 接口定义
- */
-
-/**
- * CommunicateResp 接口定义
- */
-interface CommunicateInfo {
-  /**
-   * 微信群图片
-   */
-  wchatImage: string;
-
-  /**
-   * QQ群分享列表
-   */
-  qqGroupList: string[];
 }
 
 export interface WebsiteConfig {

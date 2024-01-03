@@ -12,11 +12,11 @@
         <a-form-item label="">
           <span style="display: flex; justify-content: center; font-size: 12px">
             <a-space>
-              <a ref="https://image.dooo.ng/upload" target="_blank">免费图床1</a>
-              <a ref="https://tuchuang.wvv.free.hr/" target="_blank">免费图床2</a>
-              <a ref="https://png.cm/" target="_blank">免费图床3</a>
-              <a ref="https://img.ax/" target="_blank">免费图床4</a>
-              <a ref="https://www.locimg.com/" target="_blank">免费图床5</a>
+              <a href="https://image.dooo.ng/upload" target="_blank">免费图床1</a>
+              <a href="https://tuchuang.wvv.free.hr/" target="_blank">免费图床2</a>
+              <a href="https://png.cm/" target="_blank">免费图床3</a>
+              <a href="https://img.ax/" target="_blank">免费图床4</a>
+              <a href="https://www.locimg.com/" target="_blank">免费图床5</a>
             </a-space>
           </span>
         </a-form-item>

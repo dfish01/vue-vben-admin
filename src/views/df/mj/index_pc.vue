@@ -73,7 +73,7 @@
                 <a-button-group>
                   <a-tooltip title="🥤系统相关操作说明以及Midjouney教程文档库 ~">
                     <a-button
-                      @click="openTutorial"
+                      @click="openTutorialView"
                       style="padding: 5px"
                       v-if="systemInfoForm.tutorialInfo"
                       ><SvgIcon name="jiaocheng"
@@ -83,7 +83,7 @@
                     <a-button
                       @click="openCommunicateView"
                       style="padding: 5px"
-                      v-if="systemInfoForm.communicateResp"
+                      v-if="systemInfoForm.groupInfo"
                       ><SvgIcon name="QQ"
                     /></a-button>
                   </a-tooltip>
@@ -433,19 +433,28 @@
     </div>
 
     <!-- 交流群 -->
-    <a-modal v-model:open="viewForm.communicateViewFlag" title="🐵扫码进群吧~">
+    <a-modal v-model:open="viewForm.communicateViewFlag" title="交流群信息~">
       <template #footer>
         <a-button key="back" @click="closeCommunicateView">我已知晓</a-button>
       </template>
       <a-spin size="small" :spinning="viewForm.communicateLoading">
         <a-row>
           <a-col :span="24" style="display: flex; justify-content: center">
-            <img
-              :src="systemInfoForm.communicateResp.wchatImage"
-              @onload="handleImageLoad()"
-              width="300"
-              alt="微信二维码"
-            />
+            <MarkdownViewer :value="systemInfoForm.groupInfo" />
+          </a-col>
+        </a-row>
+      </a-spin>
+    </a-modal>
+
+    <!-- 交流群 -->
+    <a-modal v-model:open="viewForm.viewFlag" :title="viewForm.title">
+      <template #footer>
+        <a-button key="back" @click="closeView">我已知晓</a-button>
+      </template>
+      <a-spin size="small" :spinning="viewForm.loading">
+        <a-row>
+          <a-col :span="24" style="display: flex; justify-content: center">
+            <MarkdownViewer :value="viewForm.content" />
           </a-col>
         </a-row>
       </a-spin>
@@ -461,6 +470,7 @@
   import { ref, onMounted, reactive } from 'vue';
   import TextToImage from './TextToImg.vue';
   import Describe from './Describe.vue';
+  import { MarkdownViewer } from '/@/components/Markdown';
   import {
     RadiusUpleftOutlined,
     RadiusUprightOutlined,
@@ -531,9 +541,8 @@
     viewForm,
     loadSystemInfoConfig,
     openCommunicateView,
-    closeCommunicateView,
-    handleImageLoad,
-    openTutorial,
+    closeView,
+    openTutorialView,
   } = systemInfoApi();
   const { createMessage, createSuccessModal, createErrorModal, createInfoModal } = useMessage();
   const {
