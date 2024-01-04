@@ -52,9 +52,13 @@
           :text="card.goodsType == 'GOODS' ? '单品' : card.goodsType == 'GROUP' ? '拼团' : '授权'"
           :color="card.goodsType == 'GOODS' ? 'pink' : card.goodsType == 'GROUP' ? 'green' : 'blue'"
         >
-          <a-card :bodyStyle="{ padding: '0px' }" class="card" hoverable>
+          <a-card
+            :bodyStyle="{ padding: '0px', opacity: '0.75', 'line-height': 1 }"
+            class="account-card"
+            hoverable
+          >
             <!-- <a-image :src="card.imageUrl" class="card-image" preview="false" fallback="" /> -->
-            <template #extra>
+            <template #title>
               <div
                 style="
                   display: flex;
@@ -64,62 +68,97 @@
                 "
               >
                 <div style="justify-content: left">
-                  <span>🪧{{ card.goodsTitle }}</span>
+                  <Icon icon="ic:outline-bookmark-add" /><span style="margin-left: 5px">
+                    {{ card.goodsTitle }}</span
+                  >
                 </div>
               </div>
             </template>
             <div style="display: flex; flex-direction: column; padding: 10px">
               <a-row class="card-tags">
-                <span>
-                  ⚡Turbo次数
-                  <span style="font-weight: bolder">{{ card.infoBody.turboTimes }}</span></span
-                >
-                <span>
-                  🐇Fast次数
-                  <span style="font-weight: bolder">{{ card.infoBody.fastTimes }}</span></span
-                >
+                <a-col flex="90px">
+                  <span style="font-weight: bolder">
+                    <Icon icon="emojione-v1:lightning-mood" /> Turbo
+                  </span>
+                </a-col>
+                <a-col flex="auto">
+                  <span>
+                    可用<span>{{ card.infoBody.turboTimes }}</span
+                    >次
+                  </span>
+                </a-col>
+              </a-row>
+              <a-row class="card-tags">
+                <a-col flex="90px">
+                  <span style="font-weight: bolder"> <Icon icon="openmoji:rabbit" /> Fast </span>
+                </a-col>
+                <a-col flex="auto">
+                  <span> 可用{{ card.infoBody.fastTimes }}次 </span>
+                </a-col>
+              </a-row>
+              <a-row class="card-tags">
+                <a-col flex="90px">
+                  <span style="font-weight: bolder">
+                    <Icon icon="streamline-emojis:turtle" /> Relax
+                  </span>
+                </a-col>
+                <a-col flex="auto">
+                  <span> 可用{{ card.infoBody.relaxTimes }}次 </span>
+                </a-col>
               </a-row>
 
               <a-row class="card-tags">
-                <span>
-                  🐢Relax次数
-                  <span style="font-weight: bolder">{{ card.infoBody.relaxTimes }}</span></span
-                >
-                <span>
-                  📅天数 <span style="font-weight: bolder">{{ card.infoBody.authDays }}</span></span
-                >
+                <a-col flex="90px">
+                  <span style="font-weight: bolder"> <Icon icon="openmoji:timer" /> 有效期至 </span>
+                </a-col>
+                <a-col flex="auto">
+                  <span v-if="card.infoBody.authType === 'DAY'">
+                    激活后 {{ card.infoBody.authDays }} 天
+                  </span>
+                  <span v-else> 指定日期 {{ card.infoBody.authExpireTimes }} </span>
+                </a-col>
               </a-row>
+
               <a-row class="card-tags">
-                <a-col>
-                  <div>
-                    <span>🙆‍♂️人数 </span>
-                    <span style="font-weight: bolder" v-if="card.maxGroupMembers === 1">
-                      独享
-                    </span>
-                    <span style="font-weight: bolder" v-if="card.maxGroupMembers === -1">
-                      不限
-                    </span>
-                    <span v-if="card.maxGroupMembers > 1">
-                      <span style="font-weight: bolder">{{ card.minGroupMembers }}</span> ~
-                      <span style="font-weight: bolder">{{ card.maxGroupMembers }}</span>
-                    </span>
+                <a-col flex="90px">
+                  <span style="font-weight: bolder">
+                    <Icon icon="flat-color-icons:shipped" /> 发货方式
+                  </span>
+                </a-col>
+                <a-col flex="auto">
+                  <span v-if="card.shipType === 'AUTO'"> 拍下后自动发货 </span>
+                  <span v-else> 请联系客服手动发货 </span>
+                </a-col>
+              </a-row>
+              <a-row class="card-tags" style="display: flex; justify-content: space-between">
+                <div style="width: 90px">
+                  <span style="font-weight: bolder">
+                    <Icon icon="material-symbols:other-admission-outline" /> 其他优惠
+                  </span>
+                </div>
+                <div style="flex: 1; flex-wrap: true">
+                  <div style="display: flex; flex-direction: column; width: 100%; height: 100%">
+                    <span> chatgpt 3.5 模型 </span>
+                    <span> Midjourney 画廊</span>
                   </div>
-                </a-col>
-                <a-col>
-                  <!-- <div>
-                    <a-tag disabled>🚩账号情况</a-tag>
-                  </div> -->
-                </a-col>
+                </div>
               </a-row>
+
               <a-row class="card-tags">
-                <a-col>
+                <a-col v-if="card.specialLabel">
                   <a-tag color="red">{{ card.specialLabel }} </a-tag>
                 </a-col>
               </a-row>
-              <a-row class="card-tags">
-                <a-button @click="buyGoods(card)" style="width: 100%"
-                  >立即购买 💰{{ card.goodsPrice }}</a-button
-                >
+
+              <a-row class="card-tags" style="display: flex; justify-content: space-between">
+                <div style="display: flex; align-items: center; width: 90px">
+                  <span style="color: #e36414; font-size: 23px; font-weight: orange">
+                    <Icon icon="streamline-emojis:money-bag" size="23px" /> {{ card.goodsPrice }}
+                  </span>
+                </div>
+                <div style="display: flex; flex: 1; justify-content: flex-end">
+                  <a-button type="primary" @click="buyGoods(card)">立即购买 </a-button>
+                </div>
               </a-row>
             </div>
             <!-- 更多卡片内容 -->
@@ -458,6 +497,16 @@
     margin-left: 0;
 
     /* height: 150px; */
+  }
+
+  .account-card >>> .ant-card-head {
+    min-height: 40px;
+    padding: 0 10px;
+  }
+
+  .account-card >>> .ant-card {
+    opacity: 0.5;
+    line-height: 1;
   }
 
   .card >>> img {
