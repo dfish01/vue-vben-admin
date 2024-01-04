@@ -143,7 +143,7 @@
           <a-card :bodyStyle="{ padding: '10px 22px 10px 22px' }" hoverable>
             <a-row>
               <a-col>
-                <span>💌 改进与建议</span>
+                <span><Icon icon="mdi:email-arrow-left-outline" /> 改进与建议</span>
               </a-col>
             </a-row>
           </a-card>
@@ -157,11 +157,7 @@
             </a-row>
           </a-card>
         </a-col>
-        <a-col
-          :span="24"
-          @click="openAfterSaleView"
-          v-if="systemConfigForm.value.afterSaleInfo !== null"
-        >
+        <a-col :span="24" @click="openAfterSaleView" v-if="systemConfigForm.afterSaleInfo !== null">
           <a-card :bodyStyle="{ padding: '10px 22px 10px 22px' }" hoverable>
             <a-row>
               <a-col>
@@ -170,11 +166,7 @@
             </a-row>
           </a-card>
         </a-col>
-        <a-col
-          :span="24"
-          @click="openTutorialView"
-          v-if="systemConfigForm.value.tutorialInfo !== null"
-        >
+        <a-col :span="24" @click="openTutorialView" v-if="systemConfigForm.tutorialInfo !== null">
           <a-card :bodyStyle="{ padding: '10px 22px 10px 22px' }" hoverable>
             <a-row>
               <a-col>
@@ -187,7 +179,7 @@
           <a-card :bodyStyle="{ padding: '10px 22px 10px 22px' }" hoverable>
             <a-row>
               <a-col>
-                <span>🎉 限时活动 🎉</span>
+                <span><Icon icon="mingcute:celebrate-line" /> 限时活动 </span>
               </a-col>
             </a-row>
           </a-card>

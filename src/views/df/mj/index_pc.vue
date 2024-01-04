@@ -433,20 +433,6 @@
     </div>
 
     <!-- 交流群 -->
-    <a-modal v-model:open="viewForm.communicateViewFlag" title="交流群信息~">
-      <template #footer>
-        <a-button key="back" @click="closeCommunicateView">我已知晓</a-button>
-      </template>
-      <a-spin size="small" :spinning="viewForm.communicateLoading">
-        <a-row>
-          <a-col :span="24" style="display: flex; justify-content: center">
-            <MarkdownViewer :value="systemInfoForm.groupInfo" />
-          </a-col>
-        </a-row>
-      </a-spin>
-    </a-modal>
-
-    <!-- 交流群 -->
     <a-modal v-model:open="viewForm.viewFlag" :title="viewForm.title">
       <template #footer>
         <a-button key="back" @click="closeView">我已知晓</a-button>

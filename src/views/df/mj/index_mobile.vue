@@ -36,13 +36,17 @@
                         </a-button>
                       </a-tooltip>
                       <a-tooltip title="">
-                        <a-button @click="openCommunicateView" style="padding: 5px">
+                        <a-button
+                          v-if="systemInfoForm.groupInfo"
+                          @click="openCommunicateView"
+                          style="padding: 5px"
+                        >
                           <SvgIcon name="QQ" size="20" />
                         </a-button>
                       </a-tooltip>
                       <a-tooltip title="🥤系统相关操作说明以及Midjouney教程文档库 ~">
                         <a-button
-                          @click="openTutorial"
+                          @click="openTutorialView"
                           style="padding: 5px"
                           v-if="systemInfoForm.tutorialInfo"
                           ><SvgIcon name="jiaocheng" size="20"
@@ -226,19 +230,14 @@
     </div>
 
     <!-- 交流群 -->
-    <a-modal v-model:open="viewForm.communicateViewFlag" title="🐵扫码进群吧~">
+    <a-modal v-model:open="viewForm.viewFlag" :title="viewForm.title">
       <template #footer>
-        <a-button key="back" @click="closeCommunicateView">我已知晓</a-button>
+        <a-button key="back" @click="closeView">我已知晓</a-button>
       </template>
-      <a-spin size="small" :spinning="viewForm.communicateLoading">
+      <a-spin size="small" :spinning="viewForm.loading">
         <a-row>
           <a-col :span="24" style="display: flex; justify-content: center">
-            <img
-              :src="systemInfoForm.communicateResp.groupUrl"
-              @onload="handleImageLoad()"
-              width="300"
-              alt="微信二维码"
-            />
+            <MarkdownViewer :value="viewForm.content" />
           </a-col>
         </a-row>
       </a-spin>
@@ -253,6 +252,7 @@
   import Icon from '/@/components/Icon/Icon.vue';
   import { SvgIcon } from '/@/components/Icon';
   import Describe from './mobile/Describe.vue';
+  import { MarkdownViewer } from '/@/components/Markdown';
   import { SettingOutlined, CloudSyncOutlined, ClusterOutlined } from '@ant-design/icons-vue';
   import { WorkSpaceListResp, WorkSpaceSaveReq } from '/@/api/df/model/workSpaceModel'; // 请替换为您的请求模型路径
   import {
@@ -305,11 +305,9 @@
     viewForm,
     loadSystemInfoConfig,
     openCommunicateView,
-    closeCommunicateView,
-    handleImageLoad,
-    openTutorial,
+    closeView,
+    openTutorialView,
   } = systemInfoApi();
-
   // 使用 ref 包装，以确保 computed 可以正确监听变化
   const route = useRoute();
   const activeTab = ref(route.query.activeTab || 'TextToImageForm');
