@@ -103,11 +103,43 @@
                   <Icon icon="uil:server" class="vel-icon icon" aria-hidden="true" size="14" />
                   频道： <span style="font-size: 13px">{{ card.channelTitle }}</span></span
                 >
-                <!-- <a-badge
-                  style="font-size: 13px"
-                  :status="card.numAvailableDiscordAccount > 0 ? 'processing' : 'default'"
-                  :text="card.numAvailableDiscordAccount + '/' + card.numTotalDiscordAccount"
-                /> -->
+                <span v-if="card.state === 'normal'">
+                  <a-button
+                    size="small"
+                    v-if="card.ownerFlag === 'Y'"
+                    style="font-size: 12px"
+                    @click="showDeployGoods(card)"
+                  >
+                    <span
+                      ><Icon
+                        icon="material-symbols:deployed-code"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                        size="14"
+                      />
+                      发布商品</span
+                    ></a-button
+                  >
+                  <a-popconfirm
+                    v-else
+                    title="发布商品到交易市场，将停止账号的使用。是否确认？"
+                    ok-text="立即发布"
+                    cancel-text="取消"
+                    @confirm="showDeployGoods(card)"
+                  >
+                    <a-button size="small" style="font-size: 12px" @click="showDeployGoods(card)">
+                      <span
+                        ><Icon
+                          icon="material-symbols:deployed-code"
+                          class="vel-icon icon"
+                          aria-hidden="true"
+                          size="14"
+                        />
+                        出售商品</span
+                      ></a-button
+                    >
+                  </a-popconfirm>
+                </span>
               </a-row>
               <a-row class="card-tags">
                 <span style="font-size: 13px">
@@ -144,14 +176,23 @@
                   />
                 </span>
                 <span>
-                  <a-button size="small" style="font-size: 12px" @click="showDetails(card.id)"
-                    >使用概况</a-button
-                  >
+                  <a-button size="small" style="font-size: 12px" @click="showDetails(card.id)">
+                    <span
+                      ><Icon
+                        icon="basil:info-rect-outline"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                        size="14"
+                      />
+                      使用概况</span
+                    >
+                  </a-button>
                 </span>
               </a-row>
               <a-row class="card-tags">
                 <span>
-                  🕐︎ <span style="font-size: 12px">{{ card.gmtCreate }}</span></span
+                  <Icon icon="subway:time-4" class="vel-icon icon" aria-hidden="true" size="17" />
+                  <span style="font-size: 12px">{{ card.gmtCreate }}</span></span
                 >
                 <a-button
                   :disabled="card.defaultFlag === 'Y'"
@@ -426,11 +467,20 @@
     <!-- 新增用户 -->
     <a-modal
       v-model:open="accountForm.viewFlag"
-      title="🍏新建账户"
       ok-text="立即创建"
       @ok="onSubmitAdd"
       :confirmLoading="accountForm.loading"
     >
+      <template #title>
+        <span
+          ><Icon
+            icon="fluent:guest-add-24-filled"
+            class="vel-icon icon"
+            aria-hidden="true"
+          />新建账户</span
+        >
+      </template>
+
       <a-card>
         <Loading :loading="accountForm.loading" :absolute="true" tip="正在提交..." />
         <a-form :model="accountForm" layout="vertical" ref="accountFormRef">
@@ -662,6 +712,169 @@
       </a-card>
     </a-modal>
 
+    <!-- 发布商品 -->
+    <a-modal
+      v-model:open="deployGoodsForm.isActiveVisible"
+      :style="{ top: '50px' }"
+      ok-text="提交"
+      @ok="onDeployGoods"
+      :confirmLoading="deployGoodsForm.loading"
+    >
+      <template #title>
+        <span
+          ><Icon
+            icon="fluent:drawer-add-24-filled"
+            class="vel-icon icon"
+            aria-hidden="true"
+          />发布商品</span
+        >
+      </template>
+      <a-card>
+        <Loading :loading="deployGoodsForm.loading" :absolute="true" tip="正在生成中..." />
+        <a-form layout="vertical" :model="deployGoodsForm" ref="deployGoodsFormRef">
+          <a-row gutter="24">
+            <a-col :span="24">
+              <a-form-item
+                label="商品标题"
+                name="goodsTitle"
+                :rules="[{ required: true, message: '请输入商品标题!' }]"
+              >
+                <a-input v-model:value="deployGoodsForm.goodsTitle" placeholder="请输入商品标题" />
+              </a-form-item>
+            </a-col>
+
+            <a-col :span="24">
+              <a-form-item
+                label="商品说明"
+                name="goodsRemark"
+                :rules="[{ required: false, message: '请输入商品说明!' }]"
+              >
+                <a-textarea
+                  v-model:value="deployGoodsForm.goodsRemark"
+                  placeholder="请输入商品说明"
+                  :rows="3"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="库存"
+                name="stock"
+                :rules="[{ required: true, message: '请输入出售的库存!' }]"
+              >
+                <a-input-number
+                  v-model:value="deployGoodsForm.stock"
+                  placeholder="请输入出售的库存~"
+                  min="1"
+                  max="50"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="商品售价"
+                name="goodsPrice"
+                :rules="[{ required: true, message: '请输入出售价格!' }]"
+              >
+                <a-input v-model:value="deployGoodsForm.goodsPrice" placeholder="请输入出售价格~" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="商品原价"
+                name="oriGoodsPrice"
+                :rules="[{ required: true, message: '请输入商品原价格!' }]"
+              >
+                <a-input
+                  v-model:value="deployGoodsForm.oriGoodsPrice"
+                  placeholder="请输入商品原价格~"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="授权类型"
+                :name="['otherInfo', 'authWay']"
+                :rules="[{ required: true, message: '请选择授权类型' }]"
+              >
+                <a-select
+                  v-model:value="deployGoodsForm.otherInfo.authWay"
+                  @change="changeAuthWay"
+                  placeholder="授权方式"
+                >
+                  <a-select-option value="DAY">按天计算</a-select-option>
+                  <a-select-option value="TIME">指定到期时间</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+
+            <a-col :span="24" v-if="deployGoodsForm.otherInfo.authWay === 'DAY'">
+              <a-form-item label="授权天数（0~365）" :name="['otherInfo', 'authDays']">
+                <a-input-number
+                  v-model:value="deployGoodsForm.otherInfo.authDays"
+                  placeholder="请输入授权天数，为空则是永久~"
+                  min="0"
+                  max="365"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24" v-if="deployGoodsForm.otherInfo.authWay === 'TIME'">
+              <a-form-item label="到期时间" :name="['otherInfo', 'authExpireTimes']">
+                <a-date-picker
+                  show-time
+                  style="width: 100%"
+                  width="100%"
+                  v-model:value="deployGoodsForm.otherInfo.authExpireTimes"
+                  placeholder="到期时间，为空则是永久~"
+                  @change="onChangePicker"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item label="TURBO模式次数（0~9999）" :name="['otherInfo', 'turboTimes']">
+                <a-input-number
+                  v-model:value="deployGoodsForm.otherInfo.turboTimes"
+                  placeholder="请输入TURBO次数，为空则是永久~"
+                  min="0"
+                  max="9999"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item label="FAST模式次数（0~9999）" :name="['otherInfo', 'fastTimes']">
+                <a-input-number
+                  v-model:value="deployGoodsForm.otherInfo.fastTimes"
+                  placeholder="请输入Fast次数，为空则是永久~"
+                  min="0"
+                  max="365"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item label="Relax模式次数（0~9999）" :name="['otherInfo', 'relaxTimes']">
+                <a-input
+                  v-model:value="deployGoodsForm.otherInfo.relaxTimes"
+                  placeholder="请输入Relax次数，为空则是永久~"
+                  min="0"
+                  max="9999"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item label="提交任务数" :name="['otherInfo', 'numExecute']">
+                <a-input-number
+                  v-model:value="deployGoodsForm.otherInfo.numExecute"
+                  placeholder="请输提交任务数，为空则上限为主账号上限~"
+                  min="1"
+                  :max="deployGoodsForm.otherInfo.maxNumExecute"
+                />
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
+      </a-card>
+    </a-modal>
+
     <!-- 激活授权账号 -->
     <a-modal
       v-model:open="activeData.isActiveVisible"
@@ -722,6 +935,7 @@
 <script lang="ts" setup>
   import { ref, onMounted, computed, unref } from 'vue';
   import { Loading } from '/@/components/Loading';
+  import Icon from '/@/components/Icon/Icon.vue';
   import {
     ListQueryParams,
     AccountListItem,
@@ -747,8 +961,8 @@
   import { IdReq } from '/@/api/model/baseModel';
   import Goods from './goods.vue';
   import AccountGroup from './account_group.vue';
+  import { deployNewGoods, deploySecondHandGoods } from '/@/api/df/goods';
   import Discord from './discord.vue';
-  import Icon from '/@/components/Icon/Icon.vue';
   import { message } from 'ant-design-vue';
   import {
     discordAddToken,
@@ -1058,6 +1272,59 @@
   // 更新模态窗口的可见性，由子组件触发
   const updateModalVisible = (value: boolean) => {
     isDetailsModalVisible.value = value;
+  };
+
+  /************************************发布商品********************************* */
+  const deployGoodsFormRef = ref();
+  const deployGoodsForm = ref({
+    loading: false,
+    isActiveVisible: false,
+    goodsTitle: null,
+    goodsRemark: null,
+    goodsPrice: null,
+    oriGoodsPrice: null,
+    stock: null,
+    accountId: null,
+    otherInfo: {
+      authType: 'DAY',
+      authDays: null,
+      maxNumExecute: 50,
+      authExpireTimes: null,
+
+      turboTimes: null,
+      fastTimes: null,
+      relaxTimes: null,
+      numExecute: null,
+    },
+  });
+  const showDeployGoods = async (card) => {
+    deployGoodsForm.value.isActiveVisible = true;
+    deployGoodsForm.value.accountId = card.id;
+    deployGoodsForm.value.maxNumExecute = card.numExecute;
+
+    deployGoodsForm.value.stock = null;
+    deployGoodsForm.value.otherInfo.turboTimes = null;
+    deployGoodsForm.value.otherInfo.fastTimes = null;
+    deployGoodsForm.value.otherInfo.relaxTimes = null;
+    deployGoodsForm.value.otherInfo.numExecute = null;
+    deployGoodsForm.value.authDays = null;
+    deployGoodsForm.value.authExpireTimes = null;
+  };
+
+  const hideDeployGoods = async () => {
+    createAuthForm.value.isActiveVisible = false;
+  };
+  const onDeployGoods = async () => {
+    deployGoodsForm.value.loading = true;
+    try {
+      await deployGoodsFormRef.value.validate();
+      await deployNewGoods(deployGoodsForm.value);
+
+      deployGoodsForm.value.isActiveVisible = false;
+      // onSearch();
+    } finally {
+      deployGoodsForm.value.loading = false;
+    }
   };
 
   /************************************生成授权********************************* */

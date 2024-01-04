@@ -23,7 +23,8 @@
 
             <a-button-group>
               <a-button @click="onSearch(1)">🔍查询</a-button>
-              <a-button type="primary" @click="goView('/trade')">订单记录</a-button>
+              <a-button type="primary" @click="showAddGoods">添加商品</a-button>
+              <a-button @click="goView('/trade')">订单记录</a-button>
             </a-button-group>
           </a-space>
         </a-card>
@@ -166,8 +167,31 @@
       title="交易记录"
       placement="right"
     >
-      <TradePc
-    /></a-drawer>
+      <TradePc />
+    </a-drawer>
+
+    <!-- 添加商品 -->
+    <a-modal
+      v-model:open="payForm.viewFlag"
+      title="添加商品"
+      style="width: 410px; height: 450px"
+      @cancel="closeView"
+    >
+      <template #title>
+        <span
+          ><Icon
+            icon="uil:server"
+            class="vel-icon icon"
+            aria-hidden="true"
+            size="14"
+          />发布商品</span
+        >
+      </template>
+      <template #footer>
+        <a-button type="primary" @click="deployGoods"> 立即发布 </a-button>
+      </template>
+      <a-card />
+    </a-modal>
   </a-layout>
 </template>
 
@@ -175,6 +199,7 @@
   import { ref, onMounted, onUnmounted, computed, unref, toRefs, watch } from 'vue';
   import { QrCode, QrCodeActionType } from '/@/components/Qrcode/index';
   import LogoImg from '/logo.png';
+  import Icon from '/@/components/Icon/Icon.vue';
   import {
     DeleteOutlined,
     InfoCircleOutlined,

@@ -11,6 +11,8 @@ import { IdReq } from '/@/api/model/baseModel';
 enum Api {
   GoodsList = '/open/goods/list',
   GoodsAdd = '/open/goods/add',
+  DeployNewGoods = '/open/goods/deployNewGoods',
+  DeploySecondHandGoods = '/open/goods/deploySecondHandGoods',
   GoodsDelete = '/open/goods/delete',
 }
 
@@ -22,6 +24,44 @@ export function addGoods(params: GoodsAddParams, mode: ErrorMessageMode = 'messa
     },
     {
       errorMessageMode: mode,
+    },
+  );
+}
+
+/**
+ * 发布新商品
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function deployNewGoods(params: any, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<void>(
+    {
+      url: Api.DeployNewGoods,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+      successMessageMode: mode,
+    },
+  );
+}
+
+/**
+ * 发布二手商品
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function deploySecondHandGoods(params: any, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<void>(
+    {
+      url: Api.DeploySecondHandGoods,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+      successMessageMode: mode,
     },
   );
 }
