@@ -14,6 +14,9 @@ enum Api {
   DeployNewGoods = '/open/goods/deployNewGoods',
   DeploySecondHandGoods = '/open/goods/deploySecondHandGoods',
   GoodsDelete = '/open/goods/delete',
+  ChangeGoodsState = '/open/goods/changeGoodsState',
+  GoodsInfo = '/open/goods/goodsInfo',
+  ModifiedNewGoods = '/open/goods/modifiedNewGoods',
 }
 
 export function addGoods(params: GoodsAddParams, mode: ErrorMessageMode = 'message') {
@@ -83,6 +86,13 @@ export function goodsList(params: GoodsListReq, mode: ErrorMessageMode = 'messag
     },
   );
 }
+
+/**
+ * 删除商品
+ * @param params
+ * @param mode
+ * @returns
+ */
 export function deleteGoods(params: IdReq, mode: ErrorMessageMode = 'message') {
   return defHttp.post<void>(
     {
@@ -91,6 +101,66 @@ export function deleteGoods(params: IdReq, mode: ErrorMessageMode = 'message') {
     },
     {
       errorMessageMode: mode,
+      successMessageMode: mode,
+    },
+  );
+}
+
+/**
+ * 修改商品上下架状态
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function changeGoodsState(
+  params: { goodsId: string; goodsState: string },
+  mode: ErrorMessageMode = 'message',
+) {
+  return defHttp.post<void>(
+    {
+      url: Api.ChangeGoodsState,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+      successMessageMode: mode,
+    },
+  );
+}
+
+/**
+ * 获取商品详情
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function goodsInfo(params: IdReq, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<void>(
+    {
+      url: Api.GoodsInfo,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
+}
+
+/**
+ * 变更商品
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function modifiedNewGoods(params: any, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<void>(
+    {
+      url: Api.ModifiedNewGoods,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+      successMessageMode: mode,
     },
   );
 }

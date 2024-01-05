@@ -3,6 +3,7 @@ import { BasicPageParams, BasePageResult } from '/@/api/model/baseModel';
 export interface GoodsListReq extends BasicPageParams {
   goodsTitle: string | null;
   goodsType: string | null;
+  ownerFlag: string | null;
 }
 
 export interface GoodsAddParams {}

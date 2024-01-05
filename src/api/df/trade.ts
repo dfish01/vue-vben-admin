@@ -11,7 +11,8 @@ import {
 
 enum Api {
   CreateTrade = '/open/trade/createTrade',
-  TradeList = '/open/trade/tradeList',
+  UserTradeList = '/open/trade/userTradeList',
+  SaleTradeList = '/open/trade/saleTradeList',
   CancelTrade = '/open/trade/cancelTrade',
   FetchPayResult = '/open/trade/fetchPayResult',
 }
@@ -36,7 +37,7 @@ export function createTradeApi(params: IdReq, mode: ErrorMessageMode = 'message'
 }
 
 /**
- * 列表
+ * 列表（卖家订单列表）
  * @param params
  * @param mode
  * @returns
@@ -44,7 +45,7 @@ export function createTradeApi(params: IdReq, mode: ErrorMessageMode = 'message'
 export function tradeListApi(params: TradeListQueryReq, mode: ErrorMessageMode = 'message') {
   return defHttp.post<ListResultModel>(
     {
-      url: Api.TradeList,
+      url: Api.UserTradeList,
       params,
     },
     {
@@ -52,6 +53,25 @@ export function tradeListApi(params: TradeListQueryReq, mode: ErrorMessageMode =
     },
   );
 }
+
+/**
+ * 列表(卖家订单列表)
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function saleTradeListApi(params: TradeListQueryReq, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<ListResultModel>(
+    {
+      url: Api.SaleTradeList,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
+}
+
 /**
  * 查询支付结果
  *
