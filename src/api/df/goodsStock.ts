@@ -5,8 +5,8 @@ import { IdReq } from '/@/api/model/baseModel';
 enum Api {
   AppendStock = '/open/goodsStock/appendStock',
   StockList = '/open/goodsStock/list',
-  DiscardStock = '/open/goods/discardStock',
-  Delete = '/open/goods/delete',
+  DiscardStock = '/open/goodsStock/discardStock',
+  Delete = '/open/goodsStock/delete',
 }
 
 /**

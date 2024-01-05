@@ -24,6 +24,7 @@ enum Api {
   AppendDiscordAccount = '/open/accountDiscord/appendDiscordAccount',
   AddOwnerAccount = '/open/accountDiscord/addOwnerAccount',
   CreateAuth = '/open/accountDiscord/createAuth',
+  DeleteAuth = '/open/accountDiscord/deleteAuth',
   AccountAuthList = '/open/accountDiscord/authList',
   DisabledAccount = '/open/accountDiscord/disabledAccount',
   SetDefault = '/open/accountDiscord/setDefault',
@@ -338,6 +339,25 @@ export function createAccountAuth(params: CreateAuthCodeReq, mode: ErrorMessageM
     },
     {
       errorMessageMode: mode,
+    },
+  );
+}
+
+/**
+ * 删除授权
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function deleteAuth(params: IdReq, mode: ErrorMessageMode = 'message') {
+  return defHttp.post(
+    {
+      url: Api.DeleteAuth,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+      successMessageMode: mode,
     },
   );
 }

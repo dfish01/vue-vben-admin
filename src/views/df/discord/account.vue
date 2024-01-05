@@ -103,25 +103,9 @@
                   <Icon icon="uil:server" class="vel-icon icon" aria-hidden="true" size="14" />
                   频道： <span style="font-size: 13px">{{ card.channelTitle }}</span></span
                 >
-                <span v-if="card.state === 'normal'">
-                  <a-button
-                    size="small"
-                    v-if="card.ownerFlag === 'Y'"
-                    style="font-size: 12px"
-                    @click="showDeployGoods(card)"
-                  >
-                    <span
-                      ><Icon
-                        icon="material-symbols:deployed-code"
-                        class="vel-icon icon"
-                        aria-hidden="true"
-                        size="14"
-                      />
-                      发布商品</span
-                    ></a-button
-                  >
+                <span v-if="card.state === 'normal' && card.canSale === 'Y'">
                   <a-popconfirm
-                    v-else
+                    v-if="card.ownerFlag === 'N'"
                     title="发布商品到交易市场，将停止账号的使用。是否确认？"
                     ok-text="立即发布"
                     cancel-text="取消"
@@ -896,7 +880,7 @@
     </a-modal>
 
     <!-- 授权列表 -->
-    <a-modal v-model:open="authListForm.isAuthModalVisible" width="75%">
+    <a-modal v-model:open="authListForm.isAuthModalVisible" width="85%">
       <template #title>
         <Icon
           icon="streamline-emojis:beaming-face-with-smiling-eyes"
@@ -912,12 +896,38 @@
       <div style="width: 100%; padding: 10px; overflow-x: auto">
         <a-table :dataSource="authListTableData" class="a-table" :scroll="{ x: 'max-content' }">
           <a-table-column
+            key="authCode"
+            title="授权码"
+            data-index="authCode"
+            align="center"
+            :width="80"
+          >
+            <template #default="{ record }">
+              <span v-if="record.useWay === 'GOODS'"> ********* </span>
+              <span v-else> {{ record.authCode }} </span>
+            </template>
+          </a-table-column>
+          <a-table-column
             v-for="column in authColumns"
             :v-if="!column.hidden"
             :key="column.key"
             :title="column.title"
             :dataIndex="column.dataIndex"
           />
+
+          <a-table-column title="操作" align="center" key="actions" fixed="right" :width="80">
+            <template #default="{ record }">
+              <a-button-group>
+                <a-button
+                  type="primary"
+                  danger
+                  v-if="record.useFlag === 'N'"
+                  @click="doDeleteAuth(record.id, record.accountId)"
+                  >删除</a-button
+                >
+              </a-button-group>
+            </template>
+          </a-table-column>
         </a-table>
       </div>
     </a-modal>
@@ -947,6 +957,7 @@
     queryList,
     changeAuth,
     del,
+    deleteAuth,
     activeAuthAccount,
     accountAuthList,
     createAccountAuth,
@@ -1084,7 +1095,7 @@
   // ]);
   const authColumns = [
     // { title: 'ID', dataIndex: 'id', key: 'id', hidden: true },
-    { title: '授权码', dataIndex: 'authCode', key: 'authCode', width: 100 },
+    // { title: '授权码', dataIndex: 'authCode', key: 'authCode', width: 100 },
     { title: '激活用户', dataIndex: 'activeUserEmail', key: 'activeUserEmail', width: 100 },
     { title: '激活时间', dataIndex: 'gmtActive', key: 'gmtActive', width: 100 },
     { title: 'Turbo次数', dataIndex: 'turboTimes', key: 'turboTimes', width: 100 },
@@ -1373,6 +1384,20 @@
       // onSearch();
     } finally {
       createAuthForm.value.loading = false;
+    }
+  };
+
+  /**
+   * 删除授权
+   */
+  const doDeleteAuth = async (id, accountId) => {
+    globalLoading.value = true;
+    try {
+      await deleteAuth({ id: id });
+      authListForm.value.isAuthModalVisible = true;
+      authListTableData.value = await accountAuthList({ accountId: accountId, source: 'MJ' });
+    } finally {
+      globalLoading.value = false;
     }
   };
 

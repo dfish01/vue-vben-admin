@@ -7,13 +7,15 @@
             <a-select
               v-model:value="goodsForm.goodsType"
               class="mobile-select"
-              placeholder="商品类型~"
+              style="width: 110px"
+              placeholder="商品类型"
               @change="onSearch(1)"
             >
               <a-select-option value="">全部</a-select-option>
+              <a-select-option value="MIDJOURNEY">midjourney</a-select-option>
+              <a-select-option value="GPT">chatGPt</a-select-option>
+              <a-select-option value="SYSTEM">系统</a-select-option>
               <a-select-option value="GROUP">拼团</a-select-option>
-              <a-select-option value="GOODS">单品</a-select-option>
-              <a-select-option value="AUTH_CODE">授权</a-select-option>
             </a-select>
             <a-input
               v-model:value="goodsForm.goodsTitle"
@@ -344,20 +346,6 @@
                 />
               </a-form-item>
             </a-col>
-            <a-col :span="24" v-if="deployGoodsForm.shipType === 'AUTO'">
-              <a-form-item
-                label="商品库存"
-                name="stockInfo"
-                :rules="[{ required: false, message: '请输入商品库存!' }]"
-              >
-                <a-textarea
-                  v-model:value="deployGoodsForm.stockInfo"
-                  placeholder="请输入商品库存，多个用|分割"
-                  :rows="3"
-                />
-              </a-form-item>
-            </a-col>
-
             <a-col :span="12">
               <a-form-item
                 label="授权类型"
@@ -403,6 +391,72 @@
                   v-model:value="deployGoodsForm.infoBody.authExpireTimes"
                   placeholder="到期时间，为空则是永久~"
                   @change="onChangePicker"
+                />
+              </a-form-item>
+            </a-col>
+          </a-row>
+          <a-row gutter="24">
+            <a-col :span="12">
+              <a-form-item
+                label="追加库存"
+                :name="['autoGenStock', 'genWay']"
+                :rules="[{ required: true, message: '请选择追加库存的方式!' }]"
+              >
+                <a-select
+                  v-model:value="deployGoodsForm.autoGenStock.genWay"
+                  style="width: 100%"
+                  placeholder="追加库存"
+                >
+                  <a-select-option value="NONE">暂不追加</a-select-option>
+                  <a-select-option value="ACCOUNT">自动追加</a-select-option>
+                  <a-select-option value="HAND">手动追加</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" />
+            <a-col :span="24" v-if="deployGoodsForm.autoGenStock.genWay === 'HAND'">
+              <a-form-item
+                label="商品库存"
+                :name="['autoGenStock', 'appendStockInfo']"
+                :rules="[{ required: false, message: '请输入商品库存!' }]"
+              >
+                <a-textarea
+                  v-model:value="deployGoodsForm.autoGenStock.appendStockInfo"
+                  placeholder="请输入商品库存，多个用|分割"
+                  :rows="3"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" v-if="deployGoodsForm.autoGenStock.genWay === 'ACCOUNT'">
+              <a-form-item
+                :name="['autoGenStock', 'autoGenAccountId']"
+                :rules="[{ required: true, message: '请选择账号!' }]"
+              >
+                <template #label>
+                  <span>指定账号</span
+                  ><span style="color: red; font-size: 10px">
+                    （将自动生成授权码，无需单独维护库存）
+                  </span>
+                </template>
+                <a-select
+                  placeholder="请选择账号"
+                  style="width: 100%; height: 32px"
+                  v-model:value="deployGoodsForm.autoGenStock.autoGenAccountId"
+                  :options="selectForm.accountOptions"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" v-if="deployGoodsForm.autoGenStock.genWay === 'ACCOUNT'">
+              <a-form-item
+                label="追加库存数量"
+                :name="['autoGenStock', 'autoGenStockNum']"
+                :rules="[{ required: false, message: '请输入追加库存数量!' }]"
+              >
+                <a-input-number
+                  v-model:value="deployGoodsForm.autoGenStock.autoGenStockNum"
+                  placeholder="请输入追加库存数量~"
+                  min="1"
+                  max="50"
                 />
               </a-form-item>
             </a-col>
@@ -488,21 +542,56 @@
       </template>
       <Loading :loading="stockListForm.loading" :absolute="true" tip="数据加载中..." />
       <div style="width: 100%; padding: 5px 10px; overflow-x: auto">
+        <a-button @click="showAppendStock" style="margin-bottom: 8px">追加</a-button>
         <a-table :dataSource="stockListTableData" class="a-table" :scroll="{ x: 'max-content' }">
           <a-table-column
-            v-for="column in stockColumns"
-            :v-if="!column.hidden"
-            :key="column.key"
-            :title="column.title"
-            :dataIndex="column.dataIndex"
-            size="small"
+            key="state"
+            title="发货内容"
+            data-index="infoBody"
+            align="center"
+            :width="200"
           />
-          <a-table-column title="操作" key="actions" fixed="right" :width="200">
+          <a-table-column
+            key="state"
+            title="交易单号"
+            data-index="orderId"
+            align="center"
+            :width="100"
+          />
+          <a-table-column key="state" title="状态" data-index="state" align="center" :width="80">
+            <template #default="{ text }">
+              <span>
+                <a-tag v-if="text === 'NONE'" color="#597E52">待使用</a-tag>
+                <a-tag v-if="text === 'PREEMPT'" color="#91C8E4">已占用</a-tag>
+                <a-tag v-if="text === 'OUT_BOUND'" color="#68A7AD">已出库</a-tag>
+                <a-tag v-if="text === 'DISCARD'" color="#A9A9A9">丢弃</a-tag>
+              </span>
+            </template>
+          </a-table-column>
+          <a-table-column
+            key="state"
+            title="更新时间"
+            data-index="gmtModified"
+            align="center"
+            :width="130"
+          />
+
+          <a-table-column title="操作" key="actions" fixed="right" :width="80">
             <template #default="{ record }">
               <a-button-group>
-                <a-button danger @click="showAppendStock">追加</a-button>
-                <a-button danger @click="doDiscardStock(record)">丢弃</a-button>
-                <a-button danger type="warning" @click="doDeleteStock(record.id)">删除</a-button>
+                <a-button
+                  type="warning"
+                  v-if="record.state !== 'DISCARD'"
+                  @click="doDiscardStock(record)"
+                  >丢弃</a-button
+                >
+                <a-button
+                  type="primary"
+                  danger
+                  v-if="record.state === 'DISCARD'"
+                  @click="doDeleteStock(record.id)"
+                  >删除</a-button
+                >
               </a-button-group>
             </template>
           </a-table-column>
@@ -510,13 +599,13 @@
       </div>
     </a-modal>
 
-    <!-- 发布商品 -->
+    <!-- 追加库存 -->
     <a-modal
-      v-model:open="appendStockForm.showFlag"
+      v-model:open="appendStockForm.viewFlag"
       :style="{ top: '50px' }"
       :width="750"
       ok-text="立即追加"
-      @ok="onAppendStock"
+      @ok="doAppendStock"
       :confirmLoading="appendStockForm.loading"
     >
       <template #title>
@@ -528,7 +617,7 @@
       </template>
       <a-card>
         <Loading :loading="appendStockForm.loading" :absolute="true" tip="正在生成中..." />
-        <a-form layout="vertical" :model="deployGoodsForm" ref="deployGoodsFormRef">
+        <a-form layout="vertical" :model="appendStockForm" ref="appendStockFormRef">
           <a-row gutter="24">
             <a-col :span="24">
               <a-form-item
@@ -539,8 +628,9 @@
                 <a-textarea
                   v-model:value="appendStockForm.stockInfo"
                   placeholder="请输入商品库存，多个用|分割"
-                  :rows="3"
+                  :rows="5"
                 />
+                <span style="color: red; font-size: 10px"> 这个是追加库存，不是覆盖</span>
               </a-form-item>
             </a-col>
           </a-row>
@@ -599,6 +689,7 @@
   import { addTag } from '/@/api/df/drawTaskTag';
   import { useGo } from '/@/hooks/web/usePage';
   import { appendStock, stockList, discardStock, deleteStock } from '/@/api/df/goodsStock';
+  import { availableList } from '/@/api/df/account';
 
   const go = useGo();
   const goView = async (routePath) => {
@@ -625,7 +716,7 @@
 
   const goodsForm = ref({
     goodsTitle: '',
-    goodsType: '',
+    goodsType: null,
     ownerFlag: 'false',
   });
   onMounted(() => {
@@ -786,7 +877,13 @@
     accountId: null,
     shipType: 'AUTO',
     goodsType: 'MIDJOURNEY',
-    stockInfo: null,
+    autoGenStock: {
+      genWay: 'NONE',
+      appendStockInfo: null,
+      autoGenAccountId: null,
+      autoGenStockNum: null,
+    },
+
     infoBody: {
       authWay: 'DAY',
       authDays: null,
@@ -798,6 +895,10 @@
       numExecute: null,
       infoBodyStr: '',
     },
+  });
+
+  const selectForm = ref({
+    accountOptions: [],
   });
   const showDeployGoods = async (card) => {
     deployGoodsForm.value.title = '发布新商品';
@@ -814,7 +915,36 @@
     deployGoodsForm.value.infoBody.fastTimes = null;
     deployGoodsForm.value.infoBody.relaxTimes = null;
     deployGoodsForm.value.infoBody.numExecute = null;
+    deployGoodsForm.value.autoGenStock = {
+      genWay: 'NONE',
+      appendStockInfo: null,
+      autoGenAccountId: null,
+      autoGenStockNum: null,
+    };
     deployGoodsForm.value.isActiveVisible = true;
+    initAccountList();
+  };
+
+  const initAccountList = async () => {
+    deployGoodsForm.value.loading = true;
+    try {
+      const response = await availableList({
+        accMode: '',
+        ownerFlag: 'Y',
+      });
+
+      // 使用 map 方法转换数组
+      const transformedList = response.map((item) => ({
+        label: item.accountName,
+        value: item.id,
+      }));
+
+      // 如果您想在转换后的数组前面添加一个特定的对象，可以使用以下方法：
+      const finalList = [...transformedList];
+      selectForm.value.accountOptions = finalList;
+    } finally {
+      deployGoodsForm.value.loading = false;
+    }
   };
 
   const hideDeployGoods = async () => {
@@ -882,6 +1012,12 @@
     deployGoodsForm.value = card;
     deployGoodsForm.value.loading = false;
     console.log(1112);
+    deployGoodsForm.value.autoGenStock = {
+      genWay: 'NONE',
+      appendStockInfo: null,
+      autoGenAccountId: null,
+      autoGenStockNum: null,
+    };
     deployGoodsForm.value.isActiveVisible = true;
   };
 
@@ -897,13 +1033,10 @@
   ]);
 
   const stockColumns = [
-    { title: 'ID', dataIndex: 'id', key: 'id', hidden: true },
-    { title: '商品ID', dataIndex: 'goodsId', key: 'id', hidden: true },
-    { title: '内容', dataIndex: 'infoBody', key: 'infoBody', width: 100 },
-    { title: '邮件模板', dataIndex: 'emailTemplate', key: 'emailTemplate', width: 100 },
-    { title: '状态', dataIndex: 'state', key: 'authWayLabel', width: 100 },
+    { title: '内容', dataIndex: 'infoBody', key: 'infoBody' },
+    // { title: '邮件模板', dataIndex: 'emailTemplate', key: 'emailTemplate', width: 100 },
+    { title: '状态', dataIndex: 'stateStr', key: 'stateStr', width: 100 },
     { title: '关联单号', dataIndex: 'orderId', key: 'orderId', width: 100 },
-    { title: '激活时间', dataIndex: 'gmtCreate', key: 'gmtCreate', width: 100 },
   ];
 
   const showStockList = async (card) => {
@@ -947,11 +1080,7 @@
     stockListForm.value.viewFlag = false;
   };
 
-  const showAppendStock = () => {
-    appendStockForm.value.title = '追加【' + stockListForm.value.goodsTitle + '】库存';
-    appendStockForm.value.viewFlag = true;
-  };
-
+  const appendStockFormRef = ref();
   const appendStockForm = ref({
     title: '',
     viewFlag: false,
@@ -959,6 +1088,25 @@
     goodsId: null,
     stockInfo: null,
   });
+
+  const showAppendStock = () => {
+    appendStockForm.value.goodsId = stockListForm.value.goodsId;
+    appendStockForm.value.title = '追加【' + stockListForm.value.goodsTitle + '】库存';
+    appendStockForm.value.viewFlag = true;
+  };
+
+  const doAppendStock = async () => {
+    appendStockForm.value.loading = true;
+    try {
+      await appendStockFormRef.value.validate();
+      await appendStock(appendStockForm.value);
+      stockListTableData.value = await stockList({ goodsId: stockListForm.value.goodsId });
+      appendStockForm.value.viewFlag = false;
+    } finally {
+      stockListForm.value.loading = false;
+    }
+  };
+
   //*****************************************库存相关 结束 *************************************/
 </script>
 
