@@ -250,7 +250,7 @@
                     <a-tooltip title="立即前往">
                       <a-button type="text" @click="goThirdShop(card)" style="width: 100%">
                         <Icon
-                          icon="mdi:go-kart"
+                          icon="majesticons:door-enter"
                           class="vel-icon icon"
                           aria-hidden="true"
                           size="17"
@@ -309,9 +309,18 @@
               </a-row>
               <a-row class="card-tags" v-else>
                 <a-col :span="24">
-                  <a-button @click="goThirdShop(card)" style="width: 100%">
-                    <Icon icon="mdi:go-kart" class="vel-icon icon" aria-hidden="true" size="17" />
-                    前往店铺
+                  <a-button
+                    :disabled="card.status === 'PENDING'"
+                    @click="goThirdShop(card)"
+                    style="width: 100%"
+                  >
+                    <Icon
+                      icon="majesticons:door-enter"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                      size="17"
+                    />
+                    {{ card.status === 'PENDING' ? '重新装修中，暂停访问' : '前往店铺' }}
                   </a-button>
                 </a-col>
               </a-row>

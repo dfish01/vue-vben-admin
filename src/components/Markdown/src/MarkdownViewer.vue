@@ -1,13 +1,15 @@
 <template>
+  <Loading :loading="markDownloading" :absolute="true" tip="内容加载中..." />
   <div ref="viewerRef" id="markdownViewer" :class="$props.class"></div>
 </template>
 
 <script lang="ts" setup>
-  import { onBeforeUnmount, onDeactivated, Ref, ref, unref, watch } from 'vue';
+  import { onBeforeUnmount, onDeactivated, Ref, ref, unref, watch, nextTick } from 'vue';
   import VditorPreview from 'vditor/dist/method.min';
   import { onMountedOrActivated } from '@vben/hooks';
   import { useRootSetting } from '/@/hooks/setting/useRootSetting';
   import { getTheme } from './getTheme';
+  import { Loading } from '/@/components/Loading';
 
   const props = defineProps({
     value: { type: String },
@@ -16,8 +18,9 @@
   const viewerRef = ref(null);
   const vditorPreviewRef = ref(null) as Ref<VditorPreview | null>;
   const { getDarkMode } = useRootSetting();
-
+  const markDownloading = ref(false);
   function init() {
+    markDownloading.value = true;
     const viewerEl = unref(viewerRef);
     vditorPreviewRef.value = VditorPreview.preview(viewerEl, props.value, {
       mode: getTheme(getDarkMode.value, 'content'),
@@ -28,6 +31,10 @@
       hljs: {
         // 设置代码块主题
         style: getTheme(getDarkMode.value, 'code'),
+      },
+
+      after: () => {
+        markDownloading.value = false;
       },
     });
   }

@@ -8,7 +8,7 @@ enum Api {
   AnalysisLink = '/open/waterMask/analysis',
   addSuggest = '/open/userSuggest/add',
   CommunicateInfo = '/open/dataCache/communicate',
-  AfterSaleInfo = '/open/dataCache/afterSale',
+  AfterSaleInfo = '/open/dataCache/afterSaleInfo',
   TutorialInfo = '/open/dataCache/tutorialInfo',
   SystemInfo = '/open/dataCache/systemInfo',
 

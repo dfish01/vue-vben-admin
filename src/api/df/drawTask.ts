@@ -14,6 +14,7 @@ import {
   DrawTaskPublicListReq,
   DeleteBatchReq,
   DrawTaskInfoResp,
+  DrawTaskListResp,
 } from '/@/api/df/model/drawTaskModel';
 import { ErrorMessageMode } from '/#/axios';
 
@@ -23,6 +24,7 @@ enum Api {
   Delete = '/open/drawTask/delete',
   ChangePublic = '/open/drawTask/changePublic',
   List = '/open/drawTask/list',
+  SearchByTimer = '/open/drawTask/searchByTimer',
   TaskInfo = '/open/drawTask//taskInfo',
 
   Translate = '/open/drawTask/translate',
@@ -176,6 +178,24 @@ export function drawTaskList(params: DrawTaskListQueryReq, mode: ErrorMessageMod
   return defHttp.post<ListResultModel>(
     {
       url: Api.List,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
+}
+
+/**
+ * 查询指定任务
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function searchByTimer(params: string[], mode: ErrorMessageMode = 'message') {
+  return defHttp.post<DrawTaskListResp[]>(
+    {
+      url: Api.SearchByTimer,
       params,
     },
     {

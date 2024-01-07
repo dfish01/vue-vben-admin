@@ -992,7 +992,7 @@
                           <a-menu-item
                             key="Upscale (Subtle)"
                             v-if="card.buttonMap['Upscale (Subtle)']"
-                            @click="($event) => handleU(card, 'Upscale (Subtle) ', 'subtle')"
+                            @click="($event) => handleU(card, 'Upscale (Subtle)', 'subtle')"
                             ><Icon
                               icon="fluent:scale-fill-24-regular"
                               size="14px"
@@ -1015,7 +1015,7 @@
                           <a-menu-item
                             key="Redo Upscale (Subtle)"
                             v-if="card.buttonMap['Redo Upscale (Subtle)']"
-                            @click="($event) => handleU(card, 'Redo Upscale (Subtle) ', 'subtle')"
+                            @click="($event) => handleU(card, 'Redo Upscale (Subtle)', 'subtle')"
                             ><Icon
                               icon="fluent:scale-fill-24-regular"
                               size="14px"

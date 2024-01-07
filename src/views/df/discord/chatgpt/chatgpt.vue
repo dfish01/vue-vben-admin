@@ -249,7 +249,7 @@
               <a-col :span="24" style="display: flex; justify-content: center">
                 <a-button-group style="width: 100%">
                   <a-popconfirm
-                    title="是否确认删除账户？存在授权的账户无法删除！"
+                    title="是否确认删除账户？"
                     ok-text="Yes"
                     cancel-text="No"
                     @confirm="deleteAccount(card.id)"
@@ -312,7 +312,7 @@
             <a-row class="card-tags" v-else>
               <a-col :span="24">
                 <a-popconfirm
-                  title="是否确认删除账户？存在授权的账户无法删除！"
+                  title="是否确认删除账户？"
                   ok-text="Yes"
                   cancel-text="No"
                   @confirm="deleteAccount(card.id)"

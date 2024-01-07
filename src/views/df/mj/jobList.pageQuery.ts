@@ -16,6 +16,7 @@ import {
 import { downloadByOnlineUrl } from '/@/utils/file/download';
 
 import {
+  searchByTimer,
   drawTaskList,
   addDrawTask,
   changePublic,
@@ -157,35 +158,45 @@ export function jobListQueryApi() {
   }
 
   //异步查询，无loading
-  const onSearchNoLoading = async () => {
-    const params: DrawTaskListQueryReq = {
-      sortWay: searchForm.value.sortWay,
-      spaceId: searchForm.value.spaceId,
-      tagName: searchForm.value.tagName,
-      commandType: searchForm.value.commandType,
-      state: searchForm.value.state,
-      current: pagination.value.current,
-      pageSize: pagination.value.pageSize,
-    };
-
-    const response = await drawTaskList(params);
-    setTimerIfNecessary(response);
-    cards.value = response.records;
-    pagination.value.total = response.total;
+  const onSearchNoLoading = async (taskIds) => {
+    // const params: DrawTaskListQueryReq = {
+    //   sortWay: searchForm.value.sortWay,
+    //   spaceId: searchForm.value.spaceId,
+    //   tagName: searchForm.value.tagName,
+    //   commandType: searchForm.value.commandType,
+    //   state: searchForm.value.state,
+    //   current: pagination.value.current,
+    //   pageSize: pagination.value.pageSize,
+    // };
+    const response = await searchByTimer(taskIds);
+    response.forEach((item) => {
+      const index = cards.value.findIndex((item1) => item1.id === item.id);
+      console.log('-----------------' + index);
+      if (index !== -1) {
+        cards.value[index] = { ...item };
+      }
+    });
+    setTimerIfNecessary();
   };
 
   //判断是否添加定时查询任务
-  const setTimerIfNecessary = async (response) => {
-    const loopQueryFlag = response.records.some(
-      (item) => item.state === 'QUEUED' || item.state === 'RUNNING' || item.state === 'READY',
-    );
-    console.log('setTimerIfNecessary...' + loopQueryFlag + 'intervalId=' + intervalId);
-    if (loopQueryFlag && intervalId === null) {
+  const setTimerIfNecessary = async () => {
+    // const loopQueryFlag = response.records.some(
+    //   (item) => item.state === 'QUEUED' || item.state === 'RUNNING' || item.state === 'READY',
+    // );
+    // 过滤出满足条件的记录ID
+    const filteredIds = cards.value
+      .filter(
+        (item) => item.state === 'QUEUED' || item.state === 'RUNNING' || item.state === 'READY',
+      )
+      .map((item) => item.id);
+
+    console.log('setTimerIfNecessary...' + filteredIds + 'intervalId=' + intervalId);
+    if (filteredIds.length > 0 && intervalId === null) {
       intervalId = setInterval(() => {
-        console.log('-----------------');
-        onSearchNoLoading();
+        onSearchNoLoading(filteredIds);
       }, 5000); // 5秒
-    } else if (!loopQueryFlag && intervalId != null) {
+    } else if (filteredIds.length === 0 && intervalId != null) {
       removeTimer();
     }
   };
@@ -225,9 +236,9 @@ export function jobListQueryApi() {
     };
     try {
       const response = await drawTaskList(params);
-      setTimerIfNecessary(response);
       cards.value = response.records;
       pagination.value.total = response.total;
+      setTimerIfNecessary();
     } finally {
       loadingRef.value = false;
     }

@@ -75,8 +75,8 @@
               <a-row class="card-tags">
                 <span>
                   ⚡商品名称：
-                  <span style="font-weight: bolder">{{ card.goodsTitle }}</span></span
-                >
+                  <span style="font-weight: bolder">{{ card.goodsTitle }}</span>
+                </span>
               </a-row>
               <a-row class="card-tags">
                 <span>
@@ -104,14 +104,15 @@
                   <a-button @click="cancelOrder(card)" style="width: 50%">取消交易 </a-button>
                 </a-col>
                 <a-col :span="24" v-if="card.state === 'WAIT_SEND'">
-                  <a-button @click="allText(card)" style="width: 50%">催发货 </a-button>
-                  <a-button @click="showConnect(card)" style="width: 50%">联系客服 </a-button>
+                  <a-button @click="openSpeedSend(card)" style="width: 50%">催发货 </a-button>
+                  <a-button @click="openAfterSaleView(card)" style="width: 50%">联系客服 </a-button>
                 </a-col>
                 <a-col :span="24" v-if="card.state === 'CANCEL'">
                   <a-button @click="reBuyGoods(card)" style="width: 100%">重新购买</a-button>
                 </a-col>
                 <a-col :span="24" v-if="card.state === 'FINISHED' || card.state === 'CLOSED'">
-                  <a-button @click="reBuyGoods(card)" style="width: 100%">再来一单</a-button>
+                  <a-button @click="reBuyGoods(card)" style="width: 50%">再来一单</a-button>
+                  <a-button @click="openDeliverInfo(card)" style="width: 50%">发货信息</a-button>
                 </a-col>
               </a-row>
             </div>
@@ -201,6 +202,28 @@
         </a-row>
       </a-card>
     </a-modal>
+    <!-- 联系客服 -->
+    <a-modal v-model:open="systemConfigViewForm.viewFlag">
+      <template #title>
+        <Icon icon="streamline-emojis:bell" />
+        <span> {{ systemConfigViewForm.title }}</span>
+      </template>
+
+      <template #footer>
+        <a-button
+          key="submit"
+          type="primary"
+          @click="closeAfterSaleView"
+          :loading="systemConfigViewForm.loading"
+          >已知悉</a-button
+        >
+      </template>
+      <a-spin :spinning="systemConfigViewForm.loading">
+        <div style="padding: 10px 20px">
+          <MarkdownViewer :value="systemConfigViewForm.content" />
+        </div>
+      </a-spin>
+    </a-modal>
   </a-layout>
 </template>
 
@@ -237,11 +260,12 @@
     DrawCollectListQueryReq,
     DrawCollectListResp,
   } from '/@/api/df/model/drawCollectModel';
-  import { genPromptList, genTagList } from '/@/api/df/dataCache';
+  import { afterSaleInfo } from '/@/api/df/utils';
   import { message, Empty } from 'ant-design-vue';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
   import Icon from '/@/components/Icon/Icon.vue';
   import { useGo } from '/@/hooks/web/usePage';
+  import { MarkdownViewer } from '/@/components/Markdown';
 
   const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
 
@@ -376,7 +400,6 @@
     pagination.value.total = response.total;
 
     loadingRef.value = false;
-    console.log(111111111111);
   };
   /***************************支付************************* */
   const payForm = ref({
@@ -453,6 +476,42 @@
       onSearch(1);
       closeView();
     }
+  };
+
+  /****************************** 交流群 && 教程 && 公告 && 活动 && 售后 ******************************** */
+
+  const systemConfigViewForm = ref({
+    viewFlag: false,
+    content: '',
+    title: '',
+    loading: false,
+  });
+
+  /**
+   * 联系客服
+   */
+  const openAfterSaleView = async () => {
+    systemConfigViewForm.value.title = '售后客服';
+    systemConfigViewForm.value.content = await afterSaleInfo();
+    systemConfigViewForm.value.viewFlag = true;
+  };
+
+  const closeAfterSaleView = async () => {
+    systemConfigViewForm.value.title = '';
+    systemConfigViewForm.value.content = '';
+    systemConfigViewForm.value.viewFlag = false;
+  };
+
+  const openDeliverInfo = async (card) => {
+    systemConfigViewForm.value.title = '发货信息';
+    systemConfigViewForm.value.content = card.deliverObj;
+    systemConfigViewForm.value.viewFlag = true;
+  };
+  const openSpeedSend = async (card) => {
+    systemConfigViewForm.value.title = '正在发货中..';
+    systemConfigViewForm.value.content =
+      '抱歉久等了，系统正在发货中！请耐心等待。或者麻烦您联系客服处理下。';
+    systemConfigViewForm.value.viewFlag = true;
   };
 </script>
 

@@ -44,10 +44,21 @@
                   <a-button type="primary" @click="onAdd">新增账户</a-button>
                   <a-button @click="onShowActive">授权激活</a-button>
                   <!-- <a-button type="success" @click="openGoodsShop">授权市场</a-button> -->
+
                   <!-- <a-button type="success" @click="openAccountGroup"
                     >账号组管理{{ props.contentHeight }}</a-button
                   > -->
                 </a-button-group>
+                <a-button @click="goThirdShop(card)">
+                  <Icon
+                    icon="simple-icons:shopee"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                    color="#86A789"
+                    size="17"
+                  />
+                  前往体验
+                </a-button>
               </a-space>
             </a-form-item>
           </a-form>
@@ -200,7 +211,7 @@
                 >
                   <a-button-group type="text" style="width: 100%">
                     <a-popconfirm
-                      title="是否确认删除账户？存在授权的账户无法删除！"
+                      title="是否确认删除账户？"
                       ok-text="Yes"
                       cancel-text="No"
                       @confirm="deleteAccount(card.id)"
@@ -264,7 +275,7 @@
               <a-row class="card-tags" v-else>
                 <a-col :span="24">
                   <a-popconfirm
-                    title="是否确认删除账户？存在授权的账户无法删除！"
+                    title="是否确认删除账户？"
                     ok-text="Yes"
                     cancel-text="No"
                     @confirm="deleteAccount(card.id)"
@@ -985,6 +996,7 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
   import { discordApi } from './discord';
+  import { useGo } from '/@/hooks/web/usePage';
 
   /** 页面高度计算开始 */
   const button = ref(null);
@@ -1433,6 +1445,18 @@
       onSearch();
     } finally {
       activeData.value.loading = false;
+    }
+  };
+
+  /******************* 店铺跳转 ***************** */
+
+  //跳转CHATGPT页面
+  const go = useGo();
+  const goThirdShop = async (card) => {
+    if (card.shopType === 'THIRD') {
+      window.open(card.linkUrl, '_blank');
+    } else {
+      go('/goods/index');
     }
   };
 
