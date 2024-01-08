@@ -619,7 +619,7 @@
                           v-model:value="deployGoodsForm.infoBody.fastTimes"
                           placeholder="请输入Fast次数，为空则是永久~"
                           min="0"
-                          max="365"
+                          max="9999"
                         />
                       </a-form-item>
                     </a-col>
@@ -1068,7 +1068,7 @@
 
     deployGoodsForm.value.accountId = card.id;
     deployGoodsForm.value.infoBody.maxNumExecute = card.numExecute;
-
+    deployGoodsForm.value.id = null;
     deployGoodsForm.value.stock = null;
     deployGoodsForm.value.infoBody.authWay = 'DAY';
     deployGoodsForm.value.infoBody.authDays = null;
