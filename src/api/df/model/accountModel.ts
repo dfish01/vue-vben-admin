@@ -22,7 +22,7 @@ export interface CreateAuthCodeReq {
   fastTimes: number;
   relaxTimes: number;
   authDays: number;
-  numExecute: number;
+  maxSubmit: number;
 }
 
 /** 账号授权列表响应 */
@@ -91,7 +91,7 @@ export interface AccountListItem {
 
 export interface AddAccountReq {
   accountName: string;
-  numExecute: number | null;
+  maxSubmit: number | null;
   guildId: string;
   channelId: string;
   discordUserId: string;
@@ -122,7 +122,7 @@ interface AuthUseInfo {
  * 账号负载
  */
 interface LoadInfo {
-  numExecute: number; // 可同时提交的任务数
+  maxSubmit: number; // 可同时提交的任务数
   numDiscord: number; // discord账号数
   maxConcurrency: number; // 最大并发数
   useConcurrency: number; // 已用并发数

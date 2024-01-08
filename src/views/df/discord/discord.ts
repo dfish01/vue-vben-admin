@@ -17,14 +17,14 @@ export function discordApi() {
   const accountForm = ref({
     viewFlag: false,
     loading: false,
-    numExecute: 50,
+    maxSubmit: 50,
     accountName: null,
     guildId: null,
     channelId: null,
     discordUserId: null,
     discordUserIds: null,
     allocateStrategy: 'FCFS',
-    conExecute: null,
+    conExecute: 100,
 
     discordUserOptions: [] as { label: string; value: string }[],
     guildOptions: [] as { label: string; value: string }[],
@@ -34,7 +34,7 @@ export function discordApi() {
 
   const onAdd = async () => {
     accountForm.value.accountName = null;
-    accountForm.value.numExecute = 50;
+    accountForm.value.maxSubmit = 300;
     accountForm.value.guildId = null;
     accountForm.value.channelId = null;
     accountForm.value.discordUserId = null;

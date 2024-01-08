@@ -352,7 +352,7 @@
               <br />
               队列数上限:
               {{
-                statisticsForm.formData.loadInfo ? statisticsForm.formData.loadInfo.numExecute : 0
+                statisticsForm.formData.loadInfo ? statisticsForm.formData.loadInfo.maxSubmit : 0
               }}
               <br />
               已用并发数:
@@ -592,13 +592,36 @@
                 label="🫒最大并发数"
                 :rules="[
                   {
-                    required: true,
+                    required: false,
                     message: '最大并发数是必填项',
                   },
                 ]"
                 name="conExecute"
               >
-                <a-input v-model:value="accountForm.conExecute" placeholder="输入最大并发数" />
+                <a-input
+                  disabled
+                  v-model:value="accountForm.conExecute"
+                  placeholder="输入最大并发数"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="🫒最大并发数"
+                :rules="[
+                  {
+                    required: false,
+                    message: '最大并发数是必填项',
+                  },
+                ]"
+                name="maxSubmit"
+              >
+                <a-input-number
+                  v-model:value="accountForm.maxSubmit"
+                  placeholder="请输入最大提交任务数~"
+                  min="1"
+                  max="300"
+                />
               </a-form-item>
             </a-col>
           </a-row>
@@ -741,9 +764,9 @@
               </a-form-item>
             </a-col>
             <a-col :span="24">
-              <a-form-item label="提交任务数" name="numExecute">
+              <a-form-item label="提交任务数" name="maxSubmit">
                 <a-input-number
-                  v-model:value="createAuthForm.otherInfo.numExecute"
+                  v-model:value="createAuthForm.otherInfo.maxSubmit"
                   placeholder="请输提交任务数，为空则上限为主账号上限~"
                   min="1"
                   :max="createAuthForm.maxNumExecute"
@@ -904,9 +927,9 @@
               </a-form-item>
             </a-col>
             <a-col :span="24">
-              <a-form-item label="提交任务数" :name="['otherInfo', 'numExecute']">
+              <a-form-item label="提交任务数" :name="['otherInfo', 'maxSubmit']">
                 <a-input-number
-                  v-model:value="deployGoodsForm.otherInfo.numExecute"
+                  v-model:value="deployGoodsForm.otherInfo.maxSubmit"
                   placeholder="请输提交任务数，为空则上限为主账号上限~"
                   min="1"
                   :max="deployGoodsForm.otherInfo.maxNumExecute"
@@ -1161,7 +1184,7 @@
     { title: 'Turbo次数', dataIndex: 'turboTimes', key: 'turboTimes', width: 100 },
     { title: 'Fast次数', dataIndex: 'fastTimes', key: 'fastTimes', width: 100 },
     { title: 'Relax次数', dataIndex: 'relaxTimes', key: 'relaxTimes', width: 100 },
-    { title: '提交任务数', dataIndex: 'numExecute', key: 'numExecute', width: 100 },
+    { title: '提交任务数', dataIndex: 'maxSubmit', key: 'maxSubmit', width: 100 },
     { title: '生成时间', dataIndex: 'gmtCreate', key: 'gmtCreate', width: 100 },
     { title: '授权方式', dataIndex: 'authWayLabel', key: 'authWayLabel', width: 100 },
     { title: '天数/效期', dataIndex: 'authDays', key: 'authDays', width: 100 },
@@ -1359,25 +1382,25 @@
     otherInfo: {
       authType: 'DAY',
       authDays: null,
-      maxNumExecute: 50,
+      maxNumExecute: 300,
       authExpireTimes: null,
 
       turboTimes: null,
       fastTimes: null,
       relaxTimes: null,
-      numExecute: null,
+      maxSubmit: null,
     },
   });
   const showDeployGoods = async (card) => {
     deployGoodsForm.value.isActiveVisible = true;
     deployGoodsForm.value.accountId = card.id;
-    deployGoodsForm.value.maxNumExecute = card.numExecute;
+    deployGoodsForm.value.maxNumExecute = card.maxSubmit;
 
     deployGoodsForm.value.stock = null;
     deployGoodsForm.value.otherInfo.turboTimes = null;
     deployGoodsForm.value.otherInfo.fastTimes = null;
     deployGoodsForm.value.otherInfo.relaxTimes = null;
-    deployGoodsForm.value.otherInfo.numExecute = null;
+    deployGoodsForm.value.otherInfo.maxSubmit = null;
     deployGoodsForm.value.authDays = null;
     deployGoodsForm.value.authExpireTimes = null;
   };
@@ -1408,25 +1431,25 @@
     accountId: null,
     authType: 'DAY',
     authDays: null,
-    maxNumExecute: 50,
+    maxNumExecute: 300,
     authExpireTimes: null,
     otherInfo: {
       turboTimes: null,
       fastTimes: null,
       relaxTimes: null,
-      numExecute: null,
+      maxSubmit: null,
     },
   });
   const showCreateAuth = async (card) => {
     createAuthForm.value.isActiveVisible = true;
     createAuthForm.value.accountId = card.id;
-    createAuthForm.value.maxNumExecute = card.numExecute;
+    createAuthForm.value.maxNumExecute = card.maxSubmit;
 
     createAuthForm.value.num = null;
     createAuthForm.value.otherInfo.turboTimes = null;
     createAuthForm.value.otherInfo.fastTimes = null;
     createAuthForm.value.otherInfo.relaxTimes = null;
-    createAuthForm.value.otherInfo.numExecute = null;
+    createAuthForm.value.otherInfo.maxSubmit = null;
     createAuthForm.value.authDays = null;
     createAuthForm.value.authExpireTimes = null;
   };
@@ -1536,7 +1559,7 @@
 
   .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     flex: 1;
     align-content: start;
     margin-top: 10px;
@@ -1546,7 +1569,7 @@
   }
 
   .card {
-    min-width: 290px;
+    min-width: 300px;
     border-radius: 7%;
   }
 

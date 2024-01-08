@@ -20,7 +20,7 @@ export function discordApi() {
     spaceCode: null,
     viewFlag: false,
     loading: false,
-    numExecute: 50,
+    maxSubmit: 50,
     accountName: null,
     guildId: null,
     channelId: null,
@@ -48,7 +48,7 @@ export function discordApi() {
 
   const showImportView = () => {
     importForm.value.accountName = null;
-    importForm.value.numExecute = 50;
+    importForm.value.maxSubmit = 300;
     importForm.value.guildId = null;
     importForm.value.channelId = null;
     importForm.value.discordUserId = null;

@@ -130,7 +130,7 @@
                 </span>
               </a-col>
               <a-col flex="auto">
-                <span> 最多同时提交{{ card.infoBody.numExecute }}个任务 </span>
+                <span> 最多同时提交{{ card.infoBody.maxSubmit }}个任务 </span>
               </a-col>
             </a-row>
             <a-row class="card-tags">
@@ -561,7 +561,20 @@
                 </a-select>
               </a-form-item>
             </a-col>
-            <a-col :span="12" />
+            <a-col :span="12">
+              <a-form-item
+                label="排序值"
+                name="sort"
+                :rules="[{ required: true, message: '请输入排序值!' }]"
+              >
+                <a-input-number
+                  v-model:value="deployGoodsForm.sort"
+                  placeholder="请输入排序值~"
+                  min="1"
+                  max="9999"
+                />
+              </a-form-item>
+            </a-col>
             <a-col :span="24" v-if="deployGoodsForm.autoGenStock.genWay === 'HAND'">
               <a-form-item
                 label="商品库存"
@@ -604,7 +617,7 @@
                   v-model:value="deployGoodsForm.autoGenStock.autoGenStockNum"
                   placeholder="请输入追加库存数量~"
                   min="1"
-                  max="50"
+                  max="100"
                 />
               </a-form-item>
             </a-col>
@@ -651,9 +664,9 @@
                       </a-form-item>
                     </a-col>
                     <a-col :span="12">
-                      <a-form-item label="提交任务数" :name="['infoBody', 'numExecute']">
+                      <a-form-item label="提交任务数" :name="['infoBody', 'maxSubmit']">
                         <a-input-number
-                          v-model:value="deployGoodsForm.infoBody.numExecute"
+                          v-model:value="deployGoodsForm.infoBody.maxSubmit"
                           placeholder="请输提交任务数，为空则上限为主账号上限~"
                           min="1"
                           :max="deployGoodsForm.infoBody.maxNumExecute"
@@ -1064,6 +1077,7 @@
     shipType: 'AUTO',
     goodsType: 'MIDJOURNEY',
     emailTemplate: null,
+    sort: 99,
     autoGenStock: {
       genWay: 'NONE',
       appendStockInfo: null,
@@ -1075,11 +1089,11 @@
       authWay: 'DAY',
       authDays: null,
       authExpireTimes: null,
-      maxNumExecute: 50,
+      maxNumExecute: 300,
       turboTimes: null,
       fastTimes: null,
       relaxTimes: null,
-      numExecute: null,
+      maxSubmit: null,
       conExecute: null,
       infoBodyStr: '',
     },
@@ -1092,7 +1106,7 @@
     deployGoodsForm.value.title = '发布新商品';
 
     deployGoodsForm.value.accountId = card.id;
-    deployGoodsForm.value.infoBody.maxNumExecute = card.numExecute;
+    deployGoodsForm.value.infoBody.maxNumExecute = card.maxSubmit;
     deployGoodsForm.value.id = null;
     deployGoodsForm.value.stock = null;
     deployGoodsForm.value.infoBody.authWay = 'DAY';
@@ -1102,7 +1116,7 @@
     deployGoodsForm.value.infoBody.turboTimes = null;
     deployGoodsForm.value.infoBody.fastTimes = null;
     deployGoodsForm.value.infoBody.relaxTimes = null;
-    deployGoodsForm.value.infoBody.numExecute = null;
+    deployGoodsForm.value.infoBody.maxSubmit = null;
     deployGoodsForm.value.autoGenStock = {
       genWay: 'NONE',
       appendStockInfo: null,
