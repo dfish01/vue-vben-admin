@@ -430,13 +430,20 @@
             v-if="statisticsForm.formData.ownerFlag === 'Y'"
           >
             <a-table :data-source="statisticsForm.formData.discordList" rowKey="email">
-              <a-table-column title="账号名" dataIndex="globalName" key="globalName" :width="200" />
-              <a-table-column title="邮箱" dataIndex="email" key="email" />
+              <a-table-column
+                title="账号名"
+                align="center"
+                dataIndex="globalName"
+                key="globalName"
+                :width="200"
+              />
+              <a-table-column title="邮箱" align="center" dataIndex="email" key="email" />
               <a-table-column
                 title="Discord状态"
                 dataIndex="discordState"
                 key="discordState"
-                :width="100"
+                align="center"
+                :width="120"
               >
                 <template #default="{ text }">
                   <a-badge
@@ -445,7 +452,13 @@
                   />
                 </template>
               </a-table-column>
-              <a-table-column title="MJ状态" dataIndex="mjState" key="mjState" :width="100">
+              <a-table-column
+                title="MJ状态"
+                align="center"
+                dataIndex="mjState"
+                key="mjState"
+                :width="100"
+              >
                 <template #default="{ text }">
                   <a-badge
                     :status="getMjStateContent(text).status"
@@ -551,6 +564,41 @@
                   placeholder="请选择默认频道"
                   :options="accountForm.channelOptions"
                 />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="🥞分配策略"
+                :rules="[
+                  {
+                    required: false,
+                    message: '请选择任务分配策略',
+                  },
+                ]"
+                name="allocateStrategy"
+              >
+                <a-select
+                  style="width: 100%"
+                  v-model:value="accountForm.allocateStrategy"
+                  placeholder="分配策略"
+                >
+                  <a-select-option value="FCFS">先到先运行</a-select-option>
+                  <a-select-option value="MLQ">按人运行</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="🫒最大并发数"
+                :rules="[
+                  {
+                    required: true,
+                    message: '最大并发数是必填项',
+                  },
+                ]"
+                name="conExecute"
+              >
+                <a-input v-model:value="accountForm.conExecute" placeholder="输入最大并发数" />
               </a-form-item>
             </a-col>
           </a-row>

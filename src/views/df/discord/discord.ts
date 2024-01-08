@@ -23,6 +23,9 @@ export function discordApi() {
     channelId: null,
     discordUserId: null,
     discordUserIds: null,
+    allocateStrategy: 'FCFS',
+    conExecute: null,
+
     discordUserOptions: [] as { label: string; value: string }[],
     guildOptions: [] as { label: string; value: string }[],
     channelOptions: [] as { label: string; value: string }[],

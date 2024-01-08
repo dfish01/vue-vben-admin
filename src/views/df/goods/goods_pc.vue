@@ -126,13 +126,27 @@
             <a-row class="card-tags">
               <a-col flex="90px">
                 <span style="font-weight: bolder">
-                  <Icon icon="tabler:needle-thread" /> 并发数
+                  <Icon icon="tabler:needle-thread" /> 队列数
                 </span>
               </a-col>
               <a-col flex="auto">
                 <span> 最多同时提交{{ card.infoBody.numExecute }}个任务 </span>
               </a-col>
             </a-row>
+            <a-row class="card-tags">
+              <a-col flex="90px">
+                <span style="font-weight: bolder">
+                  <Icon icon="tabler:needle-thread" /> 并发数
+                </span>
+              </a-col>
+              <a-col flex="auto" v-if="card.infoBody.conExecute">
+                <span> 最多同时运行{{ card.infoBody.conExecute }}个任务 </span>
+              </a-col>
+              <a-col flex="auto" v-else>
+                <span> 同时运行任务数同主账号 </span>
+              </a-col>
+            </a-row>
+
             <a-row
               class="card-tags"
               style="display: flex; justify-content: space-between"
@@ -646,6 +660,16 @@
                         />
                       </a-form-item>
                     </a-col>
+                    <a-col :span="12">
+                      <a-form-item label="并发任务数" :name="['infoBody', 'conExecute']">
+                        <a-input-number
+                          v-model:value="deployGoodsForm.infoBody.conExecute"
+                          placeholder="请输并发任务数，为空则上限为主账号上限~"
+                          min="1"
+                          :max="deployGoodsForm.infoBody.conExecute"
+                        />
+                      </a-form-item>
+                    </a-col>
                     <a-col :span="24">
                       <a-form-item
                         label="追加内容"
@@ -1056,6 +1080,7 @@
       fastTimes: null,
       relaxTimes: null,
       numExecute: null,
+      conExecute: null,
       infoBodyStr: '',
     },
   });
