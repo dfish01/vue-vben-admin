@@ -157,14 +157,12 @@
                   <Icon icon="material-symbols:other-admission-outline" /> 其他
                 </span>
               </div>
-              <div style="flex: 1; flex-wrap: true">
-                <div style="display: flex; flex-direction: column; width: 100%; height: 100%">
-                  <span v-for="(line, index) in formatLines(card)" :key="index">
-                    {{ line }}
-                    <br />
-                    <!-- 可选：添加换行符 -->
-                  </span>
-                </div>
+              <div style="flex: 1; flex-wrap: false">
+                <a-typography-text
+                  style="width: 160px"
+                  :ellipsis="{ tooltip: card.infoBody.infoBodyStr }"
+                  :content="card.infoBody.infoBodyStr"
+                />
               </div>
             </a-row>
             <a-row class="card-tags">
@@ -889,6 +887,7 @@
   import { useGo } from '/@/hooks/web/usePage';
   import { appendStock, stockList, discardStock, deleteStock } from '/@/api/df/goodsStock';
   import { availableList } from '/@/api/df/account';
+  import { EllipsisText } from '@/components/EllipsisText';
 
   const go = useGo();
   const goView = async (routePath) => {
@@ -1076,7 +1075,7 @@
     accountId: null,
     shipType: 'AUTO',
     goodsType: 'MIDJOURNEY',
-    emailTemplate: null,
+    emailTemplate: '您购买的商品发货啦！系统已帮您自动激活咯! 发货内容：${content}',
     sort: 99,
     autoGenStock: {
       genWay: 'NONE',

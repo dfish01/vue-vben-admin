@@ -195,8 +195,16 @@
                   style="font-size: 12px"
                   @click="doSetDefault(card.id)"
                 >
-                  {{ card.defaultFlag === 'Y' ? '默认账号' : '设置默认' }}</a-button
-                >
+                  <span
+                    ><Icon
+                      icon="fluent:tap-double-20-filled"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                      size="14"
+                    />
+                    {{ card.defaultFlag === 'Y' ? '默认账号' : '设置默认' }}</span
+                  >
+                </a-button>
                 <a-col :span="24">
                   <a-divider
                     style="width: 100%; margin-top: 8px; margin-bottom: 1px; margin-left: 0"
@@ -330,10 +338,9 @@
           >已知晓</a-button
         >
       </template>
-      <a-card>
+      <a-card :bordered="false">
         <Loading :loading="statisticsForm.loading" :absolute="true" tip="数据加载中..." />
-
-        <a-descriptions title="账户情况" bordered>
+        <a-descriptions title="" bordered>
           <a-descriptions-item label="账户名">{{
             statisticsForm.formData.accountName
           }}</a-descriptions-item>
@@ -355,14 +362,29 @@
                 statisticsForm.formData.loadInfo ? statisticsForm.formData.loadInfo.maxSubmit : 0
               }}
               <br />
-              已用并发数:
+              并发执行线程:
+              {{
+                statisticsForm.formData.loadInfo
+                  ? statisticsForm.formData.loadInfo.userConExecute
+                  : 0
+              }}
+              <br />
+              已使用线程:
+              {{
+                statisticsForm.formData.loadInfo
+                  ? statisticsForm.formData.loadInfo.useConExecute
+                  : 0
+              }}
+
+              <br />
+              主账号已用并发数:
               {{
                 statisticsForm.formData.loadInfo
                   ? statisticsForm.formData.loadInfo.useConcurrency
                   : 0
               }}
               <br />
-              最大并发数:
+              主账号最大并发数:
               {{
                 statisticsForm.formData.loadInfo
                   ? statisticsForm.formData.loadInfo.maxConcurrency

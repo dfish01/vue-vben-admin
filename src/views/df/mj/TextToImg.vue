@@ -1527,7 +1527,7 @@
           emit('startLoading');
         } catch (error) {
           console.log(error);
-          message.error({ content: '任务提交失败!', key, duration: 2 });
+          message.error({ content: error.message, key, duration: 3 });
         } finally {
           textFormLoading.value = false;
           // emit('endLoading');

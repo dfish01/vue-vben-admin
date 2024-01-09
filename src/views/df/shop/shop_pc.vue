@@ -86,8 +86,7 @@
                   :span="24"
                   style="
                     width: 100%;
-                    min-height: 100px;
-                    max-height: 125px;
+                    height: 115px;
                     margin-top: 1px;
                     margin-bottom: 5px;
                     margin-left: 2px;

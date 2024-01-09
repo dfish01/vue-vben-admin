@@ -128,7 +128,7 @@ export function addDrawTask(params: AddDrawTaskParams, mode: ErrorMessageMode = 
       timeout: 35 * 1000,
     },
     {
-      errorMessageMode: mode,
+      errorMessageMode: 'none',
     },
   );
 }
