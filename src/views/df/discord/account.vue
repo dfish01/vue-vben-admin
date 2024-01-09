@@ -1543,14 +1543,10 @@
 
   /******************* 店铺跳转 ***************** */
 
-  //跳转CHATGPT页面
+  //跳转商品页面
   const go = useGo();
   const goThirdShop = async (card) => {
-    if (card.shopType === 'THIRD') {
-      window.open(card.linkUrl, '_blank');
-    } else {
-      go('/goods/index');
-    }
+    go('/goods/index');
   };
 
   defineExpose({
