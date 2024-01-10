@@ -110,6 +110,30 @@
                 </span>
               </a-col>
             </a-row>
+            <a-row class="card-tags">
+              <a-col flex="90px">
+                <span style="font-weight: bolder">
+                  <Icon icon="tabler:needle-thread" /> 队列数
+                </span>
+              </a-col>
+              <a-col flex="auto">
+                <span> 最多同时提交{{ card.infoBody.maxSubmit }}个任务 </span>
+              </a-col>
+            </a-row>
+            <a-row class="card-tags">
+              <a-col flex="90px">
+                <span style="font-weight: bolder">
+                  <Icon icon="tabler:needle-thread" /> 并发线程
+                </span>
+              </a-col>
+              <a-col flex="auto" v-if="card.infoBody.conExecute">
+                <span> 最多同时运行{{ card.infoBody.conExecute }}个任务 </span>
+              </a-col>
+              <a-col flex="auto" v-else>
+                <span> 同时运行任务数同主账号 </span>
+              </a-col>
+            </a-row>
+
             <a-row
               class="card-tags"
               style="display: flex; justify-content: space-between"
@@ -169,36 +193,20 @@
             </a-row>
 
             <a-row class="card-tags" style="display: flex; justify-content: space-between">
-              <div style="display: flex; align-items: center; width: 100px">
+              <div style="display: flex; align-items: center; width: 150px">
                 <span style="color: #e36414; font-size: 20px; font-weight: orange">
-                  <Icon icon="icon-park-solid:paper-money" size="23px" /> {{ card.goodsPrice }}
+                  <Icon icon="icon-park-solid:paper-money" size="20px" /> {{ card.goodsPrice }}
+                </span>
+                <span style="bottom: 0; margin-left: 10px; font-size: 20px">
+                  <a-typography-text delete>
+                    {{ card.oriGoodsPrice }}
+                  </a-typography-text>
                 </span>
               </div>
 
               <div style="display: flex; flex: 1; justify-content: flex-end">
                 <a-button type="primary" @click="buyGoods(card)">立即购买 </a-button>
               </div>
-            </a-row>
-            <a-row v-if="card.editFlag && card.editFlag == true" class="card-tags">
-              <a-col :span="24">
-                <a-button-group style="width: 100%">
-                  <a-button style="width: 25%" @click="showModifiedNewGoods(card)">编辑 </a-button>
-                  <a-button
-                    v-if="card.goodsState === 'DOWN'"
-                    style="width: 25%"
-                    @click="doChangeGoodsState(card, 'UP')"
-                    >上架
-                  </a-button>
-                  <a-button
-                    v-if="card.goodsState === 'UP'"
-                    style="width: 25%"
-                    @click="doChangeGoodsState(card, 'DOWN')"
-                    >下架
-                  </a-button>
-                  <a-button style="width: 25%" @click="doDeleteGoods(card.id)">删除 </a-button>
-                  <a-button style="width: 25%" @click="showStockList(card)">库存 </a-button>
-                </a-button-group>
-              </a-col>
             </a-row>
           </div>
           <!-- 更多卡片内容 -->

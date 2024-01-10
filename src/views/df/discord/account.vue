@@ -366,31 +366,35 @@
               {{
                 statisticsForm.formData.loadInfo
                   ? statisticsForm.formData.loadInfo.userConExecute
+                    ? statisticsForm.formData.loadInfo.userConExecute
+                    : '主账号的上限数【' + statisticsForm.formData.loadInfo.maxConcurrency + '】'
                   : 0
               }}
               <br />
-              已使用线程:
-              {{
-                statisticsForm.formData.loadInfo
-                  ? statisticsForm.formData.loadInfo.useConExecute
-                  : 0
-              }}
-
+              <span v-if="statisticsForm.formData.loadInfo.userConExecute">
+                已使用线程:
+                {{
+                  statisticsForm.formData.loadInfo
+                    ? statisticsForm.formData.loadInfo.useConExecute
+                    : 0
+                }}
+              </span>
               <br />
-              主账号已用并发数:
-              {{
-                statisticsForm.formData.loadInfo
-                  ? statisticsForm.formData.loadInfo.useConcurrency
-                  : 0
-              }}
-              <br />
-              主账号最大并发数:
-              {{
-                statisticsForm.formData.loadInfo
-                  ? statisticsForm.formData.loadInfo.maxConcurrency
-                  : 0
-              }}
-              <br />
+              <span v-if="statisticsForm.formData.ownerFlag === 'Y'">
+                主账号已用并发数:
+                {{
+                  statisticsForm.formData.loadInfo
+                    ? statisticsForm.formData.loadInfo.useConcurrency
+                    : 0
+                }}
+                <br />
+                主账号最大并发数:
+                {{
+                  statisticsForm.formData.loadInfo
+                    ? statisticsForm.formData.loadInfo.maxConcurrency
+                    : 0
+                }}
+              </span>
             </span>
           </a-descriptions-item>
           <a-descriptions-item

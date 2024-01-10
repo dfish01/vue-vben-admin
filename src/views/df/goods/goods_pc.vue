@@ -136,7 +136,7 @@
             <a-row class="card-tags">
               <a-col flex="90px">
                 <span style="font-weight: bolder">
-                  <Icon icon="tabler:needle-thread" /> 并发数
+                  <Icon icon="tabler:needle-thread" /> 并发线程
                 </span>
               </a-col>
               <a-col flex="auto" v-if="card.infoBody.conExecute">
@@ -189,16 +189,24 @@
                 <span v-if="card.shipType === 'SYSTEM_ACTIVE'"> 拍下后自动发货并激活 </span>
               </a-col>
             </a-row>
-
             <a-row class="card-tags">
               <a-col flex="90px">
                 <span style="font-weight: bolder"> <Icon icon="jam:box" /> 库存 </span>
               </a-col>
-              <a-col flex="auto">
-                {{ card.stock }}
+              <a-col flex="auto" v-if="card.editFlag && card.editFlag == true">
+                {{ card.stock }}/真实库存{{ card.realStock ? card.realStock : 0 }}
               </a-col>
+              <a-col flex="auto" v-else> {{ card.stock }} 件 </a-col>
             </a-row>
+            <a-row class="card-tags">
+              <a-col flex="90px">
+                <span style="font-weight: bolder">
+                  <Icon icon="foundation:burst-sale" color="red" /> 已售出
+                </span>
+              </a-col>
 
+              <a-col flex="auto"> {{ card.numSale }} 件 </a-col>
+            </a-row>
             <a-row class="card-tags">
               <a-col v-if="card.specialLabel">
                 <a-tag color="red">{{ card.specialLabel }} </a-tag>
