@@ -45,7 +45,7 @@
       </a-card>
       <!-- 配置选项卡 -->
       <a-row style="width: 100%; margin-top: 10px">
-        <a-col :span="8">
+        <a-col :span="8" v-if="userInfo.value.phone === '未绑定手机号'">
           <a-card
             :bodyStyle="{ padding: '10px 22px' }"
             @click="handleShowModal('changePhone')"
@@ -340,11 +340,11 @@
 
       <!-- 手机号模态窗 -->
       <a-modal
-        title="更改绑定手机号"
+        title="绑定手机号"
         v-model:open="viewAgg.phoneShow"
         @ok="handlePhoneSubmit"
         :confirm-loading="loading"
-        ok-text="确认更改手机号"
+        ok-text="立即保存"
         :bodyStyle="{ padding: '0 ' }"
       >
         <a-card>
@@ -653,10 +653,6 @@
     viewAgg.value.phoneShow = type === 'changePhone';
     viewAgg.value.emailShow = type === 'changeMail';
     viewAgg.value.passwordShow = type === 'changePassword';
-
-    console.log(viewAgg.value.phoneShow);
-    console.log(viewAgg.value.emailShow);
-    console.log(viewAgg.value.passwordShow);
   };
   const formData = reactive({
     phone: '',
@@ -720,9 +716,10 @@
       .validate()
       .then(async () => {
         await resetPhone(formData);
-        createMessage.success('手机号切换成功！');
+        createMessage.success('手机号绑定成功！');
+        viewAgg.value.phoneShow = false;
         //待处理触发右侧列表刷新
-        console.log(11111);
+        userInfo.value.phone = formData.phone;
       })
       .catch((error) => {
         console.log('error', error);

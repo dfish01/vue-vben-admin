@@ -298,18 +298,18 @@
 
     <!-- 手机号模态窗 -->
     <a-modal
-      title="更改绑定手机号"
+      title="绑定手机号"
       v-model:open="viewAgg.phoneShow"
       @ok="handlePhoneSubmit"
       :confirm-loading="loading"
-      ok-text="确认更改手机号"
+      ok-text="立即保存"
     >
       <a-card>
         <a-form layout="vertical" :model="formData" :rules="getPhoneRules" ref="phoneFormRef">
           <a-row gutter="24">
             <a-col :span="24">
-              <a-form-item label="新手机号" name="phone">
-                <a-input v-model:value="formData.phone" placeholder="请输入您的新手机号" />
+              <a-form-item label="手机号" name="phone">
+                <a-input v-model:value="formData.phone" placeholder="请输入您的手机号" />
               </a-form-item>
             </a-col>
           </a-row>
@@ -659,9 +659,10 @@
       .validate()
       .then(async () => {
         await resetPhone(formData);
-        createMessage.success('手机号切换成功！');
+        createMessage.success('手机号绑定成功！');
+        viewAgg.value.phoneShow = false;
         //待处理触发右侧列表刷新
-        console.log(11111);
+        userInfo.value.phone = formData.phone;
       })
       .catch((error) => {
         console.log('error', error);
@@ -758,12 +759,12 @@
   const appObj = ref<any>({
     setting: [
       {
-        name: '变更手机号',
+        name: '绑定手机号',
         key: 'changePhone',
         svgName: 'gridicons:phone',
         routeUrl: '',
         type: 'model',
-        showFlag: true,
+        showFlag: userInfo.value.phone === '未绑定手机号',
       },
       {
         name: '修改密码',
