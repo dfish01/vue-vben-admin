@@ -45,7 +45,7 @@
       </a-card>
       <!-- 配置选项卡 -->
       <a-row style="width: 100%; margin-top: 10px">
-        <a-col :span="8" v-if="userInfo.value.phone === '未绑定手机号'">
+        <a-col :span="8" v-if="userInfo.phone === '未绑定手机号'">
           <a-card
             :bodyStyle="{ padding: '10px 22px' }"
             @click="handleShowModal('changePhone')"
@@ -496,6 +496,10 @@
   import { MarkdownViewer } from '/@/components/Markdown';
   import { changeUserIcon } from '/@/api/df/user';
   import { SvgIcon } from '/@/components/Icon/index';
+  import useClipboard from 'vue-clipboard3';
+
+  const { toClipboard } = useClipboard();
+
   /** 页面高度计算开始 */
   const formRef = ref();
   //页面高度处理
@@ -778,13 +782,20 @@
     inviteForm.value.viewFlag = false;
   };
 
-  const copyText = (text) => {
-    const value = unref(text);
-    if (!value) {
-      message.warning('请输入要拷贝的内容！');
-      return;
+  const copyText = async (text) => {
+    try {
+      await toClipboard(text);
+      message.success('复制成功');
+    } catch (e) {
+      message.error('复制失败!' + e.message);
     }
-    doCopyText(value);
+
+    // const value = unref(text);
+    // if (!value) {
+    //   message.warning('请输入要拷贝的内容！');
+    //   return;
+    // }
+    // doCopyText(value);
   };
 </script>
 <style lang="less">

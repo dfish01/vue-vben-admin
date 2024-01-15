@@ -32,7 +32,7 @@
         // 设置代码块主题
         style: getTheme(getDarkMode.value, 'code'),
       },
-
+      cdn: 'https://vdcdn.gfish.top',
       after: () => {
         markDownloading.value = false;
       },

@@ -170,7 +170,7 @@
 
 <script setup lang="ts">
   import { onMounted, onUnmounted, ref, reactive, createVNode } from 'vue';
-  import { MarkDown, MarkDownActionType, MarkdownViewer } from '/@/components/Markdown';
+  import { MarkdownViewer } from '/@/components/Markdown';
   import { LazyImg, Waterfall } from 'vue-waterfall-plugin-next';
   import 'vue-waterfall-plugin-next/dist/style.css';
   import { Loading } from '/@/components/Loading';

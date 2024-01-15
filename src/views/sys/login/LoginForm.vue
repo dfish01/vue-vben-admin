@@ -123,8 +123,8 @@
               <a-input v-model:value="customHostData.customHost" placeholder="输入托管地址">
                 <template #addonBefore>
                   <a-select v-model:value="customHostData.ssl" style="width: 90px">
-                    <a-select-option value="Http://">Http://</a-select-option>
-                    <a-select-option value="Https://">Https://</a-select-option>
+                    <a-select-option value="http://">Http://</a-select-option>
+                    <a-select-option value="https://">Https://</a-select-option>
                   </a-select>
                 </template>
               </a-input>

@@ -1,7 +1,9 @@
 import { message } from 'ant-design-vue';
 import { unref } from 'vue';
-import { copyText as doCopyText } from '/@/utils/copyTextToClipboard';
 import { downloadByOnlineUrl } from '/@/utils/file/download';
+import useClipboard from 'vue-clipboard3';
+
+const { toClipboard } = useClipboard();
 
 export const handleDownloadByUrl = async (url: string) => {
   const path = url.split('?')[0];
@@ -32,14 +34,14 @@ export const downloadImage = (image) => {
 };
 
 //复制数据
-export function copyText(text) {
-  // const value = unref(text);
-  if (!text) {
-    message.warning('请输入要拷贝的内容！');
-    return;
+export const copyText = async (text) => {
+  try {
+    await toClipboard(text);
+    message.success('复制成功');
+  } catch (e) {
+    message.error('复制失败!' + e.message);
   }
-  doCopyText(text);
-}
+};
 export const splitInInfo = (prompt) => {
   const parts = prompt.split('\n\n').filter((part) => part.trim() !== '');
   return parts;

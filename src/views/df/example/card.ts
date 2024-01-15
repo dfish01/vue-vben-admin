@@ -6,8 +6,10 @@ import {
   addDrawingSample,
   delExample,
 } from '/@/api/df/drawingSample';
-import { copyText as doCopyText } from '/@/utils/copyTextToClipboard';
 import { useGo } from '/@/hooks/web/usePage';
+import useClipboard from 'vue-clipboard3';
+
+const { toClipboard } = useClipboard();
 
 export function useDrawCard() {
   //初始化类目
@@ -26,13 +28,20 @@ export function useDrawCard() {
   };
 
   //复制数据
-  const copyText = (prompt) => {
-    const value = unref(prompt);
-    if (!value) {
-      message.warning('请输入要拷贝的内容！');
-      return;
+  const copyText = async (prompt) => {
+    try {
+      await toClipboard(prompt);
+      message.success('复制成功');
+    } catch (e) {
+      message.error('复制失败!' + e.message);
     }
-    doCopyText(value);
+
+    // const value = unref(prompt);
+    // if (!value) {
+    //   message.warning('请输入要拷贝的内容！');
+    //   return;
+    // }
+    // doCopyText(value);
   };
 
   //画同款

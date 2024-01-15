@@ -189,17 +189,13 @@
 
 <script setup lang="ts">
   import { onMounted, onUnmounted, ref, reactive, computed, unref } from 'vue';
-  // import { LazyImg, Waterfall } from '../../lib/index'
+  import { MarkdownViewer } from '/@/components/Markdown';
   import { LazyImg, Waterfall } from 'vue-waterfall-plugin-next';
   import 'vue-waterfall-plugin-next/dist/style.css';
   import { Loading } from '/@/components/Loading';
   import { useDrawCard } from './card';
   import Icon from '/@/components/Icon/Icon.vue';
-  import {
-    CaretLeftOutlined,
-    CaretRightOutlined,
-    ExclamationCircleOutlined,
-  } from '@ant-design/icons-vue';
+  import { CaretLeftOutlined, CaretRightOutlined } from '@ant-design/icons-vue';
   import 'viewerjs/dist/viewer.css';
   // import { directive as viewer } from 'v-viewer';
   import { api as viewerApi } from 'v-viewer';
