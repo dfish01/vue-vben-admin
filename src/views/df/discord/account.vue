@@ -793,9 +793,19 @@
               <a-form-item label="提交任务数" name="maxSubmit">
                 <a-input-number
                   v-model:value="createAuthForm.otherInfo.maxSubmit"
-                  placeholder="请输提交任务数，为空则上限为主账号上限~"
+                  placeholder="请输入提交任务数，为空则上限为主账号上限~"
                   min="1"
                   :max="createAuthForm.maxNumExecute"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item label="并发线程数" name="maxSubmit">
+                <a-input-number
+                  v-model:value="createAuthForm.otherInfo.conExecute"
+                  placeholder="请输入并发线程数，为空则上限为主账号上限~"
+                  min="1"
+                  :max="createAuthForm.conExecute"
                 />
               </a-form-item>
             </a-col>
@@ -1211,6 +1221,7 @@
     { title: 'Fast次数', dataIndex: 'fastTimes', key: 'fastTimes', width: 100 },
     { title: 'Relax次数', dataIndex: 'relaxTimes', key: 'relaxTimes', width: 100 },
     { title: '提交任务数', dataIndex: 'maxSubmit', key: 'maxSubmit', width: 100 },
+    { title: '并发线程数', dataIndex: 'conExecute', key: 'conExecute', width: 100 },
     { title: '生成时间', dataIndex: 'gmtCreate', key: 'gmtCreate', width: 100 },
     { title: '授权方式', dataIndex: 'authWayLabel', key: 'authWayLabel', width: 100 },
     { title: '天数/效期', dataIndex: 'authDays', key: 'authDays', width: 100 },
@@ -1464,6 +1475,7 @@
       fastTimes: null,
       relaxTimes: null,
       maxSubmit: null,
+      conExecute: null,
     },
   });
   const showCreateAuth = async (card) => {
@@ -1476,6 +1488,8 @@
     createAuthForm.value.otherInfo.fastTimes = null;
     createAuthForm.value.otherInfo.relaxTimes = null;
     createAuthForm.value.otherInfo.maxSubmit = null;
+    createAuthForm.value.otherInfo.conExecute = null;
+
     createAuthForm.value.authDays = null;
     createAuthForm.value.authExpireTimes = null;
   };
