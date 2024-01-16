@@ -422,7 +422,7 @@
     // 唯一key值
     rowKey: 'id',
     // 卡片之间的间隙
-    gutter: 5,
+    gutter: 1,
     // 是否有周围的gutter
     hasAroundGutter: true,
     // 卡片在PC上的宽度

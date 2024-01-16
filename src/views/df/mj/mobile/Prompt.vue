@@ -31,7 +31,7 @@
 
     <div v-loading="loadingRef" style="overflow: hidden">
       <a-card :bodyStyle="{ padding: '1px 1px 1px 1px' }" ref="promptCategory">
-        <a-row :gutter="[1, 3]" :wrap="true">
+        <a-row :gutter="[1, 3]" :wrap="true" style="display: flex; justify-content: center">
           <a-col v-for="category in categories" :key="category.categoryCode" class="category-col">
             <div class="row-wapper" style="border-radius: 10%">
               <a-checkable-tag
@@ -44,14 +44,13 @@
             </div>
           </a-col>
           <a-col class="category-col">
-            <div>
-              <a-input-search
+            <div style="display: flex; align-items: center">
+              <a-input
                 v-model:value="queryName"
                 placeholder="输入艺术家吧！"
-                style="width: 200px"
-                size="large"
-                @search="onSearch(1)"
+                style="width: 200px; height: 32px"
               />
+              <a-button style="height: 32px" @search="onSearch(1)">按钮</a-button>
             </div>
           </a-col>
         </a-row>
@@ -62,7 +61,7 @@
           :style="{ height: '100%', overflow: 'auto' }"
           :bodyStyle="{ padding: '10px 7px 10px 7px', height: '100%' }"
         >
-          <a-row :gutter="[3, 7]" wrap>
+          <a-row :gutter="[3, 7]" wrap style="display: flex; justify-content: space-around">
             <a-col
               v-for="item in items"
               :key="item.id"
@@ -423,19 +422,19 @@
   @media (min-width: 310px) and (max-width: 363px) {
     .prompt-body {
       /* height: calc(90vh - 281.8px - 32px); */
-      height: calc(90vh - 225px - 56.8px) !important;
+      height: calc(90vh - 195px - 56.8px) !important;
     }
   }
 
   @media (min-width: 424px) and (max-width: 544px) {
     .prompt-body {
-      height: calc(90vh - 205.8px) !important;
+      height: calc(90vh - 175.8px) !important;
     }
   }
 
   @media (min-width: 545px) and (max-width: 804px) {
     .prompt-body {
-      height: calc(90vh - 167.8px) !important;
+      height: calc(90vh - 137.8px) !important;
     }
   }
 
@@ -466,8 +465,8 @@
 
   .prompt-wrapper {
     position: relative;
-    width: 73px;
-    height: 73px;
+    width: 58px;
+    height: 58px;
     padding: 0;
     overflow: hidden;
     transition: transform 0.3s ease;
