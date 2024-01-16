@@ -9,7 +9,7 @@
     @close="handleDrawerClose(false)"
   >
     <template #extra>
-      <a-row style="display: flex; justify-content: space-between">
+      <a-row style="display: flex; justify-content: space-between; height: 20px">
         <a-col>
           <div style="justify-content: left">
             <a-tooltip title="右键可添加到收藏哦~设置好权重值后，记得启用哦~"> 🪧 </a-tooltip>
@@ -31,7 +31,7 @@
 
     <div v-loading="loadingRef" style="overflow: hidden">
       <a-card :bodyStyle="{ padding: '1px 1px 1px 1px' }" ref="promptCategory">
-        <a-row :gutter="[1, 3]" :wrap="true" style="display: flex; justify-content: center">
+        <a-row :gutter="[1, 3]" :wrap="true" style="display: flex; justify-content: space-around">
           <a-col v-for="category in categories" :key="category.categoryCode" class="category-col">
             <div class="row-wapper" style="border-radius: 10%">
               <a-checkable-tag
@@ -422,25 +422,32 @@
   @media (min-width: 310px) and (max-width: 363px) {
     .prompt-body {
       /* height: calc(90vh - 281.8px - 32px); */
-      height: calc(90vh - 195px - 56.8px) !important;
+      height: calc(100vh - 65px - 225px - 55px - 9px);
     }
   }
 
-  @media (min-width: 424px) and (max-width: 544px) {
+  @media (min-width: 363px) and (max-width: 423px) {
     .prompt-body {
-      height: calc(90vh - 175.8px) !important;
+      /* height: calc(90vh - 281.8px - 32px); */
+      height: calc(100vh - 65px - 188px - 55px - 9px);
     }
   }
 
-  @media (min-width: 545px) and (max-width: 804px) {
+  @media (min-width: 423px) and (max-width: 544px) {
     .prompt-body {
-      height: calc(90vh - 137.8px) !important;
+      height: calc(100vh - 65px - 149px - 55px - 9px);
+    }
+  }
+
+  @media (min-width: 572px) and (max-width: 804px) {
+    .prompt-body {
+      height: calc(100vh - 65px - 113px - 55px - 9px);
     }
   }
 
   @media (min-width: 805px) {
     .prompt-body {
-      height: calc(90vh - 73px - 56.8px) !important;
+      height: calc(100vh - 65px - 72px - 55px - 9px);
     }
   }
 
@@ -520,7 +527,7 @@
     display: flex;
     align-content: center;
     align-items: center; /* 垂直居中 */
-    height: 9vh;
+    height: 55px;
 
     /* padding: 20px; */
   }
@@ -530,6 +537,6 @@
   }
 
   .prompt-body {
-    height: calc(90vh - 187px - 56.8px);
+    height: calc(100vh - 65px - 225px - 55px - 9px);
   }
 </style>
