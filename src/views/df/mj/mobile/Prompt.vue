@@ -422,32 +422,32 @@
   @media (min-width: 310px) and (max-width: 363px) {
     .prompt-body {
       /* height: calc(90vh - 281.8px - 32px); */
-      height: calc(100vh - 65px - 225px - 55px - 9px);
+      height: calc(100vh - 65px - 225px - 55px - 10px);
     }
   }
 
   @media (min-width: 363px) and (max-width: 423px) {
     .prompt-body {
       /* height: calc(90vh - 281.8px - 32px); */
-      height: calc(100vh - 65px - 188px - 55px - 9px);
+      height: calc(100vh - 65px - 188px - 55px - 10px);
     }
   }
 
   @media (min-width: 423px) and (max-width: 544px) {
     .prompt-body {
-      height: calc(100vh - 65px - 149px - 55px - 9px);
+      height: calc(100vh - 65px - 149px - 55px - 10px);
     }
   }
 
   @media (min-width: 572px) and (max-width: 804px) {
     .prompt-body {
-      height: calc(100vh - 65px - 113px - 55px - 9px);
+      height: calc(100vh - 65px - 113px - 55px - 10px);
     }
   }
 
   @media (min-width: 805px) {
     .prompt-body {
-      height: calc(100vh - 65px - 72px - 55px - 9px);
+      height: calc(100vh - 65px - 72px - 55px - 10px);
     }
   }
 
@@ -537,6 +537,6 @@
   }
 
   .prompt-body {
-    height: calc(100vh - 65px - 225px - 55px - 9px);
+    height: calc(100vh - 65px - 225px - 55px - 10px);
   }
 </style>
