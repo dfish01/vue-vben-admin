@@ -366,7 +366,6 @@
           <a-row gutter="24">
             <a-col :span="24">
               <a-form-item
-                label="🐵登录邮箱"
                 :rules="[
                   {
                     required: true,
@@ -375,12 +374,21 @@
                 ]"
                 name="accountName"
               >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="mdi:email"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />登录邮箱（账号多的时候方便记）
+                  </span>
+                </template>
+
                 <a-input v-model:value="accountForm.accountName" placeholder="输入登录邮箱" />
               </a-form-item>
             </a-col>
             <a-col :span="24">
               <a-form-item
-                label="🍵登录密码"
                 :rules="[
                   {
                     required: true,
@@ -389,21 +397,59 @@
                 ]"
                 name="password"
               >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="solar:password-linear"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />登录密码
+                  </span>
+                </template>
                 <a-input v-model:value="accountForm.password" placeholder="输入登录密码" />
               </a-form-item>
             </a-col>
             <a-col :span="24">
-              <a-form-item label="🍙MFA（二次验证密码-选填）">
+              <a-form-item>
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="solar:password-linear"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />MFA（二次验证密码-选填）
+                  </span>
+                </template>
+
                 <a-input v-model:value="accountForm.mfaCode" placeholder="输入MFA" />
               </a-form-item>
             </a-col>
             <a-col :span="24" v-if="accountForm.id">
-              <a-form-item label="🐥ACCESS-TOKEN（无法生成时，手动填写）">
+              <a-form-item>
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="carbon:password"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />ACCESS-TOKEN（无法生成时，手动填写）
+                  </span>
+                </template>
+
                 <a-input v-model:value="accountForm.accessToken" placeholder="输入ACCESS-TOKEN" />
               </a-form-item>
             </a-col>
             <a-col :span="24" v-if="accountForm.id">
-              <a-form-item label="🐥ACCESS-TOKEN过期时间（填写ACCESS-TOKEN时，补充）">
+              <a-form-item>
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="pajamas:time-out"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />ACCESS-TOKEN过期时间（填写ACCESS-TOKEN时，补充）
+                  </span>
+                </template>
                 <a-date-picker
                   show-time
                   style="width: 100%"
@@ -561,6 +607,9 @@
   import { useGo } from '/@/hooks/web/usePage';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
+  import { usePermission } from '/@/hooks/web/usePermission';
+
+  const { hasPermission } = usePermission();
 
   /** 页面高度计算开始 */
   const button = ref(null);
@@ -660,6 +709,12 @@
   });
 
   const onAdd = () => {
+    if (!hasPermission('2001')) {
+      createMessage.warning(
+        '嘿，你错过时间了，现在已经关闭自动升级了！联系站长看看能否给你开放权限吧！',
+      );
+      return;
+    }
     accountForm.value.accountName = null;
     accountForm.value.password = null;
     accountForm.value.mfaCode = null;

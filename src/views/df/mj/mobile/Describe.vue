@@ -283,9 +283,9 @@
     try {
       await addDrawTask(addTaskParam);
       message.success({ content: '解析任务已开始!', key, duration: 2 });
-      fileList.value = [];
-      base64Images.value = [];
-      emit('startLoading');
+      // fileList.value = [];
+      // base64Images.value = [];
+      // emit('startLoading');
     } catch (error) {
       console.log(error);
       message.error({ content: '解析任务启动失败!', key, duration: 2 });

@@ -350,7 +350,7 @@
           <a-descriptions-item label="账号权限">{{
             statisticsForm.formData.ownerFlag === 'N' ? '授权' : '主账号'
           }}</a-descriptions-item>
-          <a-descriptions-item :span="3" label="负载信息">
+          <a-descriptions-item :span="3" label="负载信息" v-if="statisticsForm.formData.loadInfo">
             <span>
               Discord账号数:
               {{
@@ -440,7 +440,7 @@
             label="授权账号概况"
             v-if="statisticsForm.formData.ownerFlag === 'Y'"
           >
-            <span>
+            <span v-if="statisticsForm.formData.ownerInfo">
               总账号个数: {{ statisticsForm.formData.ownerInfo.countAccounts }}
               <br />
               总可用账号数:{{ statisticsForm.formData.ownerInfo.countNormalAccounts }}
@@ -521,7 +521,6 @@
           <a-row gutter="24">
             <a-col :span="24">
               <a-form-item
-                label="🐵账号名（账号多的时候方便记）"
                 :rules="[
                   {
                     required: true,
@@ -530,12 +529,20 @@
                 ]"
                 name="accountName"
               >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="ic:sharp-account-box"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />账号名（账号多的时候方便记）
+                  </span>
+                </template>
                 <a-input v-model:value="accountForm.accountName" placeholder="输入账号名" />
               </a-form-item>
             </a-col>
             <a-col :span="24">
               <a-form-item
-                label="🐧分配Discord账号"
                 :rules="[
                   {
                     required: true,
@@ -544,6 +551,15 @@
                 ]"
                 name="discordUserId"
               >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="ic:round-account-tree"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />分配Discord账号
+                  </span>
+                </template>
                 <a-select
                   @change="onSelectDiscordUser"
                   style="width: 100%; height: 32px"
@@ -555,7 +571,6 @@
             </a-col>
             <a-col :span="24">
               <a-form-item
-                label="🍵执行服务器"
                 :rules="[
                   {
                     required: true,
@@ -564,6 +579,11 @@
                 ]"
                 name="guildId"
               >
+                <template #label>
+                  <span
+                    ><Icon icon="uil:server" class="vel-icon icon" aria-hidden="true" />执行服务器
+                  </span>
+                </template>
                 <a-select
                   @change="onSelectGuild"
                   style="width: 100%; height: 32px"
@@ -575,7 +595,6 @@
             </a-col>
             <a-col :span="24">
               <a-form-item
-                label="🍙默认频道"
                 :rules="[
                   {
                     required: true,
@@ -584,6 +603,15 @@
                 ]"
                 name="channelId"
               >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="ri:wechat-channels-line"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />默认频道
+                  </span>
+                </template>
                 <a-select
                   v-model:value="accountForm.channelId"
                   style="width: 100%"
@@ -594,7 +622,6 @@
             </a-col>
             <a-col :span="24">
               <a-form-item
-                label="🥞分配策略"
                 :rules="[
                   {
                     required: false,
@@ -603,6 +630,16 @@
                 ]"
                 name="allocateStrategy"
               >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="clarity:display-solid-alerted"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />分配策略
+                  </span>
+                </template>
+
                 <a-select
                   style="width: 100%"
                   v-model:value="accountForm.allocateStrategy"
@@ -615,7 +652,6 @@
             </a-col>
             <a-col :span="24">
               <a-form-item
-                label="🫒最大并发数"
                 :rules="[
                   {
                     required: false,
@@ -624,6 +660,15 @@
                 ]"
                 name="conExecute"
               >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="tabler:needle-thread"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />最大并发数
+                  </span>
+                </template>
                 <a-input
                   disabled
                   v-model:value="accountForm.conExecute"
@@ -633,15 +678,23 @@
             </a-col>
             <a-col :span="24">
               <a-form-item
-                label="🫒最大并发数"
                 :rules="[
                   {
                     required: false,
-                    message: '最大并发数是必填项',
+                    message: '提交任务数是必填项',
                   },
                 ]"
                 name="maxSubmit"
               >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="tabler:needle-thread"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />最大提交任务数
+                  </span>
+                </template>
                 <a-input-number
                   v-model:value="accountForm.maxSubmit"
                   placeholder="请输入最大提交任务数~"

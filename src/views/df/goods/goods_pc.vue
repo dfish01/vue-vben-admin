@@ -36,7 +36,9 @@
 
             <a-button-group>
               <a-button @click="onSearch(1)">🔍查询</a-button>
-              <a-button type="primary" @click="showDeployGoods">添加商品</a-button>
+              <a-button type="primary" v-if="hasPermission('9999')" @click="showDeployGoods"
+                >添加商品</a-button
+              >
               <a-button @click="goView('/trade')">订单记录</a-button>
             </a-button-group>
           </a-space>
@@ -896,6 +898,9 @@
   import { appendStock, stockList, discardStock, deleteStock } from '/@/api/df/goodsStock';
   import { availableList } from '/@/api/df/account';
   import { EllipsisText } from '@/components/EllipsisText';
+  import { usePermission } from '/@/hooks/web/usePermission';
+
+  const { hasPermission } = usePermission();
 
   const go = useGo();
   const goView = async (routePath) => {

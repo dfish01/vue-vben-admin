@@ -266,6 +266,9 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { copyText as doCopyText } from '/@/utils/copyTextToClipboard';
   import Icon from '/@/components/Icon/Icon.vue';
+  import { usePermission } from '/@/hooks/web/usePermission';
+
+  const { hasPermission } = usePermission();
 
   const { createMessage, createSuccessModal, createErrorModal, createInfoModal } = useMessage();
   const props = defineProps({
@@ -294,7 +297,6 @@
   };
 
   const initBindServerNameList = async () => {
-    console.log(initBindServerNameList);
     const response = await getZoneList();
 
     // 使用 map 方法转换数组
@@ -343,6 +345,13 @@
     token: null,
   });
   const showDiscordForm = (record) => {
+    if (!hasPermission('2001')) {
+      createMessage.warning(
+        '嘿，你错过时间了，现在已经关闭自动升级了！联系站长看看能否给你开放权限吧！',
+      );
+      return;
+    }
+
     if (record) {
       discordForm.value.id = record.id;
       discordForm.value.title = '💡刷新token信息(请确认token值的有效性！)';
