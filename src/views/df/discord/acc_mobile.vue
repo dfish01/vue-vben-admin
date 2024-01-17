@@ -54,7 +54,7 @@
                 <SvgIcon name="list_search" size="20" />
               </a-button>
             </a-tooltip>
-            <a-tooltip title="市场">
+            <a-tooltip title="商品市场">
               <a-button @click="goView('/goods/index')" style="padding: 5px">
                 <SvgIcon name="shopping" size="20" />
               </a-button>

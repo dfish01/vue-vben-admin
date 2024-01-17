@@ -57,7 +57,7 @@
                     color="#86A789"
                     size="17"
                   />
-                  前往体验
+                  购买账号
                 </a-button>
               </a-space>
             </a-form-item>
