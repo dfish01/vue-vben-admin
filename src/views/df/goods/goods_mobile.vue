@@ -72,142 +72,212 @@
               </div>
             </div>
           </template>
-          <div style="display: flex; flex-direction: column; padding: 10px">
-            <a-row class="card-tags">
-              <a-col flex="90px">
-                <span style="font-weight: bolder">
-                  <Icon icon="emojione-v1:lightning-mood" /> Turbo
-                </span>
-              </a-col>
-              <a-col flex="auto">
-                <span>
-                  可用<span>{{
-                    card.infoBody.turboTimes !== null ? card.infoBody.turboTimes : '无限'
-                  }}</span
-                  >次
-                </span>
-              </a-col>
-            </a-row>
-            <a-row class="card-tags">
-              <a-col flex="90px">
-                <span style="font-weight: bolder"> <Icon icon="openmoji:rabbit" /> Fast </span>
-              </a-col>
-              <a-col flex="auto">
-                <span>
-                  可用{{ card.infoBody.fastTimes !== null ? card.infoBody.fastTimes : '无限' }}次
-                </span>
-              </a-col>
-            </a-row>
-            <a-row class="card-tags">
-              <a-col flex="90px">
-                <span style="font-weight: bolder">
-                  <Icon icon="streamline-emojis:turtle" /> Relax
-                </span>
-              </a-col>
-              <a-col flex="auto">
-                <span>
-                  可用{{ card.infoBody.relaxTimes !== null ? card.infoBody.relaxTimes : '无限' }}次
-                </span>
-              </a-col>
-            </a-row>
-            <a-row class="card-tags">
-              <a-col flex="90px">
-                <span style="font-weight: bolder">
-                  <Icon icon="tabler:needle-thread" /> 队列数
-                </span>
-              </a-col>
-              <a-col flex="auto">
-                <span> 最多同时提交{{ card.infoBody.maxSubmit }}个任务 </span>
-              </a-col>
-            </a-row>
-            <a-row class="card-tags">
-              <a-col flex="90px">
-                <span style="font-weight: bolder">
-                  <Icon icon="tabler:needle-thread" /> 并发线程
-                </span>
-              </a-col>
-              <a-col flex="auto" v-if="card.infoBody.conExecute">
-                <span> 最多同时运行{{ card.infoBody.conExecute }}个任务 </span>
-              </a-col>
-              <a-col flex="auto" v-else>
-                <span> 同时运行任务数同主账号 </span>
-              </a-col>
-            </a-row>
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+              padding: 10px;
+            "
+          >
+            <div>
+              <div v-if="card.infoBody.billingMethod === 'INTEGRAL'">
+                <a-row class="card-tags">
+                  <a-col flex="90px">
+                    <span style="font-weight: bolder">
+                      <Icon icon="material-symbols:money-outline-rounded" color="#A94438" /> 积分
+                    </span>
+                  </a-col>
+                  <a-col flex="auto">
+                    <span>
+                      {{ card.infoBody.score }} 积分
+                      <a-tooltip
+                        color="#99BC85"
+                        v-if="card.infoBody.integralRule"
+                        :overlayStyle="{ maxWidth: '500px' }"
+                      >
+                        <template #title>
+                          <p
+                            v-for="(part, index) in card.infoBody.integralRule.split(';')"
+                            :key="index"
+                            >{{ part.trim() }}</p
+                          >
+                        </template>
+                        <a-tag style="align-items: center"
+                          ><Icon icon="basil:info-rect-outline" color="#0B60B0" />规则</a-tag
+                        >
+                      </a-tooltip>
+                    </span>
+                  </a-col>
+                </a-row>
 
-            <a-row
-              class="card-tags"
-              style="display: flex; justify-content: space-between"
-              v-if="card.infoBody.infoBodyStr"
-            >
-              <div style="width: 90px">
-                <span style="font-weight: bolder">
-                  <Icon icon="material-symbols:other-admission-outline" /> 其他
-                </span>
+                <a-row class="card-tags" v-if="card.infoBody.remark">
+                  <a-col flex="90px">
+                    <span style="font-weight: bolder">
+                      <Icon icon="emojione-v1:note-page" /> 备注
+                    </span>
+                  </a-col>
+                  <a-col flex="auto">
+                    <span>
+                      {{ card.infoBody.remark }}
+                    </span>
+                  </a-col>
+                </a-row>
               </div>
-              <div style="flex: 1; flex-wrap: false">
-                <a-typography-text
-                  style="width: 160px"
-                  :ellipsis="{ tooltip: card.infoBody.infoBodyStr }"
-                  :content="card.infoBody.infoBodyStr"
-                />
-              </div>
-            </a-row>
-            <a-row class="card-tags">
-              <a-col flex="90px">
-                <span style="font-weight: bolder"> <Icon icon="openmoji:timer" /> 有效期至 </span>
-              </a-col>
-              <a-col flex="auto">
-                <span v-if="card.infoBody.authWay === 'DAY'">
-                  激活后 {{ card.infoBody.authDays }} 天
-                </span>
-                <span v-else> {{ card.infoBody.authExpireTimes }} </span>
-              </a-col>
-            </a-row>
-
-            <a-row class="card-tags">
-              <a-col flex="90px">
-                <span style="font-weight: bolder">
-                  <Icon icon="flat-color-icons:shipped" /> 发货方式
-                </span>
-              </a-col>
-              <a-col flex="auto">
-                <span v-if="card.shipType === 'AUTO'"> 拍下后自动发货 </span>
-                <span v-if="card.shipType === 'HAND'"> 请联系客服手动发货 </span>
-                <span v-if="card.shipType === 'SYSTEM_ACTIVE'"> 拍下后自动发货并激活 </span>
-              </a-col>
-            </a-row>
-
-            <a-row class="card-tags">
-              <a-col flex="90px">
-                <span style="font-weight: bolder"> <Icon icon="jam:box" /> 库存 </span>
-              </a-col>
-              <a-col flex="auto">
-                {{ card.stock }}
-              </a-col>
-            </a-row>
-
-            <a-row class="card-tags">
-              <a-col v-if="card.specialLabel">
-                <a-tag color="red">{{ card.specialLabel }} </a-tag>
-              </a-col>
-            </a-row>
-
-            <a-row class="card-tags" style="display: flex; justify-content: space-between">
-              <div style="display: flex; align-items: center; width: 150px">
-                <span style="color: #e36414; font-size: 20px; font-weight: orange">
-                  <Icon icon="icon-park-solid:paper-money" size="20px" /> {{ card.goodsPrice }}
-                </span>
-                <span style="bottom: 0; margin-left: 10px; font-size: 20px">
-                  <a-typography-text delete>
-                    {{ card.oriGoodsPrice }}
-                  </a-typography-text>
-                </span>
+              <div v-else>
+                <a-row class="card-tags">
+                  <a-col flex="90px">
+                    <span style="font-weight: bolder">
+                      <Icon icon="emojione-v1:lightning-mood" /> Turbo
+                    </span>
+                  </a-col>
+                  <a-col flex="auto">
+                    <span>
+                      可用<span>{{
+                        card.infoBody.turboTimes !== null ? card.infoBody.turboTimes : '无限'
+                      }}</span
+                      >次
+                    </span>
+                  </a-col>
+                </a-row>
+                <a-row class="card-tags">
+                  <a-col flex="90px">
+                    <span style="font-weight: bolder"> <Icon icon="openmoji:rabbit" /> Fast </span>
+                  </a-col>
+                  <a-col flex="auto">
+                    <span>
+                      可用{{
+                        card.infoBody.fastTimes !== null ? card.infoBody.fastTimes : '无限'
+                      }}次
+                    </span>
+                  </a-col>
+                </a-row>
+                <a-row class="card-tags">
+                  <a-col flex="90px">
+                    <span style="font-weight: bolder">
+                      <Icon icon="streamline-emojis:turtle" /> Relax
+                    </span>
+                  </a-col>
+                  <a-col flex="auto">
+                    <span>
+                      可用{{
+                        card.infoBody.relaxTimes !== null ? card.infoBody.relaxTimes : '无限'
+                      }}次
+                    </span>
+                  </a-col>
+                </a-row>
               </div>
 
-              <div style="display: flex; flex: 1; justify-content: flex-end">
-                <a-button type="primary" @click="buyGoods(card)">立即购买 </a-button>
-              </div>
-            </a-row>
+              <a-row class="card-tags">
+                <a-col flex="90px">
+                  <span style="font-weight: bolder">
+                    <Icon icon="tabler:needle-thread" /> 队列数
+                  </span>
+                </a-col>
+                <a-col flex="auto">
+                  <span> 最多同时提交{{ card.infoBody.maxSubmit }}个任务 </span>
+                </a-col>
+              </a-row>
+              <a-row class="card-tags">
+                <a-col flex="90px">
+                  <span style="font-weight: bolder">
+                    <Icon icon="tabler:needle-thread" /> 并发线程
+                  </span>
+                </a-col>
+                <a-col flex="auto" v-if="card.infoBody.conExecute">
+                  <span> 最多同时运行{{ card.infoBody.conExecute }}个任务 </span>
+                </a-col>
+                <a-col flex="auto" v-else>
+                  <span> 同时运行任务数同主账号 </span>
+                </a-col>
+              </a-row>
+
+              <a-row
+                class="card-tags"
+                style="display: flex; justify-content: space-between"
+                v-if="card.infoBody.infoBodyStr"
+              >
+                <div style="width: 90px">
+                  <span style="font-weight: bolder">
+                    <Icon icon="material-symbols:other-admission-outline" /> 其他福利
+                  </span>
+                </div>
+                <div style="flex: 1; flex-wrap: false">
+                  <a-typography-text
+                    style="width: 160px"
+                    :ellipsis="{ tooltip: card.infoBody.infoBodyStr }"
+                    :content="card.infoBody.infoBodyStr"
+                  />
+                </div>
+              </a-row>
+              <a-row class="card-tags">
+                <a-col flex="90px">
+                  <span style="font-weight: bolder"> <Icon icon="openmoji:timer" /> 有效期至 </span>
+                </a-col>
+                <a-col flex="auto">
+                  <span v-if="card.infoBody.authWay === 'DAY'">
+                    激活后 {{ card.infoBody.authDays }} 天
+                  </span>
+                  <span v-else> {{ card.infoBody.authExpireTimes }} </span>
+                </a-col>
+              </a-row>
+
+              <a-row class="card-tags">
+                <a-col flex="90px">
+                  <span style="font-weight: bolder">
+                    <Icon icon="flat-color-icons:shipped" /> 发货方式
+                  </span>
+                </a-col>
+                <a-col flex="auto">
+                  <span v-if="card.shipType === 'AUTO'"> 拍下后自动发货 </span>
+                  <span v-if="card.shipType === 'HAND'"> 请联系客服手动发货 </span>
+                  <span v-if="card.shipType === 'SYSTEM_ACTIVE'"> 拍下后自动发货并激活 </span>
+                </a-col>
+              </a-row>
+              <a-row class="card-tags">
+                <a-col flex="90px">
+                  <span style="font-weight: bolder"> <Icon icon="jam:box" /> 当前库存 </span>
+                </a-col>
+                <a-col flex="auto" v-if="card.editFlag && card.editFlag == true">
+                  {{ card.stock }}/真实库存{{ card.realStock ? card.realStock : 0 }}
+                </a-col>
+                <a-col flex="auto" v-else> {{ card.stock }} 件 </a-col>
+              </a-row>
+              <a-row class="card-tags">
+                <a-col flex="90px">
+                  <span style="font-weight: bolder">
+                    <Icon icon="foundation:burst-sale" color="red" /> 已售出
+                  </span>
+                </a-col>
+
+                <a-col flex="auto"> {{ card.numSale }} 件 </a-col>
+              </a-row>
+              <a-row class="card-tags">
+                <a-col v-if="card.specialLabel">
+                  <a-tag color="red">{{ card.specialLabel }} </a-tag>
+                </a-col>
+              </a-row>
+            </div>
+            <div>
+              <a-row class="card-tags" style="display: flex; justify-content: space-between">
+                <div style="display: flex; align-items: center; width: 150px">
+                  <span style="color: #e36414; font-size: 20px; font-weight: orange">
+                    <Icon icon="icon-park-solid:paper-money" size="20px" /> {{ card.goodsPrice }}
+                  </span>
+                  <span style="bottom: 0; margin-left: 10px; font-size: 20px">
+                    <a-typography-text delete>
+                      {{ card.oriGoodsPrice }}
+                    </a-typography-text>
+                  </span>
+                </div>
+
+                <div style="display: flex; flex: 1; justify-content: flex-end">
+                  <a-button type="primary" @click="buyGoods(card)" :disabled="card.stock > 0"
+                    >立即购买
+                  </a-button>
+                </div>
+              </a-row>
+            </div>
           </div>
           <!-- 更多卡片内容 -->
         </a-card>

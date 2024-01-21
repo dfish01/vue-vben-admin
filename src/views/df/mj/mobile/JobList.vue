@@ -415,7 +415,13 @@
               </a-tooltip>
               <a-tooltip title="删除">
                 <a-popconfirm
-                  title="是否确认移除任务?"
+                  :title="
+                    card.secState === 'SUBMITTED' ||
+                    card.secState === 'IN_PROGRESS' ||
+                    card.secState === 'SUCCESS'
+                      ? '是否确认移除任务？注意：该状态不会退还资源！请等待任务完成或者自动超时失败退还资源！'
+                      : '是否确认移除任务？'
+                  "
                   ok-text="确认删除"
                   cancel-text="取消"
                   @confirm="deleteCard(card)"
@@ -485,7 +491,13 @@
               </a-tooltip>
               <a-tooltip title="删除">
                 <a-popconfirm
-                  title="是否确认移除任务?"
+                  :title="
+                    card.secState === 'SUBMITTED' ||
+                    card.secState === 'IN_PROGRESS' ||
+                    card.secState === 'SUCCESS'
+                      ? '是否确认移除任务？注意：该状态不会退还资源！请等待任务完成或者自动超时失败退还资源！'
+                      : '是否确认移除任务？'
+                  "
                   ok-text="确认删除"
                   cancel-text="取消"
                   @confirm="deleteCard(card)"
@@ -627,7 +639,13 @@
                     </a-popover> -->
 
                     <a-popconfirm
-                      title="是否确认移除任务?"
+                      :title="
+                        card.secState === 'SUBMITTED' ||
+                        card.secState === 'IN_PROGRESS' ||
+                        card.secState === 'SUCCESS'
+                          ? '是否确认移除任务？注意：该状态不会退还资源！请等待任务完成或者自动超时失败退还资源！'
+                          : '是否确认移除任务？'
+                      "
                       ok-text="确认删除"
                       cancel-text="取消"
                       @confirm="deleteCard(card)"
@@ -1328,7 +1346,12 @@
 
     <!-- remix弹窗-->
     <div>
-      <a-modal v-model:open="remix.view" :title="remix.title" @ok="doZoomCus()">
+      <a-modal
+        v-model:open="remix.view"
+        :title="remix.title"
+        @ok="doZoomCus()"
+        :confirmLoading="remix.loading"
+      >
         <a-spin :spinning="remix.loading">
           <a-row style="padding: 15px">
             <a-col span="24">
@@ -1417,6 +1440,7 @@
       </a-modal>
     </div>
 
+    <!-- 局部变化 -->
     <a-modal
       v-model:open="varyRegionForm.viewFlag"
       title="🎨Midjourney局部变化"
@@ -2060,9 +2084,9 @@
   onMounted(() => {
     (window as any).varyRegionForm = varyRegionForm;
     initTag();
+    await initAccountInfo();
   });
   onMounted(async () => {
-    await initAccountInfo();
     searchForm.value.spaceId = accountForm.currentSpaceId;
     onSearch();
   });

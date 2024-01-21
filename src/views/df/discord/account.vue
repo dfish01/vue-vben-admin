@@ -402,7 +402,7 @@
             label="授权使用情况"
             v-if="statisticsForm.formData.ownerFlag === 'N'"
           >
-            <span>
+            <span v-if="statisticsForm.billingMethod === 'TIMES'">
               turbo次数:
               {{ statisticsForm.formData.authUseInfo.turboTimes }}
               /
@@ -433,6 +433,29 @@
               <!-- 成功次数:{{ statisticsForm.formData.authUseInfo.numSuccess }} -->
               <br />
               到期时间:{{ statisticsForm.formData.authUseInfo.expireTime }}
+            </span>
+            <span v-else>
+              总积分:
+              {{
+                statisticsForm.ownerFlag === 'Y'
+                  ? '不限制'
+                  : statisticsForm.formData.authUseInfo.totalScore
+              }}
+
+              <br />
+              已用积分:
+              {{
+                statisticsForm.ownerFlag === 'Y'
+                  ? '-'
+                  : statisticsForm.formData.authUseInfo.usedScore
+              }}
+              <br />
+              剩余积分:
+              {{
+                statisticsForm.ownerFlag === 'Y'
+                  ? '不限制'
+                  : statisticsForm.formData.authUseInfo.remainScore
+              }}
             </span>
           </a-descriptions-item>
           <a-descriptions-item
@@ -813,6 +836,58 @@
               </a-form-item>
             </a-col>
             <a-col :span="24">
+              <a-form-item label="提交任务数" name="maxSubmit">
+                <a-input-number
+                  v-model:value="createAuthForm.otherInfo.maxSubmit"
+                  placeholder="请输入提交任务数，为空则上限为主账号上限~"
+                  min="1"
+                  :max="createAuthForm.maxNumExecute"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item label="并发线程数" name="maxSubmit">
+                <a-input-number
+                  v-model:value="createAuthForm.otherInfo.conExecute"
+                  placeholder="请输入并发线程数，为空则上限为主账号上限~"
+                  min="1"
+                  :max="createAuthForm.conExecute"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                :rules="[
+                  {
+                    required: true,
+                    message: '请选择计费方式',
+                  },
+                ]"
+                name="billingMethod"
+              >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="clarity:display-solid-alerted"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />计费方式{{ createAuthForm.billingMethod }}
+                  </span>
+                </template>
+
+                <a-select
+                  style="width: 100%"
+                  v-model:value="createAuthForm.billingMethod"
+                  placeholder="计费方式"
+                >
+                  <a-select-option value="TIMES">按次数</a-select-option>
+                  <a-select-option value="INTEGRAL">按积分</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+          </a-row>
+          <a-row v-if="createAuthForm.billingMethod === 'TIMES'">
+            <a-col :span="24">
               <a-form-item label="TURBO模式次数（0~9999）" name="turboTimes">
                 <a-input-number
                   v-model:value="createAuthForm.otherInfo.turboTimes"
@@ -842,25 +917,23 @@
                 />
               </a-form-item>
             </a-col>
+          </a-row>
+          <a-row v-else>
             <a-col :span="24">
-              <a-form-item label="提交任务数" name="maxSubmit">
-                <a-input-number
-                  v-model:value="createAuthForm.otherInfo.maxSubmit"
-                  placeholder="请输入提交任务数，为空则上限为主账号上限~"
-                  min="1"
-                  :max="createAuthForm.maxNumExecute"
+              <a-form-item label="积分" name="score">
+                <a-input
+                  v-model:value="createAuthForm.otherInfo.score"
+                  placeholder="请输入积分"
+                  min="0"
+                  max="999999"
+                  style="width: 100%"
                 />
               </a-form-item>
             </a-col>
             <a-col :span="24">
-              <a-form-item label="并发线程数" name="maxSubmit">
-                <a-input-number
-                  v-model:value="createAuthForm.otherInfo.conExecute"
-                  placeholder="请输入并发线程数，为空则上限为主账号上限~"
-                  min="1"
-                  :max="createAuthForm.conExecute"
-                />
-              </a-form-item>
+              <span style="color: red; font-size: 10px"
+                >每个任务都会按照不同的类型操作消耗相对应的积分，具体看说明~</span
+              >
             </a-col>
           </a-row>
         </a-form>
@@ -1061,45 +1134,111 @@
         授权列表
       </template>
       <template #footer>
-        <a-button key="submit" type="primary" @click="closeAuthModal">已知晓</a-button>
+        <a-button key="submit" type="primary" @click="closeAuthModal"
+          >已知晓 {{ authListForm.tabKey }}</a-button
+        >
       </template>
       <Loading :loading="authListForm.loading" :absolute="true" tip="数加载中..." />
-      <div style="width: 100%; padding: 10px; overflow-x: auto">
-        <a-table :dataSource="authListTableData" class="a-table" :scroll="{ x: 'max-content' }">
-          <a-table-column
-            key="authCode"
-            title="授权码"
-            data-index="authCode"
-            align="center"
-            :width="80"
-          >
-            <template #default="{ record }">
-              <span v-if="record.useWay === 'GOODS'"> ********* </span>
-              <span v-else> {{ record.authCode }} </span>
-            </template>
-          </a-table-column>
-          <a-table-column
-            v-for="column in authColumns"
-            :v-if="!column.hidden"
-            :key="column.key"
-            :title="column.title"
-            :dataIndex="column.dataIndex"
-          />
 
-          <a-table-column title="操作" align="center" key="actions" fixed="right" :width="80">
-            <template #default="{ record }">
-              <a-button-group>
-                <a-button
-                  type="primary"
-                  danger
-                  v-if="record.useFlag === 'N'"
-                  @click="doDeleteAuth(record.id, record.accountId)"
-                  >删除</a-button
-                >
-              </a-button-group>
+      <div style="width: 100%; padding: 10px; overflow-x: auto">
+        <a-tabs ref="formRef" v-model:activeKey="authListForm.tabKey" @change="changeBillingCount">
+          <a-tab-pane key="TIMES">
+            <template #tab>
+              <span
+                ><Icon
+                  icon="fluent:calendar-arrow-counterclockwise-20-regular"
+                  class="vel-icon icon"
+                  aria-hidden="true"
+                  style="margin-right: 2px"
+                  size="16"
+                />次数计费
+              </span>
             </template>
-          </a-table-column>
-        </a-table>
+            <a-table :dataSource="authListTableData" class="a-table" :scroll="{ x: 'max-content' }">
+              <a-table-column
+                key="authCode"
+                title="授权码"
+                data-index="authCode"
+                align="center"
+                :width="80"
+              >
+                <template #default="{ record }">
+                  <span v-if="record.useWay === 'GOODS'"> ********* </span>
+                  <span v-else> {{ record.authCode }} </span>
+                </template>
+              </a-table-column>
+              <a-table-column
+                v-for="column in timeAuthColumns"
+                :v-if="!column.hidden"
+                :key="column.key"
+                :title="column.title"
+                :dataIndex="column.dataIndex"
+              />
+
+              <a-table-column title="操作" align="center" key="actions" fixed="right" :width="80">
+                <template #default="{ record }">
+                  <a-button-group>
+                    <a-button
+                      type="primary"
+                      danger
+                      v-if="record.useFlag === 'N'"
+                      @click="doDeleteAuth(record.id, record.accountId)"
+                      >删除</a-button
+                    >
+                  </a-button-group>
+                </template>
+              </a-table-column>
+            </a-table>
+          </a-tab-pane>
+          <a-tab-pane key="INTEGRAL">
+            <template #tab>
+              <span>
+                <Icon
+                  icon="material-symbols:money-outline-rounded"
+                  class="vel-icon icon"
+                  style="margin-right: 2px"
+                  aria-hidden="true"
+                  size="16"
+                />积分计费</span
+              >
+            </template>
+            <a-table :dataSource="authListTableData" class="a-table" :scroll="{ x: 'max-content' }">
+              <a-table-column
+                key="authCode"
+                title="授权码"
+                data-index="authCode"
+                align="center"
+                :width="80"
+              >
+                <template #default="{ record }">
+                  <span v-if="record.useWay === 'GOODS'"> ********* </span>
+                  <span v-else> {{ record.authCode }} </span>
+                </template>
+              </a-table-column>
+              <a-table-column
+                v-for="column in integralAuthColumns"
+                :v-if="!column.hidden"
+                :key="column.key"
+                :title="column.title"
+                :dataIndex="column.dataIndex"
+              />
+
+              <a-table-column title="操作" align="center" key="actions" fixed="right" :width="80">
+                <template #default="{ record }">
+                  <a-button-group>
+                    <a-button
+                      type="primary"
+                      danger
+                      v-if="record.useFlag === 'N'"
+                      @click="doDeleteAuth(record.id, record.accountId)"
+                      >删除</a-button
+                    >
+                  </a-button-group>
+                </template>
+              </a-table-column>
+            </a-table>
+          </a-tab-pane>
+        </a-tabs>
       </div>
     </a-modal>
 
@@ -1157,6 +1296,7 @@
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
   import { discordApi } from './discord';
   import { useGo } from '/@/hooks/web/usePage';
+  import { func } from 'vue-types';
 
   /** 页面高度计算开始 */
   const button = ref(null);
@@ -1253,6 +1393,8 @@
 
   //授权列表相关 开始
   const authListForm = ref({
+    tabKey: 'TIMES',
+    accountId: null,
     loading: false,
     isAuthModalVisible: false,
     authList: {},
@@ -1261,11 +1403,7 @@
     // 更多数据...
   ]);
 
-  // const authList = ref([
-  //   { id: '1', authCode: '123456', user: '张三', authTime: '2023-07-20 18:00:00' },
-  //   { id: '2', authCode: '789012', user: '李四', authTime: '2023-07-21 18:00:00' },
-  // ]);
-  const authColumns = [
+  const timeAuthColumns = [
     // { title: 'ID', dataIndex: 'id', key: 'id', hidden: true },
     // { title: '授权码', dataIndex: 'authCode', key: 'authCode', width: 100 },
     { title: '激活用户', dataIndex: 'activeUserEmail', key: 'activeUserEmail', width: 100 },
@@ -1279,13 +1417,40 @@
     { title: '授权方式', dataIndex: 'authWayLabel', key: 'authWayLabel', width: 100 },
     { title: '天数/效期', dataIndex: 'authDays', key: 'authDays', width: 100 },
   ];
+  const integralAuthColumns = [
+    // { title: 'ID', dataIndex: 'id', key: 'id', hidden: true },
+    // { title: '授权码', dataIndex: 'authCode', key: 'authCode', width: 100 },
+    { title: '激活用户', dataIndex: 'activeUserEmail', key: 'activeUserEmail', width: 100 },
+    { title: '激活时间', dataIndex: 'gmtActive', key: 'gmtActive', width: 100 },
+    { title: '积分', dataIndex: 'score', key: 'score', width: 100 },
+    { title: '提交任务数', dataIndex: 'maxSubmit', key: 'maxSubmit', width: 100 },
+    { title: '并发线程数', dataIndex: 'conExecute', key: 'conExecute', width: 100 },
+    { title: '生成时间', dataIndex: 'gmtCreate', key: 'gmtCreate', width: 100 },
+    { title: '授权方式', dataIndex: 'authWayLabel', key: 'authWayLabel', width: 100 },
+    { title: '天数/效期', dataIndex: 'authDays', key: 'authDays', width: 100 },
+  ];
 
-  const showAuthorizationList = async (id) => {
+  const changeBillingCount = async (activeKey) => {
     // 显示授权列表
     authListForm.value.loading = true;
     try {
+      authListTableData.value = await accountAuthList({
+        accountId: authListForm.value.accountId,
+        source: 'MJ',
+        billingMethod: activeKey,
+      });
+    } finally {
+      authListForm.value.loading = false;
+    }
+  };
+  const showAuthorizationList = async (id) => {
+    // 显示授权列表
+    authListForm.value.loading = true;
+    authListForm.value.accountId = id;
+    authListForm.value.tabKey = 'TIMES';
+    try {
       authListForm.value.isAuthModalVisible = true;
-      authListTableData.value = await accountAuthList({ accountId: id, source: 'MJ' });
+      changeBillingCount(authListForm.value.tabKey);
     } finally {
       authListForm.value.loading = false;
     }
@@ -1523,7 +1688,9 @@
     authDays: null,
     maxNumExecute: 300,
     authExpireTimes: null,
+    billingMethod: 'TIMES',
     otherInfo: {
+      score: 100,
       turboTimes: null,
       fastTimes: null,
       relaxTimes: null,

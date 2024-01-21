@@ -493,7 +493,13 @@
               </a-tooltip>
               <a-tooltip title="删除">
                 <a-popconfirm
-                  title="是否确认移除任务?"
+                  :title="
+                    card.secState === 'SUBMITTED' ||
+                    card.secState === 'IN_PROGRESS' ||
+                    card.secState === 'SUCCESS'
+                      ? '是否确认移除任务？注意：该状态不会退还资源！请等待任务完成或者自动超时失败退还资源！'
+                      : '是否确认移除任务？'
+                  "
                   ok-text="确认删除"
                   cancel-text="取消"
                   @confirm="deleteCard(card)"
@@ -635,7 +641,13 @@
                     </a-popover> -->
 
                     <a-popconfirm
-                      title="是否确认移除任务?"
+                      :title="
+                        card.secState === 'SUBMITTED' ||
+                        card.secState === 'IN_PROGRESS' ||
+                        card.secState === 'SUCCESS'
+                          ? '是否确认移除任务？注意：该状态不会退还资源！请等待任务完成或者自动超时失败退还资源！'
+                          : '是否确认移除任务？'
+                      "
                       ok-text="确认删除"
                       cancel-text="取消"
                       @confirm="deleteCard(card)"

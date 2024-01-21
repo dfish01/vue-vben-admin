@@ -1,7 +1,12 @@
 <template>
   <!-- remix弹窗-->
   <div>
-    <a-modal v-model:open="remix.view" :title="remix.title" @ok="doZoomCus()">
+    <a-modal
+      v-model:open="remix.view"
+      :title="remix.title"
+      @ok="doZoomCus()"
+      :confirmLoading="remix.loading"
+    >
       <a-spin :spinning="remix.loading">
         <a-row style="padding: 15px">
           <a-col span="24">

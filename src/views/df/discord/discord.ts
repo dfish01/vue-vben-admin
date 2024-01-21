@@ -25,6 +25,7 @@ export function discordApi() {
     discordUserIds: null,
     allocateStrategy: 'FCFS',
     conExecute: 100,
+    billingMethod: 'TIMES',
 
     discordUserOptions: [] as { label: string; value: string }[],
     guildOptions: [] as { label: string; value: string }[],
