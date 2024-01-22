@@ -2081,7 +2081,7 @@
 
   // 使用 ref 包装，以确保 computed 可以正确监听变化
 
-  onMounted(() => {
+  onMounted(async () => {
     (window as any).varyRegionForm = varyRegionForm;
     initTag();
     await initAccountInfo();
