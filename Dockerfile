@@ -4,8 +4,10 @@ FROM node:16-alpine as build-stage
 MAINTAINER Adoin 'adoin@qq.com'
 WORKDIR /app
 COPY . ./
+# taobao证书过期了,先换这个源
+RUN npm config set registry https://registry.npmjs.org/
 # 设置 node 阿里镜像
-RUN npm config set registry https://registry.npm.taobao.org
+#RUN npm config set registry https://registry.npm.taobao.org
 # 设置--max-old-space-size
 ENV NODE_OPTIONS=--max-old-space-size=16384
 # 设置阿里镜像、pnpm、依赖、编译
