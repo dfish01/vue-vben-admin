@@ -15,7 +15,7 @@
               />MJ账户组
             </span>
           </template>
-          <Account :contentHeight="contentHeight" />
+          <Account :contentHeight="contentHeight" ref="accountRef" />
         </a-tab-pane>
         <a-tab-pane key="2">
           <template #tab>
@@ -26,8 +26,8 @@
                 style="margin-right: 2px"
                 aria-hidden="true"
                 size="16"
-              />Discord账号</span
-            >
+              />Discord账号
+            </span>
           </template>
           <Discord :contentHeight="contentHeight" />
         </a-tab-pane>
@@ -52,7 +52,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, onMounted, computed, unref } from 'vue';
+  import { ref, onMounted, computed, unref, nextTick } from 'vue';
 
   import AccountGroup from './account_group.vue';
   import Account from './account.vue';

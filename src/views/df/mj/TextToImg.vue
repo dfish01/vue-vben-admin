@@ -29,6 +29,7 @@
         </template>
         <!-- <a-form-item name="command" style="margin-bottom: 1px; resize: none"> -->
         <a-textarea
+          ref="promptStep"
           style="width: 99%"
           :rows="10"
           v-model:value="textToImgForm.command"
@@ -41,7 +42,13 @@
         <!-- </a-form-item> -->
       </a-card>
       <!-- 垫图 B-->
-      <a-card size="small" :bordered="true" :bodyStyle="{ padding: '5px' }" class="ar-card2">
+      <a-card
+        size="small"
+        ref="blendStep"
+        :bordered="true"
+        :bodyStyle="{ padding: '5px' }"
+        class="ar-card2"
+      >
         <template #title>
           <div class="ar-card2-title">
             <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
@@ -93,7 +100,13 @@
       </a-card>
       <!-- 垫图 E-->
       <!-- 辅助工具 B-->
-      <a-card size="small" :bordered="true" :bodyStyle="{ padding: '5px' }" class="ar-card2">
+      <a-card
+        size="small"
+        :bordered="true"
+        ref="toolsStep"
+        :bodyStyle="{ padding: '5px' }"
+        class="ar-card2"
+      >
         <template #title>
           <div class="ar-card2-title">
             <span style="font-weight: bold">辅助工具</span>
@@ -118,8 +131,15 @@
         </a-row>
       </a-card>
       <!-- 辅助工具 E-->
+
       <!-- 任务标签 B-->
-      <a-card size="small" :bordered="true" :bodyStyle="{ padding: '5px' }" class="ar-card2">
+      <a-card
+        size="small"
+        ref="accountStep"
+        :bordered="true"
+        :bodyStyle="{ padding: '5px' }"
+        class="ar-card2"
+      >
         <template #title>
           <div class="ar-card2-title">
             <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
@@ -248,7 +268,13 @@
       <!-- 任务标签 E-->
 
       <!-- 提示词 B-->
-      <a-card size="small" :bordered="true" :bodyStyle="{ padding: '5px' }" class="ar-card2">
+      <a-card
+        size="small"
+        ref="attrStep"
+        :bordered="true"
+        :bodyStyle="{ padding: '5px' }"
+        class="ar-card2"
+      >
         <template #title>
           <div class="ar-card2-title">
             <span style="font-weight: bold">提示词属性</span>
@@ -350,6 +376,7 @@
         :bordered="true"
         :bodyStyle="{ padding: '5px', width: '100%' }"
         class="ar-card2"
+        ref="modeStep"
       >
         <template #title>
           <div class="ar-card2-title">
@@ -362,6 +389,7 @@
             </a-tooltip>
           </div>
         </template>
+
         <a-row :gutter="2">
           <div class="card-container" style="width: 100%">
             <a-tabs v-model:activeKey="activeKey" type="card" @change="chooseVersion">
@@ -1260,9 +1288,25 @@
       <img alt="example" style="width: 100%" :src="previewImage" />
     </a-modal>
   </a-form>
+
+  <a-tour
+    :open="textToImageStep.open"
+    :steps="textToImageStep.steps"
+    @close="textToImageStepOpen(false)"
+  />
 </template>
 <script lang="ts" setup>
-  import { ref, reactive, onMounted, computed, unref, watch, defineProps, toRefs } from 'vue';
+  import {
+    ref,
+    reactive,
+    onMounted,
+    computed,
+    unref,
+    watch,
+    defineProps,
+    toRefs,
+    nextTick,
+  } from 'vue';
   import type { Rule } from 'ant-design-vue/es/form';
   import { addDrawTask, aiPrompt, translate } from '/@/api/df/drawTask';
   import { genPromptList, genTagList } from '/@/api/df/dataCache';
@@ -1834,6 +1878,72 @@
       base64Images.value = base64Images.value.filter((img) => remainingFiles.includes(img.uid));
     }
   };
+
+  /************************漫游引导********************** */
+  const promptStep = ref(null);
+  const blendStep = ref(null);
+  const toolsStep = ref(null);
+  const accountStep = ref(null);
+  const attrStep = ref(null);
+  const modeStep = ref(null);
+
+  const textToImageStep = ref({
+    open: false,
+    current: 0,
+    steps: [
+      {
+        title: '关键词',
+        description:
+          '在这里输入你们想要的描述，如果写入--相关的参数，将以输入的为主，提示词属性不再生效！',
+        placement: 'right',
+        target: () => promptStep.value && promptStep.value.$el,
+      },
+      {
+        title: '垫图',
+        description: '你可以上传一些图片作为参考图，以保证出图的相似性。',
+        placement: 'right',
+        target: () => blendStep.value && blendStep.value.$el,
+      },
+      {
+        title: '辅助工具',
+        description: '内嵌了翻译、AI联想、3600+风格，无需再单独查找了，尽情使用吧。',
+        placement: 'right',
+        target: () => toolsStep.value && toolsStep.value.$el,
+      },
+      {
+        title: '运行账户',
+        description: '选择相关的执行账户、频道以及执行模式，这里的配置会使用到全局，包括收藏页面。',
+        placement: 'right',
+        target: () => accountStep.value && accountStep.value.$el,
+      },
+      {
+        title: '提示词属性',
+        description:
+          '这里时系统附带的属性，包括你选择的相关风格都会显示在这里。注意：想要使用这里的属性，请勿在Prompt内填写相关的--属性',
+        placement: 'right',
+        target: () => attrStep.value && attrStep.value.$el,
+      },
+      {
+        title: '模型选择',
+        description:
+          '这里留下了最流行的模型，比如v4之类的当前版本已经隐藏。niji是动漫风格，V5、V6写实效果优秀。大家多试试看！',
+        placement: 'right',
+        target: () => modeStep.value && modeStep.value.$el,
+      },
+      {
+        title: '提交任务',
+        description: '点击提交，即可开始你的第一次绘画！',
+        placement: 'right',
+        target: () => button.value && button.value.$el,
+      },
+    ],
+  });
+  const textToImageStepOpen = (val: boolean): void => {
+    textToImageStep.value.open = val;
+  };
+
+  // 导出此方法以便外部访问
+  defineExpose({ textToImageStepOpen });
 </script>
 <style scoped>
   /* 媒体查询 */

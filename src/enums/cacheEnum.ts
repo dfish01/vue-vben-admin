@@ -1,5 +1,9 @@
 //自定义HOST
 export const MJ_TASK_ACCOUNT_KEY = 'MJ_TASK_ACCOUNT__';
+//自定义账号引导
+export const MJ_ACCOUNT_TOUR = 'MJ_ACCOUNT_TOUR__';
+//自定义作图引导
+export const MJ_DRAW_TOUR = 'MJ_DRAW_TOUR__';
 
 export const CUSTOM_HOST_KEY = 'CUSTOM_HOST__';
 

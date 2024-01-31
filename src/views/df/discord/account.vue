@@ -41,15 +41,15 @@
                 </a-button-group>
                 <a-button-group>
                   <!-- <a-button @click="showDiscordForm">配置Discord账号</a-button> -->
-                  <a-button type="primary" @click="onAdd">新增账户</a-button>
-                  <a-button @click="onShowActive">授权激活</a-button>
+                  <a-button type="primary" @click="onAdd" ref="accountGroupStep">新增账户</a-button>
+                  <a-button @click="onShowActive" ref="activeStep">授权激活</a-button>
                   <!-- <a-button type="success" @click="openGoodsShop">授权市场</a-button> -->
 
                   <!-- <a-button type="success" @click="openAccountGroup"
                     >账号组管理{{ props.contentHeight }}</a-button
                   > -->
                 </a-button-group>
-                <a-button @click="goThirdShop(card)">
+                <a-button @click="goThirdShop(card)" ref="goodsStep">
                   <Icon
                     icon="simple-icons:shopee"
                     class="vel-icon icon"
@@ -1249,11 +1249,13 @@
       :visible="isDetailsModalVisible"
       @update-visible="updateModalVisible"
     />
+
+    <a-tour :open="accountStep.open" :steps="accountStep.steps" @close="accountStepOpen(false)" />
   </div>
 </template>
 
 <script lang="ts" setup>
-  import { ref, onMounted, computed, unref } from 'vue';
+  import { ref, onMounted, computed, unref, nextTick } from 'vue';
   import { Loading } from '/@/components/Loading';
   import Icon from '/@/components/Icon/Icon.vue';
   import {
@@ -1297,6 +1299,8 @@
   import { discordApi } from './discord';
   import { useGo } from '/@/hooks/web/usePage';
   import { func } from 'vue-types';
+  import { getCustomCache, setCustomCache } from '/@/utils/custom';
+  import { MJ_ACCOUNT_TOUR } from '/@/enums/cacheEnum';
 
   /** 页面高度计算开始 */
   const button = ref(null);
@@ -1381,9 +1385,11 @@
     }
   };
 
-  onMounted(() => {
-    onSearch();
+  onMounted(async () => {
+    await onSearch();
     queryDiscordList({});
+    await nextTick();
+    accountStepOpen(true);
   });
 
   // 主table 数据
@@ -1786,11 +1792,64 @@
   const goThirdShop = async (card) => {
     go('/goods/index');
   };
+  const closeModal = () => {
+    isDetailsModalVisible.value = false;
+  };
+
+  /************************漫游引导********************** */
+  const activeStep = ref(null);
+  const goodsStep = ref(null);
+  const discordStep = ref(null);
+  const accountGroupStep = ref(null);
+
+  const accountStep = ref({
+    open: false,
+    current: 0,
+    steps: [
+      {
+        title: '托管账号',
+        description:
+          '如果有自己的Discord账号，可以先获取Discord的token然后到Discord账号页签进行账号一键托管。',
+        placement: 'center',
+      },
+      {
+        title: '账号组',
+        description:
+          '托管Discord账号后即可点击这里进行创建Discord账号组，账号组是一个Discord的集合，用于突破Midjourney并发上限！',
+        placement: 'right',
+        target: () => accountGroupStep.value && accountGroupStep.value.$el,
+      },
+
+      {
+        title: '激活账号',
+        description:
+          '如果你从集市或者朋友那分享获取到了授权码，可以点这里进行激活。激活后你就可以使用该账号进行作图了~',
+        placement: 'right',
+        target: () => activeStep.value && activeStep.value.$el,
+      },
+      {
+        title: '商品集市',
+        description: '如果你没有自己的账号，并且需要进行作图。可以考虑到这里购买~',
+        placement: 'right',
+        target: () => goodsStep.value && goodsStep.value.$el,
+      },
+    ],
+  });
+  const accountStepOpen = (val: boolean): void => {
+    if (val === true) {
+      const needShow = getCustomCache(MJ_ACCOUNT_TOUR);
+      if (needShow && needShow === true) {
+        return;
+      }
+      setCustomCache(MJ_ACCOUNT_TOUR, true);
+    }
+
+    accountStep.value.open = val;
+  };
 
   defineExpose({
-    closeModal: () => {
-      isDetailsModalVisible.value = false;
-    },
+    closeModal,
+    accountStepOpen,
   });
 </script>
 

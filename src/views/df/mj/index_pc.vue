@@ -73,6 +73,7 @@
                 <a-button-group>
                   <a-tooltip title="🥤系统相关操作说明以及Midjouney教程文档库 ~">
                     <a-button
+                      ref="teachStep"
                       @click="openTutorialView"
                       style="padding: 5px"
                       v-if="systemInfoForm.tutorialInfo"
@@ -88,12 +89,15 @@
                     /></a-button>
                   </a-tooltip>
                   <a-tooltip title="🍧导入DISCORD记录，可以将discord的图片导入进来进行管理哦~">
-                    <a-button @click="showImportView" style="padding: 5px"
+                    <a-button
+                      @click="showImportView"
+                      style="padding: 5px"
+                      ref="importDiscordMessageStep"
                       ><SvgIcon name="discord"
                     /></a-button>
                   </a-tooltip>
                   <a-tooltip title="🥃工作空间管理，各空间数据隔离，后续可邀请好友加入你的空间~">
-                    <a-button @click="showWorkerSpace" style="padding: 0 5px"
+                    <a-button @click="showWorkerSpace" style="padding: 0 5px" ref="workSpaceStep"
                       ><SvgIcon name="space"
                     /></a-button>
                   </a-tooltip>
@@ -105,22 +109,23 @@
           <a-tabs class="edit-tab" v-model="activeTab">
             <a-tab-pane key="TextToImg">
               <template #tab>
-                <span>
+                <div>
                   <Icon
                     icon="streamline-emojis:robot-face-1"
                     style="margin: 0"
                     aria-hidden="true"
                   />
-                  <b>文生图</b>
-                </span>
+                  <b ref="textToImgStep">文生图</b>
+                </div>
               </template>
               <TextToImage
+                ref="textToImageRef"
                 style="text-align: center"
                 @startLoading="startLoadingHandler"
                 @endLoading="endLoadingHandler"
               />
             </a-tab-pane>
-            <a-tab-pane key="MixImage">
+            <a-tab-pane key="MixImage" ref="blendImgStep">
               <template #tab>
                 <span>
                   <Icon
@@ -133,16 +138,16 @@
               </template>
               <Blend @startLoading="startLoadingHandler" @endLoading="endLoadingHandler" />
             </a-tab-pane>
-            <a-tab-pane key="Describe">
+            <a-tab-pane key="Describe" ref="describeImgStep">
               <template #tab>
-                <span>
+                <div>
                   <Icon
                     icon="streamline-emojis:robot-face-3"
                     style="margin: 0"
                     aria-hidden="true"
                   />
                   <b>解析图</b>
-                </span>
+                </div>
               </template>
 
               <Describe @startLoading="startLoadingHandler" @endLoading="endLoadingHandler" />
@@ -445,6 +450,12 @@
         </a-row>
       </a-spin>
     </a-modal>
+    <a-tour
+      :open="indexStep.open"
+      :steps="indexStep.steps"
+      @change="changeStep"
+      @close="indexStepOpen(false)"
+    />
   </a-layout>
 </template>
 
@@ -453,7 +464,7 @@
   import Icon from '/@/components/Icon/Icon.vue';
   import { SvgIcon } from '/@/components/Icon';
   import Blend from './Blend.vue';
-  import { ref, onMounted, reactive } from 'vue';
+  import { ref, onMounted, reactive, nextTick } from 'vue';
   import TextToImage from './TextToImg.vue';
   import Describe from './Describe.vue';
   import { MarkdownViewer } from '/@/components/Markdown';
@@ -495,6 +506,8 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { discordApi } from './discord';
   import { spaceInfoApi, systemInfoApi } from './index';
+  import { getCustomCache, setCustomCache } from '/@/utils/custom';
+  import { MJ_DRAW_TOUR } from '/@/enums/cacheEnum';
 
   const {
     accountForm,
@@ -549,6 +562,7 @@
   const activeTab = ref(route.query.activeTab || 'TextToImageForm');
   const loadingRef = ref(false);
   const jobListRef = ref();
+  const textToImageRef = ref();
   const isDrawerVisible = ref(false);
   const isMobile = ref(window.innerWidth < 768);
   const showTabs = ref(true);
@@ -644,8 +658,92 @@
       accountForm.currentSpaceId = item.id;
       accountForm.currentSpaceTitle = item.title;
     }
-    loadSystemInfoConfig();
+    await loadSystemInfoConfig();
+    await nextTick();
+    indexStepOpen(true);
   });
+
+  /************************漫游引导********************** */
+  const importDiscordMessageStep = ref(null);
+  const teachStep = ref(null);
+  const workSpaceStep = ref(null);
+  const describeImgStep = ref(null);
+  const blendImgStep = ref(null);
+  const textToImgStep = ref(null);
+
+  const indexStep = ref({
+    open: false,
+    current: 0,
+    steps: [
+      {
+        title: '使用引导',
+        description: '欢迎使用Midjourney的国内代理系统！然我们一起看下基本操作吧~',
+        placement: 'center',
+      },
+      {
+        title: 'AI教程（正在收集中）',
+        description: '初学者的试着看看教程，包含系统的使用以及流行的AI相关知识。',
+        placement: 'right',
+        target: () => teachStep.value && teachStep.value.$el,
+      },
+      {
+        title: 'Discord导入',
+        description: '你可以选择导入指定频道的discord数据，无缝衔接使用。',
+        placement: 'right',
+        target: () => importDiscordMessageStep.value && importDiscordMessageStep.value.$el,
+      },
+      {
+        title: '工作空间',
+        description: '每个空间的任务相互独立，类似Discord的频道，方便你们管理图片。',
+        placement: 'right',
+        target: () => workSpaceStep.value && workSpaceStep.value.$el,
+      },
+      {
+        title: '文生图教程',
+        description: '是否继续文生图教程，以便快速开始你的第一张AI图片？',
+        placement: 'center',
+      },
+      // {
+      //   title: 'Midjourney-文生图',
+      //   description:
+      //     '文生图功能时目前最常用的了，你可以配合系统提供的翻译、AI、3600+风格以及全量的参数去快速的生成你想要的图！',
+      //   placement: 'right',
+      //   target: () => textToImgStep.value && textToImgStep.value.$el,
+      // },
+      // {
+      //   title: 'Midjourney-混图',
+      //   description: '这个用于多个图片之间的直接融合，不需要关键词。结果会超出你的预料，快试试吧。',
+      //   placement: 'right',
+      //   target: () => blendImgStep.value && blendImgStep.value.$el,
+      // },
+      // {
+      //   title: 'Midjourney-解析图',
+      //   description:
+      //     '如果你看到一张你喜欢的图片而不知道怎么描述时，可以试试使用它！解析出来的Prompt配合自动垫图，绝配！',
+      //   placement: 'right',
+      //   target: () => describeImgStep.value && describeImgStep.value.$el,
+      // },
+    ],
+  });
+
+  const indexStepOpen = (val: boolean): void => {
+    if (val === true) {
+      const needShow = getCustomCache(MJ_DRAW_TOUR);
+      if (needShow && needShow === true) {
+        return;
+      }
+      setCustomCache(MJ_DRAW_TOUR, true);
+    }
+
+    indexStep.value.open = val;
+  };
+
+  const changeStep = (current: number): void => {
+    if (current === 3) {
+      indexStep.value.open = false;
+      textToImageRef.value.textToImageStepOpen(true);
+    }
+  };
 </script>
 
 <style scoped>
