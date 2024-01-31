@@ -31,7 +31,7 @@
           </template>
           <Discord :contentHeight="contentHeight" />
         </a-tab-pane>
-        <a-tab-pane key="3">
+        <a-tab-pane key="3" disabled>
           <template #tab>
             <span>
               <Icon
@@ -41,7 +41,7 @@
                 aria-hidden="true"
                 size="16"
               />
-              ChatGpt账号</span
+              ChatGpt账号（已关闭）</span
             >
           </template>
           <Chatgpt :contentHeight="contentHeight" />

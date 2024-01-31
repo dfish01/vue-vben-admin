@@ -235,17 +235,67 @@
       v-model:open="discordSettingForm.viewFlag"
       title="账号配置"
       ok-text="立即更新"
-      @ok="doUpdateServerZone"
+      @ok="doUpdateConfig"
       :confirmLoading="discordSettingForm.loading"
     >
       <a-card>
         <a-spin :spinning="discordSettingForm.loading" :tip="discordSettingForm.loadingTitle">
-          <a-select
-            style="width: 100%; height: 32px"
-            placeholder="请选择要绑定的服务器~"
-            v-model:value="discordSettingForm.bindingServerName"
-            :options="discordSettingForm.bindingServerNameOptions"
-          />
+          <a-form :model="discordSettingForm" layout="vertical" ref="discordSettingFormRef">
+            <a-row gutter="24">
+              <a-col :span="24">
+                <a-form-item
+                  :rules="[
+                    {
+                      required: true,
+                      message: '绑定的服务器是必填项',
+                    },
+                  ]"
+                  name="bindingServerName"
+                >
+                  <template #label>
+                    <span
+                      ><Icon
+                        icon="file-icons:moment-timezone"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                      />绑定的服务器
+                    </span>
+                  </template>
+                  <a-select
+                    style="width: 100%; height: 32px"
+                    placeholder="请选择要绑定的服务器~"
+                    v-model:value="discordSettingForm.bindingServerName"
+                    :options="discordSettingForm.bindingServerNameOptions"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :span="24">
+                <a-form-item
+                  :rules="[
+                    {
+                      required: true,
+                      message: '最大并发线程数',
+                    },
+                  ]"
+                  name="maxConcurrent"
+                >
+                  <template #label>
+                    <span
+                      ><Icon
+                        icon="ic:round-account-tree"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                      />输入最大并发线程数
+                    </span>
+                  </template>
+                  <a-input
+                    v-model:value="discordSettingForm.maxConcurrent"
+                    placeholder="输入最大并发线程数"
+                  />
+                </a-form-item>
+              </a-col>
+            </a-row>
+          </a-form>
         </a-spin>
       </a-card>
     </a-modal>
@@ -260,7 +310,7 @@
     discordInfo,
     getValidResult,
     getZoneList,
-    updateServerZone,
+    updateConfig,
     resetConUse,
   } from '/@/api/df/discord';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -288,16 +338,18 @@
 
     discordId: null,
     bindingServerName: null,
+    maxConcurrent: 3,
     bindingServerNameOptions: [],
   });
   const showInfoSetting = async (discord) => {
     discordSettingForm.value.discordId = discord.id;
     discordSettingForm.value.bindingServerName = discord.bindingServerName;
     discordSettingForm.value.viewFlag = true;
+    discordSettingForm.value.maxConcurrent = discord.maxConcurrent;
   };
 
   const initBindServerNameList = async () => {
-    const response = await getZoneList();
+    const response = await getZoneList({});
 
     // 使用 map 方法转换数组
     const transformedList = response.map((item) => ({
@@ -308,19 +360,28 @@
     const finalList = [...transformedList];
     discordSettingForm.value.bindingServerNameOptions = finalList;
   };
-  const doUpdateServerZone = async () => {
-    discordSettingForm.value.loading = true;
-    console.log('doUpdateServerZone');
-    try {
-      await updateServerZone({
-        discordId: discordSettingForm.value.discordId,
-        bindingServerName: discordSettingForm.value.bindingServerName,
+
+  const discordSettingFormRef = ref(null);
+  const doUpdateConfig = async () => {
+    discordSettingFormRef.value
+      .validate()
+      .then(async () => {
+        try {
+          discordSettingForm.value.loading = true;
+          await updateConfig({
+            discordId: discordSettingForm.value.discordId,
+            bindingServerName: discordSettingForm.value.bindingServerName,
+            maxConcurrent: discordSettingForm.value.maxConcurrent,
+          });
+          discordSettingForm.value.viewFlag = false;
+          onSearch();
+        } finally {
+          discordSettingForm.value.loading = false;
+        }
+      })
+      .catch((error) => {
+        console.log('error', error);
       });
-      discordSettingForm.value.viewFlag = false;
-      onSearch();
-    } finally {
-      discordSettingForm.value.loading = false;
-    }
   };
 
   //账号重置

@@ -494,9 +494,7 @@
               <a-tooltip title="删除">
                 <a-popconfirm
                   :title="
-                    card.secState === 'SUBMITTED' ||
-                    card.secState === 'IN_PROGRESS' ||
-                    card.secState === 'SUCCESS'
+                    card.secState === 'SUBMITTED' || card.secState === 'IN_PROGRESS'
                       ? '是否确认移除任务？注意：该状态不会退还资源！请等待任务完成或者自动超时失败退还资源！'
                       : '是否确认移除任务？'
                   "
@@ -898,7 +896,11 @@
                         card.buttonMap['Vary (Strong)'] ||
                         card.buttonMap['Vary (Subtle)'] ||
                         card.buttonMap['Upscale (2x)'] ||
-                        card.buttonMap['Upscale (4x)']
+                        card.buttonMap['Upscale (4x)'] ||
+                        card.buttonMap['Redo Upscale (Subtle)'] ||
+                        card.buttonMap['Redo Upscale (Creative)'] ||
+                        card.buttonMap['Upscale (Subtle)'] ||
+                        card.buttonMap['Upscale (Creative)']
                       "
                     >
                       <template #overlay>
@@ -948,49 +950,11 @@
                             v-if="card.buttonMap['Upscale (4x)']"
                             @click="($event) => handleU(card, 'Upscale (4x)', 'upscale4')"
                             ><Icon
-                              icon="icon-park:double-up"
+                              icon="ph:caret-double-up-bold"
                               size="14px"
                               style="margin: 0"
                             />4倍放大</a-menu-item
                           >
-                        </a-menu>
-                      </template>
-                      <a-button size="small" class="card-button">
-                        <Icon icon="ph:magic-wand-fill" size="14px" style="margin: 0" />
-                        <span style="margin: 0">变化</span>
-                        <DownOutlined />
-                      </a-button>
-                    </a-dropdown>
-                    <a-dropdown
-                      v-if="
-                        card.buttonMap['Redo Upscale (4x)'] ||
-                        card.buttonMap['Redo Upscale (2x)'] ||
-                        card.buttonMap['Redo Upscale (Subtle)'] ||
-                        card.buttonMap['Redo Upscale (Creative)'] ||
-                        card.buttonMap['Upscale (Subtle)'] ||
-                        card.buttonMap['Upscale (Creative)']
-                      "
-                    >
-                      <template #overlay>
-                        <a-menu>
-                          <a-menu-item
-                            key="Redo Upscale (2x)"
-                            v-if="card.buttonMap['Redo Upscale (2x)']"
-                            @click="($event) => handleU(card, 'Redo Upscale (2x)', 'upscale2')"
-                            ><Icon
-                              icon="ph:caret-up-bold"
-                              size="14px"
-                              style="margin: 0"
-                            />2倍</a-menu-item
-                          >
-                          <a-menu-item
-                            key="Redo Upscale (4x)"
-                            v-if="card.buttonMap['Redo Upscale (4x)']"
-                            @click="($event) => handleU(card, 'Redo Upscale (4x)', 'upscale4')"
-                            ><Icon icon="icon-park:double-up" size="14px" style="margin: 0" />
-                            4倍</a-menu-item
-                          >
-
                           <a-menu-item
                             key="Upscale (Creative)"
                             v-if="card.buttonMap['Upscale (Creative)']"
@@ -1034,6 +998,38 @@
                               style="margin: 0"
                             />细致 (Subtle)
                           </a-menu-item>
+                        </a-menu>
+                      </template>
+                      <a-button size="small" class="card-button">
+                        <Icon icon="ph:magic-wand-fill" size="14px" style="margin: 0" />
+                        <span style="margin: 0">变化</span>
+                        <DownOutlined />
+                      </a-button>
+                    </a-dropdown>
+                    <a-dropdown
+                      v-if="
+                        card.buttonMap['Redo Upscale (4x)'] || card.buttonMap['Redo Upscale (2x)']
+                      "
+                    >
+                      <template #overlay>
+                        <a-menu>
+                          <a-menu-item
+                            key="Redo Upscale (2x)"
+                            v-if="card.buttonMap['Redo Upscale (2x)']"
+                            @click="($event) => handleU(card, 'Redo Upscale (2x)', 'upscale2')"
+                            ><Icon
+                              icon="ph:caret-up-bold"
+                              size="14px"
+                              style="margin: 0"
+                            />2倍</a-menu-item
+                          >
+                          <a-menu-item
+                            key="Redo Upscale (4x)"
+                            v-if="card.buttonMap['Redo Upscale (4x)']"
+                            @click="($event) => handleU(card, 'Redo Upscale (4x)', 'upscale4')"
+                            ><Icon icon="ph:caret-double-up-bold" size="14px" style="margin: 0" />
+                            4倍</a-menu-item
+                          >
                         </a-menu>
                       </template>
                       <a-button size="small" class="card-button">
@@ -2333,9 +2329,9 @@
       grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
       flex: 1;
       align-content: start;
-      padding: 5px;
+      padding: 3px;
       overflow: auto;
-      gap: 7px;
+      gap: 1px;
     }
 
     .card {
@@ -2366,9 +2362,9 @@
     grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
     flex: 1;
     align-content: start;
-    padding: 5px;
+    padding: 1px;
     overflow: auto;
-    gap: 7px;
+    gap: 3px;
   }
 
   .card {

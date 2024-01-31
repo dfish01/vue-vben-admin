@@ -722,7 +722,7 @@
                             v-if="card.buttonMap['Upscale (4x)']"
                             @click="($event) => handleU(card, 'Upscale (4x)', 'upscale4')"
                             ><Icon
-                              icon="icon-park:double-up"
+                              icon="ph:caret-double-up-bold"
                               size="14px"
                               style="margin: 0"
                             />4倍放大</a-menu-item
@@ -761,7 +761,7 @@
                             key="Redo Upscale (4x)"
                             v-if="card.buttonMap['Redo Upscale (4x)']"
                             @click="($event) => handleU(card, 'Redo Upscale (4x)', 'upscale4')"
-                            ><Icon icon="icon-park:double-up" size="14px" style="margin: 0" />
+                            ><Icon icon="ph:caret-double-up-bold" size="14px" style="margin: 0" />
                             4倍</a-menu-item
                           >
 
@@ -1946,7 +1946,6 @@
 
   //添加空间卡片
   const addSpaceCard = async () => {
-    console.log(11123);
     userSpaceTaskForm.value.loading = true;
     try {
       await userSpaceTaskFormRef.value.validate();

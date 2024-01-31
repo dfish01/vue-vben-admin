@@ -13,7 +13,7 @@ enum Api {
   ChannelList = '/open/discord/channelList',
 
   GetZoneList = '/open/discord/getZoneList',
-  UpdateServerZone = '/open/discord/updateServerZone',
+  UpdateConfig = '/open/discord/updateConfig',
 
   ResetConUse = '/open/discord/resetConUse',
 }
@@ -66,13 +66,13 @@ export function getZoneList(params: {}, mode: ErrorMessageMode = 'message') {
  * @param mode
  * @returns
  */
-export function updateServerZone(
+export function updateConfig(
   params: { discordId: string; bindingServerName: string },
   mode: ErrorMessageMode = 'message',
 ) {
   return defHttp.post(
     {
-      url: Api.UpdateServerZone,
+      url: Api.UpdateConfig,
       params,
       timeout: 30000,
     },

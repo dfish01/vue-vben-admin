@@ -100,6 +100,16 @@
           </a-select>
         </a-col>
       </a-row>
+      <a-row style="margin-top: 10px">
+        <a-col span="24">
+          <a-card>
+            <span style="font-size: 14px">
+              <Icon icon="streamline-emojis:bell" color="red" />
+              当上传图片时，请限制数量在5张以内，并请注意不要上传超过5M的图片。!
+            </span>
+          </a-card>
+        </a-col>
+      </a-row>
     </div>
     <div>
       <a-button

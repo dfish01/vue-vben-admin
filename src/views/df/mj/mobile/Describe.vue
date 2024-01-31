@@ -84,6 +84,16 @@
           </a-select>
         </a-col>
       </a-row>
+      <a-row style="margin-top: 10px">
+        <a-col span="24">
+          <a-card>
+            <span style="font-size: 14px">
+              <Icon icon="streamline-emojis:bell" color="red" />
+              该功能可以解析相关图片并生成提示文本。此外，请确保上传的图片大小不要超过5MB。
+            </span>
+          </a-card>
+        </a-col>
+      </a-row>
     </div>
     <div>
       <a-button
