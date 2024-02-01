@@ -7,8 +7,33 @@ enum Api {
   ListCategory = '/open/drawingSample/listCategory',
   QueryDrawingSample = '/open/drawingSample/queryDrawingSample',
   AddDrawingSample = '/open/drawingSample/addDrawingSample',
+  MoveDrawingSample = '/open/drawingSample/moveDrawingSample',
 
   Delete = '/open/drawingSample/delete',
+}
+
+/**
+ * 移动案例教程
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function moveDrawingSample(
+  params: {
+    id: string;
+    categoryCodes: string[];
+  },
+  mode: ErrorMessageMode = 'message',
+) {
+  return defHttp.post(
+    {
+      url: Api.MoveDrawingSample,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
 }
 
 /**

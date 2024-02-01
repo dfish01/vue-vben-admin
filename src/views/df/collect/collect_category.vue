@@ -54,6 +54,9 @@
                       置顶
                     </a-menu-item>
                     <a-menu-item @click="() => showAddView(categoryItem)"> 新增子分类 </a-menu-item>
+                    <a-menu-item @click="() => openCollectShareView(categoryItem)">
+                      分享收藏
+                    </a-menu-item>
                   </a-menu>
                 </template>
               </a-dropdown>
@@ -137,6 +140,136 @@
         </a-form>
       </a-card>
     </a-modal>
+
+    const collectShare = ref({ viewFlag: false, loading: false, collectCategoryId: null, : 'N', :
+    null, promptView: false, : null, });
+    <!-- 分享收藏 -->
+    <a-modal
+      v-model:open="collectShareFrom.viewFlag"
+      title="收藏分享"
+      ok-text="提交"
+      @ok="doSaveOrUpdateShare"
+      :confirmLoading="collectShareFrom.loading"
+    >
+      <a-card>
+        <a-form :model="collectShareFrom" layout="vertical" ref="collectShareFromRef">
+          <a-row gutter="24">
+            <a-col :span="24">
+              <a-form-item
+                :rules="[
+                  {
+                    required: false,
+                    message: '分类名称',
+                  },
+                ]"
+                name="collectCategoryTitle"
+              >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="ic:sharp-account-box"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />账号名（账号多的时候方便记）
+                  </span>
+                </template>
+                <a-input
+                  disabled
+                  v-model:value="collectShareFrom.collectCategoryTitle"
+                  placeholder="输入分类名"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                :rules="[
+                  {
+                    required: false,
+                    message: '请选择是否显示Prompt',
+                  },
+                ]"
+                name="promptChargeFlag"
+              >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="lucide:view"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />是否显示Prompt
+                  </span>
+                </template>
+
+                <a-select
+                  style="width: 100%"
+                  v-model:value="collectShareFrom.promptChargeFlag"
+                  placeholder="是否显示Prompt"
+                >
+                  <a-select-option value="Y">显示Prompt</a-select-option>
+                  <a-select-option value="N">不显示Prompt</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                :rules="[
+                  {
+                    required: false,
+                    message: '查看价格',
+                  },
+                ]"
+                name="price"
+              >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="solar:tag-price-bold"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />查看价格（配置密码时，允许用户支付获取密码）
+                  </span>
+                </template>
+                <a-input-number
+                  v-model:value="collectCategoryViewForm.price"
+                  style="width: 100%"
+                  :min="0"
+                  :max="2"
+                  placeholder="输入查看价格"
+                  :step="0.01"
+                  string-mode
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                :rules="[
+                  {
+                    required: false,
+                    message: '访问密码',
+                  },
+                ]"
+                name="password"
+              >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="teenyicons:password-solid"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />访问密码（为空则可允许直接访问）
+                  </span>
+                </template>
+                <a-input
+                  disabled
+                  v-model:value="collectShareFrom.password"
+                  placeholder="输入访问密码"
+                />
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
+      </a-card>
+    </a-modal>
   </div>
 </template>
 
@@ -160,6 +293,12 @@
   import { drawCollectCategoryApi } from '../mj/accountInfo';
   import { collectCategoryApi } from './category';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
+  import {
+    saveOrUpdate,
+    showShareTaskList,
+    showShareView,
+    collectShareInfo,
+  } from '/@/api/df/drawCollectShare';
 
   const {
     categoryDataForm,
@@ -252,6 +391,42 @@
   onMounted(() => {
     init();
   });
+
+  /***********************************收藏分享******************************* */
+  const collectShareFrom = ref({
+    viewFlag: false,
+    loading: false,
+    collectCategoryTitle: null,
+    collectCategoryId: null,
+    promptChargeFlag: 'N',
+    price: null,
+    promptView: false,
+    password: null,
+  });
+  const openCollectShareView = (item) => {
+    collectShareFrom.value.viewFlag = true;
+    collectShareFrom.value.loading = true;
+    try {
+      const resp = collectShareInfo({ id: item.id });
+      collectShareFrom.value.promptChargeFlag = resp ? resp.promptChargeFlag : 'N';
+      collectShareFrom.value.price = resp ? resp.price : null;
+      collectShareFrom.value.promptView = resp ? resp.promptView : false;
+      collectShareFrom.value.password = resp ? resp.password : null;
+    } finally {
+      collectShareFrom.value.loading = false;
+    }
+    collectShareFrom.value.collectCategoryId = item.title;
+    collectShareFrom.value.collectCategoryId = item.id;
+  };
+
+  const doSaveOrUpdateShare = () => {
+    collectShareFrom.value.loading = true;
+    try {
+      saveOrUpdate(collectShareFrom.value);
+    } finally {
+      collectShareFrom.value.loading = false;
+    }
+  };
 </script>
 
 <style scoped>

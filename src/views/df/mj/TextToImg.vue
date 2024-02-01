@@ -1912,7 +1912,8 @@
       },
       {
         title: '运行账户',
-        description: '选择相关的执行账户、频道以及执行模式，这里的配置会使用到全局，包括收藏页面。',
+        description:
+          '选择相关的执行账户、频道以及执行模式，这里的配置会使用到全局，包括收藏页面。如果未配置账户，请到账户菜单查看哦~',
         placement: 'right',
         target: () => accountStep.value && accountStep.value.$el,
       },
@@ -1929,6 +1930,11 @@
           '这里留下了最流行的模型，比如v4之类的当前版本已经隐藏。niji是动漫风格，V5、V6写实效果优秀。大家多试试看！',
         placement: 'right',
         target: () => modeStep.value && modeStep.value.$el,
+      },
+      {
+        title: '其他属性',
+        description: '还有一些其他属性，大家自己看描述尝试下吧！',
+        placement: 'center',
       },
       {
         title: '提交任务',

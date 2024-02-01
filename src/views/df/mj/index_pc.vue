@@ -727,13 +727,13 @@
   });
 
   const indexStepOpen = (val: boolean): void => {
-    if (val === true) {
-      const needShow = getCustomCache(MJ_DRAW_TOUR);
-      if (needShow && needShow === true) {
-        return;
-      }
-      setCustomCache(MJ_DRAW_TOUR, true);
-    }
+    // if (val === true) {
+    //   const needShow = getCustomCache(MJ_DRAW_TOUR);
+    //   if (needShow && needShow === true) {
+    //     return;
+    //   }
+    //   setCustomCache(MJ_DRAW_TOUR, true);
+    // }
 
     indexStep.value.open = val;
   };

@@ -4,6 +4,8 @@ export const MJ_TASK_ACCOUNT_KEY = 'MJ_TASK_ACCOUNT__';
 export const MJ_ACCOUNT_TOUR = 'MJ_ACCOUNT_TOUR__';
 //自定义作图引导
 export const MJ_DRAW_TOUR = 'MJ_DRAW_TOUR__';
+//自定义作图手机引导
+export const MJ_DRAW_MOBILE_TOUR = 'MJ_DRAW_MOBILE_TOUR__';
 
 export const CUSTOM_HOST_KEY = 'CUSTOM_HOST__';
 

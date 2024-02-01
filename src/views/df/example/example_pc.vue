@@ -118,6 +118,7 @@
                   "
                 >
                   <a-button
+                    v-if="!hasPermission('9999')"
                     @click.stop="copyText(item.prompt)"
                     size="small"
                     style="background-color: #5ba585; color: #fff"
@@ -128,6 +129,14 @@
                     style="background-color: #ce6872; color: white"
                     size="small"
                     >同款作画</a-button
+                  >
+
+                  <a-button
+                    v-if="hasPermission('9999')"
+                    @click.stop="showSampleView(item)"
+                    style="background-color: #ce6872; color: white"
+                    size="small"
+                    >分类</a-button
                   >
                   <a-button
                     v-if="hasPermission('9999')"
@@ -165,6 +174,37 @@
         </div>
       </a-spin>
     </a-modal>
+
+    <!-- 案例添加 -->
+    <a-modal
+      v-model:open="showExampleViewFlag"
+      title="🧉添加到官方案例"
+      :bodyStyle="{ padding: '7px 20px', 'align-items': 'center' }"
+    >
+      <template #footer>
+        <a-button key="submit" type="primary" @click="addSample()" :loading="exampleForm.loading"
+          >添加到官方案例</a-button
+        >
+      </template>
+
+      <Loading :loading="exampleForm.loading" :absolute="true" tip="数据发送中..." />
+      <a-card
+        :bordered="false"
+        :bodyStyle="{ padding: '1px 1px 1px 1px', width: '100%', 'align-items': 'center' }"
+      >
+        <a-row :gutter="[0, 2]" type="flex">
+          <a-col flex="auto">
+            <a-select
+              v-model:value="exampleForm.categoryCodes"
+              mode="multiple"
+              style="width: 100%"
+              placeholder="请选择分类"
+              :options="exampleForm.drawingSampleCategory"
+            />
+          </a-col>
+        </a-row>
+      </a-card>
+    </a-modal>
   </a-layout>
 </template>
 
@@ -189,11 +229,12 @@
   import loading from '/@/assets/images/loading.svg';
   import error from '/@/assets/images/lazy-error.svg';
   import { getRecentNotice } from '/@/api/df/utils';
-
+  import { accountInfoApi } from '../mj/accountInfo';
+  import { exampleApi } from '../mj/jobList.pageQuery';
   import {
     listCategory,
     queryDrawingSample,
-    addDrawingSample,
+    moveDrawingSample,
     delExample,
   } from '/@/api/df/drawingSample';
 
@@ -202,6 +243,11 @@
 
   onMounted(async () => {
     categorySetting.value.categories = await initDrawingSampleCategory();
+    //多选类目
+    exampleForm.value.drawingSampleCategory = categorySetting.value.categories.map((item) => ({
+      label: item.name,
+      value: item.code,
+    }));
     await handleLoadMore(500, true);
     await handleLoadMore(500, false);
     await handleLoadMore(500, false);
@@ -500,6 +546,34 @@
   function imageLoad(url: string) {
     // console.log(`${url}: 加载完成`)
   }
+
+  /*********************** 案例相关 ********************* */
+  const exampleForm = ref({
+    drawingSampleCategory: [],
+    categoryCodes: [],
+    drawTaskId: null,
+    viewFlag: false,
+    loading: false,
+  });
+  const showExampleViewFlag = ref(false);
+  const addSample = async () => {
+    exampleForm.value.loading = true;
+    console.log(11231);
+    try {
+      await moveDrawingSample({
+        id: exampleForm.value.drawTaskId,
+        categoryCodes: exampleForm.value.categoryCodes,
+      });
+      message.success('添加成功！优质案例可以找客服领取奖励哦！');
+      showExampleViewFlag.value = false;
+    } finally {
+      exampleForm.value.loading = false;
+    }
+  };
+  const showSampleView = (card) => {
+    exampleForm.value.drawTaskId = card.id;
+    showExampleViewFlag.value = true;
+  };
 </script>
 
 <style scoped>

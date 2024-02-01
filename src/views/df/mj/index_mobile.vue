@@ -31,7 +31,7 @@
                   <div style="display: flex; gap: 5px">
                     <a-button-group>
                       <a-tooltip title="任务列表">
-                        <a-button @click="showJobList" style="padding: 5px">
+                        <a-button @click="showJobList" style="padding: 5px" ref="jobLstStep">
                           <SvgIcon name="task-list" size="20" />
                         </a-button>
                       </a-tooltip>
@@ -54,7 +54,7 @@
                       </a-tooltip>
 
                       <a-tooltip title="工作空间管理">
-                        <a-button @click="showWorkerSpace" style="padding: 5px">
+                        <a-button @click="showWorkerSpace" style="padding: 5px" ref="workspaceStep">
                           <SvgIcon name="space" size="20" />
                         </a-button>
                       </a-tooltip>
@@ -67,6 +67,7 @@
             <a-tabs class="edit-tab" v-model="activeTab">
               <a-tab-pane key="TextToImg" tab="🌕文生图">
                 <TextToImage
+                  ref="textToImageRef"
                   style="text-align: center"
                   @startLoading="startLoadingHandler"
                   @endLoading="endLoadingHandler"
@@ -242,12 +243,20 @@
         </a-row>
       </a-spin>
     </a-modal>
+    <div class="custom-tour">
+      <a-tour
+        :open="indexStep.open"
+        :steps="indexStep.steps"
+        @change="changeStep"
+        @close="indexStepOpen(false)"
+      />
+    </div>
   </a-layout>
 </template>
 
 <script lang="ts" setup>
   import Blend from './mobile/Blend.vue';
-  import { ref, onMounted, reactive, nextTick, computed } from 'vue';
+  import { ref, onMounted, reactive, nextTick, computed, provide } from 'vue';
   import TextToImage from './mobile/TextToImg.vue';
   import Icon from '/@/components/Icon/Icon.vue';
   import { SvgIcon } from '/@/components/Icon';
@@ -273,6 +282,8 @@
   import type { NotificationPlacement } from 'ant-design-vue';
   import { accountInfoApi } from './accountInfo';
   import { spaceInfoApi, systemInfoApi } from './index';
+  import { getCustomCache, setCustomCache } from '/@/utils/custom';
+  import { MJ_DRAW_MOBILE_TOUR } from '/@/enums/cacheEnum';
 
   const {
     accountForm,
@@ -347,13 +358,62 @@
       accountForm.currentSpaceId = item.id;
       accountForm.currentSpaceTitle = item.title;
     }
-    loadSystemInfoConfig();
+    await loadSystemInfoConfig();
+    //引导
+    await nextTick();
+    indexStepOpen(true);
   });
 
   const showJobList = () => {
     // go('/jobList/index/' + currentSpace.id + '/' + currentSpace.title);
     // go('/jobList/index?spaceId=' + currentSpace.id + '&spaceTitle=' + currentSpace.title);
     go('/jobList/index');
+  };
+
+  /************************漫游引导********************** */
+  const jobLstStep = ref(null);
+  const workspaceStep = ref(null);
+
+  const indexStep = ref({
+    open: false,
+    current: 0,
+    steps: [
+      {
+        title: '工作空间',
+        description: '每个空间的任务相互独立，类似Discord的频道，方便你们管理图片。',
+        placement: 'bottom',
+        target: () => workspaceStep.value && workspaceStep.value.$el,
+      },
+      {
+        title: '任务列表',
+        description: '提交后的空间任务都在这里哦，如果点进去没发现任务请确认是否选对了任务空间',
+        placement: 'bottom',
+        target: () => jobLstStep.value && jobLstStep.value.$el,
+      },
+      {
+        title: '任务列表',
+        description: '提交后的空间任务都在这里哦，如果点进去没发现任务请确认是否选对了任务空间',
+        placement: 'bottom',
+      },
+    ],
+  });
+
+  const textToImageRef = ref();
+  const indexStepOpen = (val: boolean): void => {
+    // if (val === true) {
+    //   const needShow = getCustomCache(MJ_DRAW_MOBILE_TOUR);
+    //   if (needShow && needShow === true) {
+    //     return;
+    //   }
+    //   setCustomCache(MJ_DRAW_MOBILE_TOUR, true);
+    // }
+    indexStep.value.open = val;
+  };
+  const changeStep = (current: number): void => {
+    if (current === 2) {
+      indexStep.value.open = false;
+      textToImageRef.value.textToImageStepOpen(true);
+    }
   };
 </script>
 
@@ -404,5 +464,13 @@
 
   .no-padding-header >>> .ant-card-head-title {
     padding: 0 !important;
+  }
+
+  .custom-tour >>> .ant-tour {
+    width: 100% !important;
+  }
+
+  ::v-deep(.ant-tour) {
+    width: 100% !important;
   }
 </style>

@@ -46,7 +46,12 @@ import { useContentHeight } from '/@/hooks/web/useContentHeight';
 import { addTag, removeTaskTag } from '/@/api/df/drawTaskTag';
 import { useAppInject } from '/@/hooks/web/useAppInject';
 import { useUserStore as useUserStoreApi } from '/@/store/modules/user';
-import { listCategory, queryDrawingSample, addDrawingSample } from '/@/api/df/drawingSample';
+import {
+  listCategory,
+  queryDrawingSample,
+  addDrawingSample,
+  moveDrawingSample,
+} from '/@/api/df/drawingSample';
 import { splitPrompt } from './tools';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { accountInfoApi } from './accountInfo';
@@ -89,9 +94,15 @@ export function exampleApi() {
     accountViewForm.drawingSampleCategory = await listCategory({});
   };
 
+  const doMoveDrawingSample = async (params) => {
+    await moveDrawingSample(params);
+    accountViewForm.drawingSampleCategory = await listCategory({});
+  };
+
   const api = {
     drawingSampleCategory,
     doAddDrawingSample,
+    doMoveDrawingSample,
   };
   exampleApiInstance = api;
   return api;
