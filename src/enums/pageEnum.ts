@@ -9,5 +9,7 @@ export enum PageEnum {
   // error log page path
   ERROR_LOG_PAGE = '/error-log/list',
   VERIFY_PAGE = '/verify',
+
+  COLLECT_SHARE_PAGE = '/collectShare',
 }
 export const PageWrapperFixedHeightKey = 'PageWrapperFixedHeight';

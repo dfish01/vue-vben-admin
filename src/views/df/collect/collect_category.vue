@@ -100,6 +100,9 @@
                         </a-popconfirm>
 
                         <a-menu-item @click="() => modifyView(childItem)"> 修改分类 </a-menu-item>
+                        <a-menu-item @click="() => openCollectShareView(childItem)">
+                          分享收藏
+                        </a-menu-item>
                         <!-- <a-menu-item @click="() => showAddView(childItem)">
                           新增子分类
                         </a-menu-item> -->
@@ -170,7 +173,7 @@
                       icon="ic:sharp-account-box"
                       class="vel-icon icon"
                       aria-hidden="true"
-                    />账号名（账号多的时候方便记）
+                    />要分享的分类名
                   </span>
                 </template>
                 <a-input
@@ -184,7 +187,7 @@
               <a-form-item
                 :rules="[
                   {
-                    required: false,
+                    required: true,
                     message: '请选择是否显示Prompt',
                   },
                 ]"
@@ -210,7 +213,33 @@
                 </a-select>
               </a-form-item>
             </a-col>
+
             <a-col :span="24">
+              <a-form-item
+                :rules="[
+                  {
+                    required: false,
+                    message: '访问密码',
+                  },
+                ]"
+                name="password"
+              >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="teenyicons:password-solid"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />访问密码（为空则可允许直接访问）
+                  </span>
+                </template>
+                <a-input v-model:value="collectShareFrom.password" placeholder="输入访问密码" />
+              </a-form-item>
+            </a-col>
+            <a-col
+              :span="24"
+              v-if="collectShareFrom.password && collectShareFrom.password.length > 0"
+            >
               <a-form-item
                 :rules="[
                   {
@@ -232,7 +261,7 @@
                 <a-input-number
                   v-model:value="collectCategoryViewForm.price"
                   style="width: 100%"
-                  :min="0"
+                  :min="1"
                   :max="2"
                   placeholder="输入查看价格"
                   :step="0.01"
@@ -240,32 +269,24 @@
                 />
               </a-form-item>
             </a-col>
-            <a-col :span="24">
-              <a-form-item
-                :rules="[
-                  {
-                    required: false,
-                    message: '访问密码',
-                  },
-                ]"
-                name="password"
-              >
-                <template #label>
-                  <span
-                    ><Icon
-                      icon="teenyicons:password-solid"
-                      class="vel-icon icon"
-                      aria-hidden="true"
-                    />访问密码（为空则可允许直接访问）
-                  </span>
-                </template>
-                <a-input
-                  disabled
-                  v-model:value="collectShareFrom.password"
-                  placeholder="输入访问密码"
-                />
-              </a-form-item>
-            </a-col>
+            <a-card title="分享链接" style="width: 100%">
+              <a-row>
+                <a-col :span="24">
+                  <a-input-group compact :bordered="false" style="width: 100%">
+                    <a-input
+                      v-model:value="collectShareFrom.linkUrl"
+                      style="width: calc(100% - 40px)"
+                      disabled
+                    />
+                    <a-button @click="copyText(collectShareFrom.linkUrl)" style="width: 40px">
+                      <template #icon>
+                        <Icon icon="solar:copy-bold" class="vel-icon icon" aria-hidden="true" />
+                      </template>
+                    </a-button>
+                  </a-input-group>
+                </a-col>
+              </a-row>
+            </a-card>
           </a-row>
         </a-form>
       </a-card>
@@ -293,6 +314,7 @@
   import { drawCollectCategoryApi } from '../mj/accountInfo';
   import { collectCategoryApi } from './category';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
+  import { copyText } from '/@/utils/copyTextToClipboard';
   import {
     saveOrUpdate,
     showShareTaskList,
@@ -402,12 +424,15 @@
     price: null,
     promptView: false,
     password: null,
+    linkUrl: null,
   });
-  const openCollectShareView = (item) => {
+  const openCollectShareView = async (item) => {
     collectShareFrom.value.viewFlag = true;
     collectShareFrom.value.loading = true;
     try {
-      const resp = collectShareInfo({ id: item.id });
+      const resp = await collectShareInfo({ id: item.id });
+      // const resp = respObj.result;
+      console.log(resp);
       collectShareFrom.value.promptChargeFlag = resp ? resp.promptChargeFlag : 'N';
       collectShareFrom.value.price = resp ? resp.price : null;
       collectShareFrom.value.promptView = resp ? resp.promptView : false;
@@ -415,14 +440,23 @@
     } finally {
       collectShareFrom.value.loading = false;
     }
-    collectShareFrom.value.collectCategoryId = item.title;
+    collectShareFrom.value.collectCategoryTitle = item.title;
     collectShareFrom.value.collectCategoryId = item.id;
+
+    const base64Encoded = btoa(item.id);
+    const currentDomain = window.location.origin;
+    collectShareFrom.value.linkUrl =
+      currentDomain + '/open/drawCollectShare/showShareView/' + base64Encoded;
+    console.log(collectShareFrom.value.linkUrl);
   };
 
-  const doSaveOrUpdateShare = () => {
+  const collectShareFromRef = ref();
+  const doSaveOrUpdateShare = async () => {
     collectShareFrom.value.loading = true;
     try {
+      await collectShareFromRef.value.validate();
       saveOrUpdate(collectShareFrom.value);
+      collectShareFrom.value.viewFlag = false;
     } finally {
       collectShareFrom.value.loading = false;
     }

@@ -51,11 +51,21 @@ export const VerifyRoute: AppRouteRecordRaw = {
   },
 };
 
+export const CollectShareRoute: AppRouteRecordRaw = {
+  path: '/collectShare',
+  name: 'CollectShare',
+  component: () => import('/@/views/df/share/index.vue'),
+  meta: {
+    title: t('routes'),
+  },
+};
+
 // Basic routing without permission
 // 未经许可的基本路由
 export const basicRoutes = [
   LoginRoute,
   VerifyRoute,
+  CollectShareRoute,
   RootRoute,
   ...mainOutRoutes,
   REDIRECT_ROUTE,

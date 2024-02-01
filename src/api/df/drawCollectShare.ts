@@ -24,6 +24,7 @@ export function saveOrUpdate(params: any, mode: ErrorMessageMode = 'message') {
     },
     {
       errorMessageMode: mode,
+      successMessageMode: mode,
     },
   );
 }
