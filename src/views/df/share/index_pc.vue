@@ -1,111 +1,134 @@
 <template>
   <a-layout style="width: 100%; overflow: hidden">
     <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
-    <div
-      id="scrollbar"
-      ref="scrollbarRef"
-      style="flex-wrap: wrap; height: calc(100vh - 98px); overflow: auto"
-    >
-      <Waterfall
-        ref="waterfallRef"
-        :list="list"
-        :row-key="options.rowKey"
-        :gutter="options.gutter"
-        :has-around-gutter="options.hasAroundGutter"
-        :width="options.width"
-        :breakpoints="options.breakpoints"
-        :img-selector="options.imgSelector"
-        :background-color="options.backgroundColor"
-        :animation-effect="options.animationEffect"
-        :animation-duration="options.animationDuration"
-        :animation-delay="options.animationDelay"
-        :lazyload="options.lazyload"
-        :load-props="options.loadProps"
-        :cross-origin="options.crossOrigin"
-      >
-        <template #item="{ item, url, index }">
-          <div
-            v-if="url"
-            @mouseenter="doMouseenter(item)"
-            @mouseleave="doMouseleave(item)"
-            class="rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-linear hover:shadow-lg hover:shadow-gray-600 group"
-          >
-            <div class="overflow-hidden">
-              <a-card :bodyStyle="{ padding: '0px' }" class="lazyImag">
-                <LazyImg
-                  v-viewer
-                  :url="url"
-                  class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
-                  @load="imageLoad(url)"
-                />
-              </a-card>
-              <div class="move-in" v-if="item.mouseenter">
-                <!-- 上面的 div，最多显示两行文本 -->
-                <div
-                  style="
-                    display: -webkit-box;
-                    flex-grow: 1;
-                    width: 100%;
-                    padding: 0 3px;
-                    overflow: hidden;
-                    -webkit-line-clamp: 2;
-                    -webkit-box-orient: vertical;
-                  "
-                >
-                  <span style="font-size: 14px">
-                    {{ item.prompt }}
-                  </span>
-                </div>
-                <!-- 下面的 div，按钮靠右 -->
-                <div
-                  style="
-                    display: flex;
-                    flex-direction: row;
-                    justify-content: flex-end;
-                    margin: 5px 5px 5px 8px;
-                  "
-                >
-                  <a-button
-                    v-if="!hasPermission('9999')"
-                    @click.stop="copyText(item.prompt)"
-                    size="small"
-                    style="background-color: #5ba585; color: #fff"
-                    >复制</a-button
-                  >
-                  <a-button
-                    @click.stop="goDrawing(item.prompt)"
-                    style="background-color: #ce6872; color: white"
-                    size="small"
-                    >同款作画</a-button
-                  >
 
-                  <a-button
-                    v-if="hasPermission('9999')"
-                    @click.stop="showSampleView(item)"
-                    style="background-color: #ce6872; color: white"
-                    size="small"
-                    >分类</a-button
-                  >
-                  <a-button
-                    v-if="hasPermission('9999')"
-                    style="background-color: #b70d1e; color: white"
-                    size="small"
-                    @click.stop="showDeleteConfirm(item.id)"
-                    >删除</a-button
-                  >
+    <div v-if="!shareViewForm.title" style="height: 100vh">
+      <a-empty :image="simpleImage" />
+    </div>
+
+    <div v-else>
+      <a-card style="width: 100%">
+        <template #title>
+          <Icon class="vel-icon icon" icon="fluent:tag-28-regular" /> {{ shareViewForm.title }}
+          <a-button
+            v-if="!shareViewForm.passwordPass"
+            @click="shareViewOpen"
+            size="small"
+            style="margin-left: 20px"
+          >
+            请求访问
+          </a-button>
+        </template>
+        <span v-if="shareViewForm.content && shareViewForm.content.length > 0">{{
+          shareViewForm.content
+        }}</span>
+        <span v-else> 暂无描述 </span>
+      </a-card>
+    </div>
+
+    <div id="scrollbar" ref="scrollbarRef" style="flex-wrap: wrap; overflow: auto">
+      <a-card>
+        <template #title>
+          <Icon class="vel-icon icon" icon="mynaui:image" /> 图片列表- {{ shareViewForm.totalPics }}
+          张（请使用国内网络访问！）
+        </template>
+        <div
+          v-if="list.length === 0"
+          style="display: flex; align-items: center; justify-content: center"
+        >
+          <a-empty :image="simpleImage" />
+        </div>
+
+        <Waterfall
+          v-else
+          ref="waterfallRef"
+          :list="list"
+          :row-key="options.rowKey"
+          :gutter="options.gutter"
+          :has-around-gutter="options.hasAroundGutter"
+          :width="options.width"
+          :breakpoints="options.breakpoints"
+          :img-selector="options.imgSelector"
+          :background-color="options.backgroundColor"
+          :animation-effect="options.animationEffect"
+          :animation-duration="options.animationDuration"
+          :animation-delay="options.animationDelay"
+          :lazyload="options.lazyload"
+          :load-props="options.loadProps"
+          :cross-origin="options.crossOrigin"
+        >
+          <template #item="{ item, url, index }">
+            <div
+              v-if="url"
+              @mouseenter="doMouseenter(item)"
+              @mouseleave="doMouseleave(item)"
+              class="rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-linear hover:shadow-lg hover:shadow-gray-600 group"
+            >
+              <div class="overflow-hidden">
+                <a-card :bodyStyle="{ padding: '0px' }" class="lazyImag">
+                  <LazyImg
+                    v-viewer
+                    :url="url"
+                    class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
+                    @load="imageLoad(url)"
+                  />
+                </a-card>
+                <div v-if="item.prompt && item.prompt.length > 0">
+                  <div class="move-in" v-if="item.mouseenter">
+                    <!-- 上面的 div，最多显示两行文本 -->
+                    <div
+                      style="
+                        display: -webkit-box;
+                        flex-grow: 1;
+                        width: 100%;
+                        padding: 0 3px;
+                        overflow: hidden;
+                        -webkit-line-clamp: 2;
+                        -webkit-box-orient: vertical;
+                      "
+                    >
+                      <span style="font-size: 14px">
+                        {{ item.prompt }}
+                      </span>
+                    </div>
+                    <!-- 下面的 div，按钮靠右 -->
+                    <div
+                      style="
+                        display: flex;
+                        flex-direction: row;
+                        justify-content: flex-end;
+                        margin: 5px 5px 5px 8px;
+                      "
+                    >
+                      <a-button
+                        v-if="!hasPermission('9999')"
+                        @click.stop="copyText(item.prompt)"
+                        size="small"
+                        style="background-color: #5ba585; color: #fff"
+                      >
+                        复制
+                      </a-button>
+                      <a-button
+                        @click.stop="goDrawing(item.prompt)"
+                        style="background-color: #ce6872; color: white"
+                        size="small"
+                        >同款作画</a-button
+                      >
+                    </div>
+                  </div>
+                  <div class="move-out" v-else>
+                    <Icon
+                      class="vel-icon icon"
+                      icon="ant-design:exclamation-circle-twotone"
+                      size="15"
+                    />
+                  </div>
                 </div>
-              </div>
-              <div class="move-out" v-else>
-                <Icon
-                  class="vel-icon icon"
-                  icon="ant-design:exclamation-circle-twotone"
-                  size="15"
-                />
               </div>
             </div>
-          </div>
-        </template>
-      </Waterfall>
+          </template>
+        </Waterfall>
+      </a-card>
     </div>
 
     <!-- 分享收藏 -->
@@ -114,8 +137,27 @@
       title="访问申请"
       ok-text="立即提交"
       @ok="activeAndLoadMore"
-      :confirmLoading="shareViewForm.loading"
+      :confirmLoading="doLoading"
     >
+      <template #footer>
+        <a-button
+          v-if="!token && shareViewForm.needPassword === true && shareViewForm.price > 0"
+          @click="buyGoods"
+        >
+          登录后购买
+        </a-button>
+
+        <a-button
+          v-if="token && shareViewForm.needPassword === true && shareViewForm.price > 0"
+          @click="buyGoods"
+        >
+          购买激活
+        </a-button>
+        <a-button type="primary" :loading="shareViewForm.loading" @click="activeAndLoadMore">
+          立即提交
+        </a-button>
+      </template>
+
       <a-card>
         <a-form :model="shareViewForm" layout="vertical" ref="shareViewFormRef">
           <a-row gutter="24">
@@ -132,23 +174,35 @@
                 <template #label>
                   <span
                     ><Icon
-                      icon="ic:sharp-account-box"
+                      icon="teenyicons:password-solid"
                       class="vel-icon icon"
                       aria-hidden="true"
                     />访问密码
                   </span>
                 </template>
-                <a-input
-                  disabled
-                  v-model:value="shareViewForm.password"
-                  placeholder="输入访问密码"
-                />
+                <a-input v-model:value="shareViewForm.password" placeholder="输入访问密码" />
               </a-form-item>
             </a-col>
           </a-row>
         </a-form>
       </a-card>
     </a-modal>
+
+    <!-- 支付弹窗 -->
+    <a-modal
+      v-model:open="payForm.viewFlag"
+      title="打开支付宝扫码支付"
+      style="width: 410px; height: 450px"
+      @cancel="closeView"
+    >
+      <template #footer>
+        <a-button type="primary" @click="closeView"> 我已完成支付 </a-button>
+      </template>
+      <CollapseContainer title="支付码" class="text-center mb-6 qrcode-demo-item">
+        <QrCode :value="payForm.qrCodeUrl" :logo="LogoImg" :width="400" />
+      </CollapseContainer>
+    </a-modal>
+
     <Loading :loading="doLoading" :absolute="false" tip="正在加载中" />
   </a-layout>
 </template>
@@ -161,6 +215,7 @@
   import { Loading } from '/@/components/Loading';
   import Icon from '/@/components/Icon/Icon.vue';
   import { usePermission } from '/@/hooks/web/usePermission';
+  import { useGo } from '/@/hooks/web/usePage';
   import {
     CaretLeftOutlined,
     CaretRightOutlined,
@@ -168,19 +223,33 @@
   } from '@ant-design/icons-vue';
   import 'viewerjs/dist/viewer.css';
   import { directive as viewer } from 'v-viewer';
-  import { message, Modal } from 'ant-design-vue';
+  import { message, Modal, Empty } from 'ant-design-vue';
   // import loading from '/@/assets/images/lazy-loading.svg';
   import loading from '/@/assets/images/loading.svg';
   import error from '/@/assets/images/lazy-error.svg';
   import { collectShareInfo, showShareView, showShareTaskList } from '/@/api/df/drawCollectShare';
   import { useRoute } from 'vue-router';
+  import { copyText } from '/@/utils/copyTextToClipboard';
+  import { createTradeApi, tradeListApi, fetchPayResultApi, cancelTradeApi } from '/@/api/df/trade';
+  import { useUserStoreWithOut } from '/@/store/modules/user';
+
+  const userStore = useUserStoreWithOut();
+  const token = userStore.getToken;
+
+  const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
 
   const { hasPermission } = usePermission();
   const route = useRoute();
-  const id = ref(route.query.shareId);
+  const id = ref(route.query.id);
   onMounted(async () => {
     console.log(1123);
-    const shareViewInfo = await showShareView({ id: id });
+    const shareViewInfo = await showShareView({ id: id.value });
+    shareViewForm.value.title = shareViewInfo.title;
+    shareViewForm.value.content = shareViewInfo.content;
+    shareViewForm.value.numSale = shareViewInfo.numSale;
+    shareViewForm.value.visitTimes = shareViewInfo.visitTimes;
+    shareViewForm.value.needPassword = shareViewInfo.needPassword;
+    shareViewForm.value.price = shareViewInfo.price;
     if (shareViewInfo.needPassword) {
       shareViewOpen();
       return;
@@ -193,9 +262,16 @@
   const shareViewForm = ref({
     loading: false,
     viewFlag: false,
-    categoryTitle: null,
+    needPassword: true,
     userName: null,
     password: null,
+    title: null,
+    content: null,
+    visitTimes: 0,
+    numSale: 0,
+    passwordPass: false,
+    totalPics: 0,
+    price: 0,
   });
 
   const shareViewOpen = () => {
@@ -204,10 +280,22 @@
   };
 
   const activeAndLoadMore = async () => {
-    shareViewForm.value.viewFlag = true;
-    drawingSampleForm.value.id = id;
+    drawingSampleForm.value.id = id.value;
     drawingSampleForm.value.password = shareViewForm.value.password;
-    await handleLoadMore(500, true);
+    try {
+      shareViewForm.value.loading = true;
+      const more = await showShareTaskList(drawingSampleForm.value);
+      if (more && more.recordList && more.recordList.length > 0) {
+        shareViewForm.value.passwordPass = true;
+        list.value.push(...more.recordList);
+      } else {
+        message.warning('暂无更多数据！');
+      }
+      drawingSampleForm.value.nextCursorId = more.nextCursorId;
+      shareViewForm.value.viewFlag = false;
+    } finally {
+      shareViewForm.value.loading = false;
+    }
   };
 
   const categoryScrollContainer = ref(null);
@@ -350,27 +438,27 @@
     breakpoints: {
       3800: {
         // 当屏幕宽度小于等于1200
-        rowPerView: 12,
+        rowPerView: 10,
       },
       1800: {
         // 当屏幕宽度小于等于1200
-        rowPerView: 9,
+        rowPerView: 5,
       },
       1600: {
         // 当屏幕宽度小于等于1200
-        rowPerView: 8,
+        rowPerView: 4,
       },
       1200: {
         // 当屏幕宽度小于等于1200
-        rowPerView: 6,
+        rowPerView: 3,
       },
       800: {
         // 当屏幕宽度小于等于800
-        rowPerView: 4,
+        rowPerView: 2,
       },
       500: {
         // 当屏幕宽度小于等于500
-        rowPerView: 2,
+        rowPerView: 1,
       },
     },
     // 动画效果
@@ -382,7 +470,7 @@
     // 背景色
     backgroundColor: 'none',
     // imgSelector
-    imgSelector: 'imageUrl',
+    imgSelector: 'taskImage.imageUrl',
     // 加载配置
     loadProps: {
       loading,
@@ -396,21 +484,31 @@
     cardClick: null,
   });
 
+  const doMouseenter = (item) => {
+    item.mouseenter = true;
+  };
+  const doMouseleave = (item) => {
+    item.mouseenter = false;
+  };
+
   interface ViewCard {
-    src: any;
-    id?: string;
-    name?: string;
-    star?: boolean;
-    backgroundColor?: string;
-    [attr: string]: any;
+    // src: any;
+    // id?: string;
+    // name?: string;
+    // star?: boolean;
+    // backgroundColor?: string;
+    // [attr: string]: any;
+
+    taskImage: any;
+
+    /**
+     * 关键词内容JSON
+     */
+    prompt: string;
   }
+
   // 列表
   const list = ref<{ ViewCard }[]>([]);
-
-  // 删除
-  function handleDelete(item: ViewCard, index: number) {
-    list.value.splice(index, 1);
-  }
 
   function handleClick(item: ViewCard) {
     emits('cardClick', item);
@@ -420,32 +518,77 @@
     // console.log(`${url}: 加载完成`)
   }
 
-  /*********************** 案例相关 ********************* */
-  const exampleForm = ref({
-    drawingSampleCategory: [],
-    categoryCodes: [],
-    drawTaskId: null,
+  //画同款
+  const go = useGo();
+  const goDrawing = async (queryParams) => {
+    go('/mj/index?activeTab=TextToImageForm&prompt=' + queryParams);
+  };
+
+  /***************************支付************************* */
+  const payForm = ref({
+    qrCodeUrl: 'https://qr.alipay.com/bax03494nng4xiqjw5kt5559',
     viewFlag: false,
-    loading: false,
+    outTradeNo: '',
+    paySuccess: false,
+    intervalId: null as ReturnType<typeof setInterval> | null,
   });
-  const showExampleViewFlag = ref(false);
-  const addSample = async () => {
-    exampleForm.value.loading = true;
-    console.log(11231);
-    try {
-      await moveDrawingSample({
-        id: exampleForm.value.drawTaskId,
-        categoryCodes: exampleForm.value.categoryCodes,
-      });
-      message.success('添加成功！优质案例可以找客服领取奖励哦！');
-      showExampleViewFlag.value = false;
-    } finally {
-      exampleForm.value.loading = false;
+
+  const buyGoods = async (card) => {
+    if (!token) {
+      message.error('');
+    }
+    if (card.skipType === 'THIRD') {
+      openNewWindow(card.skipLink);
+    } else {
+      shareViewForm.value.loading = true;
+      try {
+        const resp = await createTradeApi({ id: card.id });
+        payForm.value.outTradeNo = resp.outTradeNo;
+        payForm.value.qrCodeUrl = resp.qrCode;
+        payForm.value.viewFlag = true;
+
+        //轮询支付结果
+        if (payForm.value.intervalId === null) {
+          payForm.value.intervalId = setInterval(() => {
+            console.log('--------fetchPayResult---------');
+            fetchPayResult();
+          }, 3000);
+        }
+      } finally {
+        shareViewForm.value.loading = false;
+      }
     }
   };
-  const showSampleView = (card) => {
-    exampleForm.value.drawTaskId = card.id;
-    showExampleViewFlag.value = true;
+  const closeView = async () => {
+    if (payForm.value.intervalId) {
+      clearInterval(payForm.value.intervalId);
+    }
+    payForm.value.intervalId = null;
+    payForm.value.viewFlag = false;
+  };
+
+  /**
+   * 查询支付结果
+   */
+  const fetchPayResult = async () => {
+    const resp = await fetchPayResultApi({ content: payForm.value.outTradeNo });
+    payForm.value.paySuccess = resp;
+    if (resp === true) {
+      message.success('支付成功！');
+      closeView();
+    }
+  };
+
+  const openNewWindow = (url) => {
+    window.open(url, '_blank');
+  };
+
+  // 分页
+  const tradeForm = ref({
+    viewFlag: false,
+  });
+  const tradeShow = () => {
+    tradeForm.value.viewFlag = true;
   };
 </script>
 

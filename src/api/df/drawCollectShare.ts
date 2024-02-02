@@ -6,8 +6,8 @@ import { ErrorMessageMode } from '/#/axios';
 enum Api {
   SaveOrUpdate = '/open/drawCollectShare/saveOrUpdate',
   CollectShareInfo = '/open/drawCollectShare/collectShareInfo',
-  ShowShareView = '/open/drawCollectShare/showShareView',
-  ShowShareTaskList = '/open/drawCollectShare/showShareTaskList',
+  ShowShareView = '/third/drawCollectShare/showShareView',
+  ShowShareTaskList = '/third/drawCollectShare/showShareTaskList',
 }
 
 /**
@@ -66,6 +66,24 @@ export function showShareView(params: IdReq, mode: ErrorMessageMode = 'message')
 }
 
 /**
+ * 显示分享情况
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function showShareView2(params: IdReq, mode: ErrorMessageMode = 'message') {
+  return defHttp.get(
+    {
+      url: Api.ShowShareView + '/',
+      params,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
+}
+
+/**
  * 显示分享的任务列表
  *
  * @param params
@@ -80,7 +98,7 @@ export function showShareTaskList(params: any, mode: ErrorMessageMode = 'message
     },
     {
       errorMessageMode: mode,
-      successMessageMode: mode,
+      // successMessageMode: mode,
     },
   );
 }

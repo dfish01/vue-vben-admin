@@ -269,6 +269,61 @@
                 />
               </a-form-item>
             </a-col>
+            <a-col :span="24">
+              <a-form-item
+                :rules="[
+                  {
+                    required: true,
+                    message: '请输入标题',
+                  },
+                ]"
+                name="title"
+              >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="icon-park-twotone:label"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />标题
+                  </span>
+                </template>
+                <a-input
+                  :maxlength="64"
+                  v-model:value="collectShareFrom.title"
+                  placeholder="输入标题"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                :rules="[
+                  {
+                    required: false,
+                    message: '请输入扩展描述',
+                  },
+                ]"
+                name="password"
+              >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="ic:round-content-paste"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />扩展描述
+                  </span>
+                </template>
+                <a-textarea
+                  style="width: 100%"
+                  v-model:value="collectShareFrom.content"
+                  placeholder="输入扩展描述~"
+                  allow-clear
+                  :maxlength="255"
+                  :auto-size="{ minRows: 2, maxRows: 4 }"
+                />
+              </a-form-item>
+            </a-col>
             <a-card title="分享链接" style="width: 100%">
               <a-row>
                 <a-col :span="24">
@@ -425,8 +480,11 @@
     promptView: false,
     password: null,
     linkUrl: null,
+    title: null,
+    content: null,
+    childCategory: null,
   });
-  const openCollectShareView = async (item) => {
+  const openCollectShareView = async (item, childCategory) => {
     collectShareFrom.value.viewFlag = true;
     collectShareFrom.value.loading = true;
     try {
@@ -434,19 +492,24 @@
       // const resp = respObj.result;
       console.log(resp);
       collectShareFrom.value.promptChargeFlag = resp ? resp.promptChargeFlag : 'N';
-      collectShareFrom.value.price = resp ? resp.price : null;
-      collectShareFrom.value.promptView = resp ? resp.promptView : false;
-      collectShareFrom.value.password = resp ? resp.password : null;
+      collectShareFrom.value.price = resp.price ? resp.price : null;
+      collectShareFrom.value.promptView = resp.promptView ? resp.promptView : false;
+      collectShareFrom.value.password = resp.password ? resp.password : null;
+      collectShareFrom.value.title = resp.title ? resp.title : null;
+      collectShareFrom.value.content = resp.content ? resp.content : null;
+      collectShareFrom.value.linkUrl = resp.shareUrl ? resp.shareUrl : null;
     } finally {
       collectShareFrom.value.loading = false;
     }
     collectShareFrom.value.collectCategoryTitle = item.title;
     collectShareFrom.value.collectCategoryId = item.id;
+    collectShareFrom.value.childCategory = childCategory;
 
     const base64Encoded = btoa(item.id);
     const currentDomain = window.location.origin;
-    collectShareFrom.value.linkUrl =
-      currentDomain + '/open/drawCollectShare/showShareView/' + base64Encoded;
+
+    // collectShareFrom.value.linkUrl =
+    //   currentDomain + '/open/drawCollectShare/showShareView/' + base64Encoded;
     console.log(collectShareFrom.value.linkUrl);
   };
 
