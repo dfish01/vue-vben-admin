@@ -2,7 +2,7 @@
   <a-layout style="width: 100%; overflow: hidden">
     <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
 
-    <div v-if="!shareViewForm.title" style="height: 100vh">
+    <div v-if="!shareViewForm.title" style="align-items: center; height: 100vh; margin-top: 30vh">
       <a-empty :image="simpleImage" />
     </div>
 
@@ -11,7 +11,7 @@
         <template #title>
           <Icon class="vel-icon icon" icon="fluent:tag-28-regular" /> {{ shareViewForm.title }}
           <a-button
-            v-if="!shareViewForm.passwordPass"
+            v-if="!shareViewForm.passwordPass && shareViewForm.needPassword === 'true'"
             @click="shareViewOpen"
             size="small"
             style="margin-left: 20px"
@@ -22,7 +22,9 @@
         <span v-if="shareViewForm.content && shareViewForm.content.length > 0">{{
           shareViewForm.content
         }}</span>
-        <span v-else> 暂无描述 </span>
+        <div v-else>
+          <a-empty :image="simpleImage" />
+        </div>
       </a-card>
     </div>
 
@@ -144,14 +146,18 @@
           v-if="!token && shareViewForm.needPassword === true && shareViewForm.price > 0"
           @click="buyGoods"
         >
-          登录后购买
+          <Icon class="vel-icon icon" icon="fluent-emoji:shopping-cart" size="15" />登录后购买（{{
+            shareViewForm.price
+          }}元）
         </a-button>
 
         <a-button
           v-if="token && shareViewForm.needPassword === true && shareViewForm.price > 0"
           @click="buyGoods"
         >
-          购买激活
+          <Icon class="vel-icon icon" icon="fluent-emoji:shopping-cart" size="15" />购买激活（{{
+            shareViewForm.price
+          }}元）
         </a-button>
         <a-button type="primary" :loading="shareViewForm.loading" @click="activeAndLoadMore">
           立即提交
@@ -184,6 +190,9 @@
               </a-form-item>
             </a-col>
           </a-row>
+          <a-row>
+            <span style="color: red; font-size: 10px">如果之前购买过，请登录后刷新即可访问~</span>
+          </a-row>
         </a-form>
       </a-card>
     </a-modal>
@@ -192,8 +201,8 @@
     <a-modal
       v-model:open="payForm.viewFlag"
       title="打开支付宝扫码支付"
-      style="width: 410px; height: 450px"
       @cancel="closeView"
+      style="width: 450px"
     >
       <template #footer>
         <a-button type="primary" @click="closeView"> 我已完成支付 </a-button>
@@ -201,6 +210,9 @@
       <CollapseContainer title="支付码" class="text-center mb-6 qrcode-demo-item">
         <QrCode :value="payForm.qrCodeUrl" :logo="LogoImg" :width="400" />
       </CollapseContainer>
+      <span style="color: red; font-size: 10px"
+        >请勿关闭窗口，如果主动关闭，请在支付完成后刷新下页面，即可访问！</span
+      >
     </a-modal>
 
     <Loading :loading="doLoading" :absolute="false" tip="正在加载中" />
@@ -230,7 +242,15 @@
   import { collectShareInfo, showShareView, showShareTaskList } from '/@/api/df/drawCollectShare';
   import { useRoute } from 'vue-router';
   import { copyText } from '/@/utils/copyTextToClipboard';
-  import { createTradeApi, tradeListApi, fetchPayResultApi, cancelTradeApi } from '/@/api/df/trade';
+  import { QrCode, QrCodeActionType } from '/@/components/Qrcode/index';
+  import {
+    createTradeApi,
+    tradeListApi,
+    fetchPayResultApi,
+    cancelTradeApi,
+    createRechargeTrade,
+    createShareTrade,
+  } from '/@/api/df/trade';
   import { useUserStoreWithOut } from '/@/store/modules/user';
 
   const userStore = useUserStoreWithOut();
@@ -242,7 +262,10 @@
   const route = useRoute();
   const id = ref(route.query.id);
   onMounted(async () => {
-    console.log(1123);
+    initQuery();
+  });
+
+  const initQuery = async () => {
     const shareViewInfo = await showShareView({ id: id.value });
     shareViewForm.value.title = shareViewInfo.title;
     shareViewForm.value.content = shareViewInfo.content;
@@ -250,13 +273,15 @@
     shareViewForm.value.visitTimes = shareViewInfo.visitTimes;
     shareViewForm.value.needPassword = shareViewInfo.needPassword;
     shareViewForm.value.price = shareViewInfo.price;
+    shareViewForm.value.totalPics = shareViewInfo.totalPics;
+    shareViewForm.value.id = shareViewInfo.id;
+    drawingSampleForm.value.id = shareViewInfo.id;
     if (shareViewInfo.needPassword) {
       shareViewOpen();
       return;
     }
     handleLoadMore(500, true);
-  });
-
+  };
   /****************************** 类目相关  ****************************** */
 
   const shareViewForm = ref({
@@ -272,6 +297,7 @@
     passwordPass: false,
     totalPics: 0,
     price: 0,
+    id: null,
   });
 
   const shareViewOpen = () => {
@@ -280,7 +306,7 @@
   };
 
   const activeAndLoadMore = async () => {
-    drawingSampleForm.value.id = id.value;
+    drawingSampleForm.value.id = shareViewForm.value.id;
     drawingSampleForm.value.password = shareViewForm.value.password;
     try {
       shareViewForm.value.loading = true;
@@ -533,30 +559,28 @@
     intervalId: null as ReturnType<typeof setInterval> | null,
   });
 
-  const buyGoods = async (card) => {
-    if (!token) {
-      message.error('');
-    }
-    if (card.skipType === 'THIRD') {
-      openNewWindow(card.skipLink);
-    } else {
-      shareViewForm.value.loading = true;
-      try {
-        const resp = await createTradeApi({ id: card.id });
-        payForm.value.outTradeNo = resp.outTradeNo;
-        payForm.value.qrCodeUrl = resp.qrCode;
-        payForm.value.viewFlag = true;
+  const buyGoods = async () => {
+    // if (!token) {
+    //   message.error('请登录后再购买~');
+    //   return;
+    // }
 
-        //轮询支付结果
-        if (payForm.value.intervalId === null) {
-          payForm.value.intervalId = setInterval(() => {
-            console.log('--------fetchPayResult---------');
-            fetchPayResult();
-          }, 3000);
-        }
-      } finally {
-        shareViewForm.value.loading = false;
+    shareViewForm.value.loading = true;
+    try {
+      const resp = await createShareTrade({ id: shareViewForm.value.id });
+      payForm.value.outTradeNo = resp.outTradeNo;
+      payForm.value.qrCodeUrl = resp.qrCode;
+      payForm.value.viewFlag = true;
+
+      //轮询支付结果
+      if (payForm.value.intervalId === null) {
+        payForm.value.intervalId = setInterval(() => {
+          console.log('--------fetchPayResult---------');
+          fetchPayResult();
+        }, 3000);
       }
+    } finally {
+      shareViewForm.value.loading = false;
     }
   };
   const closeView = async () => {
@@ -565,6 +589,8 @@
     }
     payForm.value.intervalId = null;
     payForm.value.viewFlag = false;
+    //再次初始化查询
+    initQuery();
   };
 
   /**

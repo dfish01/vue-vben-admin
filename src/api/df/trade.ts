@@ -11,6 +11,8 @@ import {
 
 enum Api {
   CreateTrade = '/open/trade/createTrade',
+  CreateShareTrade = '/open/trade/createShareTrade',
+  CreateRechargeTrade = '/open/trade/createRechargeTrade',
   UserTradeList = '/open/trade/userTradeList',
   SaleTradeList = '/open/trade/saleTradeList',
   CancelTrade = '/open/trade/cancelTrade',
@@ -28,6 +30,44 @@ export function createTradeApi(params: IdReq, mode: ErrorMessageMode = 'message'
   return defHttp.post<{ outTradeNo: string; qrCode: string }>(
     {
       url: Api.CreateTrade,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
+}
+
+/**
+ * 创建支付单(收藏分享)
+ *
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function createShareTrade(params: IdReq, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<{ outTradeNo: string; qrCode: string }>(
+    {
+      url: Api.CreateShareTrade,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
+}
+
+/**
+ * 创建支付单（充值）
+ *
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function createRechargeTrade(params: IdReq, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<{ outTradeNo: string; qrCode: string }>(
+    {
+      url: Api.CreateRechargeTrade,
       params,
     },
     {

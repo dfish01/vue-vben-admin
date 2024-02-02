@@ -452,7 +452,6 @@
   };
 
   const dealResult = (resp) => {
-    console.log('resp .....' + resp);
     if (resp.code === 0) {
       createMessage.success(resp.message);
       discordForm.value.loading = false;
