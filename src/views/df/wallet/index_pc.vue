@@ -1,16 +1,40 @@
 <template>
   <a-layout style="width: 100%; overflow: hidden">
     <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
-    <a-card>
+    <a-card :style="{ height: `calc(100vh - 49px)` }">
       <a-card>
-        <a-row justify="start" align="top">
-          <span style="margin-bottom: 20px; margin-left: 10px; font-size: 14px; font-weight: 800"
-            >账户余额</span
-          >
+        <a-row
+          justify="start"
+          align="top"
+          style="
+            margin-bottom: 20px;
+            padding: 8px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background-color: #fff7e8;
+          "
+        >
+          <span style="padding: 3px 10px; color: rgb(0 0 0 / 70%)">
+            您可以将账户内的余额提现，但是该操作将收取10%的手续费。因为工作时间的问题，提现金额将在
+            48 小时内到账，请耐心等候！有任何问题可联系客服咨询~
+          </span>
         </a-row>
-        <a-row>
-          <span style="margin-left: 10px; color: #ff9500; font-size: 28px; font-weight: 800"
-            >¥ {{ balanceForm.remainAmount }}</span
+
+        <a-row justify="start" align="top">
+          <span style="margin-bottom: 20px; margin-left: 10px; font-size: 14px; font-weight: 800">
+            账户余额
+          </span>
+        </a-row>
+        <a-row align="bottom">
+          <span style="margin-left: 10px; color: #ff9500; font-size: 28px; font-weight: 800">
+            ¥ {{ balanceForm.remainAmount }}
+          </span>
+          <a-button
+            style="margin-bottom: 5px; margin-left: 20px"
+            :disabled="balanceForm.remainAmount < 50"
+            type="primary"
+            @click="withdrawalOpen"
+            >提现</a-button
           >
         </a-row>
         <a-row
@@ -35,16 +59,16 @@
             </div>
           </a-col>
           <a-col
-            flex="210px"
+            flex="230px"
             style="display: flex; flex-direction: row; justify-content: space-between"
           >
-            <div style="width: 120px">
+            <div style="width: 160px">
               <a-input-number
                 v-model:value="balanceForm.rechargeAmount"
                 addon-before="¥"
                 :min="0.01"
                 :step="0.01"
-                placeholder="请输入金额"
+                placeholder="请输入充值金额"
               />
             </div>
             <a-popconfirm
@@ -53,7 +77,9 @@
               cancel-text="暂不需要"
               @confirm="doRechargeAmount(balanceForm.rechargeAmount)"
             >
-              <a-button type="primary" style="width: 60px; padding: 4px">充值</a-button>
+              <a-button type="primary" style="width: 60px; height: 31px; padding: 2px"
+                >充值</a-button
+              >
             </a-popconfirm>
           </a-col>
         </a-row>
@@ -136,6 +162,142 @@
         请勿关闭窗口，如果主动关闭，请在支付完成后刷新下页面，即可访问！
       </span>
     </a-modal>
+    <!-- 提现申请 -->
+    <a-modal v-model:open="withdrawalForm.viewFlag" title="提现到账户余额">
+      <template #footer>
+        <a-button type="primary" @click="doWithdrawal" :loading="withdrawalForm.loading">
+          立即提现
+        </a-button>
+      </template>
+
+      <a-card>
+        <a-form :model="withdrawalForm" layout="vertical" ref="withdrawalFormRef">
+          <a-row gutter="24">
+            <a-col :span="24">
+              <a-form-item
+                :rules="[
+                  {
+                    required: true,
+                    message: '提现金额',
+                  },
+                ]"
+                name="password"
+              >
+                <template #label>
+                  <span
+                    ><Icon icon="ph:wallet-fill" class="vel-icon icon" aria-hidden="true" />提现金额
+                  </span>
+                </template>
+                <a-input-number
+                  v-model:value="withdrawalForm.applyAmount"
+                  addon-before="¥"
+                  :min="0.01"
+                  :step="0.01"
+                  placeholder="请输入提现金额"
+                />
+              </a-form-item>
+            </a-col>
+
+            <a-col :span="24">
+              <a-form-item
+                :rules="[
+                  {
+                    required: true,
+                    message: '提现渠道',
+                  },
+                ]"
+                name="withdrawalChannel"
+              >
+                <template #label>
+                  <span
+                    ><Icon icon="uil:channel" class="vel-icon icon" aria-hidden="true" />提现渠道
+                  </span>
+                </template>
+                <a-select v-model:value="createAuthForm.authWay" placeholder="提现渠道">
+                  <a-select-option value="WCHT">微信</a-select-option>
+                  <a-select-option value="ALIPAY">支付宝</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                :rules="[
+                  {
+                    required: true,
+                    message: '提现账号',
+                  },
+                ]"
+                name="withdrawalAccount"
+              >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="solar:user-id-broken"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />提现账号
+                  </span>
+                </template>
+                <a-input
+                  v-model:value="withdrawalForm.withdrawalAccount"
+                  placeholder="请输入提现账号"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                :rules="[
+                  {
+                    required: true,
+                    message: '提现姓名',
+                  },
+                ]"
+                name="withdrawalName"
+              >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="fa-solid:user-tag"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />提现姓名
+                  </span>
+                </template>
+                <a-input
+                  v-model:value="withdrawalForm.withdrawalName"
+                  placeholder="请输入提现姓名"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                :rules="[
+                  {
+                    required: false,
+                    message: '其他信息',
+                  },
+                ]"
+                name="otherInfo"
+              >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="fluent:textbox-16-regular"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />其他信息
+                  </span>
+                </template>
+                <a-input v-model:value="withdrawalForm.otherInfo" placeholder="请输入其他信息" />
+              </a-form-item>
+            </a-col>
+          </a-row>
+          <a-row>
+            <span style="color: red; font-size: 10px">请悉知，提现到渠道账户收取10%服务费！</span>
+          </a-row>
+        </a-form>
+      </a-card>
+    </a-modal>
   </a-layout>
 </template>
 
@@ -159,7 +321,7 @@
   // import loading from '/@/assets/images/lazy-loading.svg';
   import loading from '/@/assets/images/loading.svg';
   import error from '/@/assets/images/lazy-error.svg';
-  import { flowInfo, getBalance, flowList } from '/@/api/df/wallet';
+  import { flowInfo, getBalance, flowList, withdrawal } from '/@/api/df/wallet';
   import { useRoute } from 'vue-router';
   import { copyText } from '/@/utils/copyTextToClipboard';
   import { QrCode, QrCodeActionType } from '/@/components/Qrcode/index';
@@ -309,6 +471,36 @@
   });
   const tradeShow = () => {
     tradeForm.value.viewFlag = true;
+  };
+
+  /***************************提现************************* */
+  const withdrawalFormRef = ref();
+  const withdrawalForm = ref({
+    viewFlag: false,
+    loading: false,
+    otherInfo: null,
+    withdrawalName: null,
+    withdrawalAccount: null,
+    authWay: 'ALIPAY',
+    applyAmount: null,
+  });
+
+  const doWithdrawal = async () => {
+    if (!withdrawalForm.value.applyAmount || withdrawalForm.value.applyAmount < 50) {
+      message.error('提现金额需大于等于50元~');
+      return;
+    }
+    await withdrawalFormRef.value.validate();
+    withdrawalForm.value.loading = true;
+    try {
+      await withdrawal({ applyAmount: withdrawalForm.value.applyAmount });
+    } finally {
+      withdrawalForm.value.loading = false;
+    }
+  };
+
+  const withdrawalOpen = () => {
+    withdrawalForm.value.viewFlag = true;
   };
 </script>
 

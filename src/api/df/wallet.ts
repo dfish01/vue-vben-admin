@@ -7,8 +7,48 @@ enum Api {
   GetBalance = '/open/userBalance/getBalance',
   FlowList = '/open/userBalance/flowList',
   FlowInfo = '/open/userBalance/flowInfo',
+
+  Withdrawal = '/open/userBalance/withdrawal',
+  UpdateBalanceWithdrawalResult = '/open/userBalance/updateBalanceWithdrawalResult',
 }
 
+/**
+ * 发起提现
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function withdrawal(params: any, mode: ErrorMessageMode = 'message') {
+  return defHttp.post(
+    {
+      url: Api.Withdrawal,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+      successMessageMode: mode,
+    },
+  );
+}
+
+/**
+ * 更新提现结果
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function updateBalanceWithdrawalResult(params: any, mode: ErrorMessageMode = 'message') {
+  return defHttp.post(
+    {
+      url: Api.UpdateBalanceWithdrawalResult,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+      successMessageMode: mode,
+    },
+  );
+}
 /**
  * 获取账单明细
  * @param params

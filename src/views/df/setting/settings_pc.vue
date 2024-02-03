@@ -1,168 +1,165 @@
 <template>
-  <a-layout
-    ref="fromRef"
-    style="
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: calc(100vh - 48px);
-    "
-  >
-    <div style="width: 80%">
-      <!-- 头像 -->
-      <a-card
-        :bodyStyle="{
-          padding: '30px 1px 30px 24px',
-          height: `calc(${contentHeight}px `,
-          overflow: 'auto',
-        }"
-      >
-        <a-row>
-          <!-- 头像 -->
-          <a-col>
-            <SvgIcon
-              v-if="userInfo.avatar && !userInfo.avatar.startsWith('http')"
-              style="display: block; width: 100px; height: 100px; border-radius: 15%"
-              :name="userInfo.avatar"
-            />
+  <a-layout ref="fromRef">
+    <a-card
+      :style="{ height: `calc(100vh - 49px)`, overflow: 'auto' }"
+      :bodyStyle="{ padding: '20px', display: 'flex', 'justify-content': 'center' }"
+    >
+      <div style="width: 80%">
+        <!-- 头像 -->
+        <a-card
+          :bodyStyle="{
+            padding: '30px 1px 30px 24px',
+            height: `calc(${contentHeight}px `,
+            overflow: 'auto',
+          }"
+        >
+          <a-row>
+            <!-- 头像 -->
+            <a-col>
+              <SvgIcon
+                v-if="userInfo.avatar && !userInfo.avatar.startsWith('http')"
+                style="display: block; width: 100px; height: 100px; border-radius: 15%"
+                :name="userInfo.avatar"
+              />
 
-            <a-image
-              v-else
-              :src="userInfo.avatar"
-              style="display: block; width: 100px; height: 100px; border-radius: 15%"
-            >
-              }
-            </a-image>
-          </a-col>
-          <!-- 名称信息 -->
-          <a-col style="margin-left: 15px">
-            <div>
-              <span style="font-size: 22px; font-weight: bolder">{{ userInfo.nickName }} </span>
-            </div>
-            <div>
-              <span>邮箱：{{ userInfo.email }} </span>
-            </div>
-            <div>
-              <span>手机：{{ userInfo.phone }} </span>
-            </div>
-            <div>
-              <span>CODE：{{ userInfo.accountCode }} </span>
-              <a-button type="link" @click="copyText(userInfo.accountCode)">
-                <template #icon><CopyOutlined /></template>
-              </a-button>
-            </div>
-          </a-col>
-        </a-row>
-      </a-card>
-      <a-card :bodyStyle="{ padding: 0 }">
-        <!-- 设置-选项卡 -->
-        <div class="setting">
-          <div v-for="appData in appObj.setting" :key="appData.key" class="cards">
-            <a-card
-              v-if="appData.showFlag && appData.showFlag === true"
-              @click="handleClick(appData)"
-              class="rounded-card"
-              :bodyStyle="{
-                padding: 0,
-                height: '155px',
-                width: '155px',
-                display: 'flex',
-                'align-items': 'center',
-                'justify-content': 'center',
-              }"
-              hoverable
-            >
-              <div
-                :span="24"
-                style="
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-                  justify-content: center;
-                "
+              <a-image
+                v-else
+                :src="userInfo.avatar"
+                style="display: block; width: 100px; height: 100px; border-radius: 15%"
               >
-                <span>
-                  <Icon :icon="appData.svgName" size="70" />
-                </span>
-                <div>
-                  <span> {{ appData.name }} </span>
-                </div>
+                }
+              </a-image>
+            </a-col>
+            <!-- 名称信息 -->
+            <a-col style="margin-left: 15px">
+              <div>
+                <span style="font-size: 22px; font-weight: bolder">{{ userInfo.nickName }} </span>
               </div>
-            </a-card>
-          </div>
-        </div>
-        <!-- 设置-交流 -->
-        <div class="setting">
-          <div v-for="appData in appObj.chat" :key="appData.key" class="cards">
-            <a-card
-              @click="handleClick(appData)"
-              class="rounded-card"
-              :bodyStyle="{
-                padding: 0,
-                height: '155px',
-                width: '155px',
-                display: 'flex',
-                'align-items': 'center',
-                'justify-content': 'center',
-              }"
-              hoverable
-            >
-              <div
-                :span="24"
-                style="
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-                  justify-content: center;
-                "
+              <div>
+                <span>邮箱：{{ userInfo.email }} </span>
+              </div>
+              <div>
+                <span>手机：{{ userInfo.phone }} </span>
+              </div>
+              <div>
+                <span>CODE：{{ userInfo.accountCode }} </span>
+                <a-button type="link" @click="copyText(userInfo.accountCode)">
+                  <template #icon><CopyOutlined /></template>
+                </a-button>
+              </div>
+            </a-col>
+          </a-row>
+        </a-card>
+        <a-card :bodyStyle="{ padding: 0 }" style="margin-top: 25px">
+          <!-- 设置-选项卡 -->
+          <div class="setting">
+            <div v-for="appData in appObj.setting" :key="appData.key" class="cards">
+              <a-card
+                v-if="appData.showFlag && appData.showFlag === true"
+                @click="handleClick(appData)"
+                class="rounded-card"
+                :bodyStyle="{
+                  padding: 0,
+                  height: '155px',
+                  width: '155px',
+                  display: 'flex',
+                  'align-items': 'center',
+                  'justify-content': 'center',
+                }"
+                hoverable
               >
-                <span>
-                  <Icon :icon="appData.svgName" size="70" />
-                </span>
-                <div>
-                  <span> {{ appData.name }} </span>
+                <div
+                  :span="24"
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                  "
+                >
+                  <span>
+                    <Icon :icon="appData.svgName" size="70" />
+                  </span>
+                  <div>
+                    <span> {{ appData.name }} </span>
+                  </div>
                 </div>
-              </div>
-            </a-card>
+              </a-card>
+            </div>
           </div>
-        </div>
-        <!-- 设置-交易 -->
-        <div class="setting">
-          <div v-for="appData in appObj.trade" :key="appData.key" class="cards">
-            <a-card
-              class="rounded-card"
-              @click="handleClick(appData)"
-              :bodyStyle="{
-                padding: 0,
-                height: '155px',
-                width: '155px',
-                display: 'flex',
-                'align-items': 'center',
-                'justify-content': 'center',
-              }"
-              :hoverable="appData.hover"
-            >
-              <div
-                :span="24"
-                style="
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-                  justify-content: center;
-                "
+          <!-- 设置-交流 -->
+          <div class="setting">
+            <div v-for="appData in appObj.chat" :key="appData.key" class="cards">
+              <a-card
+                @click="handleClick(appData)"
+                class="rounded-card"
+                :bodyStyle="{
+                  padding: 0,
+                  height: '155px',
+                  width: '155px',
+                  display: 'flex',
+                  'align-items': 'center',
+                  'justify-content': 'center',
+                }"
+                hoverable
               >
-                <span>
-                  <Icon :icon="appData.svgName" size="70" :color="appData.color" />
-                </span>
-                <div>
-                  <span> {{ appData.name }} </span>
+                <div
+                  :span="24"
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                  "
+                >
+                  <span>
+                    <Icon :icon="appData.svgName" size="70" />
+                  </span>
+                  <div>
+                    <span> {{ appData.name }} </span>
+                  </div>
                 </div>
-              </div>
-            </a-card>
+              </a-card>
+            </div>
           </div>
-        </div>
-      </a-card>
-    </div>
+          <!-- 设置-交易 -->
+          <div class="setting">
+            <div v-for="appData in appObj.trade" :key="appData.key" class="cards">
+              <a-card
+                class="rounded-card"
+                @click="handleClick(appData)"
+                :bodyStyle="{
+                  padding: 0,
+                  height: '155px',
+                  width: '155px',
+                  display: 'flex',
+                  'align-items': 'center',
+                  'justify-content': 'center',
+                }"
+                :hoverable="appData.hover"
+              >
+                <div
+                  :span="24"
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                  "
+                >
+                  <span>
+                    <Icon :icon="appData.svgName" size="70" :color="appData.color" />
+                  </span>
+                  <div>
+                    <span> {{ appData.name }} </span>
+                  </div>
+                </div>
+              </a-card>
+            </div>
+          </div>
+        </a-card>
+      </div>
+    </a-card>
     <!-- 意见箱 -->
     <a-modal
       v-model:open="suggestForm.viewFlag"
@@ -850,34 +847,34 @@
     ],
     trade: [
       {
-        name: '交易流水',
+        name: '账户余额',
         key: 'activity',
         svgName: 'icon-park-outline:trademark',
-        routeUrl: '',
+        routeUrl: '/wallet/index',
         type: 'route',
-        hover: false,
+        hover: true,
         color: '',
-        showFlag: true,
+        showFlag: false,
       },
       {
-        name: '下单记录',
+        name: '订单中心',
         key: 'activity',
         svgName: 'icon-park-outline:order',
         routeUrl: '/trade/index',
         type: 'route',
         hover: true,
         color: '',
-        showFlag: true,
+        showFlag: false,
       },
       {
-        name: '拉新记录',
+        name: '邀请中心',
         key: 'invite',
         svgName: 'mdi:invite',
-        routeUrl: '',
+        routeUrl: '/invite/index',
         type: 'route',
-        hover: false,
+        hover: true,
         color: 'red',
-        showFlag: true,
+        showFlag: false,
       },
     ],
   });

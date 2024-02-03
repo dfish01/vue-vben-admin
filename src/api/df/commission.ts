@@ -38,9 +38,11 @@ export function withdrawal(params: any, mode: ErrorMessageMode = 'message') {
     {
       url: Api.Withdrawal,
       params,
+      timeout: 30 * 1000,
     },
     {
       errorMessageMode: mode,
+      successMessageMode: mode,
     },
   );
 }

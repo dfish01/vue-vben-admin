@@ -1,14 +1,19 @@
 <template>
   <a-layout style="width: 100%; overflow: hidden">
     <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
-    <a-card>
+    <a-card :style="{ height: `calc(100vh - 49px)` }">
       <a-card title="邀请中心">
         <a-row
           justify="start"
           align="top"
-          style="padding: 8px; border: 1px solid transparent; background-color: #fff7e8"
+          style="
+            padding: 8px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background-color: #fff7e8;
+          "
         >
-          <span
+          <span style="padding: 3px 10px; color: rgb(0 0 0 / 70%)"
             >您可以通过分享邀请链接，邀请用户进行购买官方套餐您获得10%的佣金奖励，该用户续费您可获得5%的佣金奖励，快邀请好友来使用吧！</span
           >
         </a-row>
@@ -17,12 +22,12 @@
             <div style="height: 25px; color: rgb(0 0 0 / 70%)">
               <span>待提现收益</span>
             </div>
-            <div>
+            <div style="display: flex; align-items: center">
               <span style="color: #ff9500; font-size: 28px; font-weight: 800"
                 >{{ inviteForm.remainAmount }} 元
               </span>
               <a-button
-                style="margin-left: 10px"
+                style="margin-left: 20px"
                 :disabled="inviteForm.remainAmount < 50"
                 type="primary"
                 @click="withdrawalOpen"
@@ -62,7 +67,7 @@
 
         <a-row justify="start" align="top" style="margin-top: 20px">
           <span style="height: 25px; color: rgb(0 0 0 / 70%)">
-            提示：待提现收益金额必须 >=￥50 才能提现。
+            提示：待提现收益金额必须 >=￥50 才能提现到账户余额。
           </span>
         </a-row>
 
@@ -128,13 +133,7 @@
             align="left"
             :width="100"
           />
-          <a-table-column
-            title="订单佣金"
-            dataIndex="amount"
-            key="amount"
-            align="left"
-            :width="100"
-          />
+          <a-table-column title="佣金" dataIndex="amount" key="amount" align="left" :width="100" />
 
           <a-table-column
             title="剩余佣金"
@@ -165,48 +164,65 @@
     <!-- 提现到账户 -->
     <a-modal v-model:open="withdrawalForm.viewFlag" title="提现到账户余额">
       <template #footer>
-        <a-button type="primary" @click="doWithdrawal" :loading="withdrawalForm.loading">
-          立即提现
+        <a-button
+          :disabled="(parseFloat(withdrawalForm.applyAmount) || 0) > inviteForm.remainAmount"
+          type="primary"
+          @click="doWithdrawal"
+          :loading="withdrawalForm.loading"
+        >
+          {{
+            (parseFloat(withdrawalForm.applyAmount) || 0) <= inviteForm.remainAmount
+              ? '立即提现'
+              : `超出可提现余额 `
+          }}
         </a-button>
       </template>
 
-      <a-card>
-        <a-form :model="withdrawalForm" layout="vertical" ref="withdrawalFormRef">
-          <a-row gutter="24">
-            <a-col :span="24">
-              <a-form-item
-                :rules="[
-                  {
-                    required: true,
-                    message: '提现金额',
-                  },
-                ]"
-                name="password"
-              >
-                <template #label>
-                  <span
-                    ><Icon
-                      icon="teenyicons:password-solid"
-                      class="vel-icon icon"
-                      aria-hidden="true"
-                    />提现金额
-                  </span>
-                </template>
-                <a-input-number
-                  v-model:value="withdrawalForm.applyAmount"
-                  addon-before="¥"
-                  :min="0.01"
-                  :step="0.01"
-                  placeholder="请输入金额"
-                />
-              </a-form-item>
-            </a-col>
-          </a-row>
-          <a-row>
-            <span style="color: red; font-size: 10px">如果之前购买过，请登录后刷新即可访问~</span>
-          </a-row>
-        </a-form>
-      </a-card>
+      <a-form
+        :model="withdrawalForm"
+        layout="vertical"
+        ref="withdrawalFormRef"
+        style="padding: 20px"
+      >
+        <a-row gutter="24">
+          <a-col :span="24">
+            <a-form-item
+              :rules="[
+                {
+                  required: true,
+                  message: '请输入提现金额（需大于50元）',
+                },
+              ]"
+              name="applyAmount"
+            >
+              <template #label>
+                <span
+                  ><Icon
+                    icon="teenyicons:password-solid"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                  />提现金额
+                </span>
+              </template>
+              <a-input-number
+                v-model:value="withdrawalForm.applyAmount"
+                addon-before="¥"
+                :min="50"
+                :step="0.01"
+                placeholder="请输入金额"
+                string-mode
+                :formatter="(value) => (parseFloat(value) || 0).toFixed(2)"
+                :parser="
+                  (value) => {
+                    const parsedValue = parseFloat(value);
+                    return isNaN(parsedValue) ? 50 : parsedValue;
+                  }
+                "
+              />
+            </a-form-item>
+          </a-col>
+        </a-row>
+      </a-form>
     </a-modal>
   </a-layout>
 </template>
@@ -252,6 +268,10 @@
   /**************************提现************************* */
 
   onMounted(async () => {
+    await loadInfo();
+  });
+
+  const loadInfo = async () => {
     const commissionResp = await getCommission({});
     inviteForm.value.totalAmount = commissionResp.totalAmount;
     inviteForm.value.remainAmount = commissionResp.remainAmount;
@@ -260,7 +280,8 @@
     const currentDomain = window.location.origin;
     inviteForm.value.inviteLink =
       currentDomain + '/#/login?inviteCode=' + commissionResp.inviteCode;
-  });
+  };
+
   onMounted(async () => {
     onSearch(1);
   });
@@ -268,7 +289,7 @@
   const globalLoading = ref(false);
   const inviteForm = ref({
     totalAmount: 0,
-    remainAmount: 0,
+    remainAmount: 0 as number,
     withdrawalAmount: 0,
     numInvite: 0,
     inviteLink: null,
@@ -323,23 +344,33 @@
     onSearch(page);
   }
 
-  /***************************支付************************* */
+  /***************************提现************************* */
   const withdrawalFormRef = ref();
   const withdrawalForm = ref({
-    applyAmount: null,
+    applyAmount: null as number | null,
     viewFlag: false,
     loading: false,
   });
 
   const doWithdrawal = async () => {
-    if (!withdrawalForm.value.applyAmount || withdrawalForm.value.applyAmount < 50) {
+    await withdrawalFormRef.value.validate();
+    const applyAmount = parseFloat(withdrawalForm.value.applyAmount) || 0;
+    if (applyAmount < 50) {
       message.error('提现金额需大于等于50元~');
       return;
     }
-    await withdrawalFormRef.value.validate();
+
+    if (applyAmount > inviteForm.value.remainAmount) {
+      message.error('可提现金额不足~');
+      return;
+    }
+
     withdrawalForm.value.loading = true;
     try {
       await withdrawal({ applyAmount: withdrawalForm.value.applyAmount });
+      await loadInfo();
+      onSearch(1);
+      withdrawalForm.value.viewFlag = false;
     } finally {
       withdrawalForm.value.loading = false;
     }
