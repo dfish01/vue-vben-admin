@@ -64,7 +64,7 @@ export function createShareTrade(params: IdReq, mode: ErrorMessageMode = 'messag
  * @param mode
  * @returns
  */
-export function createRechargeTrade(params: IdReq, mode: ErrorMessageMode = 'message') {
+export function createRechargeTrade(params: any, mode: ErrorMessageMode = 'message') {
   return defHttp.post<{ outTradeNo: string; qrCode: string }>(
     {
       url: Api.CreateRechargeTrade,

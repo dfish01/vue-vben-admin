@@ -2,17 +2,70 @@
   <a-layout style="width: 100%; overflow: hidden">
     <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
     <a-card>
-      <a-card>
-        <a-row justify="start" align="top">
-          <span style="margin-bottom: 20px; margin-left: 10px; font-size: 14px; font-weight: 800"
-            >账户余额</span
+      <a-card title="邀请中心">
+        <a-row
+          justify="start"
+          align="top"
+          style="padding: 8px; border: 1px solid transparent; background-color: #fff7e8"
+        >
+          <span
+            >您可以通过分享邀请链接，邀请用户进行购买官方套餐您获得10%的佣金奖励，该用户续费您可获得5%的佣金奖励，快邀请好友来使用吧！</span
           >
         </a-row>
-        <a-row>
-          <span style="margin-left: 10px; color: #ff9500; font-size: 28px; font-weight: 800"
-            >¥ {{ balanceForm.remainAmount }}</span
-          >
+        <a-row justify="space-between" style="margin-top: 20px">
+          <a-flex vertical style="min-width: 200px">
+            <div style="height: 25px; color: rgb(0 0 0 / 70%)">
+              <span>待提现收益</span>
+            </div>
+            <div>
+              <span style="color: #ff9500; font-size: 28px; font-weight: 800"
+                >{{ inviteForm.remainAmount }} 元
+              </span>
+              <a-button
+                style="margin-left: 10px"
+                :disabled="inviteForm.remainAmount < 50"
+                type="primary"
+                @click="withdrawalOpen"
+                >提现</a-button
+              >
+            </div>
+          </a-flex>
+          <a-flex vertical style="min-width: 200px">
+            <div style="height: 25px; color: rgb(0 0 0 / 70%)">
+              <span>总收益</span>
+            </div>
+            <div>
+              <span style="font-size: 28px; font-weight: 800"
+                >{{ inviteForm.totalAmount }} 元
+              </span>
+            </div>
+          </a-flex>
+          <a-flex vertical style="min-width: 200px">
+            <div style="height: 25px; color: rgb(0 0 0 / 70%)">
+              <span>已提现</span>
+            </div>
+            <div>
+              <span style="font-size: 28px; font-weight: 800"
+                >{{ inviteForm.withdrawalAmount }} 元
+              </span>
+            </div>
+          </a-flex>
+          <a-flex vertical style="min-width: 200px">
+            <div style="height: 25px; color: rgb(0 0 0 / 70%)">
+              <span>总邀请人数</span>
+            </div>
+            <div>
+              <span style="font-size: 28px; font-weight: 800">{{ inviteForm.numInvite }} 人 </span>
+            </div>
+          </a-flex>
         </a-row>
+
+        <a-row justify="start" align="top" style="margin-top: 20px">
+          <span style="height: 25px; color: rgb(0 0 0 / 70%)">
+            提示：待提现收益金额必须 >=￥50 才能提现。
+          </span>
+        </a-row>
+
         <a-row
           style="align-items: center; height: 42px; margin-left: 10px"
           justify="start"
@@ -22,39 +75,23 @@
         </a-row>
 
         <a-row justify="start" align="top">
-          <a-col flex="auto" style="display: flex; flex-direction: row; justify-content: start">
-            <div v-for="(amount, index) in balanceForm.rechargeAmountList" :key="amount">
-              <a-popconfirm
-                :title="'是否确认充值' + amount + '元?'"
-                ok-text="立即充值"
-                cancel-text="暂不需要"
-                @confirm="doRechargeAmount(amount)"
-              >
-                <a-button style="margin-left: 10px"> ¥ {{ amount }} </a-button>
-              </a-popconfirm>
-            </div>
-          </a-col>
           <a-col
-            flex="210px"
+            flex="80px"
             style="display: flex; flex-direction: row; justify-content: space-between"
           >
-            <div style="width: 120px">
-              <a-input-number
-                v-model:value="balanceForm.rechargeAmount"
-                addon-before="¥"
-                :min="0.01"
-                :step="0.01"
-                placeholder="请输入金额"
-              />
-            </div>
-            <a-popconfirm
-              :title="'是否确认充值' + balanceForm.rechargeAmount + '元?'"
-              ok-text="立即充值"
-              cancel-text="暂不需要"
-              @confirm="doRechargeAmount(balanceForm.rechargeAmount)"
-            >
-              <a-button type="primary" style="width: 60px; padding: 4px">充值</a-button>
-            </a-popconfirm>
+            邀请链接
+          </a-col>
+          <a-col flex="auto" style="display: flex; flex-direction: row; justify-content: start">
+            <a-input-group compact :bordered="false" style="width: 100%">
+              <a-input v-model:value="inviteForm.inviteLink" style="width: 300px" disabled />
+              <a-tooltip trigger="hover" title="复制我的专属链接~">
+                <a-button @click="copyText(inviteForm.inviteLink)" style="width: 40px">
+                  <template #icon>
+                    <Icon icon="ion:copy" class="vel-icon icon" aria-hidden="true" />
+                  </template>
+                </a-button>
+              </a-tooltip>
+            </a-input-group>
           </a-col>
         </a-row>
       </a-card>
@@ -66,33 +103,41 @@
           :row-class-name="(_record, index) => (index % 2 === 1 ? 'table-striped' : null)"
           :pagination="pagination"
         >
-          <a-table-column title="账单名称" dataIndex="title" key="title" align="left" :width="150">
+          <a-table-column title="订单号" dataIndex="bizId" key="bizId" align="left" :width="100" />
+
+          <a-table-column title="事件" dataIndex="title" key="title" align="left" :width="80">
             <template #default="{ record }">
-              <div>
-                <div>
-                  {{ record.title }}
-                </div>
-                <div style="color: rgb(0 0 0 / 70%); font-size: 13px"> #{{ record.id }} </div>
-              </div>
+              <a-tag color="#ff4d4f" v-if="record.eventType === 20">提到账户</a-tag>
+              <a-tag color="#52c41a" v-else-if="record.eventType === 1">用户下单</a-tag>
+              <a-tag color="#d9d9d9" v-else>未定义</a-tag>
             </template>
           </a-table-column>
-          <a-table-column
-            title="账单金额"
-            dataIndex="amount"
-            key="amount"
-            align="left"
-            :width="150"
-          />
+
+          <a-table-column title="用户ID" dataIndex="buyerId" key="buyerId" align="left" :width="90">
+            <template #default="{ record }">
+              <a-tag v-if="record.buyerId"> 自己</a-tag>
+
+              <a-tag v-else>{{ record.buyerId }}</a-tag>
+            </template>
+          </a-table-column>
 
           <a-table-column
-            title="变更前"
-            dataIndex="beforeAmount"
-            key="beforeAmount"
+            title="订单金额"
+            dataIndex="orderAmount"
+            key="orderAmount"
             align="left"
             :width="100"
           />
           <a-table-column
-            title="变更后"
+            title="订单佣金"
+            dataIndex="amount"
+            key="amount"
+            align="left"
+            :width="100"
+          />
+
+          <a-table-column
+            title="剩余佣金"
             dataIndex="remainAmount"
             key="remainAmount"
             align="left"
@@ -100,7 +145,7 @@
           />
 
           <a-table-column
-            title="账单时间"
+            title="创建时间"
             dataIndex="gmtCreate"
             key="gmtCreate"
             align="left"
@@ -117,24 +162,51 @@
         </a-table>
       </a-card>
     </a-card>
-    <!-- 支付弹窗 -->
-    <a-modal
-      v-model:open="payForm.viewFlag"
-      title="打开支付宝扫码支付"
-      @cancel="closeView"
-      style="width: 450px"
-    >
+    <!-- 提现到账户 -->
+    <a-modal v-model:open="withdrawalForm.viewFlag" title="提现到账户余额">
       <template #footer>
-        <a-button type="primary" @click="closeView"> 我已完成支付 </a-button>
+        <a-button type="primary" @click="doWithdrawal" :loading="withdrawalForm.loading">
+          立即提现
+        </a-button>
       </template>
-      <CollapseContainer title="支付码" class="text-center mb-6 qrcode-demo-item">
-        <QrCode :value="payForm.qrCodeUrl" :logo="LogoImg" :width="400" />
-      </CollapseContainer>
-      <span
-        style="display: flex; justify-content: center; width: 100%; color: red; font-size: 10px"
-      >
-        请勿关闭窗口，如果主动关闭，请在支付完成后刷新下页面，即可访问！
-      </span>
+
+      <a-card>
+        <a-form :model="withdrawalForm" layout="vertical" ref="withdrawalFormRef">
+          <a-row gutter="24">
+            <a-col :span="24">
+              <a-form-item
+                :rules="[
+                  {
+                    required: true,
+                    message: '提现金额',
+                  },
+                ]"
+                name="password"
+              >
+                <template #label>
+                  <span
+                    ><Icon
+                      icon="teenyicons:password-solid"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />提现金额
+                  </span>
+                </template>
+                <a-input-number
+                  v-model:value="withdrawalForm.applyAmount"
+                  addon-before="¥"
+                  :min="0.01"
+                  :step="0.01"
+                  placeholder="请输入金额"
+                />
+              </a-form-item>
+            </a-col>
+          </a-row>
+          <a-row>
+            <span style="color: red; font-size: 10px">如果之前购买过，请登录后刷新即可访问~</span>
+          </a-row>
+        </a-form>
+      </a-card>
     </a-modal>
   </a-layout>
 </template>
@@ -159,10 +231,9 @@
   // import loading from '/@/assets/images/lazy-loading.svg';
   import loading from '/@/assets/images/loading.svg';
   import error from '/@/assets/images/lazy-error.svg';
-  import { flowInfo, getBalance, flowList } from '/@/api/df/wallet';
+  import { getCommission, withdrawal, flowList } from '/@/api/df/commission';
   import { useRoute } from 'vue-router';
   import { copyText } from '/@/utils/copyTextToClipboard';
-  import { QrCode, QrCodeActionType } from '/@/components/Qrcode/index';
   import {
     createTradeApi,
     tradeListApi,
@@ -178,21 +249,29 @@
 
   const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
 
-  /***************************支付************************* */
+  /**************************提现************************* */
 
   onMounted(async () => {
-    const balanceResp = await getBalance({});
-    balanceForm.value.remainAmount = balanceResp.remainAmount;
+    const commissionResp = await getCommission({});
+    inviteForm.value.totalAmount = commissionResp.totalAmount;
+    inviteForm.value.remainAmount = commissionResp.remainAmount;
+    inviteForm.value.withdrawalAmount = commissionResp.withdrawalAmount;
+    inviteForm.value.numInvite = commissionResp.numInvite;
+    const currentDomain = window.location.origin;
+    inviteForm.value.inviteLink =
+      currentDomain + '/#/login?inviteCode=' + commissionResp.inviteCode;
   });
   onMounted(async () => {
     onSearch(1);
   });
 
   const globalLoading = ref(false);
-  const balanceForm = ref({
+  const inviteForm = ref({
+    totalAmount: 0,
     remainAmount: 0,
-    rechargeAmount: null,
-    rechargeAmountList: [50, 100, 200, 500, 1000],
+    withdrawalAmount: 0,
+    numInvite: 0,
+    inviteLink: null,
   });
 
   const tableLoading = ref(false);
@@ -245,62 +324,29 @@
   }
 
   /***************************支付************************* */
-  const payForm = ref({
-    qrCodeUrl: 'https://qr.alipay.com/bax03494nng4xiqjw5kt5559',
+  const withdrawalFormRef = ref();
+  const withdrawalForm = ref({
+    applyAmount: null,
     viewFlag: false,
-    outTradeNo: '',
-    paySuccess: false,
-    intervalId: null as ReturnType<typeof setInterval> | null,
+    loading: false,
   });
 
-  const doRechargeAmount = async (amount) => {
-    if (!amount || amount < 0.01) {
-      message.error('请输入正确的充值金额~');
+  const doWithdrawal = async () => {
+    if (!withdrawalForm.value.applyAmount || withdrawalForm.value.applyAmount < 50) {
+      message.error('提现金额需大于等于50元~');
       return;
     }
-
-    globalLoading.value = true;
+    await withdrawalFormRef.value.validate();
+    withdrawalForm.value.loading = true;
     try {
-      const resp = await createRechargeTrade({ rechargeAmount: amount });
-      payForm.value.outTradeNo = resp.outTradeNo;
-      payForm.value.qrCodeUrl = resp.qrCode;
-      payForm.value.viewFlag = true;
-
-      //轮询支付结果
-      if (payForm.value.intervalId === null) {
-        payForm.value.intervalId = setInterval(() => {
-          fetchPayResult();
-        }, 3000);
-      }
+      await withdrawal({ applyAmount: withdrawalForm.value.applyAmount });
     } finally {
-      globalLoading.value = false;
-    }
-  };
-  const closeView = async () => {
-    if (payForm.value.intervalId) {
-      clearInterval(payForm.value.intervalId);
-    }
-    payForm.value.intervalId = null;
-    payForm.value.viewFlag = false;
-    //再次初始化查询
-    initQuery();
-  };
-
-  /**
-   * 查询支付结果
-   */
-  const fetchPayResult = async () => {
-    const resp = await fetchPayResultApi({ content: payForm.value.outTradeNo });
-    payForm.value.paySuccess = resp;
-    if (resp === true) {
-      message.success('支付成功！');
-      closeView();
-      onSearch(1);
+      withdrawalForm.value.loading = false;
     }
   };
 
-  const openNewWindow = (url) => {
-    window.open(url, '_blank');
+  const withdrawalOpen = () => {
+    withdrawalForm.value.viewFlag = true;
   };
 
   // 分页

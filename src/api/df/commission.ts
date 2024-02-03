@@ -4,21 +4,21 @@ import { IdReq } from '../model/baseModel';
 import { ErrorMessageMode } from '/#/axios';
 
 enum Api {
-  GetBalance = '/open/userBalance/getBalance',
-  FlowList = '/open/userBalance/flowList',
-  FlowInfo = '/open/userBalance/flowInfo',
+  Withdrawal = '/open/userCommission/withdrawal',
+  FlowList = '/open/userCommission/flowList',
+  GetCommission = '/open/userCommission/getCommission',
 }
 
 /**
- * 获取账单明细
+ * 获取佣金情况
  * @param params
  * @param mode
  * @returns
  */
-export function flowInfo(params: any, mode: ErrorMessageMode = 'message') {
+export function getCommission(params: any, mode: ErrorMessageMode = 'message') {
   return defHttp.post(
     {
-      url: Api.FlowInfo,
+      url: Api.GetCommission,
       params,
     },
     {
@@ -28,15 +28,15 @@ export function flowInfo(params: any, mode: ErrorMessageMode = 'message') {
 }
 
 /**
- * 获取账户余额
+ * 提现申请
  * @param params
  * @param mode
  * @returns
  */
-export function getBalance(params: any, mode: ErrorMessageMode = 'message') {
+export function withdrawal(params: any, mode: ErrorMessageMode = 'message') {
   return defHttp.post(
     {
-      url: Api.GetBalance,
+      url: Api.Withdrawal,
       params,
     },
     {

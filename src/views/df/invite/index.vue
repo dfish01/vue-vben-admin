@@ -1,11 +1,11 @@
 <template>
-  <LinkMobile v-if="getIsMobile" />
-  <LinkPc v-else />
+  <IndexMobile v-if="getIsMobile" />
+  <IndexPc v-else style="overflow-y: hidden" />
 </template>
 
 <script lang="ts" setup>
-  import LinkMobile from './link_mobile.vue';
-  import LinkPc from './link_pc.vue';
+  import IndexMobile from './index_mobile.vue';
+  import IndexPc from './index_pc.vue';
   import { useAppInject } from '/@/hooks/web/useAppInject';
 
   const { getIsMobile } = useAppInject();
