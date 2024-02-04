@@ -1,7 +1,7 @@
 <template>
   <a-layout style="width: 100%; overflow: hidden">
     <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
-    <a-card :style="{ height: `calc(100vh - 49px)` }">
+    <a-card :style="{ height: `calc(100vh - 49px)`, overflow: 'auto' }">
       <a-card>
         <a-row
           justify="start"

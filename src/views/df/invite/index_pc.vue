@@ -1,7 +1,7 @@
 <template>
-  <a-layout style="width: 100%; overflow: hidden">
+  <a-layout style="width: 100%; overflow: auto">
     <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
-    <a-card :style="{ height: `calc(100vh - 49px)` }">
+    <a-card :style="{ height: `calc(100vh - 49px)`, overflow: 'auto' }">
       <a-card title="邀请中心">
         <a-row
           justify="start"
@@ -431,10 +431,6 @@
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
-
-    /* overflow-x: hidden; */
-
-    /* white-space: nowrap; */
     overflow: auto;
   }
 
@@ -506,18 +502,6 @@
   .card >>> .ant-image-mask {
     border-radius: 15%;
   }
-
-  /* 
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  flex: 1;
-  align-content: start;
-  height: calc(90vh - 80px);
-  padding: 20px;
-  overflow: auto;
-  gap: 20px;
-} */
 
   .card-tags {
     display: flex;

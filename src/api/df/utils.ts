@@ -5,7 +5,8 @@ import { ErrorMessageMode } from '/#/axios';
 
 enum Api {
   SendCode = '/sendCode',
-  AnalysisLink = '/open/waterMask/analysis',
+  // 匿名
+  AnalysisLink = '/anon/waterMask/analysis',
   addSuggest = '/open/userSuggest/add',
   CommunicateInfo = '/open/dataCache/communicate',
   AfterSaleInfo = '/open/dataCache/afterSaleInfo',

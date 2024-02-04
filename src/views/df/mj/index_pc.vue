@@ -485,15 +485,8 @@
   import { accountInfoApi } from './accountInfo';
   import { addSuggest, communicateInfo, tutorialInfo, systemInfo } from '/@/api/df/utils';
   import type { NotificationPlacement } from 'ant-design-vue';
-  import {
-    saveUserSpace,
-    deleteSpace,
-    allUserSpace,
-    importMessage,
-    channelList,
-    genCode,
-    setTop,
-  } from '/@/api/df/workSpace';
+  import { importMessage } from '/@/api/df/workSpace';
+  import { userStep } from '/@/api/df/user';
 
   import {
     WorkSpaceListResp,
@@ -726,7 +719,7 @@
     ],
   });
 
-  const indexStepOpen = (val: boolean): void => {
+  const indexStepOpen = async (val: boolean): void => {
     // if (val === true) {
     //   const needShow = getCustomCache(MJ_DRAW_TOUR);
     //   if (needShow && needShow === true) {
@@ -735,6 +728,10 @@
     //   setCustomCache(MJ_DRAW_TOUR, true);
     // }
 
+    // const resp = await userStep({ content: 'MJ_DRAW_TOUR' });
+    // if (resp) {
+    //   indexStep.value.open = val;
+    // }
     indexStep.value.open = val;
   };
 

@@ -91,7 +91,7 @@
           />
         </a-form-item>
       </a-card>
-      <a-card title="pandora配置" style="margin-top: 10px">
+      <a-card title="OPENAI配置" style="margin-top: 10px">
         <a-form-item
           label="HOST地址"
           :name="['pandoraConfig', 'host']"
@@ -102,7 +102,7 @@
         <a-form-item
           label="API前缀"
           :name="['pandoraConfig', 'apiPrefix']"
-          :rules="[{ required: true, message: '请输入API前缀' }]"
+          :rules="[{ required: false, message: '请输入API前缀' }]"
         >
           <a-input
             v-model:value="extendConfigForm.pandoraConfig.apiPrefix"
@@ -121,7 +121,7 @@
           />
         </a-form-item>
 
-        <a-form-item label="自动刷新" name="autoRefresh">
+        <a-form-item label="自动刷新" name="autoRefresh" v-if="false">
           <a-switch
             v-model:checked="extendConfigForm.pandoraConfig.autoRefresh"
             checked-children="开启"

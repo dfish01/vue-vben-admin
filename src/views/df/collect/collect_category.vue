@@ -144,8 +144,6 @@
       </a-card>
     </a-modal>
 
-    const collectShare = ref({ viewFlag: false, loading: false, collectCategoryId: null, : 'N', :
-    null, promptView: false, : null, });
     <!-- 分享收藏 -->
     <a-modal
       v-model:open="collectShareFrom.viewFlag"

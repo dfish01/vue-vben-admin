@@ -249,6 +249,7 @@
         :steps="indexStep.steps"
         @change="changeStep"
         @close="indexStepOpen(false)"
+        :width="100"
       />
     </div>
   </a-layout>
@@ -264,6 +265,7 @@
   import { MarkdownViewer } from '/@/components/Markdown';
   import { SettingOutlined, CloudSyncOutlined, ClusterOutlined } from '@ant-design/icons-vue';
   import { WorkSpaceListResp, WorkSpaceSaveReq } from '/@/api/df/model/workSpaceModel'; // 请替换为您的请求模型路径
+  import { userStep } from '/@/api/df/user';
   import {
     saveUserSpace,
     deleteSpace,
@@ -467,10 +469,30 @@
   }
 
   .custom-tour >>> .ant-tour {
-    width: 100% !important;
+    width: 300px !important;
   }
 
-  ::v-deep(.ant-tour) {
-    width: 100% !important;
+  .custom-tour ::v-deep .ant-tour {
+    width: 300px !important;
+  }
+
+  .custom-tour ::v-deep .ant-tour-content {
+    width: 300px !important;
+  }
+
+  .custom-tour >>> .ant-tour-content {
+    width: 300px !important;
+  }
+
+  :deep(.ant-tour-content) {
+    width: 300px !important;
+  }
+
+  ::v-deep .ant-tour-content {
+    width: 300px !important;
+  }
+
+  :global(.ant-tour-content) {
+    width: 350px !important;
   }
 </style>

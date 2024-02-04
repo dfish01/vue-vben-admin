@@ -1387,6 +1387,7 @@
   import { useUserStore } from '/@/store/modules/user';
   import { accountInfoApi } from '../accountInfo';
   import { textFormApi } from '../jobList.pageQuery';
+  import { userStep } from '/@/api/df/user';
 
   const { textToImgForm } = textFormApi();
   const {
@@ -1921,40 +1922,40 @@
         title: '关键词',
         description:
           '在这里输入你们想要的描述，如果写入--相关的参数，将以输入的为主，提示词属性不再生效！',
-        placement: 'right',
+        placement: 'bottom',
         target: () => promptStep.value && promptStep.value.$el,
       },
       {
         title: '垫图',
         description: '你可以上传一些图片作为参考图，以保证出图的相似性。',
-        placement: 'right',
+        placement: 'bottom',
         target: () => blendStep.value && blendStep.value.$el,
       },
       {
         title: '辅助工具',
         description: '内嵌了翻译、AI联想、3600+风格，无需再单独查找了，尽情使用吧。',
-        placement: 'right',
+        placement: 'bottom',
         target: () => toolsStep.value && toolsStep.value.$el,
       },
       {
         title: '运行账户',
         description:
           '选择相关的执行账户、频道以及执行模式，这里的配置会使用到全局，包括收藏页面。如果未配置账户，请到账户菜单查看哦~',
-        placement: 'right',
+        placement: 'up',
         target: () => accountStep.value && accountStep.value.$el,
       },
       {
         title: '提示词属性',
         description:
           '这里时系统附带的属性，包括你选择的相关风格都会显示在这里。注意：想要使用这里的属性，请勿在Prompt内填写相关的--属性',
-        placement: 'right',
+        placement: 'up',
         target: () => attrStep.value && attrStep.value.$el,
       },
       {
         title: '模型选择',
         description:
           '这里留下了最流行的模型，比如v4之类的当前版本已经隐藏。niji是动漫风格，V5、V6写实效果优秀。大家多试试看！',
-        placement: 'right',
+        placement: 'up',
         target: () => modeStep.value && modeStep.value.$el,
       },
       {
@@ -1965,7 +1966,7 @@
       {
         title: '提交任务',
         description: '点击提交，即可开始你的第一次绘画！',
-        placement: 'right',
+        placement: 'up',
         target: () => button.value && button.value.$el,
       },
     ],

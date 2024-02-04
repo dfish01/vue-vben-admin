@@ -60,12 +60,22 @@ export const CollectShareRoute: AppRouteRecordRaw = {
   },
 };
 
+export const AnonXhsRoute: AppRouteRecordRaw = {
+  path: '/xhs',
+  name: 'xhs',
+  component: () => import('/@/views/df/tools/link/index.vue'),
+  meta: {
+    title: t('routes'),
+  },
+};
+
 // Basic routing without permission
 // 未经许可的基本路由
 export const basicRoutes = [
   LoginRoute,
   VerifyRoute,
   CollectShareRoute,
+  AnonXhsRoute,
   RootRoute,
   ...mainOutRoutes,
   REDIRECT_ROUTE,

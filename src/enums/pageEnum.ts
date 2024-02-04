@@ -10,6 +10,10 @@ export enum PageEnum {
   ERROR_LOG_PAGE = '/error-log/list',
   VERIFY_PAGE = '/verify',
 
+  //收藏分享
   COLLECT_SHARE_PAGE = '/collectShare',
+
+  //小红书解析
+  XHS_PAGE = '/xhs',
 }
 export const PageWrapperFixedHeightKey = 'PageWrapperFixedHeight';

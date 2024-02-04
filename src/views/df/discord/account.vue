@@ -1301,6 +1301,7 @@
   import { func } from 'vue-types';
   import { getCustomCache, setCustomCache } from '/@/utils/custom';
   import { MJ_ACCOUNT_TOUR } from '/@/enums/cacheEnum';
+  import { userStep } from '/@/api/df/user';
 
   /** 页面高度计算开始 */
   const button = ref(null);
@@ -1835,14 +1836,20 @@
       },
     ],
   });
-  const accountStepOpen = (val: boolean): void => {
-    if (val === true) {
-      const needShow = getCustomCache(MJ_ACCOUNT_TOUR);
-      if (needShow && needShow === true) {
-        return;
-      }
-      setCustomCache(MJ_ACCOUNT_TOUR, true);
-    }
+
+  const accountStepOpen = async (val) => {
+    // if (val === true) {
+    //   const needShow = getCustomCache(MJ_ACCOUNT_TOUR);
+    //   if (needShow && needShow === true) {
+    //     return;
+    //   }
+    //   setCustomCache(MJ_ACCOUNT_TOUR, true);
+    // }
+
+    // const resp = await userStep({ content: 'MJ_ACCOUNT_TOUR' });
+    // if (resp) {
+    //   accountStep.value.open = val;
+    // }
 
     accountStep.value.open = val;
   };

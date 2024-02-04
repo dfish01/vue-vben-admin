@@ -10,6 +10,7 @@ import {
 } from './model/userModel';
 
 import { ErrorMessageMode } from '/#/axios';
+import { StringReq } from '../model/baseModel';
 
 enum Api {
   RegisterByPhone = '/registerByPhone',
@@ -25,6 +26,25 @@ enum Api {
   ResetPasswordByEmail = '/resetPasswordByEmail',
 
   ChangeUserIcon = '/open/user/changeUserIcon',
+  UserStep = '/open/user/userStep',
+}
+
+/**
+ * 用户步骤
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function userStep(params: StringReq, mode: ErrorMessageMode = 'message') {
+  return defHttp.post(
+    {
+      url: Api.UserStep,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
 }
 
 /**
