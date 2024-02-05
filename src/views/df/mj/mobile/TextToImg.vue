@@ -515,7 +515,127 @@
                   </a-col>
                 </a-row>
               </a-tab-pane>
+              <a-tab-pane key="niji6" tab="Niji 6">
+                <a-row style="justify-content: left">
+                  <a-radio-group size="small" v-model:value="versionParam.niji6.style">
+                    <a-radio-button value="">Default</a-radio-button>
+                    <a-radio-button value="raw">RAW</a-radio-button>
+                  </a-radio-group>
+                </a-row>
+                <a-row style="margin-top: 10px">
+                  <a-col span="6">
+                    <a-tooltip
+                      title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
+                    >
+                      <a-tag class="quality-tag" color="default"
+                        >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
+                    ></a-tooltip>
+                  </a-col>
+                  <a-col span="18">
+                    <a-select
+                      v-model:value="versionParam.niji5.quality"
+                      style="width: 100%; height: 32px"
+                    >
+                      <a-select-option value="0.25">0.25x</a-select-option>
+                      <a-select-option value="0.5">0.5x</a-select-option>
+                      <a-select-option value="1">1x</a-select-option>
+                    </a-select>
+                  </a-col>
+                </a-row>
+                <a-row class="row-wapper">
+                  <a-col
+                    span="6"
+                    style="display: flex; align-items: center; justify-content: start"
+                  >
+                    <span class="quality-tag"
+                      >风格化
 
+                      <a-tooltip
+                        title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
+                      >
+                        <ExclamationCircleOutlined class="icon-hint" />
+                      </a-tooltip>
+                    </span>
+                  </a-col>
+                  <a-col :span="18">
+                    <a-slider
+                      style="margin-left: 3px"
+                      v-model:value="versionParam.niji5.s"
+                      :min="1"
+                      :step="1"
+                      :max="1000"
+                    />
+                  </a-col>
+                </a-row>
+                <a-row class="row-wapper">
+                  <a-col
+                    span="6"
+                    style="display: flex; align-items: center; justify-content: start"
+                  >
+                    <span class="quality-tag"
+                      >多样性
+
+                      <a-tooltip
+                        title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
+                      >
+                        <ExclamationCircleOutlined class="icon-hint" />
+                      </a-tooltip>
+                    </span>
+                  </a-col>
+                  <a-col :span="18">
+                    <a-slider
+                      style="margin-left: 3px"
+                      v-model:value="versionParam.niji5.chaos"
+                      :min="1"
+                      :step="1"
+                      :max="100"
+                    />
+                  </a-col>
+                </a-row>
+                <a-row class="row-wapper">
+                  <a-col
+                    span="6"
+                    style="display: flex; align-items: center; justify-content: start"
+                  >
+                    <span class="quality-tag"
+                      >权重
+
+                      <a-tooltip title="--iw 值越高，上传的图像对最终效果的影响就越大">
+                        <ExclamationCircleOutlined class="icon-hint" />
+                      </a-tooltip>
+                    </span>
+                  </a-col>
+                  <a-col :span="18">
+                    <a-slider
+                      style="margin-left: 3px"
+                      v-model:value="versionParam.niji5.iw"
+                      :min="0.25"
+                      :step="0.05"
+                      :max="2"
+                    />
+                  </a-col>
+                </a-row>
+                <a-row class="row-wapper">
+                  <a-col
+                    span="8"
+                    style="display: flex; align-items: center; justify-content: center"
+                  >
+                    <span class="quality-tag"
+                      >无缝图案
+                      <a-tooltip
+                        title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
+                      >
+                        <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
+                    ></span>
+                  </a-col>
+                  <a-col
+                    :span="16"
+                    style="display: flex; align-items: center; justify-content: right"
+                  >
+                    <a-switch v-model:checked="versionParam.niji5.tile" disabled />
+                  </a-col>
+                </a-row>
+              </a-tab-pane>
               <a-tab-pane key="v5" tab="V 5">
                 <a-row style="margin-top: 10px">
                   <a-col span="6">
@@ -996,6 +1116,37 @@
       </a-card>
       <!-- 模型选择 E-->
 
+      <!-- 风格参考 B-->
+      <a-card size="small" :bordered="true" :bodyStyle="{ padding: '5px' }" class="ar-card2">
+        <template #title>
+          <div class="ar-card2-title">
+            <span style="font-weight: bold">风格参考</span>
+            <a-tooltip title="让MJ按参考图的风格进行绘制。仅niji6 和 v6 适用" trigger="click">
+              <ExclamationCircleOutlined style="margin-left: 5px; cursor: pointer" />
+            </a-tooltip>
+          </div>
+        </template>
+
+        <a-row style="margin-top: 10px">
+          <a-col span="24" ref="blendStep">
+            <a-upload
+              v-model:file-list="fileList"
+              :before-upload="beforeUpload"
+              list-type="picture-card"
+              @preview="handlePreview"
+              @change="handleChange"
+              style="display: flex; align-items: flex-start; justify-content: flex-start"
+            >
+              <div v-if="fileList.length < 5">
+                <plus-outlined />
+                <div style="margin-top: 8px">上传图片</div>
+              </div>
+            </a-upload>
+          </a-col>
+        </a-row>
+      </a-card>
+      <!-- 风格参考 E-->
+
       <!-- 不想出现的参数 B-->
       <a-card size="small" :bordered="true" :bodyStyle="{ padding: '5px' }" class="ar-card2">
         <template #title>
@@ -1020,7 +1171,7 @@
       <!-- 不想出现的参数 E-->
 
       <!-- 高级参数 B-->
-      <a-collapse style="margin-top: 10px" class="ar-card2">
+      <a-collapse style="margin-top: 10px; margin-bottom: 10px" class="ar-card2">
         <a-collapse-panel key="1">
           <template #header>
             <div class="ar-card2-title">
@@ -1067,7 +1218,7 @@
                   v-model:value="paramDataValue.weird"
                   :min="1"
                   :step="1"
-                  :max="3000"
+                  :max="activeKey === 'v6' ? 3000 : 1000"
                   :disabled="activeKey === 'niji5' || activeKey === 'v4'"
                 />
               </a-col>
@@ -1723,6 +1874,15 @@
       version: 'niji 5',
       tile: false,
     },
+    niji6: {
+      style: '',
+      quality: '1',
+      chaos: 0,
+      s: 300,
+      iw: 1,
+      version: 'niji 6',
+      tile: false,
+    },
     v4: {
       style: null,
       quality: '1',
@@ -1789,7 +1949,7 @@
       paramDataValue.value.weird = null;
     }
 
-    if (activeKey === 'niji5') {
+    if (activeKey === 'niji5' || activeKey === 'niji6') {
       textToImgForm.robotSelect = '1022952195194359889';
     } else {
       textToImgForm.robotSelect = '936929561302675456';

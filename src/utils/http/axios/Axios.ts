@@ -88,8 +88,9 @@ export class VAxios {
 
     // Request interceptor configuration processing
     this.axiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-      // If cancel repeat request is turned on, then cancel repeat request is prohibited     
-      const requestOptions =  (config as unknown as any).requestOptions ?? this.options.requestOptions;
+      // If cancel repeat request is turned on, then cancel repeat request is prohibited
+      const requestOptions =
+        (config as unknown as any).requestOptions ?? this.options.requestOptions;
       const ignoreCancelToken = requestOptions?.ignoreCancelToken ?? true;
 
       !ignoreCancelToken && axiosCanceler.addPending(config);
@@ -148,7 +149,7 @@ export class VAxios {
         formData.append(key, params.data![key]);
       });
     }
-
+    console.log('uploadFile uploadFile uploadFile');
     return this.axiosInstance.request<T>({
       ...config,
       method: 'POST',
@@ -202,7 +203,7 @@ export class VAxios {
     if (config.cancelToken) {
       conf.cancelToken = config.cancelToken;
     }
-    
+
     if (config.signal) {
       conf.signal = config.signal;
     }

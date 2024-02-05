@@ -8,6 +8,13 @@ import {
   PayConfig,
 } from '/@/api/df/model/systemModel';
 import { IdReq } from '/@/api/model/baseModel';
+import { ContentTypeEnum } from '/@/enums/httpEnum';
+import { UploadApiResult } from './model/uploadModel';
+import { AxiosProgressEvent } from 'axios';
+import { getAppEnvConfig } from '/@/utils/env';
+
+const { VITE_GLOB_APP_TITLE, VITE_GLOB_API_URL, VITE_GLOB_API_URL_PREFIX, VITE_GLOB_UPLOAD_URL } =
+  getAppEnvConfig();
 
 enum Api {
   SaveExtendConfig = '/open/dict/saveExtendConfig',
@@ -22,6 +29,46 @@ enum Api {
 
   SavePayConfig = '/open/dict/savePayConfig',
   PayConfigInfo = '/open/dict/payConfigInfo',
+
+  Upload = '/open/system/upload',
+}
+
+/**
+ * 上传文件
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function upload2(
+  params: any,
+  onUploadProgress: (progressEvent: AxiosProgressEvent) => void,
+  mode: ErrorMessageMode = 'message',
+) {
+  return defHttp.post<string>(
+    {
+      url: Api.Upload,
+
+      params,
+      headers: {
+        'Content-Type': ContentTypeEnum.FORM_DATA,
+      },
+      onUploadProgress: onUploadProgress,
+    },
+    {
+      errorMessageMode: mode,
+      successMessageMode: mode,
+    },
+  );
+}
+export function upload(params: any, onUploadProgress: (progressEvent: AxiosProgressEvent) => void) {
+  return defHttp.uploadFile<any>(
+    {
+      url: Api.Upload,
+      onUploadProgress,
+      baseURL: VITE_GLOB_UPLOAD_URL,
+    },
+    params,
+  );
 }
 
 /**

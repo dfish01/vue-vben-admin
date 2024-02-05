@@ -101,7 +101,7 @@ const transform: AxiosTransform = {
   // 请求之前处理config
   beforeRequestHook: (config, options) => {
     const { apiUrl, joinPrefix, joinParamsToUrl, formatDate, joinTime = true, urlPrefix } = options;
-
+    console.log('beforeRequestHook beforeRequestHook beforeRequestHook');
     if (joinPrefix) {
       config.url = `${urlPrefix}${config.url}`;
     }
@@ -154,6 +154,7 @@ const transform: AxiosTransform = {
         config.params = undefined;
       }
     }
+
     return config;
   },
 
