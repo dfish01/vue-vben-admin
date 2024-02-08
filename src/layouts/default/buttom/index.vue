@@ -2,7 +2,7 @@
   <div>
     <div class="bottom-menu" :class="getHeaderClass">
       <a-menu mode="horizontal" :selectedKeys="[selected]" @click="handleClick" class="flex-menu">
-        <a-menu-item key="mj" @click="toDetail('/mj')" class="flex-item">
+        <a-menu-item key="mj" @click="toDetail('/mmj/index')" class="flex-item">
           <div class="menu-content">
             <div
               ><Icon class="vel-icon icon" icon="pepicons-pencil:paint-pallet" size="16" />
@@ -51,7 +51,7 @@
         </a-menu-item>
         <a-menu-item key="toolsLink" @click="toDetail('/tools-link')" class="flex-item">
           <div class="menu-content">
-            <div><Icon class="vel-icon icon" icon="carbon:task-tools" size="16" /> 抓图</div>
+            <div><Icon class="vel-icon icon" icon="carbon:task-tools" size="16" />小红书</div>
           </div>
         </a-menu-item>
         <a-menu-item key="setting" @click="toDetail('/setting')" class="flex-item">

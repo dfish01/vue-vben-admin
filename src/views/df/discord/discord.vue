@@ -48,7 +48,7 @@
         rowKey="id"
         :loading="tableLoading"
         :row-class-name="(_record, index) => (index % 2 === 1 ? 'table-striped' : null)"
-        :scroll="{ x: 'max-content', y: props.contentHeight - 230 }"
+        :scroll="{ y: props.contentHeight - 230 }"
         :pagination="false"
       >
         <a-table-column
