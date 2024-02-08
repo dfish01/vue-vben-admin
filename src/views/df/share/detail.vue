@@ -1,10 +1,51 @@
 <template>
   <a-layout style="width: 100%; overflow: hidden">
-    <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
+    <Loading :loading="doLoading" :absolute="false" tip="正在加载中" />
 
-    <div v-if="!shareViewForm.title" style="align-items: center; height: 100vh; margin-top: 30vh">
-      <a-empty :image="simpleImage" />
-    </div>
+    <!-- 查询框 -->
+    <a-row>
+      <a-col
+        :span="24"
+        style="display: flex; flex-direction: row; justify-content: center; margin-top: 20px"
+      >
+        <div style="display: flex; flex-direction: row; justify-content: center">
+          <a-input-group compact style="display: flex; justify-content: center">
+            <a-input
+              v-model:value="searchForm.url"
+              placeholder="这里输入作者的作品编号或者用户名~"
+              style="width: 500px; height: 40px"
+            />
+            <a-button style="height: 40px" type="primary" @click="doAnalysis">立即查询</a-button>
+          </a-input-group>
+          <a-button style="height: 40px; margin-left: 10px" @click="clear">清空</a-button>
+        </div>
+      </a-col>
+
+      <a-col
+        :span="24"
+        style="
+          display: flex;
+          justify-content: center;
+          margin-top: 20px;
+          border: 1px solid transparent;
+          border-radius: 8px;
+        "
+      >
+        <div
+          style="
+            width: 800px;
+            padding: 8px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background-color: #fff7e8;
+          "
+        >
+          <span style="padding: 3px 10px; color: rgb(0 0 0 / 70%)"
+            >小提示：复制小红书的分享链接即可一键解析获取无水印原图，点击大图后右键下载！后续可用MJ账号进行一键二创作哦~</span
+          >
+        </div>
+      </a-col>
+    </a-row>
 
     <div v-else>
       <a-card style="width: 100%">
@@ -214,8 +255,6 @@
         >请勿关闭窗口，如果主动关闭，请在支付完成后刷新下页面，即可访问！</span
       >
     </a-modal>
-
-    <Loading :loading="doLoading" :absolute="false" tip="正在加载中" />
   </a-layout>
 </template>
 
