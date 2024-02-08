@@ -19,7 +19,7 @@
         <template #title>
           <div class="ar-card2-title">
             <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
-              >关键词
+              ><Icon icon="streamline-emojis:writing-hand-1" /> 关键词
               <a-tooltip
                 title="这里输入相关的描述。你可以输入主体Prompt然后选择相关的配置、也可以自己输入完整的prompt、另外你也可以以 “/imagine:”开头输入相关的prompt。 “/imagine:”支持多条输入，记得换行哈~ "
               >
@@ -48,22 +48,103 @@
       >
         <template #title>
           <div class="ar-card2-title">
-            <span style="font-weight: bold">提示词属性</span>
+            <span style="font-weight: bold"
+              ><Icon icon="streamline-emojis:open-book" /> 提示词属性</span
+            >
           </div>
         </template>
         <div class="tags-container">
-          <a-tag
+          <div v-for="tag in paramTags" :key="tag.text">
+            <a-tooltip :overlayStyle="{}" v-if="tag.text.length > 60">
+              <template #title>
+                <p v-for="(part, index) in tag.text.split('\n\n')" :key="index">{{
+                  part.trim()
+                }}</p>
+              </template>
+              <a-tag
+                :color="tag.color"
+                size="small"
+                style="
+                  flex-wrap: wrap;
+                  max-width: 330px;
+                  margin: 1px 2px;
+                  padding: 1px 3px;
+                  font-size: 10px;
+                "
+              >
+                {{ truncateText(tag.text) }}
+              </a-tag>
+            </a-tooltip>
+            <a-tag
+              v-else
+              :color="tag.color"
+              size="small"
+              style="
+                flex-wrap: wrap;
+                max-width: 330px;
+                margin: 1px 2px;
+                padding: 1px 3px;
+                font-size: 10px;
+              "
+            >
+              {{ tag.text }}
+            </a-tag>
+          </div>
+        </div>
+        <!-- <div class="tags-container">
+          <div
             v-for="tag in paramTags"
             :key="tag.text"
-            :color="tag.color"
             size="small"
-            style="margin: 1px 2px; padding: 1px 3px"
+            style="
+              flex-wrap: wrap;
+              max-width: 330px;
+              margin: 1px 2px;
+              padding: 1px 3px;
+              border-radius: 4px;
+            "
+            :style="{ background: tag.color }"
           >
             {{ tag.text }}
-          </a-tag>
-        </div>
+          </div> 
+        </div>-->
       </a-card>
       <!-- 提示词 E-->
+
+      <!-- 辅助工具 B-->
+      <a-card
+        size="small"
+        :bordered="true"
+        ref="toolsStep"
+        :bodyStyle="{ padding: '5px' }"
+        class="ar-card2"
+      >
+        <template #title>
+          <div class="ar-card2-title">
+            <span style="font-weight: bold">
+              <Icon icon="streamline-emojis:railway-car" /> 辅助工具</span
+            >
+          </div>
+        </template>
+        <a-row>
+          <a-col span="8">
+            <a-button style="width: 100%" size="small" @click="openTranslate"
+              ><SvgIcon name="translate" />中英翻译</a-button
+            >
+          </a-col>
+          <a-col span="8">
+            <a-button style="width: 100%" size="small" @click="openAiPrompt"
+              ><SvgIcon name="gpt" />AI生成</a-button
+            >
+          </a-col>
+          <a-col span="8">
+            <a-button style="width: 100%" size="small" @click="openDrawerInC">
+              <SvgIcon name="book" /> Prompt宝典</a-button
+            >
+          </a-col>
+        </a-row>
+      </a-card>
+      <!-- 辅助工具 E-->
       <!-- 垫图 B-->
       <a-card
         size="small"
@@ -76,28 +157,14 @@
           <div class="ar-card-title-be">
             <div>
               <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
-                >绘画垫图
+                ><Icon icon="streamline-emojis:tent" /> 绘画垫图
                 <a-tooltip
                   title="（非必须）这里上传图片，让MJ在绘画的时候以其内容作为基本，根据配合iw可以自己调整相似度~"
                 >
                   <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
               ></span>
             </div>
-            <Icon
-              v-if="viewForm.blendFlag"
-              @click="changeViewForm('blendFlag')"
-              icon="pepicons-pop:eye-circle"
-              class="vel-icon icon"
-              aria-hidden="true"
-            />
-
-            <Icon
-              v-else
-              @click="changeViewForm('blendFlag')"
-              icon="pepicons-pop:eye-closed-circle"
-              class="vel-icon icon"
-              aria-hidden="true"
-            />
+            <a-switch v-model:checked="viewForm.blendFlag" />
           </div>
         </template>
         <div v-if="viewForm.blendFlag">
@@ -113,7 +180,7 @@
               >
                 <div v-if="fileList.length < 5">
                   <plus-outlined />
-                  <div style="margin-top: 8px">上传图片</div>
+                  <div style="margin-top: 8px"> 上传图片</div>
                 </div>
               </a-upload>
             </a-col>
@@ -143,106 +210,168 @@
       <!-- 垫图 E-->
 
       <!-- 风格参考 B-->
-      <a-card size="small" :bordered="true" :bodyStyle="{ padding: '5px' }" class="ar-card2">
+      <a-card
+        size="small"
+        :bordered="true"
+        :bodyStyle="{ padding: '5px' }"
+        class="ar-card2"
+        v-if="paramDataValue.version === 'v 6' || paramDataValue.version === 'niji 6'"
+      >
         <template #title>
           <div class="ar-card-title-be">
             <div>
-              <span style="font-weight: bold">风格参考</span>
+              <span style="font-weight: bold"
+                ><Icon icon="streamline-emojis:rainbow" /> 风格参考</span
+              >
               <a-tooltip title="让MJ按参考图的风格进行绘制。仅niji6 和 v6 适用" trigger="click">
                 <ExclamationCircleOutlined style="margin-left: 5px; cursor: pointer" />
               </a-tooltip>
             </div>
-            <Icon
-              v-if="viewForm.srefFlag"
-              @click="changeViewForm('srefFlag')"
-              icon="pepicons-pop:eye-circle"
-              class="vel-icon icon"
-              aria-hidden="true"
-            />
-
-            <Icon
-              v-else
-              @click="changeViewForm('srefFlag')"
-              icon="pepicons-pop:eye-closed-circle"
-              class="vel-icon icon"
-              aria-hidden="true"
-            />
+            <a-switch v-model:checked="viewForm.srefFlag" />
           </div>
         </template>
+        <div v-if="viewForm.srefFlag">
+          <a-row style="margin-top: 3px">
+            <a-col span="24" ref="blendStep">
+              <a-upload
+                v-model:file-list="srefFileList"
+                :action="uploadInfo.url"
+                :multiple="false"
+                :maxCount="5"
+                :headers="{ Authorization: uploadInfo.token }"
+                list-type="picture"
+                :before-upload="beforeSrefUpload"
+                @preview="handlePreview"
+                @change="handleSrefChange"
+                :withCredentials="true"
+              >
+                <a-button size="small" style="margin-bottom: 5px">
+                  <Icon
+                    icon="mdi:upload-box"
+                    v-if="srefFileList === null || srefFileList.size <= 5"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                  />上传图片
+                </a-button>
+                <template #itemRender="{ file, actions }">
+                  <a-row style="align-items: center; margin-top: 3px; border-radius: 4px">
+                    <a-col flex="70px">
+                      <a-card :bodyStyle="{ padding: '2px' }">
+                        <a-image :width="60" :height="60" :src="file.thumbUrl" />
+                      </a-card>
+                    </a-col>
 
-        <a-row style="margin-top: 10px" v-if="viewForm.srefFlag">
-          <a-col span="24" ref="blendStep">
-            <a-upload
-              v-model:file-list="srefFileList"
-              :action="uploadInfo.url"
-              :multiple="true"
-              :headers="{ Authorization: uploadInfo.token }"
-              list-type="picture-card"
-              @preview="handlePreview"
-              :withCredentials="true"
-              style="display: flex; align-items: flex-start; justify-content: flex-start"
-            >
-              <div v-if="srefFileList.length < 5">
-                <plus-outlined />
-                <div style="margin-top: 8px">上传图片</div>
-              </div>
-            </a-upload>
-          </a-col>
-        </a-row>
+                    <a-col flex="auto">
+                      <a-row style="padding: 5px" v-if="file.status === 'done'">
+                        <a-col flex="auto" style="align-items: center">
+                          <span
+                            style="
+                              display: flex;
+                              align-items: center;
+                              justify-content: start;
+                              margin-right: 0;
+                              font-size: 14px;
+                            "
+                            >权重
+                            <a-tooltip title="--iw 值越高，上传的图像对最终效果的影响就越大">
+                              <ExclamationCircleOutlined class="icon-hint" />
+                            </a-tooltip>
+                          </span>
+                          <a-slider
+                            @change="onChangeUploadIw(file, $event)"
+                            style="margin-left: 3px"
+                            :min="0.25"
+                            :step="0.05"
+                            :max="2"
+                          />
+                        </a-col>
+                        <a-col
+                          flex="50px"
+                          style="display: flex; align-items: center; justify-content: center"
+                        >
+                          <a href="javascript:;" @click="actions.remove">
+                            <Icon color="red" icon="fluent:delete-32-filled"
+                          /></a>
+                        </a-col>
+                      </a-row>
+                      <a-row style="padding: 5px" v-if="file.status === 'error'">
+                        <a-col flex="auto" style="align-items: center">
+                          <span
+                            style="
+                              display: flex;
+                              align-items: center;
+                              justify-content: start;
+                              margin-right: 0;
+                              font-size: 14px;
+                            "
+                          >
+                            抱歉、文件上传失败咯~
+                          </span>
+                        </a-col>
+                        <a-col
+                          flex="50px"
+                          style="display: flex; align-items: center; justify-content: center"
+                        >
+                          <a href="javascript:;" @click="actions.remove">
+                            <Icon color="red" icon="fluent:delete-32-filled"
+                          /></a>
+                        </a-col>
+                      </a-row>
+                      <a-row style="padding: 5px" v-if="file.status === 'uploading'">
+                        <a-col flex="auto" style="align-items: center">
+                          <span
+                            style="
+                              display: flex;
+                              align-items: center;
+                              justify-content: start;
+                              margin-left: 25px;
+                              font-size: 14px;
+                            "
+                          >
+                            正在上传中...
+                          </span>
+                        </a-col>
+                        <a-col
+                          flex="50px"
+                          style="display: flex; align-items: center; justify-content: center"
+                        >
+                          <a href="javascript:;" @click="actions.remove">
+                            <Icon color="red" icon="fluent:delete-32-filled"
+                          /></a>
+                        </a-col>
+                      </a-row>
+                    </a-col>
+                  </a-row>
+                </template>
+              </a-upload>
+            </a-col>
+          </a-row>
+          <a-row
+            class="row-wapper"
+            style="margin-bottom: 5px"
+            v-if="paramDataValue.version === 'v 6' || paramDataValue.version === 'niji 6'"
+          >
+            <a-col span="7" style="display: flex; align-items: center; justify-content: start">
+              <span class="quality-tag"
+                >整体风格
+                <a-tooltip title="--sw 值越高,整体风格混合度越高~">
+                  <ExclamationCircleOutlined class="icon-hint" />
+                </a-tooltip>
+              </span>
+            </a-col>
+            <a-col :span="17">
+              <a-slider
+                style="margin-left: 8px"
+                v-model:value="paramDataValue.sw"
+                :min="0"
+                :step="1"
+                :max="1000"
+              />
+            </a-col>
+          </a-row>
+        </div>
       </a-card>
       <!-- 风格参考 E-->
-
-      <!-- 辅助工具 B-->
-      <a-card
-        size="small"
-        :bordered="true"
-        ref="toolsStep"
-        :bodyStyle="{ padding: '5px' }"
-        class="ar-card2"
-      >
-        <template #title>
-          <div class="ar-card2-title">
-            <span style="font-weight: bold">辅助工具</span>
-          </div>
-        </template>
-        <a-row>
-          <a-col span="8">
-            <a-button style="width: 100%" size="small" @click="openTranslate"
-              ><SvgIcon name="translate" />中英翻译</a-button
-            >
-          </a-col>
-          <a-col span="8">
-            <a-button style="width: 100%" size="small" @click="openAiPrompt"
-              ><SvgIcon name="gpt" />AI生成</a-button
-            >
-          </a-col>
-          <a-col span="8">
-            <a-button style="width: 100%" size="small" @click="openDrawerInC">
-              <SvgIcon name="book" /> Prompt宝典</a-button
-            >
-          </a-col>
-        </a-row>
-        <a-row style="margin-top: 5px">
-          <a-input-group compact style="display: flex">
-            <a-tooltip title="可以给你的任务打上标签，便于分类查找">
-              <a-tag class="line-label tag-no-right-border" style="height: 74px" color="default"
-                >任务标签</a-tag
-              >
-            </a-tooltip>
-
-            <a-mentions
-              class="line-input"
-              style="height: 74px"
-              v-model:value="textToImgForm.tagName"
-              rows="3"
-              placeholder="标签配置：用@可触发最近的标签！多个标签'空格符'隔开,最多5个。每个长度不超过16个字。~"
-              :options="textToImgForm.tagNameOptions"
-              @select="onChangeLabel"
-            />
-          </a-input-group>
-        </a-row>
-      </a-card>
-      <!-- 辅助工具 E-->
 
       <!-- 任务标签 B-->
       <a-card
@@ -263,21 +392,7 @@
                   <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
               ></span>
             </div>
-            <Icon
-              v-if="viewForm.accountFlag"
-              @click="changeViewForm('accountFlag')"
-              icon="pepicons-pop:eye-circle"
-              class="vel-icon icon"
-              aria-hidden="true"
-            />
-
-            <Icon
-              v-else
-              @click="changeViewForm('accountFlag')"
-              icon="pepicons-pop:eye-closed-circle"
-              class="vel-icon icon"
-              aria-hidden="true"
-            />
+            <a-switch v-model:checked="viewForm.accountFlag" />
           </div>
         </template>
         <div v-if="viewForm.accountFlag">
@@ -365,6 +480,25 @@
               </a-select>
             </a-input-group>
           </a-row>
+          <a-row style="margin-top: 5px">
+            <a-input-group compact style="display: flex">
+              <a-tooltip title="可以给你的任务打上标签，便于分类查找">
+                <a-tag class="line-label tag-no-right-border" style="height: 74px" color="default"
+                  >任务标签</a-tag
+                >
+              </a-tooltip>
+
+              <a-mentions
+                class="line-input"
+                style="height: 74px"
+                v-model:value="textToImgForm.tagName"
+                rows="3"
+                placeholder="标签配置：用@可触发最近的标签！多个标签'空格符'隔开,最多5个。每个长度不超过16个字。~"
+                :options="textToImgForm.tagNameOptions"
+                @select="onChangeLabel"
+              />
+            </a-input-group>
+          </a-row>
           <a-row class="row-wapper">
             <a-col span="9" style="display: flex; align-items: center; justify-content: center">
               <span class="quality-tag"
@@ -387,16 +521,29 @@
       <!-- 图片比例 B-->
       <a-card size="small" :bordered="true" :bodyStyle="{ padding: '5px' }" class="ar-card2">
         <template #title>
-          <div class="ar-card2-title">
-            <span style="font-weight: bold">画图比例</span>
-            <a-tooltip title="关系到最终生成的图片比例" trigger="click">
-              <ExclamationCircleOutlined style="margin-left: 5px; cursor: pointer" />
-            </a-tooltip>
+          <div class="ar-card-title-be">
+            <div>
+              <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
+                ><Icon icon="streamline-emojis:bouquet" /> 画图比例
+                <a-tooltip title="这个参数用于设置最终生成的图片比例">
+                  <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
+              ></span>
+            </div>
+            <a-switch v-model:checked="viewForm.arFlag" />
           </div>
         </template>
-
-        <a-row :gutter="2">
-          <a-col v-for="option in options" :key="option.id" :span="option.span" class="ar-item">
+        <a-row v-if="viewForm.arFlag">
+          <a-card-grid
+            v-for="option in options"
+            :key="option.id"
+            :span="option.span"
+            class="ar-item"
+            :style="{
+              width: isEditing && option.id === 90 ? '50%' : '25%',
+              'text-align': 'center',
+              'border-radius': '4px',
+            }"
+          >
             <div
               v-if="isEditing && option.id === 90"
               class="border-wapper"
@@ -447,15 +594,18 @@
               </a-row>
             </div>
 
-            <a-tag
+            <div
               v-else
               @click="selectOption(option)"
               :color="selectedOption === option.id ? 'blue' : 'default'"
               class="ar-item-tag"
+              style="display: flex; align-items: center; justify-content: center"
             >
-              {{ option.X }}:{{ option.Y }}<br />{{ option.label }}
-            </a-tag>
-          </a-col>
+              <span style="font-size: 12px">
+                {{ option.X }}:{{ option.Y }}<br />{{ option.label }}
+              </span>
+            </div>
+          </a-card-grid>
         </a-row>
       </a-card>
       <!-- 图片比例 E-->
@@ -471,7 +621,9 @@
         <template #title>
           <div class="ar-card-title-be">
             <div>
-              <span style="font-weight: bold">模型选择</span>
+              <span style="font-weight: bold">
+                <Icon icon="streamline-emojis:fuel-pump" /> 模型选择</span
+              >
               <a-tooltip
                 title="不一样的模型会有不一样的出图效果以及不一样的参数支持。Niji模型在动漫风格这块有很好的效果~"
                 trigger="click"
@@ -479,21 +631,7 @@
                 <ExclamationCircleOutlined style="margin-left: 5px; cursor: pointer" />
               </a-tooltip>
             </div>
-            <Icon
-              v-if="viewForm.modeFlag"
-              @click="changeViewForm('modeFlag')"
-              icon="pepicons-pop:eye-circle"
-              class="vel-icon icon"
-              aria-hidden="true"
-            />
-
-            <Icon
-              v-else
-              @click="changeViewForm('modeFlag')"
-              icon="pepicons-pop:eye-closed-circle"
-              class="vel-icon icon"
-              aria-hidden="true"
-            />
+            <a-switch v-model:checked="viewForm.modeFlag" />
           </div>
         </template>
 
@@ -1156,18 +1294,23 @@
       </a-card>
       <!-- 模型选择 E-->
 
-      <!-- 不想出现的参数 B-->
+      <!-- 不想出现的参数  B-->
       <a-card size="small" :bordered="true" :bodyStyle="{ padding: '5px' }" class="ar-card2">
         <template #title>
-          <div class="ar-card2-title">
-            <span style="font-weight: bold">反向关键词</span>
-            <a-tooltip title="不想出现的关键词" trigger="click">
-              <ExclamationCircleOutlined style="margin-left: 5px; cursor: pointer" />
-            </a-tooltip>
+          <div class="ar-card-title-be">
+            <div>
+              <span style="font-weight: bold">
+                <Icon icon="streamline-emojis:cross-mark" /> 反向关键词
+              </span>
+              <a-tooltip title="不想出现的场景关键词">
+                <ExclamationCircleOutlined />
+              </a-tooltip>
+            </div>
+            <a-switch v-model:checked="viewForm.noParamFlag" />
           </div>
         </template>
 
-        <a-row :gutter="2">
+        <a-row :gutter="2" v-if="viewForm.noParamFlag">
           <a-col span="24" class="ar-item">
             <a-textarea
               v-model:value="paramDataValue.no"
@@ -1182,15 +1325,18 @@
       <!-- 高级参数 B-->
       <a-card
         size="small"
+        style="margin-bottom: 3px"
         :bordered="true"
-        :bodyStyle="{ padding: '5px', width: '100%' }"
+        :bodyStyle="{ padding: '5px', width: '100%', 'margin-bottom': '3px' }"
         class="ar-card2"
         ref="modeStep"
       >
         <template #title>
           <div class="ar-card-title-be">
             <div>
-              <span style="font-weight: bold">模型选择</span>
+              <span style="font-weight: bold"
+                ><Icon icon="streamline-emojis:tiger-face" /> 高级参数</span
+              >
               <a-tooltip
                 title="不一样的模型会有不一样的出图效果以及不一样的参数支持。Niji模型在动漫风格这块有很好的效果~"
                 trigger="click"
@@ -1198,26 +1344,12 @@
                 <ExclamationCircleOutlined style="margin-left: 5px; cursor: pointer" />
               </a-tooltip>
             </div>
-            <Icon
-              v-if="viewForm.highFlag"
-              @click="changeViewForm('highFlag')"
-              icon="pepicons-pop:eye-circle"
-              class="vel-icon icon"
-              aria-hidden="true"
-            />
-
-            <Icon
-              v-else
-              @click="changeViewForm('highFlag')"
-              icon="pepicons-pop:eye-closed-circle"
-              class="vel-icon icon"
-              aria-hidden="true"
-            />
+            <a-switch v-model:checked="viewForm.highFlag" />
           </div>
         </template>
 
         <div v-if="viewForm.highFlag">
-          <a-row style="margin-top: 10px">
+          <a-row>
             <a-input-group compact style="display: flex">
               <a-tooltip
                 title="Midjourney机器人使用种子数字来创建一个视觉噪声字段，如电视静态，作为生成初始图像网格的起点。每个图像随机生成种子数字，但可以使用--seed或--sameseed参数指定。使用相同的种子数字和提示将产生相似的结束图像。"
@@ -1816,6 +1948,7 @@
             paramsStr: concatenatedTags.value,
             mode: accountForm.mode,
             enableTranslate: textToImgForm.enableTranslate,
+            sref: srefUrls,
           },
         };
 
@@ -1864,7 +1997,8 @@
     upbeta: false,
     uplight: false,
     version: 'niji 5',
-    sref: [],
+    sref: null,
+    sw: null,
   });
 
   // AR 选项
@@ -2044,7 +2178,21 @@
       versionParam.value.v51.iw = paramDataValue.value.iw;
       versionParam.value.v52.iw = paramDataValue.value.iw;
       versionParam.value.v6.iw = paramDataValue.value.iw;
+      versionParam.value.niji6.iw = paramDataValue.value.iw;
     }
+  };
+
+  const onChangeUploadIw = (file, event) => {
+    console.log('onChangeUploadIw');
+    const newIwValue = event;
+    file.iw = newIwValue;
+    paramDataValue.value.sref = getSuccessFileUrlStr(srefFileList.value);
+    // srefFileList.value.forEach((item) => {
+    //   // 获取上传成功的文件数据
+    //   if (item.status === 'done' && item.response) {
+    //     item.iw = newIwValue; //改为你想获取的数据格式
+    //   }
+    // });
   };
 
   //初始化数据
@@ -2153,6 +2301,8 @@
     accountFlag: false,
     modeFlag: true,
     highFlag: false,
+    arFlag: false,
+    noParamFlag: false,
   });
 
   const changeViewForm = (key) => {
@@ -2180,6 +2330,13 @@
 
   const handleSrefChange = async (info: { file: UploadFile; fileList: UploadFile[] }) => {
     console.log('handleChange'); // 日志输出
+    if (info.file.status === 'done') {
+      if (info.file.response.result === null) {
+        info.file.status = 'error';
+      } else {
+        paramDataValue.value.sref = getSuccessFileUrlStr(srefFileList.value);
+      }
+    }
   };
 
   // 获取上传成功的文件 url 数组
@@ -2188,12 +2345,45 @@
     list.forEach((item) => {
       // 获取上传成功的文件数据
       if (item.status === 'done' && item.response) {
-        urls.push(item.response.result); //改为你想获取的数据格式
+        urls.push(item.response.result + ' ::' + item.iw); //改为你想获取的数据格式
       }
     });
     return urls;
   };
 
+  const getSuccessFileUrlStr = (list) => {
+    let urls = '';
+    list.forEach((item) => {
+      if (item.iw) {
+        urls = urls + item.response.result + ' ::' + item.iw + ' ';
+      } else {
+        urls = urls + item.response.result + ' ';
+      }
+    });
+    return urls;
+  };
+
+  const beforeSrefUpload = async (file: File) => {
+    try {
+      // 判断是否为图片
+      const isImage = file.type.startsWith('image/');
+      if (!isImage) {
+        throw new Error('只能上传图片文件！');
+      }
+      // 获取图片文件的大小
+      const isLt5M = file.size / 1024 / 1024 < 5;
+      if (!isLt5M) {
+        throw new Error('图片大小不能超过5MB！');
+      }
+    } catch (error) {
+      console.error('Error converting to Base64:', error);
+      // 弹出异常消息
+      message.error(error.message);
+      //移除这个文件
+      return Upload.LIST_IGNORE;
+    }
+    return true;
+  };
   /************************漫游引导********************** */
   const promptStep = ref(null);
   const blendStep = ref(null);
@@ -2265,6 +2455,13 @@
 
   // 导出此方法以便外部访问
   defineExpose({ textToImageStepOpen });
+
+  const truncateText = (text) => {
+    if (text.length > 60) {
+      return text.slice(0, 60) + '...';
+    }
+    return text;
+  };
 </script>
 <style scoped>
   /* 媒体查询 */

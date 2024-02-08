@@ -6,7 +6,7 @@
           <div class="menu-content">
             <div
               ><Icon class="vel-icon icon" icon="pepicons-pencil:paint-pallet" size="16" />
-              绘图</div
+              绘画</div
             >
           </div>
         </a-menu-item>

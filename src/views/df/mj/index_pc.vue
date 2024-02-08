@@ -499,7 +499,7 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { discordApi } from './discord';
   import { spaceInfoApi, systemInfoApi } from './index';
-  import { getCustomCache, setCustomCache } from '/@/utils/custom';
+  import { getCustomLocalCache, setCustomLocalCache } from '/@/utils/custom';
   import { MJ_DRAW_TOUR } from '/@/enums/cacheEnum';
 
   const {
@@ -720,13 +720,13 @@
   });
 
   const indexStepOpen = async (val: boolean): void => {
-    // if (val === true) {
-    //   const needShow = getCustomCache(MJ_DRAW_TOUR);
-    //   if (needShow && needShow === true) {
-    //     return;
-    //   }
-    //   setCustomCache(MJ_DRAW_TOUR, true);
-    // }
+    if (val === true) {
+      const needShow = getCustomLocalCache(MJ_DRAW_TOUR);
+      if (needShow && needShow === true) {
+        return;
+      }
+      setCustomLocalCache(MJ_DRAW_TOUR, true);
+    }
 
     // const resp = await userStep({ content: 'MJ_DRAW_TOUR' });
     // if (resp) {

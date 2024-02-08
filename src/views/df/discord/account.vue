@@ -1299,7 +1299,7 @@
   import { discordApi } from './discord';
   import { useGo } from '/@/hooks/web/usePage';
   import { func } from 'vue-types';
-  import { getCustomCache, setCustomCache } from '/@/utils/custom';
+  import { getCustomLocalCache, setCustomLocalCache } from '/@/utils/custom';
   import { MJ_ACCOUNT_TOUR } from '/@/enums/cacheEnum';
   import { userStep } from '/@/api/df/user';
 
@@ -1838,13 +1838,13 @@
   });
 
   const accountStepOpen = async (val) => {
-    // if (val === true) {
-    //   const needShow = getCustomCache(MJ_ACCOUNT_TOUR);
-    //   if (needShow && needShow === true) {
-    //     return;
-    //   }
-    //   setCustomCache(MJ_ACCOUNT_TOUR, true);
-    // }
+    if (val === true) {
+      const needShow = getCustomLocalCache(MJ_ACCOUNT_TOUR);
+      if (needShow && needShow === true) {
+        return;
+      }
+      setCustomLocalCache(MJ_ACCOUNT_TOUR, true);
+    }
 
     // const resp = await userStep({ content: 'MJ_ACCOUNT_TOUR' });
     // if (resp) {
