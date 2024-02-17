@@ -15,90 +15,105 @@
         </div>
       </a-upload>
 
-      <a-divider orientation="left" />
+      <a-divider orientation="left" style="margin-top:10px; margin-bottom:10px"/>
 
-      <a-row style="margin-top: 10px">
-        <a-col span="6">
-          <a-tooltip title="这个属性代表最终生成图片的比例">
-            <a-tag class="quality-tag tag-no-right-border" color="default">尺 寸</a-tag>
-          </a-tooltip>
-        </a-col>
-        <a-col span="18">
+      <a-row style="margin-top: 5px">
+        <a-input-group compact style="display: flex">
+          <a-tooltip title="这个属性代表最终生成图片的比例~">
+            <a-tag class="line-label tag-no-right-border" color="default"
+              >尺 寸
+            </a-tag></a-tooltip
+          >
+
           <a-select
-            style="width: 100%; height: 32px"
+            class="line-input tag-no-right-border"
+          
             v-model:value="compRender.dimensionSelector.value"
             :size="compRender.dimensionSelector.size"
             :options="compRender.dimensionSelector.options"
-          />
-        </a-col>
+          >
+          </a-select>
+        </a-input-group>
       </a-row>
-      <a-row style="margin-top: 10px">
-        <a-col span="6">
+
+      <a-row style="margin-top: 5px">
+        <a-input-group compact style="display: flex">
           <a-tooltip title="niji机器人在处理二次元方面有很大的优势~">
-            <a-tag class="quality-tag tag-no-right-border" color="default">机器人</a-tag>
-          </a-tooltip>
-        </a-col>
-        <a-col span="18">
+            <a-tag class="line-label tag-no-right-border" color="default"
+              >机器人
+            </a-tag></a-tooltip
+          >
+
           <a-select
-            style="width: 100%; height: 32px"
+            class="line-input tag-no-right-border"
+          
             v-model:value="compRender.robotSelect.value"
             :size="compRender.robotSelect.size"
             :options="compRender.robotSelect.options"
-          />
-        </a-col>
+          >
+            
+          </a-select>
+        </a-input-group>
       </a-row>
-      <a-row style="margin-top: 10px">
-        <a-col span="6">
-          <a-tooltip title="不指定账号的话，随机根据账号现有负载情况选择资源最空的一个账号">
-            <a-tag class="quality-tag tag-no-right-border" color="default">执行账号</a-tag>
+      <a-row style="margin-top: 5px">
+        <a-input-group compact style="display: flex">
+          <a-tooltip
+            title="不指定账号的话，随机根据账号现有负载情况选择资源最空的一个账号，优先默认账号。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
+          >
+            <a-tag class="line-label tag-no-right-border" color="default">执行账号</a-tag>
           </a-tooltip>
-        </a-col>
-        <a-col span="18">
+
           <a-select
+            class="line-input tag-no-right-border"
             @change="handleAccountSetting"
-            style="width: 100%; height: 32px"
             placeholder="随机选取账号，优先默认"
             v-model:value="accountForm.useAccountId"
             :size="accountViewForm.accountSelector.size"
             :options="accountViewForm.accountSelector.options"
           />
-        </a-col>
+        </a-input-group>
       </a-row>
-      <a-row style="margin-top: 10px" v-if="accountForm.useAccountId">
-        <a-col span="6">
+      <a-row style="margin-top: 5px" v-if="accountForm.useAccountId">
+        <a-input-group compact style="display: flex">
           <a-tooltip
             title="不指定频道的话，默认账户组中的频道。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
           >
-            <a-tag class="quality-tag tag-no-right-border" color="default">执行频道</a-tag>
+            <a-tag class="line-label tag-no-right-border" color="default">执行频道</a-tag>
           </a-tooltip>
-        </a-col>
 
-        <a-col span="18">
           <a-select
+            class="line-input tag-no-right-border"
             @change="handleChannelSetting"
-            style="width: 100%"
             placeholder="请选择ChannelId"
             v-model:value="accountForm.useChannelId"
             :size="accountViewForm.accountSelector.size"
             :options="accountViewForm.channelSelector.options"
           />
-        </a-col>
+        </a-input-group>
       </a-row>
-      <a-row style="margin-top: 10px">
-        <a-col span="6">
-          <a-tooltip title="这个基本参数我就不说了，慢->快->超快！！！">
-            <a-tag class="quality-tag tag-no-right-border" color="default"
-              >执行模式 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
-          ></a-tooltip>
-        </a-col>
-        <a-col span="18">
-          <a-select v-model:value="accountForm.mode" style="width: 100%; height: 32px">
+      <a-row style="margin-top: 5px">
+        <a-input-group compact style="display: flex">
+          <a-tooltip
+            title="休闲模式->快速模式->涡轮模式 速度依次递增。这里的模式是会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
+          >
+            <a-tag class="line-label tag-no-right-border" color="default"
+              >执行模式
+            </a-tag></a-tooltip
+          >
+
+          <a-select
+            class="line-input tag-no-right-border"
+            placeholder="默认休闲模式"
+            v-model:value="accountForm.mode"
+          >
+            <!-- <a-select-option>不设置</a-select-option> -->
             <a-select-option value="relax">休闲模式</a-select-option>
             <a-select-option value="fast">快速模式</a-select-option>
             <a-select-option value="turbo">涡轮模式</a-select-option>
           </a-select>
-        </a-col>
+        </a-input-group>
       </a-row>
+
       <a-row style="margin-top: 10px">
         <a-col span="24">
           <a-card>
@@ -342,7 +357,6 @@
   }
 
   .bottom-button {
-    right: 8px;
     bottom: 0;
     width: 100%;
 
@@ -395,5 +409,21 @@
 
   .no-preview-icon >>> .ant-upload-list-item-actions .anticon-eye {
     display: none;
+  }
+
+  
+  .line-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 25%;
+    height: 32px;
+    margin-right: 0;
+    font-size: 15px;
+  }
+
+  .line-input {
+    width: 75%;
+    height: 32px;
   }
 </style>

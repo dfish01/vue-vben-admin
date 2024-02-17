@@ -2352,39 +2352,39 @@
       {
         title: '辅助工具',
         description: '内嵌了翻译、AI联想、3600+风格，无需再单独查找了，尽情使用吧。',
-        placement: 'bottom',
+        placement: 'top',
         target: () => toolsStep.value && toolsStep.value.$el,
       },
       {
         title: '运行账户',
         description:
           '选择相关的执行账户、频道以及执行模式，这里的配置会使用到全局，包括收藏页面。如果未配置账户，请到账户菜单查看哦~',
-        placement: 'up',
+        placement: 'top',
         target: () => accountStep.value && accountStep.value.$el,
       },
       {
         title: '提示词属性',
         description:
           '这里时系统附带的属性，包括你选择的相关风格都会显示在这里。注意：想要使用这里的属性，请勿在Prompt内填写相关的--属性',
-        placement: 'up',
+        placement: 'top',
         target: () => attrStep.value && attrStep.value.$el,
       },
       {
         title: '模型选择',
         description:
           '这里留下了最流行的模型，比如v4之类的当前版本已经隐藏。niji是动漫风格，V5、V6写实效果优秀。大家多试试看！',
-        placement: 'up',
+        placement: 'top',
         target: () => modeStep.value && modeStep.value.$el,
       },
-      {
-        title: '其他属性',
-        description: '还有一些其他属性，大家自己看描述尝试下吧！',
-        placement: 'center',
-      },
+      // {
+      //   title: '其他属性',
+      //   description: '还有一些其他属性，大家自己看描述尝试下吧！',
+      //   placement: 'center',
+      // },
       {
         title: '提交任务',
         description: '点击提交，即可开始你的第一次绘画！',
-        placement: 'up',
+        placement: 'top',
         target: () => button.value && button.value.$el,
       },
     ],
@@ -2468,7 +2468,6 @@
   }
 
   .bottom-button {
-    right: 5px;
     bottom: 0;
     width: 100%;
 

@@ -57,62 +57,86 @@
         <a-badge-ribbon :text="getStateText(card)" :color="getStateColor(card)">
           <a-card :bodyStyle="{ padding: '0px' }" class="card" hoverable>
             <!-- <a-image :src="card.imageUrl" class="card-image" preview="false" fallback="" /> -->
-            <template #extra>
-              <div
-                style="
-                  display: flex;
-                  flex-direction: row;
-                  justify-content: space-between;
-                  width: 250px;
-                "
-              >
-                <div style="justify-content: left">
-                  <span>🪧{{ card.goodsTitle }}</span>
-                </div>
-              </div>
-            </template>
+
             <div style="display: flex; flex-direction: column; padding: 10px">
               <a-row class="card-tags">
                 <span>
-                  ⚡商品名称：
-                  <span style="font-weight: bolder">{{ card.goodsTitle }}</span>
-                </span>
-              </a-row>
-              <a-row class="card-tags">
-                <span>
-                  ⚡订单类型：
-                  <span style="font-weight: bolder">{{
-                    card.orderType === 'GROUP' ? '拼团' : '单品'
-                  }}</span></span
+                  <Icon icon="mdi:tag" class="vel-icon icon" aria-hidden="true" />交易名称：
+                  <span style="font-weight: bolder">{{ card.goodsTitle }}</span></span
                 >
               </a-row>
               <a-row class="card-tags">
                 <span>
-                  📅下单时间：
-                  <span style="font-weight: bolder">{{ card.gmtCreate }}</span></span
+                  <Icon
+                    icon="fluent-mdl2:tag-unknown"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                  />订单类型：
+                  <span style="font-weight: bolder">{{ card.tradeTypeStr }}</span></span
                 >
               </a-row>
               <a-row class="card-tags">
                 <span>
-                  📅支付时间：
-                  <span style="font-weight: bolder">{{ card.gmtPay }}</span></span
+                  <Icon
+                    icon="mdi:state-machine"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                  />订单状态：
+                  <span style="font-weight: bolder">
+                    <a-tag :color="getStateColor(card)">{{ getStateText(card) }} </a-tag>
+                  </span></span
+                >
+              </a-row>
+
+              <a-row class="card-tags">
+                <span>
+                  <Icon
+                    icon="mdi:timer-sync-outline"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                  />下单时间： <span>{{ card.gmtCreate }}</span></span
+                >
+              </a-row>
+              <a-row class="card-tags">
+                <span>
+                  <Icon
+                    icon="ic:outline-timer"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                  />支付时间： <span>{{ getPayTimeText(card) }}</span></span
                 >
               </a-row>
               <a-row class="card-tags">
                 <a-col :span="24" v-if="card.state === 'WAIT_PAY'">
-                  <a-button @click="payOrder(card)" style="width: 50%">立即支付 </a-button>
-                  <a-button @click="cancelOrder(card)" style="width: 50%">取消交易 </a-button>
+                  <a-button-group style="width: 100%">
+                    <a-button type="primary" @click="payOrder(card)" style="width: 50%"
+                      >立即支付
+                    </a-button>
+                    <a-button @click="cancelOrder(card)" style="width: 50%">取消交易 </a-button>
+                  </a-button-group>
                 </a-col>
                 <a-col :span="24" v-if="card.state === 'WAIT_SEND'">
-                  <a-button @click="openSpeedSend(card)" style="width: 50%">催发货 </a-button>
-                  <a-button @click="openAfterSaleView(card)" style="width: 50%">联系客服 </a-button>
+                  <a-button-group style="width: 100%">
+                    <a-button type="warning" @click="openSpeedSend(card)" style="width: 50%"
+                      >催发货
+                    </a-button>
+                    <a-button @click="openAfterSaleView(card)" style="width: 50%"
+                      >联系客服
+                    </a-button>
+                  </a-button-group>
                 </a-col>
                 <a-col :span="24" v-if="card.state === 'CANCEL'">
-                  <a-button @click="reBuyGoods(card)" style="width: 100%">重新购买</a-button>
+                  <a-button type="primary" @click="reBuyGoods(card)" style="width: 100%"
+                    >重新购买</a-button
+                  >
                 </a-col>
                 <a-col :span="24" v-if="card.state === 'FINISHED' || card.state === 'CLOSED'">
-                  <a-button @click="reBuyGoods(card)" style="width: 50%">再来一单</a-button>
-                  <a-button @click="openDeliverInfo(card)" style="width: 50%">发货信息</a-button>
+                  <a-button-group style="width: 100%">
+                    <a-button type="primary" @click="reBuyGoods(card)" style="width: 50%"
+                      >再来一单</a-button
+                    >
+                    <a-button @click="openDeliverInfo(card)" style="width: 50%">发货信息</a-button>
+                  </a-button-group>
                 </a-col>
               </a-row>
             </div>
@@ -231,6 +255,7 @@
   import { ref, onMounted, onUnmounted, computed, unref, toRefs, watch } from 'vue';
   import { QrCode, QrCodeActionType } from '/@/components/Qrcode/index';
   import LogoImg from '/logo.png';
+  import Icon from '/@/components/Icon/Icon.vue';
   import { SvgIcon } from '/@/components/Icon';
   import {
     DeleteOutlined,
@@ -263,7 +288,6 @@
   import { afterSaleInfo } from '/@/api/df/utils';
   import { message, Empty } from 'ant-design-vue';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
-  import Icon from '/@/components/Icon/Icon.vue';
   import { useGo } from '/@/hooks/web/usePage';
   import { MarkdownViewer } from '/@/components/Markdown';
 
@@ -328,6 +352,24 @@
         return '关闭';
       default:
         return '其他';
+    }
+  };
+
+  const getPayTimeText = (card) => {
+    //CREATE','WAIT_PAY','WAIT_SEND','FINISHED','CNACEL','CLOSED
+    switch (card.state) {
+      case 'WAIT_PAY':
+        return '等待支付中...';
+      case 'WAIT_SEND':
+        return card.gmtPay;
+      case 'FINISHED':
+        return card.gmtPay;
+      case 'CANCEL':
+        return '订单已取消.';
+      case 'CLOSED':
+        return '订单已关闭.';
+      default:
+        return card.gmtPay;
     }
   };
 

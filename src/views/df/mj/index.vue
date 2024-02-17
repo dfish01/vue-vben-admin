@@ -1,6 +1,5 @@
 <template>
-  <IndexMobile v-if="getIsMobile" />
-  <IndexPc v-else style="overflow-y: hidden" />
+  <IndexPc style="overflow-y: hidden" />
 </template>
 
 <script lang="ts" setup>

@@ -1329,7 +1329,6 @@
         :bordered="true"
         :bodyStyle="{ padding: '5px', width: '100%', 'margin-bottom': '3px' }"
         class="ar-card2"
-        ref="modeStep"
       >
         <template #title>
           <div class="ar-card-title-be">
@@ -2519,7 +2518,6 @@
   }
 
   .bottom-button {
-    right: 8px;
     bottom: 0;
     width: 100%;
 

@@ -208,14 +208,14 @@
     <div
       v-if="cards.length === 0"
       style="display: flex; align-items: center; justify-content: center"
-      :style="{ height: `calc(${contentHeight}px - 50px)`, overflow: 'auto' }"
+      :style="{ height: `calc(${contentHeight}px - 55px)`, overflow: 'auto' }"
     >
       <a-empty :image="simpleImage" />
     </div>
     <div
       v-else
       class="cards"
-      :style="{ height: `calc(${contentHeight}px - 50px)`, overflow: 'auto' }"
+      :style="{ height: `calc(${contentHeight}px - 52px)`, overflow: 'auto' }"
     >
       <div ref="cardListRef" v-for="card in cards" :key="card.id">
         <a-card :bodyStyle="{ padding: '0px' }" class="card" :hoverable="false">

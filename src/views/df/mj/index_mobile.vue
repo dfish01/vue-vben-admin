@@ -65,7 +65,12 @@
             </template>
 
             <a-tabs class="edit-tab" v-model="activeTab">
-              <a-tab-pane key="TextToImg" tab="🌕文生图">
+              <a-tab-pane key="TextToImg">
+                <template #tab>
+                  <span>
+                    <Icon icon="fluent:draw-image-24-filled" style="margin-right:1px" />文生图
+                  </span>
+                </template>
                 <TextToImage
                   ref="textToImageRef"
                   style="text-align: center"
@@ -73,14 +78,25 @@
                   @endLoading="endLoadingHandler"
                 />
               </a-tab-pane>
-              <a-tab-pane key="MixImage" tab="🌗混图">
+              <a-tab-pane key="MixImage">
+                <template #tab>
+                  <span>
+                    <Icon icon="fluent:image-table-16-filled" style="margin-right:1px" />混图
+                  </span>
+                </template>
+                
                 <Blend
                   @startLoading="startLoadingHandler"
                   @endLoading="endLoadingHandler"
                   style="width: 100%"
                 />
               </a-tab-pane>
-              <a-tab-pane key="Describe" tab="🌑解析图">
+              <a-tab-pane key="Describe">
+                <template #tab>
+                  <span>
+                    <Icon icon="fluent:image-search-24-filled" style="margin-right:1px" />解析图
+                  </span>
+                </template>
                 <Describe
                   @startLoading="startLoadingHandler"
                   @endLoading="endLoadingHandler"
