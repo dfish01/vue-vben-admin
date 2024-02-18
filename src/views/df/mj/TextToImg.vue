@@ -2335,6 +2335,8 @@
       } else {
         paramDataValue.value.sref = getSuccessFileUrlStr(srefFileList.value);
       }
+    }else if(info.file.status === 'removed') {
+      paramDataValue.value.sref = getSuccessFileUrlStr(srefFileList.value);
     }
   };
 
@@ -2457,7 +2459,7 @@
 
   const truncateText = (text) => {
     if (text.length > 60) {
-      return text.slice(0, 60) + '...';
+      return text.slice(0, 40) + '...';
     }
     return text;
   };
