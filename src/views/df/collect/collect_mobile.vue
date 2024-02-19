@@ -757,7 +757,7 @@
                               icon="fluent:scale-fill-24-regular"
                               size="14px"
                               style="margin: 0"
-                            />创意 (Creative)
+                            />重做-创意 (Creative)
                           </a-menu-item>
                           <a-menu-item
                             key="Redo Upscale (Subtle)"
@@ -767,7 +767,7 @@
                               icon="fluent:scale-fill-24-regular"
                               size="14px"
                               style="margin: 0"
-                            />细致 (Subtle)
+                            />重做-细致 (Subtle)
                           </a-menu-item>
                         </a-menu>
                       </template>
@@ -792,14 +792,14 @@
                               icon="ph:caret-up-bold"
                               size="14px"
                               style="margin: 0"
-                            />2倍</a-menu-item
+                            />重做-2倍</a-menu-item
                           >
                           <a-menu-item
                             key="Redo Upscale (4x)"
                             v-if="card.buttonMap['Redo Upscale (4x)']"
                             @click="($event) => handleU(card, 'Redo Upscale (4x)', 'upscale4')"
                             ><Icon icon="ph:caret-double-up-bold" size="14px" style="margin: 0" />
-                            4倍</a-menu-item
+                            重做-4倍</a-menu-item
                           >
                         </a-menu>
                       </template>
