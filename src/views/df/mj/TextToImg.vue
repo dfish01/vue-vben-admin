@@ -8,7 +8,7 @@
     :model="textToImgForm"
     :rules="rules"
   >
-    <div :style="{ height: `calc(${contentHeight}px - 1px`, overflow: 'auto' }">
+    <div :style="{ height: `calc(${contentHeight}px - 1px`, overflow: 'auto', padding:'0px 5px' }">
       <a-card
         size="small"
         :bordered="true"

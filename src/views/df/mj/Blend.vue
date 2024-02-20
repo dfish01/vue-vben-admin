@@ -1,6 +1,6 @@
 <template>
   <div style="text-align: left" ref="formRef">
-    <div :style="{ height: `calc(${contentHeight - 1}px`, overflow: 'auto', width: '100%' }">
+    <div :style="{ height: `calc(${contentHeight - 1}px`, overflow: 'auto', width: '100%', padding:'0px 5px' }">
       <a-upload
         v-model:file-list="fileList"
         :before-upload="beforeUpload"
