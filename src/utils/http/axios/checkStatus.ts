@@ -7,6 +7,7 @@ import { useUserStoreWithOut } from '/@/store/modules/user';
 import projectSetting from '/@/settings/projectSetting';
 import { SessionTimeoutProcessingEnum } from '/@/enums/appEnum';
 
+
 const { createMessage, createErrorModal } = useMessage();
 const error = createMessage.error!;
 const stp = projectSetting.sessionTimeoutProcessing;
@@ -35,6 +36,9 @@ export function checkStatus(
       } else {
         userStore.logout(true);
       }
+
+      //跳转到登录页 http://localhost:4000/#/login
+      // window.location.href = window.location.origin + '/#/login';
       break;
     case 403:
       errMessage = t('sys.api.errMsg403');

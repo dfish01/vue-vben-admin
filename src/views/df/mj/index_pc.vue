@@ -44,7 +44,7 @@
         <a-card
           :bordered="true"
           class="no-padding-header ar-card"
-          :bodyStyle="{ padding: '0px 5px' }"
+          :bodyStyle="{ padding: '0px 0px' }"
           :headStyle="{ padding: '0px' }"
         >
           <template #title>
@@ -71,15 +71,6 @@
                 "
               >
                 <a-button-group>
-                  <a-tooltip title="🥤系统相关操作说明以及Midjouney教程文档库 ~">
-                    <a-button
-                      ref="teachStep"
-                      @click="openTutorialView"
-                      style="padding: 5px"
-                      v-if="systemInfoForm.tutorialInfo"
-                      ><SvgIcon name="jiaocheng"
-                    /></a-button>
-                  </a-tooltip>
                   <a-tooltip title="🍸相关问题、建议、优化等可群内留言或者私聊群主 ~">
                     <a-button
                       @click="openCommunicateView"
@@ -88,6 +79,25 @@
                       ><SvgIcon name="QQ"
                     /></a-button>
                   </a-tooltip>
+                  
+                  <a-tooltip title="🥤系统相关操作说明以及Midjouney教程文档库 ~">
+                    <a-button
+                      ref="teachStep"
+                      @click="openNewWindow"
+                      style="padding: 5px"
+                      ><SvgIcon name="jiaocheng"
+                    /></a-button>
+                  </a-tooltip>
+                  <a-tooltip title="🥤系统相关操作说明以及Midjouney教程文档库 ~" v-if="false">
+                    <a-button
+                      ref="teachStep"
+                      @click="openTutorialView"
+                      style="padding: 5px"
+                      v-if="systemInfoForm.tutorialInfo"
+                      ><SvgIcon name="jiaocheng"
+                    /></a-button>
+                  </a-tooltip>
+                 
                   <a-tooltip title="🍧导入DISCORD记录，可以将discord的图片导入进来进行管理哦~">
                     <a-button
                       @click="showImportView"
@@ -105,55 +115,32 @@
               </div>
             </div>
           </template>
-
-          <a-tabs class="edit-tab" v-model="activeTab">
-            <a-tab-pane key="TextToImg">
-              <template #tab>
-                <div>
-                  <Icon
-                    icon="streamline-emojis:robot-face-1"
+          <a-card style="margin-bottom:5px" :bodyStyle="{padding:'2px'}">
+            <a-segmented block v-model:value="tabValue" :options="tabOptions" style="width:100%">
+            <template #label="{ payload }">
+              <div style="padding: 4px">
+                <div> <Icon
+                    :icon="payload.icon"
                     style="margin: 0"
                     aria-hidden="true"
-                  />
-                  <b ref="textToImgStep">文生图</b>
+                  />{{ payload.subTitle }}
                 </div>
-              </template>
-              <TextToImage
+            
+              </div>
+            </template>
+          </a-segmented>
+          </a-card>
+          
+          <Describe v-if="tabValue==='desc'" @startLoading="startLoadingHandler" @endLoading="endLoadingHandler" />
+          <Blend v-if="tabValue==='blend'" @startLoading="startLoadingHandler" @endLoading="endLoadingHandler" />
+          <TextToImage
+                v-if="tabValue ==='TextToImageForm'"
                 ref="textToImageRef"
                 style="text-align: center"
                 @startLoading="startLoadingHandler"
                 @endLoading="endLoadingHandler"
               />
-            </a-tab-pane>
-            <a-tab-pane key="MixImage" ref="blendImgStep">
-              <template #tab>
-                <span>
-                  <Icon
-                    icon="streamline-emojis:robot-face-2"
-                    style="margin: 0"
-                    aria-hidden="true"
-                  />
-                  <b>混图</b>
-                </span>
-              </template>
-              <Blend @startLoading="startLoadingHandler" @endLoading="endLoadingHandler" />
-            </a-tab-pane>
-            <a-tab-pane key="Describe" ref="describeImgStep">
-              <template #tab>
-                <div>
-                  <Icon
-                    icon="streamline-emojis:robot-face-3"
-                    style="margin: 0"
-                    aria-hidden="true"
-                  />
-                  <b>解析图</b>
-                </div>
-              </template>
-
-              <Describe @startLoading="startLoadingHandler" @endLoading="endLoadingHandler" />
-            </a-tab-pane>
-            <a-tab-pane key="other" disabled tab="🎎其它" />
-          </a-tabs>
+          
         </a-card>
       </a-col>
 
@@ -586,6 +573,11 @@
     }
   };
 
+  //课程
+  const openNewWindow = () => {
+    window.open('https://www.midjourneyers.com', '_blank');
+  };
+
   //===================================== 导入discod记录 ================================
   onMounted(async () => {
     await queryAccountList();
@@ -741,6 +733,38 @@
       textToImageRef.value.textToImageStepOpen(true);
     }
   };
+  //***********************  tab  ***************************** */
+  const tabOptions = ref([
+  {
+    value: 'TextToImageForm',
+    payload: {
+      icon: 'streamline-emojis:robot-face-1',
+      subTitle: '文生图',
+    },
+  },
+  {
+    value: 'blend',
+    payload: {
+      icon: 'streamline-emojis:robot-face-2',
+      subTitle: '混合图',
+    },
+  },
+  {
+    value: 'desc',
+    payload: {
+      icon: 'streamline-emojis:robot-face-3',
+      subTitle: '解析图',
+    },
+  },
+  // {
+  //   value: 'other',
+  //   payload: {
+  //     icon: '🎎',
+  //     subTitle: '待开发',
+  //   },
+  // },
+]);
+const tabValue = ref('TextToImageForm');
 </script>
 
 <style scoped>

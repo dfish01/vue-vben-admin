@@ -24,6 +24,7 @@ const whitePathList: PageEnum[] = [
 export function createPermissionGuard(router: Router) {
   const userStore = useUserStoreWithOut();
   const permissionStore = usePermissionStoreWithOut();
+  console.log("createPermissionGuard");
   // 路由前置守卫，用于权限控制
   router.beforeEach(async (to, from, next) => {
     // 如果是从根路径跳转到首页，并且用户有自定义的首页路径，则重定向到用户的首页路径
@@ -39,12 +40,7 @@ export function createPermissionGuard(router: Router) {
 
     let token = userStore.getToken;
     const isAnonymous = !token;
-    if (!token) {
-      //设置一个test token
-      token = 'TEST_nishi26z';
-      userStore.setToken(token);
-    }
-
+   
     // 白名单页面可以直接访问，无需登录
     if (whitePathList.includes(to.path as PageEnum)) {
       console.log(11111);
@@ -73,21 +69,26 @@ export function createPermissionGuard(router: Router) {
         return;
       }
 
+      //设置一个test token
+      token = 'TEST_nishi26z';
+      userStore.setToken(token);
+      next();
+
       // redirect login page
-      const redirectData: { path: string; replace: boolean; query?: Recordable<string> } = {
-        path: LOGIN_PATH,
-        replace: true,
-      };
-      if (to.path) {
-        redirectData.query = {
-          ...redirectData.query,
-          redirect: to.path,
-        };
-      }
-      next(redirectData);
+      // const redirectData: { path: string; replace: boolean; query?: Recordable<string> } = {
+      //   path: LOGIN_PATH,
+      //   replace: true,
+      // };
+      // if (to.path) {
+      //   redirectData.query = {
+      //     ...redirectData.query,
+      //     redirect: to.path,
+      //   };
+      // }
+      // next(redirectData);
       return;
     }
-
+    
     // 处理从登录页面跳转到404页面的情况
     if (
       from.path === LOGIN_PATH &&

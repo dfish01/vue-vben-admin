@@ -46,6 +46,15 @@
                       </a-tooltip>
                       <a-tooltip title="🥤系统相关操作说明以及Midjouney教程文档库 ~">
                         <a-button
+                          ref="teachStep"
+                          @click="openNewWindow"
+                          style="padding: 5px"
+                        
+                          ><SvgIcon name="jiaocheng"
+                        /></a-button>
+                      </a-tooltip>
+                      <a-tooltip title="🥤系统相关操作说明以及Midjouney教程文档库 ~" v-if="false">
+                        <a-button
                           @click="openTutorialView"
                           style="padding: 5px"
                           v-if="systemInfoForm.tutorialInfo"
@@ -386,6 +395,11 @@
     // go('/jobList/index/' + currentSpace.id + '/' + currentSpace.title);
     // go('/jobList/index?spaceId=' + currentSpace.id + '&spaceTitle=' + currentSpace.title);
     go('/jobList/index');
+  };
+
+  //课程
+  const openNewWindow = () => {
+    window.open('https://www.midjourneyers.com', '_blank');
   };
 
   /************************漫游引导********************** */
