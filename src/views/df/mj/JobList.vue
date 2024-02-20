@@ -1885,6 +1885,11 @@
   import { info } from 'console';
   import { accountInfoApi, tagInfoApi, drawCollectCategoryApi } from './accountInfo';
 
+  import { getAppEnvConfig } from '/@/utils/env';
+
+  const { VITE_GLOB_APP_TITLE, VITE_GLOB_API_URL, VITE_GLOB_API_URL_PREFIX, VITE_GLOB_UPLOAD_URL } =
+    getAppEnvConfig();
+
   const { setPrompt } = textFormApi();
   const {
     refreshCollectCategory,
@@ -2013,6 +2018,13 @@
   });
 
   onMounted(() => {
+    if (VITE_GLOB_API_URL.startsWith('http')) {
+      varyRegionForm.value.subUrl = VITE_GLOB_API_URL + varyRegionForm.value.subUrl;
+    } else {
+      const currentDomain = window.location.origin;
+      varyRegionForm.value.subUrl = currentDomain + VITE_GLOB_API_URL + varyRegionForm.value.subUrl;
+    }
+    console.log('onMounted subUrl ' + varyRegionForm.value.subUrl);
     (window as any).varyRegionForm = varyRegionForm;
     loadTagList();
   });

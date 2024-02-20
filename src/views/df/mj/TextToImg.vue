@@ -145,6 +145,7 @@
         </a-row>
       </a-card>
       <!-- 辅助工具 E-->
+
       <!-- 垫图 B-->
       <a-card
         size="small"
@@ -164,7 +165,7 @@
                   <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
               ></span>
             </div>
-            <a-switch v-model:checked="viewForm.blendFlag" />
+            <a-switch size="small" v-model:checked="viewForm.blendFlag" />
           </div>
         </template>
         <div v-if="viewForm.blendFlag">
@@ -227,7 +228,7 @@
                 <ExclamationCircleOutlined style="margin-left: 5px; cursor: pointer" />
               </a-tooltip>
             </div>
-            <a-switch v-model:checked="viewForm.srefFlag" />
+            <a-switch size="small" v-model:checked="viewForm.srefFlag" />
           </div>
         </template>
         <div v-if="viewForm.srefFlag">
@@ -392,7 +393,7 @@
                   <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
               ></span>
             </div>
-            <a-switch v-model:checked="viewForm.accountFlag" />
+            <a-switch size="small" v-model:checked="viewForm.accountFlag" />
           </div>
         </template>
         <div v-if="viewForm.accountFlag">
@@ -510,7 +511,7 @@
               ></span>
             </a-col>
             <a-col :span="15" style="display: flex; align-items: center; justify-content: right">
-              <a-switch v-model:checked="textToImgForm.enableTranslate" />
+              <a-switch size="small" v-model:checked="textToImgForm.enableTranslate" />
             </a-col>
           </a-row>
         </div>
@@ -529,7 +530,7 @@
                   <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
               ></span>
             </div>
-            <a-switch v-model:checked="viewForm.arFlag" />
+            <a-switch size="small" v-model:checked="viewForm.arFlag" />
           </div>
         </template>
         <a-row v-if="viewForm.arFlag">
@@ -621,17 +622,15 @@
         <template #title>
           <div class="ar-card-title-be">
             <div>
-              <span style="font-weight: bold">
-                <Icon icon="streamline-emojis:fuel-pump" /> 模型选择</span
-              >
-              <a-tooltip
-                title="不一样的模型会有不一样的出图效果以及不一样的参数支持。Niji模型在动漫风格这块有很好的效果~"
-                trigger="click"
-              >
-                <ExclamationCircleOutlined style="margin-left: 5px; cursor: pointer" />
-              </a-tooltip>
+              <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
+                ><Icon icon="streamline-emojis:fuel-pump" /> 模型选择
+                <a-tooltip
+                  title="不一样的模型会有不一样的出图效果以及不一样的参数支持。Niji模型在动漫风格这块有很好的效果~"
+                >
+                  <ExclamationCircleOutlined style="margin-left: 5px; cursor: pointer" /></a-tooltip
+              ></span>
             </div>
-            <a-switch v-model:checked="viewForm.modeFlag" />
+            <a-switch size="small" v-model:checked="viewForm.modeFlag" />
           </div>
         </template>
 
@@ -734,11 +733,11 @@
 
                 <a-row class="row-wapper">
                   <a-col
-                    span="8"
+                    span="6"
                     style="display: flex; align-items: center; justify-content: center"
                   >
-                    <span class="quality-tag"
-                      >无缝图案
+                    <span class="quality-tag">
+                      无缝图案
                       <a-tooltip
                         title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
                       >
@@ -746,10 +745,15 @@
                     ></span>
                   </a-col>
                   <a-col
-                    :span="16"
-                    style="display: flex; align-items: center; justify-content: right"
+                    :span="18"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: right;
+                      padding-right: 12px;
+                    "
                   >
-                    <a-switch v-model:checked="versionParam.niji5.tile" disabled />
+                    <a-switch size="small" v-model:checked="versionParam.niji5.tile" disabled />
                   </a-col>
                 </a-row>
               </a-tab-pane>
@@ -869,7 +873,7 @@
                     :span="16"
                     style="display: flex; align-items: center; justify-content: right"
                   >
-                    <a-switch v-model:checked="versionParam.niji5.tile" disabled />
+                    <a-switch size="small" v-model:checked="versionParam.niji5.tile" disabled />
                   </a-col>
                 </a-row>
               </a-tab-pane>
@@ -973,7 +977,7 @@
                     :span="16"
                     style="display: flex; align-items: center; justify-content: right"
                   >
-                    <a-switch v-model:checked="versionParam.v5.tile" disabled />
+                    <a-switch size="small" v-model:checked="versionParam.v5.tile" disabled />
                   </a-col>
                 </a-row>
               </a-tab-pane>
@@ -1076,7 +1080,7 @@
                     :span="16"
                     style="display: flex; align-items: center; justify-content: right"
                   >
-                    <a-switch v-model:checked="versionParam.v51.tile" disabled />
+                    <a-switch size="small" v-model:checked="versionParam.v51.tile" disabled />
                   </a-col>
                 </a-row>
               </a-tab-pane>
@@ -1180,7 +1184,7 @@
                     :span="16"
                     style="display: flex; align-items: center; justify-content: right"
                   >
-                    <a-switch v-model:checked="versionParam.v52.tile" disabled />
+                    <a-switch size="small" v-model:checked="versionParam.v52.tile" disabled />
                   </a-col>
                 </a-row>
               </a-tab-pane>
@@ -1284,7 +1288,7 @@
                     :span="16"
                     style="display: flex; align-items: center; justify-content: right"
                   >
-                    <a-switch v-model:checked="versionParam.v6.tile" disabled />
+                    <a-switch size="small" v-model:checked="versionParam.v6.tile" disabled />
                   </a-col>
                 </a-row>
               </a-tab-pane>
@@ -1306,7 +1310,7 @@
                 <ExclamationCircleOutlined />
               </a-tooltip>
             </div>
-            <a-switch v-model:checked="viewForm.noParamFlag" />
+            <a-switch size="small" v-model:checked="viewForm.noParamFlag" />
           </div>
         </template>
 
@@ -1343,7 +1347,7 @@
                 <ExclamationCircleOutlined style="margin-left: 5px; cursor: pointer" />
               </a-tooltip>
             </div>
-            <a-switch v-model:checked="viewForm.highFlag" />
+            <a-switch size="small" v-model:checked="viewForm.highFlag" />
           </div>
         </template>
 
@@ -1419,7 +1423,7 @@
               ></span>
             </a-col>
             <a-col :span="16" style="display: flex; align-items: center; justify-content: right">
-              <a-switch disabled v-model:checked="paramDataValue.test" />
+              <a-switch size="small" disabled v-model:checked="paramDataValue.test" />
             </a-col>
           </a-row>
           <a-row :gutter="2" class="row-wapper">
@@ -1432,6 +1436,7 @@
             </a-col>
             <a-col :span="15" style="display: flex; align-items: center; justify-content: right">
               <a-switch
+                size="small"
                 v-model:checked="paramDataValue.upbeta"
                 @change="
                   () => {
@@ -1454,6 +1459,7 @@
             <a-col :span="15" style="display: flex; align-items: center; justify-content: right">
               <!-- <a-switch v-model:checked="paramDataValue.uplight" /> -->
               <a-switch
+                size="small"
                 v-model:checked="paramDataValue.uplight"
                 @change="
                   () => {
@@ -2335,7 +2341,7 @@
       } else {
         paramDataValue.value.sref = getSuccessFileUrlStr(srefFileList.value);
       }
-    }else if(info.file.status === 'removed') {
+    } else if (info.file.status === 'removed') {
       paramDataValue.value.sref = getSuccessFileUrlStr(srefFileList.value);
     }
   };

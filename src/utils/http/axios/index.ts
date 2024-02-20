@@ -218,7 +218,7 @@ const transform: AxiosTransform = {
     }
 
     checkStatus(error?.response?.status, msg, errorMessageMode);
-
+    console.log(123123123123123);
     // 添加自动重试机制 保险起见 只针对GET请求
     const retryRequest = new AxiosRetry();
     const { isOpenRetry } = config.requestOptions.retryRequest;

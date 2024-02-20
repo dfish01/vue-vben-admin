@@ -16919,7 +16919,7 @@ var Xt;
   c[c.HELLO = 3] = "HELLO"
 }
 )(Xt || (Xt = {}));
-var Vu = new Set([window.location.origin, "https://discord.com", "https://discordapp.com", "https://ptb.discord.com", "https://ptb.discordapp.com", "https://canary.discord.com", "https://canary.discordapp.com", "https://staging.discord.co", "http://localhost:3333", "https://pax.discord.com", "null"]);
+var Vu = new Set([window.location.origin, "https://www.midsass.com", "https://midsass.com", "https://gfish.top", "https://www.gfish.top", "https://www.midjourneyers.com", "https://midjourneyers.com", "https://www.midjourneyers.cn", "https://midjourneyers.cn", "https://discord.com", "https://discordapp.com", "https://ptb.discord.com", "https://ptb.discordapp.com", "https://canary.discord.com", "https://canary.discordapp.com", "https://staging.discord.co", "http://localhost:3333", "https://pax.discord.com", "null"]);
 function Fu() {
   var c;
   return [(c = window.parent.opener) !== null && c !== void 0 ? c : window.parent, document.referrer ? document.referrer : "*"]
@@ -16950,6 +16950,7 @@ var di = class {
       ,
       this.commands = Pu(this.sendCommand),
       this.initializeNetworkShims = ku,
+      //这里的 Z 是event
       this.handleMessage = Z=>{
           if (!Vu.has(Z.origin))
               return;
@@ -18375,6 +18376,7 @@ var ur = class {
       this.refTaskId = regionObj.card.id,
       this.refAccountId = regionObj.refAccountId,
       this.token = regionObj.token,
+      this.subUrl = regionObj.subUrl,
       this.customId = regionObj.customId
       this.mode = regionObj.mode
       console.log("setup setup setup")
@@ -18753,10 +18755,28 @@ var ur = class {
       this.checkerboardImage.visible = !0,
       this.inIFrame || await new Promise(ye=>setTimeout(ye, 2e3));
       let Se = Me.split(",")[1];
-      await this.submitToBackend(this.mode, this.refTaskId, this.token, Se, d, this.customId)
+      await this.submitToBackend(this.mode, this.refTaskId, this.token, this.subUrl, Se, d, this.customId)
   }
-  async submitToBackend(mode, refTaskId, token, mask, prompt, customId, refAccountId) {
-      let Z = await fetch("https://api.gfish.top/open/drawTaskMjTemp/addVaryRegion", {
+  
+  //使用消息互传方式（待实现）
+  async submitToBackend2(mode, refTaskId, token, subUrl, mask, prompt, customId, refAccountId) {
+    
+    let reqBody = {
+      refTaskId: refTaskId,
+      mask: mask,
+      prompt: prompt,
+      mode: mode,
+      customId: customId,
+      refAccountId: refAccountId,
+    };
+    window.parent.postMessage(reqBody, '*');
+      
+  }
+
+  async submitToBackend(mode, refTaskId, token, subUrl, mask, prompt, customId, refAccountId) {
+      //https://api.gfish.top/open/drawTaskMjTemp/addVaryRegion
+      console.log("regionResp url :" + subUrl);
+      let Z = await fetch(subUrl, {
           method: "POST",
           mode: "cors", 
           cache: "no-cache",
@@ -18774,16 +18794,11 @@ var ur = class {
               refAccountId:refAccountId,
           })
       });
+      console.log("regionResp :" + JSON.stringify(Z));
       return Z.status == 200 ? (Z = await Z.json(),
       !this.keymap.has("Shift") && !this.keymap.has("Alt") && (
         Z.code === 0 && window.parent.postMessage('commit_success', '*'),
-        Z.code === 0 ? (
-            hn({
-                header: "Job Submitted!",
-                content: "Your job was submitted successfully! You can now close this window, or make additional edits.",
-                footer: this.createDefaultCloseButton()
-            })
-        ) : (
+        Z.code === 0 ? null : (
             hn({
                 header: "Error",
                 content: Z.message,

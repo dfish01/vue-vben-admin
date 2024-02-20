@@ -630,6 +630,7 @@ export function jobOptionApi() {
     card: null,
     mode: null,
     refAccountId: null,
+    subUrl: '/open/drawTaskMjTemp/addVaryRegion',
   });
   const openVaryRegion = (card, type, key) => {
     // MJ::Inpaint::1::a65a6904-6f26-43fd-93a2-db88a9a2d2a1::SOLO
