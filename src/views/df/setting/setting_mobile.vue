@@ -170,7 +170,6 @@
             @confirm="doLogout()"
           >
             <a-card-grid
-              @click="openTutorialView"
               v-if="systemConfigForm.tutorialInfo !== null"
               :hoverable="true"
               style="width: 34%; text-align: center"
@@ -507,6 +506,7 @@
   };
   const doLogout = async () => {
     userStore.logout();
+
     goView('/login');
   };
 

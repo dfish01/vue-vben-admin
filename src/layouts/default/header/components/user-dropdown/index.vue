@@ -1,5 +1,17 @@
 <template>
-  <Dropdown placement="bottomLeft" :overlayClassName="`${prefixCls}-dropdown-overlay`">
+  <div v-if="getUserInfo.userId === '-1'" @click="login">
+    <span :class="[prefixCls, `${prefixCls}--${theme}`]" class="flex">
+      <Icon icon="streamline-emojis:prince-1" :class="`${prefixCls}__header`" />
+
+      <span :class="`${prefixCls}__info hidden md:block`">
+        <span :class="`${prefixCls}__name`" class="truncate" style="font-size: 12px">
+          立即登录
+        </span>
+      </span>
+    </span>
+  </div>
+
+  <Dropdown v-else placement="bottomLeft" :overlayClassName="`${prefixCls}-dropdown-overlay`">
     <span :class="[prefixCls, `${prefixCls}--${theme}`]" class="flex">
       <SvgIcon
         v-if="getUserInfo.avatar && !getUserInfo.avatar.startsWith('http')"
@@ -53,10 +65,9 @@
   import { SvgIcon } from '/@/components/Icon';
   import Icon from '@/components/Icon/Icon.vue';
   import { defineComponent, computed } from 'vue';
-
   import { DOC_URL } from '/@/settings/siteSetting';
 
-  import { useUserStore } from '/@/store/modules/user';
+  import { useUserStore, useUserStoreWithOut } from '/@/store/modules/user';
   import { useHeaderSetting } from '/@/hooks/setting/useHeaderSetting';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
@@ -75,6 +86,7 @@
     components: {
       Dropdown,
       SvgIcon,
+      Icon,
       Menu,
       MenuItem: createAsyncComponent(() => import('./DropMenuItem.vue')),
       MenuDivider: Menu.Divider,
@@ -91,8 +103,8 @@
       const userStore = useUserStore();
 
       const getUserInfo = computed(() => {
-        const { realName = '', avatar, desc } = userStore.getUserInfo || {};
-        return { realName, avatar: avatar || headerImg, desc };
+        const { userId, realName = '', avatar, desc } = userStore.getUserInfo || {};
+        return { userId, realName, avatar: avatar || headerImg, desc };
       });
 
       const [register, { openModal }] = useModal();
@@ -109,6 +121,12 @@
       //  login out
       function handleLoginOut() {
         userStore.confirmLoginOut();
+      }
+
+      function login() {
+        userStore.setToken(undefined);
+        userStore.setSessionTimeout(true);
+        userStore.logout(true);
       }
 
       // open doc
@@ -143,6 +161,7 @@
         register,
         registerApi,
         getUseLockPage,
+        login,
       };
     },
   });

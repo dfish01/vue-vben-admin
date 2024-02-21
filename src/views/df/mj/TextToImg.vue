@@ -8,7 +8,7 @@
     :model="textToImgForm"
     :rules="rules"
   >
-    <div :style="{ height: `calc(${contentHeight}px - 1px`, overflow: 'auto', padding:'0px 5px' }">
+    <div :style="{ height: `calc(${contentHeight}px - 1px`, overflow: 'auto', padding: '0px 5px' }">
       <a-card
         size="small"
         :bordered="true"
@@ -211,13 +211,7 @@
       <!-- 垫图 E-->
 
       <!-- 风格参考 B-->
-      <a-card
-        size="small"
-        :bordered="true"
-        :bodyStyle="{ padding: '5px' }"
-        class="ar-card2"
-        v-if="paramDataValue.version === 'v 6' || paramDataValue.version === 'niji 6'"
-      >
+      <a-card size="small" :bordered="true" :bodyStyle="{ padding: '5px' }" class="ar-card2">
         <template #title>
           <div class="ar-card-title-be">
             <div>
@@ -228,7 +222,11 @@
                 <ExclamationCircleOutlined style="margin-left: 5px; cursor: pointer" />
               </a-tooltip>
             </div>
-            <a-switch size="small" v-model:checked="viewForm.srefFlag" />
+            <a-switch
+              size="small"
+              :disabled="!(paramDataValue.version === 'v 6' || paramDataValue.version === 'niji 6')"
+              v-model:checked="viewForm.srefFlag"
+            />
           </div>
         </template>
         <div v-if="viewForm.srefFlag">
@@ -623,7 +621,7 @@
           <div class="ar-card-title-be">
             <div>
               <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
-                ><Icon icon="streamline-emojis:fuel-pump" /> 模型选择
+                ><Icon icon="streamline-emojis:fuel-pump" /> 运行模型
                 <a-tooltip
                   title="不一样的模型会有不一样的出图效果以及不一样的参数支持。Niji模型在动漫风格这块有很好的效果~"
                 >
@@ -634,665 +632,626 @@
           </div>
         </template>
 
-        <a-row :gutter="2" v-if="viewForm.modeFlag">
+        <a-row :gutter="2" v-if="viewForm.modeFlag" style="margin-top: 3px">
+          <div
+            style="width: 100%; margin: 0 0 3px"
+            :bordered="false"
+            :bodyStyle="{ padding: '0px' }"
+          >
+            <a-segmented
+              block
+              v-model:value="activeKey"
+              :options="tabOptions"
+              style="width: 100%"
+              @change="chooseVersion"
+            >
+              <template #label="{ payload }">
+                <div style="padding: 4px">
+                  <div>
+                    {{ payload.subTitle }}
+                  </div>
+                </div>
+              </template>
+            </a-segmented>
+          </div>
           <div class="card-container" style="width: 100%">
-            <a-tabs v-model:activeKey="activeKey" type="card" @change="chooseVersion">
-              <a-tab-pane key="niji5" tab="Niji 5">
-                <a-row style="justify-content: left">
-                  <a-col span="24" class="style-radio">
-                    <a-radio-group style="height: 32px" v-model:value="versionParam.niji5.style">
-                      <a-tooltip title="默认的风格，效果很不错">
-                        <a-radio-button value="">默认</a-radio-button>
-                      </a-tooltip>
+            <div v-if="activeKey === 'niji5'">
+              <a-row style="justify-content: left">
+                <a-col span="24" class="style-radio">
+                  <a-radio-group style="height: 32px" v-model:value="versionParam.niji5.style">
+                    <a-tooltip title="默认的风格，效果很不错">
+                      <a-radio-button value="">默认</a-radio-button>
+                    </a-tooltip>
 
-                      <a-tooltip title=" 表现力风格，更精致的插图艺术风格">
-                        <a-radio-button value="expressive">表现</a-radio-button>
-                      </a-tooltip>
-                      <a-tooltip title="可爱风格，能创造出迷人可爱的角色、道具和场景">
-                        <a-radio-button value="cute">可爱</a-radio-button>
-                      </a-tooltip>
+                    <a-tooltip title=" 表现力风格，更精致的插图艺术风格">
+                      <a-radio-button value="expressive">表现</a-radio-button>
+                    </a-tooltip>
+                    <a-tooltip title="可爱风格，能创造出迷人可爱的角色、道具和场景">
+                      <a-radio-button value="cute">可爱</a-radio-button>
+                    </a-tooltip>
 
-                      <a-tooltip title="景色风格，在奇幻环境下作出美丽的背景和电影般的角色时刻">
-                        <a-radio-button value="scenic">风景</a-radio-button>
-                      </a-tooltip>
-                      <a-tooltip title="原始风格，在2023.5.26日之前的默认Niji5的风格">
-                        <a-radio-button value="original">原始</a-radio-button>
-                      </a-tooltip>
-                    </a-radio-group>
-                  </a-col>
-                </a-row>
-                <a-row style="margin-top: 10px">
-                  <a-input-group compact style="display: flex">
-                    <a-tooltip
-                      title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
-                    >
-                      <a-tag class="line-label tag-no-right-border" color="default"
-                        >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
-                    ></a-tooltip>
-
-                    <a-select
-                      v-model:value="versionParam.niji5.quality"
-                      class="line-input tag-no-right-border"
-                    >
-                      <a-select-option value="0.25">0.25x</a-select-option>
-                      <a-select-option value="0.5">0.5x</a-select-option>
-                      <a-select-option value="1">1x</a-select-option>
-                    </a-select>
-                  </a-input-group>
-                </a-row>
-                <a-row class="row-wapper">
-                  <a-col
-                    span="6"
-                    style="display: flex; align-items: center; justify-content: start"
-                  >
-                    <span class="quality-tag"
-                      >风格化
-
-                      <a-tooltip
-                        title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" />
-                      </a-tooltip>
-                    </span>
-                  </a-col>
-                  <a-col :span="18">
-                    <a-slider
-                      style="margin-left: 3px"
-                      v-model:value="versionParam.niji5.s"
-                      :min="1"
-                      :step="1"
-                      :max="1000"
-                    />
-                  </a-col>
-                </a-row>
-                <a-row class="row-wapper">
-                  <a-col
-                    span="6"
-                    style="display: flex; align-items: center; justify-content: start"
-                  >
-                    <span class="quality-tag"
-                      >多样性
-
-                      <a-tooltip
-                        title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" />
-                      </a-tooltip>
-                    </span>
-                  </a-col>
-                  <a-col :span="18">
-                    <a-slider
-                      style="margin-left: 3px"
-                      v-model:value="versionParam.niji5.chaos"
-                      :min="1"
-                      :step="1"
-                      :max="100"
-                    />
-                  </a-col>
-                </a-row>
-
-                <a-row class="row-wapper">
-                  <a-col
-                    span="6"
-                    style="display: flex; align-items: center; justify-content: center"
-                  >
-                    <span class="quality-tag">
-                      无缝图案
-                      <a-tooltip
-                        title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
-                    ></span>
-                  </a-col>
-                  <a-col
-                    :span="18"
-                    style="
-                      display: flex;
-                      align-items: center;
-                      justify-content: right;
-                      padding-right: 12px;
-                    "
-                  >
-                    <a-switch size="small" v-model:checked="versionParam.niji5.tile" disabled />
-                  </a-col>
-                </a-row>
-              </a-tab-pane>
-              <a-tab-pane key="niji6" tab="Niji 6">
-                <a-row style="justify-content: left">
-                  <a-radio-group style="height: 32px" v-model:value="versionParam.niji6.style">
-                    <a-radio-button value="">默认风格</a-radio-button>
-                    <a-radio-button value="raw">原始风格</a-radio-button>
+                    <a-tooltip title="景色风格，在奇幻环境下作出美丽的背景和电影般的角色时刻">
+                      <a-radio-button value="scenic">风景</a-radio-button>
+                    </a-tooltip>
+                    <a-tooltip title="原始风格，在2023.5.26日之前的默认Niji5的风格">
+                      <a-radio-button value="original">原始</a-radio-button>
+                    </a-tooltip>
                   </a-radio-group>
-                </a-row>
-                <a-row style="margin-top: 10px">
-                  <a-input-group compact style="display: flex">
+                </a-col>
+              </a-row>
+              <a-row style="margin-top: 5px">
+                <a-input-group compact style="display: flex">
+                  <a-tooltip
+                    title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
+                  >
+                    <a-tag class="line-label tag-no-right-border" color="default"
+                      >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
+                  ></a-tooltip>
+
+                  <a-select
+                    v-model:value="versionParam.niji5.quality"
+                    class="line-input tag-no-right-border"
+                  >
+                    <a-select-option value="0.25">0.25x</a-select-option>
+                    <a-select-option value="0.5">0.5x</a-select-option>
+                    <a-select-option value="1">1x</a-select-option>
+                  </a-select>
+                </a-input-group>
+              </a-row>
+              <a-row class="row-wapper">
+                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
+                  <span class="quality-tag"
+                    >风格化
+
                     <a-tooltip
-                      title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
+                      title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
                     >
-                      <a-tag class="line-label tag-no-right-border" color="default"
-                        >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
-                    ></a-tooltip>
+                      <ExclamationCircleOutlined class="icon-hint" />
+                    </a-tooltip>
+                  </span>
+                </a-col>
+                <a-col :span="18">
+                  <a-slider
+                    style="margin-left: 3px"
+                    v-model:value="versionParam.niji5.s"
+                    :min="1"
+                    :step="1"
+                    :max="1000"
+                  />
+                </a-col>
+              </a-row>
+              <a-row class="row-wapper">
+                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
+                  <span class="quality-tag"
+                    >多样性
 
-                    <a-select
-                      v-model:value="versionParam.niji6.quality"
-                      class="line-input tag-no-right-border"
-                    >
-                      <a-select-option value="0.25">0.25x</a-select-option>
-                      <a-select-option value="0.5">0.5x</a-select-option>
-                      <a-select-option value="1">1x</a-select-option>
-                    </a-select>
-                  </a-input-group>
-                </a-row>
-                <a-row class="row-wapper">
-                  <a-col
-                    span="6"
-                    style="display: flex; align-items: center; justify-content: start"
-                  >
-                    <span class="quality-tag"
-                      >风格化
-
-                      <a-tooltip
-                        title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" />
-                      </a-tooltip>
-                    </span>
-                  </a-col>
-                  <a-col :span="18">
-                    <a-slider
-                      style="margin-left: 3px"
-                      v-model:value="versionParam.niji5.s"
-                      :min="1"
-                      :step="1"
-                      :max="1000"
-                    />
-                  </a-col>
-                </a-row>
-                <a-row class="row-wapper">
-                  <a-col
-                    span="6"
-                    style="display: flex; align-items: center; justify-content: start"
-                  >
-                    <span class="quality-tag"
-                      >多样性
-
-                      <a-tooltip
-                        title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" />
-                      </a-tooltip>
-                    </span>
-                  </a-col>
-                  <a-col :span="18">
-                    <a-slider
-                      style="margin-left: 3px"
-                      v-model:value="versionParam.niji5.chaos"
-                      :min="1"
-                      :step="1"
-                      :max="100"
-                    />
-                  </a-col>
-                </a-row>
-                <a-row class="row-wapper">
-                  <a-col
-                    span="6"
-                    style="display: flex; align-items: center; justify-content: start"
-                  >
-                    <span class="quality-tag"
-                      >权重
-
-                      <a-tooltip title="--iw 值越高，上传的图像对最终效果的影响就越大">
-                        <ExclamationCircleOutlined class="icon-hint" />
-                      </a-tooltip>
-                    </span>
-                  </a-col>
-                  <a-col :span="18">
-                    <a-slider
-                      style="margin-left: 3px"
-                      v-model:value="versionParam.niji5.iw"
-                      :min="0.25"
-                      :step="0.05"
-                      :max="2"
-                    />
-                  </a-col>
-                </a-row>
-                <a-row class="row-wapper">
-                  <a-col
-                    span="8"
-                    style="display: flex; align-items: center; justify-content: center"
-                  >
-                    <span class="quality-tag"
-                      >无缝图案
-                      <a-tooltip
-                        title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
-                    ></span>
-                  </a-col>
-                  <a-col
-                    :span="16"
-                    style="display: flex; align-items: center; justify-content: right"
-                  >
-                    <a-switch size="small" v-model:checked="versionParam.niji5.tile" disabled />
-                  </a-col>
-                </a-row>
-              </a-tab-pane>
-              <a-tab-pane key="v5" tab="V 5" v-if="false">
-                <a-row style="justify-content: left">
-                  <a-col span="24" class="style-radio">
-                    <a-radio-group style="height: 32px" v-model:value="versionParam.v5.style">
-                      <a-tooltip title="默认风格">
-                        <a-radio-button value="">默认风格</a-radio-button>
-                      </a-tooltip>
-                      <!-- <a-tooltip title="原始风格，多实用于摄影，更写实的风格">
-                        <a-radio-button value="raw">RAW</a-radio-button>
-                      </a-tooltip> -->
-                    </a-radio-group>
-                  </a-col>
-                </a-row>
-                <a-row style="margin-top: 10px">
-                  <a-input-group compact style="display: flex">
                     <a-tooltip
-                      title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
+                      title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
                     >
-                      <a-tag class="line-label tag-no-right-border" color="default"
-                        >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
-                    ></a-tooltip>
-
-                    <a-select
-                      v-model:value="versionParam.v5.quality"
-                      class="line-input tag-no-right-border"
-                    >
-                      <a-select-option value="0.25">0.25x</a-select-option>
-                      <a-select-option value="0.5">0.5x</a-select-option>
-                      <a-select-option value="1">1x</a-select-option>
-                    </a-select>
-                  </a-input-group>
-                </a-row>
-                <a-row class="row-wapper">
-                  <a-col
-                    span="6"
-                    style="display: flex; align-items: center; justify-content: start"
-                  >
-                    <span class="quality-tag"
-                      >风格化
-
-                      <a-tooltip
-                        title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" />
-                      </a-tooltip>
-                    </span>
-                  </a-col>
-                  <a-col :span="18">
-                    <a-slider
-                      style="margin-left: 3px"
-                      v-model:value="versionParam.v5.s"
-                      :min="1"
-                      :step="1"
-                      :max="1000"
-                    />
-                  </a-col>
-                </a-row>
-                <a-row class="row-wapper">
-                  <a-col
-                    span="6"
-                    style="display: flex; align-items: center; justify-content: start"
-                  >
-                    <span class="quality-tag"
-                      >多样性
-
-                      <a-tooltip
-                        title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" />
-                      </a-tooltip>
-                    </span>
-                  </a-col>
-                  <a-col :span="18">
-                    <a-slider
-                      style="margin-left: 3px"
-                      v-model:value="versionParam.v5.chaos"
-                      :min="1"
-                      :step="1"
-                      :max="100"
-                    />
-                  </a-col>
-                </a-row>
-
-                <a-row class="row-wapper">
-                  <a-col
-                    span="8"
-                    style="display: flex; align-items: center; justify-content: center"
-                  >
-                    <span class="quality-tag"
-                      >无缝图案
-                      <a-tooltip
-                        title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
-                    ></span>
-                  </a-col>
-                  <a-col
-                    :span="16"
-                    style="display: flex; align-items: center; justify-content: right"
-                  >
-                    <a-switch size="small" v-model:checked="versionParam.v5.tile" disabled />
-                  </a-col>
-                </a-row>
-              </a-tab-pane>
-              <a-tab-pane key="v51" tab="V 5.1">
-                <a-row style="justify-content: left">
-                  <a-col span="24" class="style-radio">
-                    <a-radio-group style="height: 32px" v-model:value="versionParam.v51.style">
-                      <a-tooltip title="默认风格">
-                        <a-radio-button value="">默认风格</a-radio-button>
-                      </a-tooltip>
-                      <a-tooltip title="原始风格，多实用于摄影，更写实的风格">
-                        <a-radio-button value="raw">原始风格</a-radio-button>
-                      </a-tooltip>
-                    </a-radio-group>
-                  </a-col>
-                </a-row>
-                <a-row style="margin-top: 10px">
-                  <a-input-group compact style="display: flex">
+                      <ExclamationCircleOutlined class="icon-hint" />
+                    </a-tooltip>
+                  </span>
+                </a-col>
+                <a-col :span="18">
+                  <a-slider
+                    style="margin-left: 3px"
+                    v-model:value="versionParam.niji5.chaos"
+                    :min="1"
+                    :step="1"
+                    :max="100"
+                  />
+                </a-col>
+              </a-row>
+              <a-row class="row-wapper">
+                <a-col span="8" style="display: flex; align-items: center; justify-content: center">
+                  <span class="quality-tag"
+                    >无缝图案
                     <a-tooltip
-                      title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
+                      title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
                     >
-                      <a-tag class="line-label tag-no-right-border" color="default"
-                        >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
-                    ></a-tooltip>
+                      <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
+                  ></span>
+                </a-col>
+                <a-col
+                  :span="16"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: right;
+                    padding-right: 7px;
+                  "
+                >
+                  <a-switch size="small" v-model:checked="versionParam.niji5.tile" disabled />
+                </a-col>
+              </a-row>
+            </div>
+            <div v-if="activeKey === 'niji6'">
+              <a-row style="justify-content: left">
+                <a-radio-group style="height: 32px" v-model:value="versionParam.niji6.style">
+                  <a-radio-button value="">默认风格</a-radio-button>
+                  <a-radio-button value="raw">原始风格</a-radio-button>
+                </a-radio-group>
+              </a-row>
+              <a-row style="margin-top: 5px">
+                <a-input-group compact style="display: flex">
+                  <a-tooltip
+                    title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
+                  >
+                    <a-tag class="line-label tag-no-right-border" color="default"
+                      >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
+                  ></a-tooltip>
 
-                    <a-select
-                      v-model:value="versionParam.v51.quality"
-                      class="line-input tag-no-right-border"
-                    >
-                      <a-select-option value="0.25">0.25x</a-select-option>
-                      <a-select-option value="0.5">0.5x</a-select-option>
-                      <a-select-option value="1">1x</a-select-option>
-                    </a-select>
-                  </a-input-group>
-                </a-row>
-                <a-row class="row-wapper">
-                  <a-col
-                    span="6"
-                    style="display: flex; align-items: center; justify-content: start"
+                  <a-select
+                    v-model:value="versionParam.niji6.quality"
+                    class="line-input tag-no-right-border"
                   >
-                    <span class="quality-tag"
-                      >风格化
+                    <a-select-option value="0.25">0.25x</a-select-option>
+                    <a-select-option value="0.5">0.5x</a-select-option>
+                    <a-select-option value="1">1x</a-select-option>
+                  </a-select>
+                </a-input-group>
+              </a-row>
+              <a-row class="row-wapper">
+                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
+                  <span class="quality-tag"
+                    >风格化
 
-                      <a-tooltip
-                        title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" />
-                      </a-tooltip>
-                    </span>
-                  </a-col>
-                  <a-col :span="18">
-                    <a-slider
-                      style="margin-left: 3px"
-                      v-model:value="versionParam.v51.s"
-                      :min="1"
-                      :step="1"
-                      :max="1000"
-                    />
-                  </a-col>
-                </a-row>
-                <a-row class="row-wapper">
-                  <a-col
-                    span="6"
-                    style="display: flex; align-items: center; justify-content: start"
-                  >
-                    <span class="quality-tag"
-                      >多样性
-
-                      <a-tooltip
-                        title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" />
-                      </a-tooltip>
-                    </span>
-                  </a-col>
-                  <a-col :span="18">
-                    <a-slider
-                      style="margin-left: 3px"
-                      v-model:value="versionParam.v51.chaos"
-                      :min="1"
-                      :step="1"
-                      :max="100"
-                    />
-                  </a-col>
-                </a-row>
-                <a-row class="row-wapper">
-                  <a-col
-                    span="8"
-                    style="display: flex; align-items: center; justify-content: center"
-                  >
-                    <span class="quality-tag"
-                      >无缝图案
-                      <a-tooltip
-                        title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
-                    ></span>
-                  </a-col>
-                  <a-col
-                    :span="16"
-                    style="display: flex; align-items: center; justify-content: right"
-                  >
-                    <a-switch size="small" v-model:checked="versionParam.v51.tile" disabled />
-                  </a-col>
-                </a-row>
-              </a-tab-pane>
-              <a-tab-pane key="v52" tab="V 5.2">
-                <a-row style="justify-content: left">
-                  <a-col span="24" class="style-radio">
-                    <a-radio-group style="height: 32px" v-model:value="versionParam.v52.style">
-                      <a-tooltip title="默认风格">
-                        <a-radio-button value="">默认风格</a-radio-button>
-                      </a-tooltip>
-                      <a-tooltip title="原始风格，多实用于摄影，更写实的风格">
-                        <a-radio-button value="raw">原始风格</a-radio-button>
-                      </a-tooltip>
-                    </a-radio-group>
-                  </a-col>
-                </a-row>
-                <a-row style="margin-top: 10px">
-                  <a-input-group compact style="display: flex">
                     <a-tooltip
-                      title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
+                      title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
                     >
-                      <a-tag class="line-label tag-no-right-border" color="default"
-                        >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
-                    ></a-tooltip>
+                      <ExclamationCircleOutlined class="icon-hint" />
+                    </a-tooltip>
+                  </span>
+                </a-col>
+                <a-col :span="18">
+                  <a-slider
+                    style="margin-left: 3px"
+                    v-model:value="versionParam.niji5.s"
+                    :min="1"
+                    :step="1"
+                    :max="1000"
+                  />
+                </a-col>
+              </a-row>
+              <a-row class="row-wapper">
+                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
+                  <span class="quality-tag"
+                    >多样性
 
-                    <a-select
-                      v-model:value="versionParam.v52.quality"
-                      class="line-input tag-no-right-border"
-                    >
-                      <a-select-option value="0.25">0.25x</a-select-option>
-                      <a-select-option value="0.5">0.5x</a-select-option>
-                      <a-select-option value="1">1x</a-select-option>
-                    </a-select>
-                  </a-input-group>
-                </a-row>
-                <a-row class="row-wapper">
-                  <a-col
-                    span="6"
-                    style="display: flex; align-items: center; justify-content: start"
-                  >
-                    <span class="quality-tag"
-                      >风格化
-
-                      <a-tooltip
-                        title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" />
-                      </a-tooltip>
-                    </span>
-                  </a-col>
-                  <a-col :span="18">
-                    <a-slider
-                      style="margin-left: 3px"
-                      v-model:value="versionParam.v52.s"
-                      :min="1"
-                      :step="1"
-                      :max="1000"
-                    />
-                  </a-col>
-                </a-row>
-                <a-row class="row-wapper">
-                  <a-col
-                    span="6"
-                    style="display: flex; align-items: center; justify-content: start"
-                  >
-                    <span class="quality-tag"
-                      >多样性
-
-                      <a-tooltip
-                        title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" />
-                      </a-tooltip>
-                    </span>
-                  </a-col>
-                  <a-col :span="18">
-                    <a-slider
-                      style="margin-left: 3px"
-                      v-model:value="versionParam.v52.chaos"
-                      :min="1"
-                      :step="1"
-                      :max="100"
-                    />
-                  </a-col>
-                </a-row>
-
-                <a-row class="row-wapper">
-                  <a-col
-                    span="8"
-                    style="display: flex; align-items: center; justify-content: center"
-                  >
-                    <span class="quality-tag"
-                      >无缝图案
-                      <a-tooltip
-                        title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
-                    ></span>
-                  </a-col>
-                  <a-col
-                    :span="16"
-                    style="display: flex; align-items: center; justify-content: right"
-                  >
-                    <a-switch size="small" v-model:checked="versionParam.v52.tile" disabled />
-                  </a-col>
-                </a-row>
-              </a-tab-pane>
-              <a-tab-pane key="v6" tab="V 6">
-                <a-row style="justify-content: left">
-                  <a-col span="24" class="style-radio">
-                    <a-radio-group style="height: 32px" v-model:value="versionParam.v6.style">
-                      <a-tooltip title="默认风格">
-                        <a-radio-button value="">默认风格</a-radio-button>
-                      </a-tooltip>
-                      <a-tooltip title="原始风格，多实用于摄影，更写实的风格">
-                        <a-radio-button value="raw">原始风格</a-radio-button>
-                      </a-tooltip>
-                    </a-radio-group>
-                  </a-col>
-                </a-row>
-                <a-row style="margin-top: 10px">
-                  <a-input-group compact style="display: flex">
                     <a-tooltip
-                      title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
+                      title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
                     >
-                      <a-tag class="line-label tag-no-right-border" color="default"
-                        >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
-                    ></a-tooltip>
-
-                    <a-select
-                      v-model:value="versionParam.v6.quality"
-                      class="line-input tag-no-right-border"
+                      <ExclamationCircleOutlined class="icon-hint" />
+                    </a-tooltip>
+                  </span>
+                </a-col>
+                <a-col :span="18">
+                  <a-slider
+                    style="margin-left: 3px"
+                    v-model:value="versionParam.niji5.chaos"
+                    :min="1"
+                    :step="1"
+                    :max="100"
+                  />
+                </a-col>
+              </a-row>
+              <a-row class="row-wapper">
+                <a-col span="8" style="display: flex; align-items: center; justify-content: center">
+                  <span class="quality-tag"
+                    >无缝图案
+                    <a-tooltip
+                      title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
                     >
-                      <a-select-option value="0.25">0.25x</a-select-option>
-                      <a-select-option value="0.5">0.5x</a-select-option>
-                      <a-select-option value="1">1x</a-select-option>
-                    </a-select>
-                  </a-input-group>
-                </a-row>
-                <a-row class="row-wapper">
-                  <a-col
-                    span="6"
-                    style="display: flex; align-items: center; justify-content: start"
+                      <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
+                  ></span>
+                </a-col>
+                <a-col
+                  :span="16"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: right;
+                    padding-right: 7px;
+                  "
+                >
+                  <a-switch size="small" v-model:checked="versionParam.niji5.tile" disabled />
+                </a-col>
+              </a-row>
+            </div>
+            <div v-if="activeKey === 'v5'">
+              <a-row style="justify-content: left">
+                <a-col span="24" class="style-radio">
+                  <a-radio-group style="height: 32px" v-model:value="versionParam.v5.style">
+                    <a-tooltip title="默认风格">
+                      <a-radio-button value="">默认风格</a-radio-button>
+                    </a-tooltip>
+                  </a-radio-group>
+                </a-col>
+              </a-row>
+              <a-row style="margin-top: 5px">
+                <a-input-group compact style="display: flex">
+                  <a-tooltip
+                    title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
                   >
-                    <span class="quality-tag"
-                      >风格化
+                    <a-tag class="line-label tag-no-right-border" color="default"
+                      >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
+                  ></a-tooltip>
 
-                      <a-tooltip
-                        title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" />
-                      </a-tooltip>
-                    </span>
-                  </a-col>
-                  <a-col :span="18">
-                    <a-slider
-                      style="margin-left: 3px"
-                      v-model:value="versionParam.v6.s"
-                      :min="1"
-                      :step="1"
-                      :max="1000"
-                    />
-                  </a-col>
-                </a-row>
-                <a-row class="row-wapper">
-                  <a-col
-                    span="6"
-                    style="display: flex; align-items: center; justify-content: start"
+                  <a-select
+                    v-model:value="versionParam.v5.quality"
+                    class="line-input tag-no-right-border"
                   >
-                    <span class="quality-tag"
-                      >多样性
+                    <a-select-option value="0.25">0.25x</a-select-option>
+                    <a-select-option value="0.5">0.5x</a-select-option>
+                    <a-select-option value="1">1x</a-select-option>
+                  </a-select>
+                </a-input-group>
+              </a-row>
+              <a-row class="row-wapper">
+                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
+                  <span class="quality-tag"
+                    >风格化
 
-                      <a-tooltip
-                        title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" />
-                      </a-tooltip>
-                    </span>
-                  </a-col>
-                  <a-col :span="18">
-                    <a-slider
-                      style="margin-left: 3px"
-                      v-model:value="versionParam.v6.chaos"
-                      :min="1"
-                      :step="1"
-                      :max="100"
-                    />
-                  </a-col>
-                </a-row>
+                    <a-tooltip
+                      title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
+                    >
+                      <ExclamationCircleOutlined class="icon-hint" />
+                    </a-tooltip>
+                  </span>
+                </a-col>
+                <a-col :span="18">
+                  <a-slider
+                    style="margin-left: 3px"
+                    v-model:value="versionParam.v5.s"
+                    :min="1"
+                    :step="1"
+                    :max="1000"
+                  />
+                </a-col>
+              </a-row>
+              <a-row class="row-wapper">
+                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
+                  <span class="quality-tag"
+                    >多样性
 
-                <a-row class="row-wapper">
-                  <a-col
-                    span="8"
-                    style="display: flex; align-items: center; justify-content: center"
+                    <a-tooltip
+                      title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
+                    >
+                      <ExclamationCircleOutlined class="icon-hint" />
+                    </a-tooltip>
+                  </span>
+                </a-col>
+                <a-col :span="18">
+                  <a-slider
+                    style="margin-left: 3px"
+                    v-model:value="versionParam.v5.chaos"
+                    :min="1"
+                    :step="1"
+                    :max="100"
+                  />
+                </a-col>
+              </a-row>
+              <a-row class="row-wapper">
+                <a-col span="8" style="display: flex; align-items: center; justify-content: center">
+                  <span class="quality-tag"
+                    >无缝图案
+                    <a-tooltip
+                      title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
+                    >
+                      <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
+                  ></span>
+                </a-col>
+                <a-col
+                  :span="16"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: right;
+                    padding-right: 7px;
+                  "
+                >
+                  <a-switch size="small" v-model:checked="versionParam.v5.tile" disabled />
+                </a-col>
+              </a-row>
+            </div>
+            <div v-if="activeKey === 'v51'">
+              <a-row style="justify-content: left">
+                <a-col span="24" class="style-radio">
+                  <a-radio-group style="height: 32px" v-model:value="versionParam.v51.style">
+                    <a-tooltip title="默认风格">
+                      <a-radio-button value="">默认风格</a-radio-button>
+                    </a-tooltip>
+                    <a-tooltip title="原始风格，多实用于摄影，更写实的风格">
+                      <a-radio-button value="raw">原始风格</a-radio-button>
+                    </a-tooltip>
+                  </a-radio-group>
+                </a-col>
+              </a-row>
+              <a-row style="margin-top: 5px">
+                <a-input-group compact style="display: flex">
+                  <a-tooltip
+                    title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
                   >
-                    <span class="quality-tag"
-                      >无缝图案
-                      <a-tooltip
-                        title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
-                      >
-                        <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
-                    ></span>
-                  </a-col>
-                  <a-col
-                    :span="16"
-                    style="display: flex; align-items: center; justify-content: right"
+                    <a-tag class="line-label tag-no-right-border" color="default"
+                      >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
+                  ></a-tooltip>
+
+                  <a-select
+                    v-model:value="versionParam.v51.quality"
+                    class="line-input tag-no-right-border"
                   >
-                    <a-switch size="small" v-model:checked="versionParam.v6.tile" disabled />
-                  </a-col>
-                </a-row>
-              </a-tab-pane>
-            </a-tabs>
+                    <a-select-option value="0.25">0.25x</a-select-option>
+                    <a-select-option value="0.5">0.5x</a-select-option>
+                    <a-select-option value="1">1x</a-select-option>
+                  </a-select>
+                </a-input-group>
+              </a-row>
+              <a-row class="row-wapper">
+                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
+                  <span class="quality-tag"
+                    >风格化
+
+                    <a-tooltip
+                      title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
+                    >
+                      <ExclamationCircleOutlined class="icon-hint" />
+                    </a-tooltip>
+                  </span>
+                </a-col>
+                <a-col :span="18">
+                  <a-slider
+                    style="margin-left: 3px"
+                    v-model:value="versionParam.v51.s"
+                    :min="1"
+                    :step="1"
+                    :max="1000"
+                  />
+                </a-col>
+              </a-row>
+              <a-row class="row-wapper">
+                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
+                  <span class="quality-tag"
+                    >多样性
+
+                    <a-tooltip
+                      title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
+                    >
+                      <ExclamationCircleOutlined class="icon-hint" />
+                    </a-tooltip>
+                  </span>
+                </a-col>
+                <a-col :span="18">
+                  <a-slider
+                    style="margin-left: 3px"
+                    v-model:value="versionParam.v51.chaos"
+                    :min="1"
+                    :step="1"
+                    :max="100"
+                  />
+                </a-col>
+              </a-row>
+              <a-row class="row-wapper">
+                <a-col span="8" style="display: flex; align-items: center; justify-content: center">
+                  <span class="quality-tag"
+                    >无缝图案
+                    <a-tooltip
+                      title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
+                    >
+                      <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
+                  ></span>
+                </a-col>
+                <a-col
+                  :span="16"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: right;
+                    padding-right: 7px;
+                  "
+                >
+                  <a-switch size="small" v-model:checked="versionParam.v51.tile" disabled />
+                </a-col>
+              </a-row>
+            </div>
+            <div v-if="activeKey === 'v52'">
+              <a-row style="justify-content: left">
+                <a-col span="24" class="style-radio">
+                  <a-radio-group style="height: 32px" v-model:value="versionParam.v52.style">
+                    <a-tooltip title="默认风格">
+                      <a-radio-button value="">默认风格</a-radio-button>
+                    </a-tooltip>
+                    <a-tooltip title="原始风格，多实用于摄影，更写实的风格">
+                      <a-radio-button value="raw">原始风格</a-radio-button>
+                    </a-tooltip>
+                  </a-radio-group>
+                </a-col>
+              </a-row>
+              <a-row style="margin-top: 5px">
+                <a-input-group compact style="display: flex">
+                  <a-tooltip
+                    title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
+                  >
+                    <a-tag class="line-label tag-no-right-border" color="default"
+                      >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
+                  ></a-tooltip>
+
+                  <a-select
+                    v-model:value="versionParam.v52.quality"
+                    class="line-input tag-no-right-border"
+                  >
+                    <a-select-option value="0.25">0.25x</a-select-option>
+                    <a-select-option value="0.5">0.5x</a-select-option>
+                    <a-select-option value="1">1x</a-select-option>
+                  </a-select>
+                </a-input-group>
+              </a-row>
+              <a-row class="row-wapper">
+                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
+                  <span class="quality-tag"
+                    >风格化
+
+                    <a-tooltip
+                      title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
+                    >
+                      <ExclamationCircleOutlined class="icon-hint" />
+                    </a-tooltip>
+                  </span>
+                </a-col>
+                <a-col :span="18">
+                  <a-slider
+                    style="margin-left: 3px"
+                    v-model:value="versionParam.v52.s"
+                    :min="1"
+                    :step="1"
+                    :max="1000"
+                  />
+                </a-col>
+              </a-row>
+              <a-row class="row-wapper">
+                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
+                  <span class="quality-tag"
+                    >多样性
+
+                    <a-tooltip
+                      title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
+                    >
+                      <ExclamationCircleOutlined class="icon-hint" />
+                    </a-tooltip>
+                  </span>
+                </a-col>
+                <a-col :span="18">
+                  <a-slider
+                    style="margin-left: 3px"
+                    v-model:value="versionParam.v52.chaos"
+                    :min="1"
+                    :step="1"
+                    :max="100"
+                  />
+                </a-col>
+              </a-row>
+
+              <a-row class="row-wapper">
+                <a-col span="8" style="display: flex; align-items: center; justify-content: center">
+                  <span class="quality-tag"
+                    >无缝图案
+                    <a-tooltip
+                      title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
+                    >
+                      <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
+                  ></span>
+                </a-col>
+                <a-col
+                  :span="16"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: right;
+                    padding-right: 7px;
+                  "
+                >
+                  <a-switch size="small" v-model:checked="versionParam.v52.tile" disabled />
+                </a-col>
+              </a-row>
+            </div>
+            <div v-if="activeKey === 'v6'">
+              <a-row style="justify-content: left">
+                <a-col span="24" class="style-radio">
+                  <a-radio-group style="height: 32px" v-model:value="versionParam.v6.style">
+                    <a-tooltip title="默认风格">
+                      <a-radio-button value="">默认风格</a-radio-button>
+                    </a-tooltip>
+                    <a-tooltip title="原始风格，多实用于摄影，更写实的风格">
+                      <a-radio-button value="raw">原始风格</a-radio-button>
+                    </a-tooltip>
+                  </a-radio-group>
+                </a-col>
+              </a-row>
+              <a-row style="margin-top: 5px">
+                <a-input-group compact style="display: flex">
+                  <a-tooltip
+                    title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
+                  >
+                    <a-tag class="line-label tag-no-right-border" color="default"
+                      >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
+                  ></a-tooltip>
+
+                  <a-select
+                    v-model:value="versionParam.v6.quality"
+                    class="line-input tag-no-right-border"
+                  >
+                    <a-select-option value="0.25">0.25x</a-select-option>
+                    <a-select-option value="0.5">0.5x</a-select-option>
+                    <a-select-option value="1">1x</a-select-option>
+                  </a-select>
+                </a-input-group>
+              </a-row>
+              <a-row class="row-wapper">
+                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
+                  <span class="quality-tag"
+                    >风格化
+
+                    <a-tooltip
+                      title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
+                    >
+                      <ExclamationCircleOutlined class="icon-hint" />
+                    </a-tooltip>
+                  </span>
+                </a-col>
+                <a-col :span="18">
+                  <a-slider
+                    style="margin-left: 3px"
+                    v-model:value="versionParam.v6.s"
+                    :min="1"
+                    :step="1"
+                    :max="1000"
+                  />
+                </a-col>
+              </a-row>
+              <a-row class="row-wapper">
+                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
+                  <span class="quality-tag"
+                    >多样性
+
+                    <a-tooltip
+                      title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
+                    >
+                      <ExclamationCircleOutlined class="icon-hint" />
+                    </a-tooltip>
+                  </span>
+                </a-col>
+                <a-col :span="18">
+                  <a-slider
+                    style="margin-left: 3px"
+                    v-model:value="versionParam.v6.chaos"
+                    :min="1"
+                    :step="1"
+                    :max="100"
+                  />
+                </a-col>
+              </a-row>
+              <a-row class="row-wapper">
+                <a-col span="8" style="display: flex; align-items: center; justify-content: center">
+                  <span class="quality-tag"
+                    >无缝图案
+                    <a-tooltip
+                      title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
+                    >
+                      <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
+                  ></span>
+                </a-col>
+                <a-col
+                  :span="16"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: right;
+                    padding-right: 7px;
+                  "
+                >
+                  <a-switch size="small" v-model:checked="versionParam.v6.tile" disabled />
+                </a-col>
+              </a-row>
+            </div>
           </div>
         </a-row>
       </a-card>
@@ -1917,8 +1876,7 @@
   };
 
   //提交任务
-  const onSubmit = () => {
-    console.log(textToImgForm);
+  const onSubmit = async () => {
     const srefUrls = getSuccessFileUrls(srefFileList.value);
     console.log(srefUrls);
     if (
@@ -1926,59 +1884,48 @@
       textToImgForm.command === '' ||
       textToImgForm.command === undefined
     ) {
-      message.error('请输入关键词~');
+      message.warning('请输入关键词~');
       return false;
     }
 
-    formRef.value
-      .validate()
-      .then(async () => {
-        const addTaskParam: AddDrawTaskParams = {
-          spaceId: accountForm.currentSpaceId,
-          refAccountId: accountForm.useAccountId,
-          channel: 'MJ',
-          priority: 0,
-          // refTaskId: null,
-          privacyMode: textToImgForm.isPublic ? 'N' : 'Y',
-          commandType: 'IMAGINE',
-          invokeTimes: textToImgForm.invokeTimes,
-          tagNames: textToImgForm.tagName,
-          prompt: {
-            useChannelId: accountForm.useChannelId,
-            base64Array: base64Images.value,
-            paramsDataMap: paramDataValue.value,
-            prompt: textToImgForm.command,
-            commandType: 'IMAGINE',
-            bootId: textToImgForm.robotSelect,
-            paramsStr: concatenatedTags.value,
-            mode: accountForm.mode,
-            enableTranslate: textToImgForm.enableTranslate,
-            sref: srefUrls,
-          },
-        };
+    const addTaskParam: AddDrawTaskParams = {
+      spaceId: accountForm.currentSpaceId,
+      refAccountId: accountForm.useAccountId,
+      channel: 'MJ',
+      priority: 0,
+      // refTaskId: null,
+      privacyMode: textToImgForm.isPublic ? 'N' : 'Y',
+      commandType: 'IMAGINE',
+      invokeTimes: textToImgForm.invokeTimes,
+      tagNames: textToImgForm.tagName,
+      prompt: {
+        useChannelId: accountForm.useChannelId,
+        base64Array: base64Images.value,
+        paramsDataMap: paramDataValue.value,
+        prompt: textToImgForm.command,
+        commandType: 'IMAGINE',
+        bootId: textToImgForm.robotSelect,
+        paramsStr: concatenatedTags.value,
+        mode: accountForm.mode,
+        enableTranslate: textToImgForm.enableTranslate,
+        sref: srefUrls,
+      },
+    };
 
-        textFormLoading.value = true;
-        const key = 'submitTask';
-        message.loading({ content: '正在提交任务...', key, duration: 0 });
-        try {
-          await addDrawTask(addTaskParam);
-          message.success({ content: '任务提交成功!', key, duration: 2 });
-          emit('startLoading');
-        } catch (error) {
-          console.log(error);
-          message.error({ content: error.message, key, duration: 3 });
-        } finally {
-          textFormLoading.value = false;
-          // emit('endLoading');
-        }
-        // createMessage.success('任务已添加~~~');
-
-        //待处理触发右侧列表刷新
-        console.log(textToImgForm);
-      })
-      .catch((error) => {
-        console.log('error', error);
-      });
+    textFormLoading.value = true;
+    const key = 'submitTask';
+    message.loading({ content: '正在提交任务...', key, duration: 0 });
+    try {
+      await addDrawTask(addTaskParam);
+      message.success({ content: '任务提交成功!', key, duration: 2 });
+      emit('startLoading');
+    } catch (error) {
+      console.log(error);
+      message.error({ content: error.message, key, duration: 3 });
+    } finally {
+      textFormLoading.value = false;
+      // emit('endLoading');
+    }
   };
 
   const componentDisabled = ref(false);
@@ -2086,7 +2033,7 @@
   const versionParam = ref({
     niji5: {
       style: '',
-      quality: '0.25',
+      quality: '1',
       chaos: 0,
       s: 100,
       iw: 1,
@@ -2161,18 +2108,76 @@
     { deep: true },
   );
 
+  const tabOptions = ref([
+    {
+      value: 'niji5',
+      payload: {
+        icon: 'streamline-emojis:robot-face-1',
+        subTitle: 'NIJI 5',
+      },
+    },
+    {
+      value: 'niji6',
+      payload: {
+        icon: 'streamline-emojis:robot-face-2',
+        subTitle: 'NIJI 6',
+      },
+    },
+    {
+      value: 'v5',
+      payload: {
+        icon: 'streamline-emojis:robot-face-3',
+        subTitle: 'V5',
+      },
+    },
+    {
+      value: 'v51',
+      payload: {
+        icon: 'streamline-emojis:robot-face-3',
+        subTitle: 'V5.1',
+      },
+    },
+    {
+      value: 'v52',
+      payload: {
+        icon: 'streamline-emojis:robot-face-3',
+        subTitle: 'V5.2',
+      },
+    },
+    {
+      value: 'v6',
+      payload: {
+        icon: 'streamline-emojis:robot-face-3',
+        subTitle: 'V6',
+      },
+    },
+    // {
+    //   value: 'other',
+    //   payload: {
+    //     icon: '🎎',
+    //     subTitle: '待开发',
+    //   },
+    // },
+  ]);
+
   const chooseVersion = (activeKey) => {
     console.log('Current active tab key:', activeKey);
     console.log(paramDataValue.value);
-
     if (activeKey === 'niji5' || activeKey === 'v4') {
       paramDataValue.value.weird = null;
     }
-
     if (activeKey === 'niji5' || activeKey === 'niji6') {
       textToImgForm.robotSelect = '1022952195194359889';
     } else {
       textToImgForm.robotSelect = '936929561302675456';
+    }
+    //风格参考
+    if (activeKey === 'v6' || activeKey === 'niji6') {
+      paramDataValue.value.sref = getSuccessFileUrlStr(srefFileList.value);
+    } else {
+      paramDataValue.value.sw = null;
+      paramDataValue.value.sref = null;
+      viewForm.value.srefFlag = false;
     }
   };
 
@@ -2406,7 +2411,7 @@
       {
         title: '关键词',
         description:
-          '在这里输入你们想要的描述，如果写入--相关的参数，将以输入的为主，提示词属性不再生效！',
+          '在这里输入你们想要的描述，如果写入--相关的参数，将以输入的为主，UI选择的属性将不再生效！',
         placement: 'right',
         target: () => promptStep.value && promptStep.value.$el,
       },

@@ -8,6 +8,8 @@ import { useUserStoreWithOut } from '/@/store/modules/user';
 import { PAGE_NOT_FOUND_ROUTE } from '/@/router/routes/basic';
 
 import { RootRoute } from '/@/router/routes';
+import { getCustomLocalCache, setCustomLocalCache } from '/@/utils/custom';
+import { MJ_ACCOUNT_TOUR } from '/@/enums/cacheEnum';
 
 const LOGIN_PATH = PageEnum.BASE_LOGIN;
 
@@ -24,7 +26,7 @@ const whitePathList: PageEnum[] = [
 export function createPermissionGuard(router: Router) {
   const userStore = useUserStoreWithOut();
   const permissionStore = usePermissionStoreWithOut();
-  console.log("createPermissionGuard");
+  console.log('createPermissionGuard');
   // 路由前置守卫，用于权限控制
   router.beforeEach(async (to, from, next) => {
     // 如果是从根路径跳转到首页，并且用户有自定义的首页路径，则重定向到用户的首页路径
@@ -40,10 +42,9 @@ export function createPermissionGuard(router: Router) {
 
     let token = userStore.getToken;
     const isAnonymous = !token;
-   
+
     // 白名单页面可以直接访问，无需登录
     if (whitePathList.includes(to.path as PageEnum)) {
-      console.log(11111);
       if (to.path === LOGIN_PATH && token) {
         // 如果用户已登录且访问的是登录页面，则尝试执行登录后操作，并重定向到指定页面
         const isSessionTimeout = userStore.getSessionTimeout;
@@ -72,8 +73,8 @@ export function createPermissionGuard(router: Router) {
       //设置一个test token
       token = 'TEST_nishi26z';
       userStore.setToken(token);
-      next();
-
+      await userStore.afterLoginAction();
+      next((to.query?.redirect as string) || '/');
       // redirect login page
       // const redirectData: { path: string; replace: boolean; query?: Recordable<string> } = {
       //   path: LOGIN_PATH,
@@ -88,7 +89,7 @@ export function createPermissionGuard(router: Router) {
       // next(redirectData);
       return;
     }
-    
+
     // 处理从登录页面跳转到404页面的情况
     if (
       from.path === LOGIN_PATH &&

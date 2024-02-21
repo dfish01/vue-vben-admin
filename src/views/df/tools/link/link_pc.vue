@@ -45,8 +45,10 @@
               background-color: #fff7e8;
             "
           >
-            <span style="padding: 3px 10px; color: rgb(0 0 0 / 70%)"
-              >小提示：复制小红书的分享链接即可一键解析获取无水印原图，点击大图后右键下载！后续可用MJ账号进行一键二创作哦~</span
+            <span style="padding: 3px 10px; color: rgb(0 0 0 / 70%)">
+              <Icon
+                icon="flat-color-icons:idea"
+              />小提示：复制小红书的分享链接即可一键解析获取无水印原图，点击大图后右键下载！后续可进行一键二创作哦~</span
             >
           </div>
         </a-col>

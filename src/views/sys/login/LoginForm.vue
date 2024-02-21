@@ -96,9 +96,13 @@
       </ACol>
     </ARow>
 
-    <Divider class="enter-x">{{ t('sys.login.otherSignIn') }}</Divider>
+    <Divider class="enter-x" v-if="!getIsMobile">{{ t('sys.login.otherSignIn') }}</Divider>
 
-    <div class="flex justify-evenly enter-x" :class="`${prefixCls}-sign-in-way`">
+    <div
+      class="flex justify-evenly enter-x"
+      :class="`${prefixCls}-sign-in-way`"
+      v-if="!getIsMobile"
+    >
       <GithubFilled />
       <WechatFilled />
       <AlipayCircleFilled />
@@ -161,7 +165,9 @@
   import { Persistent, BasicKeys } from '/@/utils/cache/persistent';
   import { websiteConfigInfo } from '/@/api/df/anon';
   import { useGlobSetting } from '/@/hooks/setting';
+  import { useAppInject } from '/@/hooks/web/useAppInject';
 
+  const { getIsMobile } = useAppInject();
   const { title: websiteTitle } = useGlobSetting();
 
   const ACol = Col;

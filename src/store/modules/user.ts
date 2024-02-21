@@ -4,8 +4,17 @@ import { defineStore } from 'pinia';
 import { store } from '/@/store';
 import { RoleEnum } from '/@/enums/roleEnum';
 import { PageEnum } from '/@/enums/pageEnum';
-import { ROLES_KEY, TOKEN_KEY, USER_INFO_KEY, PERSONAL_SETTING_KEY } from '/@/enums/cacheEnum';
+import {
+  ROLES_KEY,
+  TOKEN_KEY,
+  USER_INFO_KEY,
+  PERSONAL_SETTING_KEY,
+  MJ_TASK_ACCOUNT_KEY,
+} from '/@/enums/cacheEnum';
 import { getAuthCache, setAuthCache } from '/@/utils/auth';
+
+import { accountInfoApi } from '/@/views/df/mj/accountInfo';
+
 import {
   GetUserInfoModel,
   LoginParams,
@@ -29,6 +38,22 @@ import { RouteRecordRaw } from 'vue-router';
 import { PAGE_NOT_FOUND_ROUTE } from '/@/router/routes/basic';
 import { isArray } from '/@/utils/is';
 import { h } from 'vue';
+import {
+  getCustomCache,
+  setCustomCache,
+  clearCustomLocalCache,
+  clearCustomCache,
+} from '/@/utils/custom';
+
+const {
+  accountForm,
+  accountViewForm,
+  initAccountList,
+  initAccountInfo,
+  doGetChannelsByGroup,
+  handleAccountSetting,
+  handleSetting,
+} = accountInfoApi();
 
 interface UserState {
   userInfo: Nullable<UserInfo>;
@@ -191,6 +216,11 @@ export const useUserStore = defineStore({
         const data = await loginApi(loginParams, mode);
         const { token } = data;
 
+        //清除账号信息
+        // setCustomCache(MJ_TASK_ACCOUNT_KEY, undefined);
+        // clearCustomLocalCache(true);
+        // clearCustomCache(true);
+
         // save token
         this.setToken(token);
         return this.afterLoginAction(goHome);
@@ -245,6 +275,37 @@ export const useUserStore = defineStore({
       // get user info
       const userInfo = await this.getUserInfoAction();
 
+      // const getPersonalSetting = getCustomCache(MJ_TASK_ACCOUNT_KEY);
+      // if (!getPersonalSetting || getPersonalSetting?.userId !== userInfo?.userId) {
+      //   setCustomCache(MJ_TASK_ACCOUNT_KEY, {
+      //     userId: userInfo?.userId,
+      //     useAccountId: null,
+      //     useAccountName: null,
+      //     useChannelId: null,
+      //     useChannelName: null,
+      //     mode: 'relax',
+      //     currentSpaceId: null,
+      //     currentSpaceTitle: null,
+      //     resetFlag: true,
+      //   });
+      //   console.log('写入初始化账号设置');
+      // }
+      //初始化信息
+      console.log('写入初始化账号设置');
+      if (accountForm.value === undefined || accountForm.value?.userId !== userInfo?.userId) {
+        accountForm.userId = userInfo?.userId;
+        accountForm.useAccountId = null;
+        accountForm.useChannelId = null;
+        accountForm.currentSpaceId = null;
+        accountForm.useAccountName = null;
+        accountForm.currentSpaceTitle = null;
+        accountForm.useChannelName = null;
+        //下拉数据
+        accountViewForm.accountSelector.options = [{ label: '默认账户', value: '' }];
+        accountViewForm.channelSelector.options = [{ label: '默认', value: '' }];
+        accountViewForm.spaceOptions = [{ label: '默认', value: '' }];
+      }
+
       const sessionTimeout = this.sessionTimeout;
       if (sessionTimeout) {
         this.setSessionTimeout(false);
@@ -280,6 +341,10 @@ export const useUserStore = defineStore({
      * @description: logout
      */
     async logout(goLogin = false) {
+      //清除账号信息
+      // clearCustomLocalCache(true);
+      // clearCustomCache(true);
+
       if (this.getToken) {
         try {
           await doLogout();

@@ -16,7 +16,7 @@ import {
 import { addTag, removeTaskTag } from '/@/api/df/drawTaskTag';
 import { genPromptList, genTagList } from '/@/api/df/dataCache';
 import { ListQueryParams, ListResultModel, AccountListItem } from '/@/api/df/model/accountModel';
-import { availableList, getChannelsByGroup } from '/@/api/df/account';
+import { availableList, getChannelsByGroup, getGroupAccounts } from '/@/api/df/account';
 import type { UploadFile } from 'ant-design-vue/es/upload/interface';
 import { message, UploadProps, Upload } from 'ant-design-vue';
 import { useRoute } from 'vue-router';
@@ -36,6 +36,7 @@ import {
   setTop,
 } from '/@/api/df/drawCollectCategory';
 import { addToCategory, removeFromCategory } from '/@/api/df/drawCollect';
+import { useUserStore } from '/@/store/modules/user';
 
 const { createMessage, createSuccessModal, createErrorModal, createInfoModal } = useMessage();
 
@@ -64,6 +65,8 @@ export function accountInfoApi() {
   }
 
   const accountForm = reactive({
+    resetFlag: false,
+    userId: null as string | null | undefined,
     useAccountId: null as string | null | undefined,
     useAccountName: null as string | null | undefined,
     useChannelId: null as string | null | undefined,
@@ -103,10 +106,18 @@ export function accountInfoApi() {
 
   const initAccountInfo = async () => {
     //初始化偏好
-    console.log('初始化偏好');
+    console.log('初始化偏好22');
     const getPersonalSetting = getCustomCache(MJ_TASK_ACCOUNT_KEY);
+
     if (getPersonalSetting) {
+      // if (getPersonalSetting.resetFlag === true) {
+      //   accountViewForm.accountSelector.options = [{ label: '默认账户', value: '' }];
+      //   accountViewForm.channelSelector.options = [{ label: '默认', value: '' }];
+      //   accountViewForm.spaceOptions.options = [{ label: '默认', value: '' }];
+      // }
+      accountForm.resetFlag = false;
       accountForm.mode = getPersonalSetting.mode;
+      // accountForm.mode = getPersonalSetting?.mode || 'relax';
       accountForm.currentSpaceId = getPersonalSetting.currentSpaceId;
       accountForm.currentSpaceTitle = getPersonalSetting.currentSpaceTitle;
       accountForm.useAccountId = getPersonalSetting.useAccountId;

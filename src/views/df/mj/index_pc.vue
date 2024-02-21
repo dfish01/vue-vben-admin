@@ -79,12 +79,9 @@
                       ><SvgIcon name="QQ"
                     /></a-button>
                   </a-tooltip>
-                  
+
                   <a-tooltip title="🥤系统相关操作说明以及Midjouney教程文档库 ~">
-                    <a-button
-                      ref="teachStep"
-                      @click="openNewWindow"
-                      style="padding: 5px"
+                    <a-button ref="teachStep" @click="openNewWindow" style="padding: 5px"
                       ><SvgIcon name="jiaocheng"
                     /></a-button>
                   </a-tooltip>
@@ -97,7 +94,7 @@
                       ><SvgIcon name="jiaocheng"
                     /></a-button>
                   </a-tooltip>
-                 
+
                   <a-tooltip title="🍧导入DISCORD记录，可以将discord的图片导入进来进行管理哦~">
                     <a-button
                       @click="showImportView"
@@ -115,32 +112,38 @@
               </div>
             </div>
           </template>
-          <a-card style="margin-bottom:5px" :bodyStyle="{padding:'2px'}">
-            <a-segmented block v-model:value="tabValue" :options="tabOptions" style="width:100%">
-            <template #label="{ payload }">
-              <div style="padding: 4px">
-                <div> <Icon
-                    :icon="payload.icon"
-                    style="margin: 0"
-                    aria-hidden="true"
-                  />{{ payload.subTitle }}
+
+          <a-card style="margin: 0 2px 2px" :bodyStyle="{ padding: '2px' }">
+            <a-segmented block v-model:value="tabValue" :options="tabOptions" style="width: 100%">
+              <template #label="{ payload }">
+                <div style="padding: 4px">
+                  <div>
+                    <Icon :icon="payload.icon" style="margin: 0" aria-hidden="true" />{{
+                      payload.subTitle
+                    }}
+                  </div>
                 </div>
-            
-              </div>
-            </template>
-          </a-segmented>
+              </template>
+            </a-segmented>
           </a-card>
-          
-          <Describe v-if="tabValue==='desc'" @startLoading="startLoadingHandler" @endLoading="endLoadingHandler" />
-          <Blend v-if="tabValue==='blend'" @startLoading="startLoadingHandler" @endLoading="endLoadingHandler" />
+
+          <Describe
+            v-if="tabValue === 'desc'"
+            @startLoading="startLoadingHandler"
+            @endLoading="endLoadingHandler"
+          />
+          <Blend
+            v-if="tabValue === 'blend'"
+            @startLoading="startLoadingHandler"
+            @endLoading="endLoadingHandler"
+          />
           <TextToImage
-                v-if="tabValue ==='TextToImageForm'"
-                ref="textToImageRef"
-                style="text-align: center"
-                @startLoading="startLoadingHandler"
-                @endLoading="endLoadingHandler"
-              />
-          
+            v-if="tabValue === 'TextToImageForm'"
+            ref="textToImageRef"
+            style="text-align: center"
+            @startLoading="startLoadingHandler"
+            @endLoading="endLoadingHandler"
+          />
         </a-card>
       </a-col>
 
@@ -190,11 +193,20 @@
                 dataIndex="gmtCreate"
                 key="gmtCreate"
                 align="center"
+                width="200px"
               />
 
-              <a-table-column title="操作" key="actions" style="width: 150px">
+              <a-table-column title="操作" key="actions" width="300px">
                 <template #default="{ record }">
                   <a-button-group>
+                    <a-button type="warning" @click="addUserSpace(record)">编辑</a-button>
+
+                    <a-button
+                      :loading="compState.loading"
+                      @click="doSetTop(record)"
+                      v-if="record.sort != 0"
+                      >置顶</a-button
+                    >
                     <a-popconfirm
                       title="删除后该空间图片将丢失（目前暂未做迁移逻辑），是否确认删除?"
                       ok-text="确认删除"
@@ -203,19 +215,6 @@
                     >
                       <a-button type="primary" danger v-if="record.sort != 0">删除</a-button>
                     </a-popconfirm>
-                    <a-button
-                      type="warning"
-                      @click="addUserSpace(record)"
-                      v-if="record.defaultFlag === 'N'"
-                      >编辑</a-button
-                    >
-                    <a-button
-                      :loading="compState.loading"
-                      @click="doSetTop(record)"
-                      v-if="record.sort != 0"
-                      >置顶</a-button
-                    >
-
                     <a-button @click="selectSpace(record)">选择</a-button>
                     <a-button type="primary" @click="doGenCode(record, 'topRight')"
                       >生成编码</a-button
@@ -735,36 +734,36 @@
   };
   //***********************  tab  ***************************** */
   const tabOptions = ref([
-  {
-    value: 'TextToImageForm',
-    payload: {
-      icon: 'streamline-emojis:robot-face-1',
-      subTitle: '文生图',
+    {
+      value: 'TextToImageForm',
+      payload: {
+        icon: 'streamline-emojis:robot-face-1',
+        subTitle: '文生图',
+      },
     },
-  },
-  {
-    value: 'blend',
-    payload: {
-      icon: 'streamline-emojis:robot-face-2',
-      subTitle: '混合图',
+    {
+      value: 'blend',
+      payload: {
+        icon: 'streamline-emojis:robot-face-2',
+        subTitle: '混合图',
+      },
     },
-  },
-  {
-    value: 'desc',
-    payload: {
-      icon: 'streamline-emojis:robot-face-3',
-      subTitle: '解析图',
+    {
+      value: 'desc',
+      payload: {
+        icon: 'streamline-emojis:robot-face-3',
+        subTitle: '解析图',
+      },
     },
-  },
-  // {
-  //   value: 'other',
-  //   payload: {
-  //     icon: '🎎',
-  //     subTitle: '待开发',
-  //   },
-  // },
-]);
-const tabValue = ref('TextToImageForm');
+    // {
+    //   value: 'other',
+    //   payload: {
+    //     icon: '🎎',
+    //     subTitle: '待开发',
+    //   },
+    // },
+  ]);
+  const tabValue = ref('TextToImageForm');
 </script>
 
 <style scoped>

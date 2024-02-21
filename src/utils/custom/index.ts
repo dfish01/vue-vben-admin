@@ -24,6 +24,7 @@ export function clearCustomCache(immediate = true) {
   const fn = isLocal ? Persistent.clearLocal : Persistent.clearSession;
   return fn(immediate);
 }
+
 /************************* local ******************** */
 
 export function getCustomLocalCache<T>(key: BasicKeys) {

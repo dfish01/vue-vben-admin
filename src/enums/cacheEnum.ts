@@ -1,4 +1,4 @@
-//自定义HOST
+//全局账号信息
 export const MJ_TASK_ACCOUNT_KEY = 'MJ_TASK_ACCOUNT__';
 //自定义账号引导
 export const MJ_ACCOUNT_TOUR = 'MJ_ACCOUNT_TOUR__';

@@ -24,7 +24,7 @@
         </a-menu-item>
         <a-menu-item key="chatgpt" @click="toDetail('/chatgpt')" class="flex-item">
           <div class="menu-content">
-            <div><Icon class="vel-icon icon" icon="logos:openai-icon" size="16" /> 对话</div>
+            <div><Icon class="vel-icon icon" icon="simple-icons:openai" size="16" /> 对话</div>
           </div>
         </a-menu-item>
         <!-- <a-menu-item key="public" @click="toDetail('/public')" class="flex-item">
