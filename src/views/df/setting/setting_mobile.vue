@@ -2,8 +2,9 @@
   <a-layout ref="formRef">
     <a-card
       :style="{
-        height: `calc(100vh - 45px) `,
+        height: `calc(100vh - 56px - 45px) `,
         width: '100%',
+
         padding: 0,
       }"
       :bodyStyle="{ padding: '5px 5px' }"

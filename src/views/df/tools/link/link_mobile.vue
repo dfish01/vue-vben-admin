@@ -153,7 +153,7 @@
   });
 
   const openDraw = async () => {
-    go('/mj/index');
+    go('/mmj/index');
   };
 
   const doAnalysis = async () => {

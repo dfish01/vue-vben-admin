@@ -2,7 +2,7 @@
   <a-layout style="width: 100%; overflow: hidden">
     <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
     <a-card
-      :style="{ height: `calc(100vh - 46px)`, overflow: 'auto' }"
+      :style="{ height: `calc(100vh - 56px - 45px)`, overflow: 'auto' }"
       :bodyStyle="{ padding: '0px' }"
     >
       <a-card :bodyStyle="{ padding: '7px' }">

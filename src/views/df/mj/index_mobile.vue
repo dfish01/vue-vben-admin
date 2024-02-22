@@ -461,13 +461,14 @@
         subTitle: '解析图',
       },
     },
-    // {
-    //   value: 'other',
-    //   payload: {
-    //     icon: '🎎',
-    //     subTitle: '🎎待开发',
-    //   },
-    // },
+    {
+      disabled: 'false',
+      value: 'other',
+      payload: {
+        icon: 'streamline-emojis:beaming-face-with-smiling-eyes',
+        subTitle: '待开发',
+      },
+    },
   ]);
   const tabValue = ref('TextToImageForm');
 </script>
@@ -521,31 +522,7 @@
     padding: 0 !important;
   }
 
-  .custom-tour >>> .ant-tour {
-    width: 300px !important;
-  }
-
-  .custom-tour ::v-deep .ant-tour {
-    width: 300px !important;
-  }
-
-  .custom-tour ::v-deep .ant-tour-content {
-    width: 300px !important;
-  }
-
-  .custom-tour >>> .ant-tour-content {
-    width: 300px !important;
-  }
-
-  :deep(.ant-tour-content) {
-    width: 300px !important;
-  }
-
-  ::v-deep .ant-tour-content {
-    width: 300px !important;
-  }
-
-  :global(.ant-tour-content) {
-    width: 350px !important;
+  :global(.ant-tour) {
+    width: auto !important;
   }
 </style>
