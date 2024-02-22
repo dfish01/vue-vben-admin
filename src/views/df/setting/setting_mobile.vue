@@ -62,8 +62,8 @@
             title="个人信息"
           >
             <a-card-grid
-              :bordered="false"
-              v-if="userInfo.phone === '未绑定手机号'"
+              :bordered="userInfo.phone === '未绑定手机号'"
+              :disabled="userInfo.phone !== '未绑定手机号'"
               :style="{
                 padding: '10px 0px',
                 margin: '0px',
@@ -72,11 +72,11 @@
                 'border-bottom-left-radius': '8px',
               }"
               :hoverable="true"
-              @click="handleShowModal('changePhone')"
+              @click="userInfo.phone !== '未绑定手机号' ? null : handleShowModal('changePhone')"
             >
               <span
                 ><Icon icon="fluent:phone-chat-16-regular" />
-                {{ userInfo.phone === '未绑定手机号' ? '绑定手机' : '变更手机号' }}</span
+                {{ userInfo.phone === '未绑定手机号' ? '绑定手机' : '已绑定手机号' }}</span
               ></a-card-grid
             >
             <a-card-grid
@@ -752,8 +752,12 @@
     (emailFormRef.value as any).validate((valid) => {
       if (valid) {
         // 调用邮箱更新的API
-        resetEmail(formData);
-        createMessage.success('邮箱已切换成功！,请去新邮箱激活账号');
+        try {
+          resetEmail(formData);
+          createMessage.success('邮箱已切换成功！,请去新邮箱激活账号');
+        } finally {
+          loading.value = false;
+        }
       } else {
         console.error('Email form validation failed!');
       }
@@ -764,11 +768,16 @@
     (phoneFormRef.value as any)
       .validate()
       .then(async () => {
-        await resetPhone(formData);
-        createMessage.success('手机号绑定成功！');
-        viewAgg.value.phoneShow = false;
-        //待处理触发右侧列表刷新
-        userInfo.value.phone = formData.phone;
+        loading.value = true;
+        try {
+          await resetPhone(formData);
+          createMessage.success('手机号绑定成功！');
+          viewAgg.value.phoneShow = false;
+          //待处理触发右侧列表刷新
+          userInfo.value.phone = formData.phone;
+        } finally {
+          loading.value = false;
+        }
       })
       .catch((error) => {
         console.log('error', error);
@@ -792,10 +801,13 @@
       .validate()
       .then(async () => {
         // 成功的处理逻辑
-        console.log(1111);
-        await changePassword(formData);
+        try {
+          await changePassword(formData);
 
-        createMessage.success('密码修改成功！');
+          createMessage.success('密码修改成功！');
+        } finally {
+          loading.value = false;
+        }
       })
       .catch(() => {
         console.error('Password form validation failed!');
