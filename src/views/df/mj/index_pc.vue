@@ -716,7 +716,9 @@
       if (needShow && needShow === true) {
         return;
       }
+
       setCustomLocalCache(MJ_DRAW_TOUR, true);
+      console.log('setCustomLocalCache ' + getCustomLocalCache(MJ_DRAW_TOUR));
     }
 
     // const resp = await userStep({ content: 'MJ_DRAW_TOUR' });

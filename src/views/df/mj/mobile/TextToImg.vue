@@ -128,21 +128,18 @@
           </div>
         </template>
         <a-row>
-          <a-col span="8">
-            <a-button style="width: 100%" size="small" @click="openTranslate"
+          <a-button-group style="width: 100%">
+            <a-button style="width: 33%" size="small" @click="openTranslate"
               ><SvgIcon name="translate" />中英翻译</a-button
             >
-          </a-col>
-          <a-col span="8">
-            <a-button style="width: 100%" size="small" @click="openAiPrompt"
+            <a-button style="width: 33%" size="small" @click="openAiPrompt"
               ><SvgIcon name="gpt" />AI生成</a-button
             >
-          </a-col>
-          <a-col span="8">
-            <a-button style="width: 100%" size="small" @click="openDrawerInC">
+
+            <a-button style="width: 33%" size="small" @click="openDrawerInC">
               <SvgIcon name="book" /> Prompt宝典</a-button
             >
-          </a-col>
+          </a-button-group>
         </a-row>
       </a-card>
       <!-- 辅助工具 E-->
@@ -221,11 +218,15 @@
                   <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
               ></span>
             </div>
-            <a-switch
-              size="small"
-              :disabled="!(paramDataValue.version === 'v 6' || paramDataValue.version === 'niji 6')"
-              v-model:checked="viewForm.srefFlag"
-            />
+            <div>
+              <span
+                style="font-size: 10px"
+                v-if="!(paramDataValue.version === 'v 6' || paramDataValue.version === 'niji 6')"
+              >
+                仅niji6 和 v6 模型可用</span
+              >
+              <a-switch size="small" v-else v-model:checked="viewForm.srefFlag" />
+            </div>
           </div>
         </template>
         <div v-if="viewForm.srefFlag">
@@ -1824,7 +1825,7 @@
   const substractSpaceRefs = ref([card]);
   const upwardSpace = computed(() => 1);
   //移动设备底部导航栏
-  const offsetHeightRef = ref(47);
+  const offsetHeightRef = ref(55);
   const subtractHeightRefs = ref([button]);
 
   // 使用hook

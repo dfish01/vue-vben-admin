@@ -106,7 +106,6 @@ export function accountInfoApi() {
 
   const initAccountInfo = async () => {
     //初始化偏好
-    console.log('初始化偏好22');
     const getPersonalSetting = getCustomCache(MJ_TASK_ACCOUNT_KEY);
 
     if (getPersonalSetting) {

@@ -753,6 +753,10 @@
     }
   };
 
+  const openNewWindow = () => {
+    window.open('https://www.midjourneyers.com', '_blank');
+  };
+
   const appObj = ref<any>({
     setting: [
       {
@@ -815,7 +819,7 @@
         routeUrl: '',
         type: 'func',
         showFlag: systemConfigForm.value.tutorialInfo !== null,
-        func: openTutorialView,
+        func: openNewWindow,
       },
       {
         name: '售后服务',

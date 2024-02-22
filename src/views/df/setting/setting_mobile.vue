@@ -1,10 +1,10 @@
 <template>
-  <a-layout ref="formRef">
+  <a-layout ref="formRef" class="custom-font">
     <a-card
       :style="{
-        height: `calc(100vh - 56px - 45px) `,
         width: '100%',
-
+        height: `calc(100vh - 56px - 55px) `,
+        'overflow-y': 'scroll',
         padding: 0,
       }"
       :bodyStyle="{ padding: '5px 5px' }"
@@ -52,136 +52,201 @@
         </a-row>
       </a-card>
       <!-- 配置选项卡 -->
-      <a-row style="width: 100%; margin-top: 10px">
-        <a-card :bordered="false" :bodyStyle="{ padding: '0px 0px', 'justify-content': 'center' }">
-          <a-card-grid
-            style="width: 33%; text-align: center"
-            v-if="userInfo.phone === '未绑定手机号'"
-            :hoverable="true"
-            @click="handleShowModal('changePhone')"
-          >
-            <span><Icon icon="fluent:phone-chat-16-regular" /> 绑定手机</span></a-card-grid
-          >
-          <a-card-grid
-            @click="handleShowModal('changePassword')"
-            style="width: 34%; text-align: center"
-            :hoverable="true"
-            ><span><Icon icon="teenyicons:password-outline" /> 变更密码</span></a-card-grid
-          >
-
-          <a-card-grid @click="handleShowModal('changeMail')" style="width: 33%; text-align: center"
-            ><span><Icon icon="carbon:email-new" /> 变更邮箱</span></a-card-grid
-          >
-
-          <a-popconfirm
-            title="前往查看商品市场？"
-            ok-text="立即前往"
-            cancel-text="取消"
-            @confirm="goView('/goods/index')"
-          >
-            <a-card-grid :hoverable="true" style="width: 33%; text-align: center"
-              ><span><Icon icon="heroicons:shopping-bag-16-solid" /> 官方商品</span></a-card-grid
-            >
-          </a-popconfirm>
-          <a-popconfirm title="正在开发中，请稍后~" cancel-text="取消">
-            <a-card-grid :hoverable="false" style="width: 34%; text-align: center" disabled
-              ><span
-                ><Icon icon="fluent:shopping-bag-arrow-left-24-regular" /> 二手商品</span
-              ></a-card-grid
-            >
-          </a-popconfirm>
-          <a-popconfirm
-            title="前往查看集市？"
-            ok-text="立即前往"
-            cancel-text="取消"
-            @confirm="goView('/shop/index')"
-          >
-            <a-card-grid :hoverable="true" style="width: 33%; text-align: center"
-              ><span><Icon icon="iconoir:shop-four-tiles" /> 集市</span></a-card-grid
-            >
-          </a-popconfirm>
-
-          <a-popconfirm
-            title="前往查看余额？"
-            ok-text="立即前往"
-            cancel-text="取消"
-            @confirm="goView('/wallet/index')"
-          >
-            <a-card-grid :hoverable="true" style="width: 33%; text-align: center"
-              ><span><Icon icon="icon-park-outline:bank" /> 账户余额</span></a-card-grid
-            >
-          </a-popconfirm>
-          <a-popconfirm
-            title="前往查看交易记录？"
-            ok-text="立即前往"
-            cancel-text="取消"
-            @confirm="goView('/trade/index')"
-          >
-            <a-card-grid :hoverable="true" style="width: 34%; text-align: center"
-              ><span><Icon icon="icon-park-outline:trademark" /> 交易记录</span></a-card-grid
-            >
-          </a-popconfirm>
-          <a-popconfirm
-            title="前往邀请中心？"
-            ok-text="立即前往"
-            cancel-text="取消"
-            @confirm="goView('/invite/index')"
-          >
-            <a-card-grid :hoverable="true" style="width: 33%; text-align: center"
-              ><span><Icon icon="mdi:invite" /> 邀请中心</span></a-card-grid
-            >
-          </a-popconfirm>
-        </a-card>
-      </a-row>
-      <a-row style="width: 100%; margin-top: 10px">
-        <a-card :bordered="false" :bodyStyle="{ padding: '0px 0px', 'justify-content': 'center' }">
-          <a-card-grid
-            style="width: 33%; text-align: center"
-            :hoverable="true"
-            @click="openSuggestView"
-          >
-            <span><Icon icon="entypo:new-message" /> 建议</span></a-card-grid
-          >
-          <a-card-grid
-            @click="openGroupView"
-            style="width: 34%; text-align: center"
-            :hoverable="true"
-            ><span><Icon icon="icon-park-outline:wechat" /> 交流群</span>
-          </a-card-grid>
-          <a-card-grid
-            @click="openAfterSaleView"
-            v-if="systemConfigForm.afterSaleInfo !== null"
-            style="width: 33%; text-align: center"
-            ><span><Icon icon="ri:customer-service-2-line" /> 售后服务</span></a-card-grid
-          >
-
-          <a-card-grid
-            @click="openTutorialView"
-            v-if="systemConfigForm.tutorialInfo !== null"
-            :hoverable="true"
-            style="width: 33%; text-align: center"
-          >
-            <span><Icon icon="gis:map-book" /> 知识库</span></a-card-grid
-          >
-
-          <a-popconfirm
-            title="是否退出系统？"
-            ok-text="立即退出"
-            cancel-text="取消"
-            @confirm="doLogout()"
+      <div>
+        <a-row style="width: 100%; margin-top: 10px">
+          <a-card
+            size="small"
+            :bordered="true"
+            style="width: 100%"
+            :bodyStyle="{ padding: '0px', 'justify-content': 'center', width: '100%' }"
+            title="个人信息"
           >
             <a-card-grid
-              v-if="systemConfigForm.tutorialInfo !== null"
+              :bordered="false"
+              v-if="userInfo.phone === '未绑定手机号'"
+              :style="{
+                padding: '10px 0px',
+                margin: '0px',
+                width: '33%',
+                'text-align': 'center',
+                'border-bottom-left-radius': '8px',
+              }"
               :hoverable="true"
-              style="width: 34%; text-align: center"
+              @click="handleShowModal('changePhone')"
             >
-              <span><Icon icon="bx:log-out" /> 退出登录</span></a-card-grid
+              <span
+                ><Icon icon="fluent:phone-chat-16-regular" />
+                {{ userInfo.phone === '未绑定手机号' ? '绑定手机' : '变更手机号' }}</span
+              ></a-card-grid
             >
-          </a-popconfirm>
-          <a-card-grid :hoverable="false" style="width: 33%; text-align: center" />
-        </a-card>
-      </a-row>
+            <a-card-grid
+              @click="handleShowModal('changePassword')"
+              :style="{ padding: '10px 0px', margin: '0px', width: '34%', 'text-align': 'center' }"
+              :hoverable="true"
+              ><span><Icon icon="teenyicons:password-outline" /> 变更密码</span></a-card-grid
+            >
 
+            <a-card-grid
+              @click="handleShowModal('changeMail')"
+              :style="{
+                width: '33%',
+                'text-align': 'center',
+                padding: '10px 0px',
+                'border-bottom-right-radius': '8px',
+              }"
+              ><span><Icon icon="carbon:email-new" /> 变更邮箱</span></a-card-grid
+            >
+          </a-card>
+        </a-row>
+        <a-row style="width: 100%; margin-top: 10px">
+          <a-card
+            size="small"
+            :bordered="true"
+            :bodyStyle="{ padding: '0px 0px', 'justify-content': 'center' }"
+            title="交易中心"
+          >
+            <a-card-grid
+              :hoverable="true"
+              :style="{
+                padding: '10px 0px',
+                width: '33%',
+                'text-align': 'center',
+              }"
+              @click="goView('/goods/index')"
+              ><span><Icon icon="heroicons:shopping-bag-16-solid" /> 官方商品</span></a-card-grid
+            >
+
+            <a-popconfirm title="正在开发中，请稍后~" cancel-text="取消">
+              <a-card-grid
+                :style="{ padding: '10px 0px', width: '34%', 'text-align': 'center' }"
+                :hoverable="false"
+                disabled
+                ><span
+                  ><Icon icon="fluent:shopping-bag-arrow-left-24-regular" /> 二手商品</span
+                ></a-card-grid
+              >
+            </a-popconfirm>
+
+            <a-card-grid
+              :hoverable="true"
+              @click="goView('/shop/index')"
+              :style="{ padding: '10px 0px', width: '33%', 'text-align': 'center' }"
+              ><span><Icon icon="iconoir:shop-four-tiles" /> 集市</span></a-card-grid
+            >
+
+            <a-card-grid
+              :hoverable="true"
+              :style="{
+                padding: '10px 0px',
+                width: '33%',
+                'border-bottom-left-radius': '8px',
+                'text-align': 'center',
+              }"
+              @click="goView('/wallet/index')"
+              ><span><Icon icon="icon-park-outline:bank" /> 账户余额</span></a-card-grid
+            >
+
+            <a-card-grid
+              :hoverable="true"
+              :style="{
+                padding: '10px 0px',
+                width: '34%',
+
+                'text-align': 'center',
+              }"
+              @click="goView('/trade/index')"
+              ><span><Icon icon="icon-park-outline:trademark" /> 交易记录</span></a-card-grid
+            >
+
+            <a-card-grid
+              :hoverable="true"
+              :style="{
+                padding: '10px 0px',
+                width: '33%',
+                'border-bottom-right-radius': '8px',
+                'text-align': 'center',
+              }"
+              @click="goView('/invite/index')"
+              ><span><Icon icon="mdi:invite" /> 邀请中心</span></a-card-grid
+            >
+          </a-card>
+        </a-row>
+
+        <a-row style="width: 100%; margin-top: 10px">
+          <a-card
+            size="small"
+            :bordered="true"
+            :bodyStyle="{ padding: '0px 0px', 'justify-content': 'center' }"
+            title="福利集"
+          >
+            <a-card-grid
+              :style="{ padding: '10px 0px', width: '33%', 'text-align': 'center' }"
+              :hoverable="true"
+              @click="openSuggestView"
+            >
+              <span><Icon icon="entypo:new-message" /> 建议</span></a-card-grid
+            >
+            <a-card-grid
+              @click="openGroupView"
+              :style="{ padding: '10px 0px', width: '34%', 'text-align': 'center' }"
+              :hoverable="true"
+              ><span><Icon icon="icon-park-outline:wechat" /> 交流群</span>
+            </a-card-grid>
+            <a-card-grid
+              :style="{ padding: '10px 0px', width: '33%', 'text-align': 'center' }"
+              @click="openAfterSaleView"
+              v-if="systemConfigForm.afterSaleInfo !== null"
+              style="width: 33%; text-align: center"
+              ><span><Icon icon="ri:customer-service-2-line" /> 售后服务</span></a-card-grid
+            >
+
+            <a-popconfirm
+              title="是否前往知识库？"
+              ok-text="前往"
+              cancel-text="取消"
+              @confirm="openNewWindow()"
+            >
+              <a-card-grid
+                :hoverable="true"
+                :style="{
+                  padding: '10px 0px',
+                  'border-bottom-left-radius': '8px',
+                  width: '33%',
+                  'text-align': 'center',
+                }"
+              >
+                <span><Icon icon="gis:map-book" /> 知识库</span></a-card-grid
+              >
+            </a-popconfirm>
+            <a-card-grid
+              @click="goView('/tools-link/index')"
+              :hoverable="true"
+              :style="{ padding: '10px 0px', width: '34%', 'text-align': 'center' }"
+            >
+              <span><Icon icon="tabler:photo-bolt" /> 取源图</span></a-card-grid
+            >
+            <a-popconfirm
+              title="是否退出系统？"
+              ok-text="退出"
+              cancel-text="取消"
+              @confirm="doLogout()"
+            >
+              <a-card-grid
+                :hoverable="true"
+                :style="{
+                  padding: '10px 0px',
+                  width: '33%',
+                  'border-bottom-right-radius': '8px',
+                  'text-align': 'center',
+                }"
+              >
+                <span><Icon icon="bx:log-out" /> 退出登录</span></a-card-grid
+              >
+            </a-popconfirm>
+            <!-- <a-card-grid :hoverable="false" style="width: 33%; text-align: center" /> -->
+          </a-card>
+        </a-row>
+      </div>
       <!-- 意见箱 -->
       <a-modal
         v-model:open="suggestForm.viewFlag"
@@ -485,7 +550,7 @@
   const substractSpaceRefs = ref([]);
   const upwardSpace = computed(() => 1);
   //移动设备底部导航栏
-  const offsetHeightRef = ref(44);
+  const offsetHeightRef = ref(56);
   const subtractHeightRefs = ref([]);
 
   // 使用hook
@@ -718,6 +783,10 @@
     // });
   };
 
+  const openNewWindow = () => {
+    window.open('https://www.midjourneyers.com', '_blank');
+  };
+
   const handlePasswordSubmit = () => {
     (passwordFormRef.value as any)
       .validate()
@@ -809,6 +878,10 @@
 
     .ant-modal-body {
       flex: 1;
+    }
+
+    .custom-font {
+      font-size: 10px;
     }
   }
 </style>

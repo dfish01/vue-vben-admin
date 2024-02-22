@@ -68,7 +68,7 @@
     <div
       v-if="tableData.length === 0"
       style="display: flex; align-items: center; justify-content: center"
-      :style="{ height: `calc(${contentHeight}px - 75px)`, overflow: 'auto' }"
+      :style="{ height: `calc(${contentHeight}px - 77px)`, overflow: 'auto' }"
     >
       <a-empty :image="simpleImage" />
     </div>
@@ -77,7 +77,7 @@
       class="cards"
       v-else
       :style="{
-        height: `calc(${contentHeight}px  - 75px)`,
+        height: `calc(${contentHeight}px  - 77px)`,
         overflow: 'auto',
         padding: '0px 10px',
       }"

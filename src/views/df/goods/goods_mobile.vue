@@ -12,7 +12,7 @@
       >
         <div style="display: flex; align-items: center">
           <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
-          <span style="margin-left: 5px; font-size: 16px; font-weight: bold">市场</span>
+          <span style="margin-left: 5px; font-size: 16px; font-weight: bold">商品市场</span>
         </div>
         <div style="display: flex; gap: 5px">
           <a-button-group>
@@ -512,7 +512,7 @@
   const buttonRef = ref(null);
   const substractSpaceRefs = ref([]);
   const upwardSpace = computed(() => 0);
-  const offsetHeightRef = ref(100);
+  const offsetHeightRef = ref(110);
   const subtractHeightRefs = ref([buttonRef]);
   const formRef = ref();
   // 使用hook
