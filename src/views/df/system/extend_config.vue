@@ -69,6 +69,105 @@
           />
         </a-form-item>
       </a-card>
+      <a-card title="短信配置" style="margin-top: 10px">
+        <a-form-item
+          label="secretId"
+          :name="['tencentSms', 'secretId']"
+          :rules="[{ required: true, message: '请输入secretId' }]"
+        >
+          <a-input
+            v-model:value="extendConfigForm.tencentSms.secretId"
+            placeholder="请输入secretId"
+          />
+          <span style="margin-left: 10px; color: red; font-size: 13px"
+            >可通过 https://console.cloud.tencent.com/cam/capi 获取</span
+          >
+        </a-form-item>
+        <a-form-item
+          label="secretKey"
+          :name="['tencentSms', 'secretKey']"
+          :rules="[{ required: true, message: '请输入secretKey' }]"
+        >
+          <a-input
+            v-model:value="extendConfigForm.tencentSms.secretKey"
+            placeholder="请输入secretKey"
+          />
+        </a-form-item>
+        <a-form-item
+          label="appId"
+          :name="['tencentSms', 'appId']"
+          :rules="[{ required: true, message: '请输入appId' }]"
+        >
+          <a-input v-model:value="extendConfigForm.tencentSms.appId" placeholder="请输入appId" />
+          <span style="margin-left: 10px; color: red; font-size: 13px"
+            >可通过 https://console.cloud.tencent.com/smsv2/app-manage 获取</span
+          >
+        </a-form-item>
+        <a-form-item
+          label="appkey"
+          :name="['tencentSms', 'appkey']"
+          :rules="[{ required: true, message: '请输入appkey' }]"
+        >
+          <a-input v-model:value="extendConfigForm.tencentSms.appkey" placeholder="请输入appkey" />
+        </a-form-item>
+        <a-form-item
+          label="短信签名"
+          :name="['tencentSms', 'smsSign']"
+          :rules="[{ required: true, message: '请输入短信签名' }]"
+        >
+          <a-input
+            v-model:value="extendConfigForm.tencentSms.smsSign"
+            placeholder="请输入短信签名"
+          />
+        </a-form-item>
+        <a-form-item
+          label="短信区域"
+          :name="['tencentSms', 'overseas']"
+          :rules="[{ required: true, message: '请选择是否境外短信' }]"
+        >
+          <a-select
+            v-model:value="extendConfigForm.tencentSms.overseas"
+            style="width: 100%; height: 32px"
+            placeholder="短信区域"
+          >
+            <a-select-option value="true">境外</a-select-option>
+            <a-select-option value="false">国内</a-select-option>
+          </a-select>
+
+          <span style="margin-left: 10px; color: red; font-size: 13px"
+            >境外短信可将签名拼接到短信内容上</span
+          >
+        </a-form-item>
+
+        <a-form-item
+          label="模板code"
+          :name="['tencentSms', 'commonCode']"
+          :rules="[{ required: true, message: '请输入模板code' }]"
+        >
+          <a-input
+            v-model:value="extendConfigForm.tencentSms.commonCode"
+            placeholder="请输入模板code"
+          />
+          <span style="margin-left: 10px; color: red; font-size: 13px"
+            >先用统一的通用验证码模板</span
+          >
+        </a-form-item>
+      </a-card>
+
+      <a-card title="角色资源配置" style="margin-top: 10px">
+        <a-form-item
+          label="角色资源配置"
+          :name="['rolePermission', 'content']"
+          :rules="[{ required: true, message: '请输入角色资源配置' }]"
+        >
+          <a-textarea
+            v-model:value="extendConfigForm.rolePermission.content"
+            placeholder="请输入角色资源配置"
+            :rows="8"
+          />
+        </a-form-item>
+      </a-card>
+
       <a-card title="百度翻译配置" style="margin-top: 10px">
         <a-form-item
           label="appid"
@@ -194,6 +293,18 @@
     translateConfig: {
       appid: '',
       appSecret: '',
+    },
+    rolePermission: {
+      content: '',
+    },
+    tencentSms: {
+      secretId: '',
+      secretKey: '',
+      appId: '',
+      appKey: '',
+      smsSign: '',
+      commonCode: '',
+      overseas: false,
     },
     pandoraConfig: {
       host: '',

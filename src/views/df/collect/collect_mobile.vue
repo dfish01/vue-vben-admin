@@ -1170,10 +1170,44 @@
       </a-modal>
     </div>
 
-    <a-modal v-model:open="isModalVisible" width="80%">
-      <template #title> 图片查看 </template>
-      <img :src="currentImage" style="width: 100%; height: auto" />
-    </a-modal>
+    <!-- 运行账号配置-->
+    <div>
+      <a-modal v-model:open="accountViewForm.viewFlag" title="执行账号配置">
+        <template #footer>
+          <a-button type="primary" @click="closeAccountConfig">关闭窗口</a-button>
+        </template>
+        <a-card>
+          <span style="margin-bottom: 30px; font-size: 11px"
+            >📢这里和绘画工作台的账号和执行模型是联动的！！！</span
+          >
+          <a-form layout="vertical" style="margin-top: 10px">
+            <a-form-item label="执行账号">
+              <a-select
+                placeholder="不选的话，随机选取账号，优先默认"
+                @change="handleAccountSetting"
+                style="width: 100%; height: 32px"
+                v-model:value="accountForm.useAccountId"
+                v-model="accountForm.useAccountId"
+                :size="accountViewForm.accountSelector.size"
+                :options="accountViewForm.accountSelector.options"
+              />
+            </a-form-item>
+            <a-form-item label="执行模式">
+              <a-select
+                v-model:value="accountForm.mode"
+                style="width: 100%; height: 32px"
+                placeholder="不选的话，默认休闲模式"
+              >
+                <!-- <a-select-option value="">不设置</a-select-option> -->
+                <a-select-option value="relax">休闲模式</a-select-option>
+                <a-select-option value="fast">快速模式</a-select-option>
+                <a-select-option value="turbo">涡轮模式</a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-form>
+        </a-card>
+      </a-modal>
+    </div>
 
     <a-modal
       v-model:open="varyRegionForm.viewFlag"
@@ -1715,7 +1749,7 @@
   const substractSpaceRefs = ref([]);
   const upwardSpace = computed(() => 1);
   //移动设备底部导航栏
-  const offsetHeightRef = ref(95);
+  const offsetHeightRef = ref(106);
   const subtractHeightRefs = ref([buttonRef]);
 
   // 使用hook

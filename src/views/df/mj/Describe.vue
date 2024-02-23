@@ -1,7 +1,15 @@
 <template>
   <div style="text-align: left" ref="formRef">
-    <div :style="{ height: `calc(${contentHeight - 1}px`, overflow: 'auto', padding:'0px 5px' }">
-      <div style="height: 112px">
+    <div :style="{ height: `calc(${contentHeight - 1}px`, overflow: 'auto', padding: '0px 5px' }">
+      <a-card :bodyStyle="{ padding: '5px 0px' }" style="min-height: 32px" class="ar-card2">
+        <template #title>
+          <div
+            style="justify-content: flex-start; height: 32px; font-weight: bold"
+            class="quality-tag"
+          >
+            <Icon icon="streamline-emojis:tent" /> 上传解析图片
+          </div>
+        </template>
         <a-upload
           v-model:file-list="fileList"
           :before-upload="beforeUpload"
@@ -14,85 +22,99 @@
             <div style="margin-top: 8px">上传图片</div>
           </div>
         </a-upload>
-      </div>
-      <a-divider orientation="left"  style="margin-top:10px; margin-bottom:10px"/>
-      <a-row style="margin-top: 5px">
-        <a-input-group compact style="display: flex">
-          <a-tooltip title="niji机器人在处理二次元方面有很大的优势~">
-            <a-tag class="line-label tag-no-right-border" color="default"
-              >机器人
-            </a-tag></a-tooltip
-          >
+      </a-card>
 
-          <a-select
-            class="line-input tag-no-right-border"
-          
-            v-model:value="compRender.robotSelect.value"
-            :size="compRender.robotSelect.size"
-            :options="compRender.robotSelect.options"
-          >
-            
-          </a-select>
-        </a-input-group>
-      </a-row>
-      <a-row style="margin-top: 5px">
-        <a-input-group compact style="display: flex">
-          <a-tooltip
-            title="不指定账号的话，随机根据账号现有负载情况选择资源最空的一个账号，优先默认账号。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
-          >
-            <a-tag class="line-label tag-no-right-border" color="default">执行账号</a-tag>
-          </a-tooltip>
+      <a-card
+        size="small"
+        ref="accountStep"
+        style="margin-top: 5px"
+        :bordered="true"
+        :bodyStyle="{ padding: '5px' }"
+        class="ar-card2"
+      >
+        <template #title>
+          <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
+            ><Icon icon="streamline-emojis:blossom" /> 执行配置
+            <a-tooltip title="这里的账号配置针对任务列表以及个人收藏是通用的！">
+              <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
+          ></span>
+        </template>
+        <a-row style="margin-top: 5px">
+          <a-input-group compact style="display: flex">
+            <a-tooltip title="niji机器人在处理二次元方面有很大的优势~">
+              <a-tag class="line-label tag-no-right-border" color="default"
+                >机器人
+              </a-tag></a-tooltip
+            >
 
-          <a-select
-            class="line-input tag-no-right-border"
-            @change="handleAccountSetting"
-            placeholder="随机选取账号，优先默认"
-            v-model:value="accountForm.useAccountId"
-            :size="accountViewForm.accountSelector.size"
-            :options="accountViewForm.accountSelector.options"
-          />
-        </a-input-group>
-      </a-row>
-      <a-row style="margin-top: 5px" v-if="accountForm.useAccountId">
-        <a-input-group compact style="display: flex">
-          <a-tooltip
-            title="不指定频道的话，默认账户组中的频道。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
-          >
-            <a-tag class="line-label tag-no-right-border" color="default">执行频道</a-tag>
-          </a-tooltip>
+            <a-select
+              class="line-input tag-no-right-border"
+              v-model:value="compRender.robotSelect.value"
+              :size="compRender.robotSelect.size"
+              :options="compRender.robotSelect.options"
+            />
+          </a-input-group>
+        </a-row>
+        <a-row style="margin-top: 5px">
+          <a-input-group compact style="display: flex">
+            <a-tooltip
+              title="不指定账号的话，随机根据账号现有负载情况选择资源最空的一个账号，优先默认账号。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
+            >
+              <a-tag class="line-label tag-no-right-border" color="default">执行账号</a-tag>
+            </a-tooltip>
 
-          <a-select
-            class="line-input tag-no-right-border"
-            @change="handleChannelSetting"
-            placeholder="请选择ChannelId"
-            v-model:value="accountForm.useChannelId"
-            :size="accountViewForm.accountSelector.size"
-            :options="accountViewForm.channelSelector.options"
-          />
-        </a-input-group>
-      </a-row>
-      <a-row style="margin-top: 5px">
-        <a-input-group compact style="display: flex">
-          <a-tooltip
-            title="休闲模式->快速模式->涡轮模式 速度依次递增。这里的模式是会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
-          >
-            <a-tag class="line-label tag-no-right-border" color="default"
-              >执行模式
-            </a-tag></a-tooltip
-          >
+            <a-select
+              class="line-input tag-no-right-border"
+              @change="handleAccountSetting"
+              placeholder="随机选取账号，优先默认"
+              v-model:value="accountForm.useAccountId"
+              :size="accountViewForm.accountSelector.size"
+              :options="accountViewForm.accountSelector.options"
+            />
+          </a-input-group>
+        </a-row>
+        <a-row style="margin-top: 5px" v-if="accountForm.useAccountId">
+          <a-input-group compact style="display: flex">
+            <a-tooltip
+              title="不指定频道的话，默认账户组中的频道。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
+            >
+              <a-tag class="line-label tag-no-right-border" color="default">执行频道</a-tag>
+            </a-tooltip>
 
-          <a-select
-            class="line-input tag-no-right-border"
-            placeholder="默认休闲模式"
-            v-model:value="accountForm.mode"
-          >
-            <!-- <a-select-option>不设置</a-select-option> -->
-            <a-select-option value="relax">休闲模式</a-select-option>
-            <a-select-option value="fast">快速模式</a-select-option>
-            <a-select-option value="turbo">涡轮模式</a-select-option>
-          </a-select>
-        </a-input-group>
-      </a-row>
+            <a-select
+              class="line-input tag-no-right-border"
+              @change="handleChannelSetting"
+              placeholder="请选择ChannelId"
+              v-model:value="accountForm.useChannelId"
+              :size="accountViewForm.accountSelector.size"
+              :options="accountViewForm.channelSelector.options"
+            />
+          </a-input-group>
+        </a-row>
+        <a-row style="margin-top: 5px">
+          <a-input-group compact style="display: flex">
+            <a-tooltip
+              title="休闲模式->快速模式->涡轮模式 速度依次递增。这里的模式是会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
+            >
+              <a-tag class="line-label tag-no-right-border" color="default"
+                >执行模式
+              </a-tag></a-tooltip
+            >
+
+            <a-select
+              class="line-input tag-no-right-border"
+              placeholder="默认休闲模式"
+              v-model:value="accountForm.mode"
+            >
+              <!-- <a-select-option>不设置</a-select-option> -->
+              <a-select-option value="relax">休闲模式</a-select-option>
+              <a-select-option value="fast">快速模式</a-select-option>
+              <a-select-option value="turbo">涡轮模式</a-select-option>
+            </a-select>
+          </a-input-group>
+        </a-row>
+      </a-card>
+
       <a-row style="margin-top: 10px">
         <a-col span="24">
           <a-card>
@@ -123,7 +145,7 @@
 
 <script lang="ts" setup>
   import { ref, reactive, computed, unref, onMounted, toRefs } from 'vue';
-  import { PlusOutlined } from '@ant-design/icons-vue';
+  import { PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue';
   import Icon from '/@/components/Icon/Icon.vue';
   import { message, UploadProps, Upload } from 'ant-design-vue';
   import { addDrawTask } from '/@/api/df/drawTask';
@@ -378,7 +400,6 @@
     border-right: none;
   }
 
-  
   .line-label {
     display: flex;
     align-items: center;
@@ -392,5 +413,14 @@
   .line-input {
     width: 75%;
     height: 32px;
+  }
+
+  .ar-card2 {
+  }
+
+  .ar-card2 >>> .ant-card-head {
+    display: flex;
+    min-height: 38px;
+    padding: 0 12px;
   }
 </style>

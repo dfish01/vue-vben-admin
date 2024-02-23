@@ -13,7 +13,7 @@
       >
         <div style="display: flex; align-items: center">
           <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
-          <span style="margin-left: 5px; font-size: 16px; font-weight: bold"> 精选案例 </span>
+          <span style="margin-left: 5px; font-size: 16px; font-weight: bold"> Midjourney画廊 </span>
         </div>
         <div style="display: flex; gap: 5px">
           <a-tooltip title="保存查看进度">
@@ -249,6 +249,7 @@
   import { usePermission } from '/@/hooks/web/usePermission';
   import { accountInfoApi } from '../mj/accountInfo';
   import { exampleApi } from '../mj/jobList.pageQuery';
+  import { useGo } from '/@/hooks/web/usePage';
   import {
     listCategory,
     queryDrawingSample,
@@ -270,7 +271,7 @@
   const substractSpaceRefs = ref([]);
   const upwardSpace = computed(() => 0);
   //移动设备底部导航栏
-  const offsetHeightRef = ref(124);
+  const offsetHeightRef = ref(134);
   const subtractHeightRefs = ref([]);
 
   // 使用hook
@@ -283,7 +284,7 @@
     offsetHeightRef,
   );
 
-  const { copyText, goDrawing, loadMore, initDrawingSampleCategory } = useDrawCard();
+  const { copyText, loadMore, initDrawingSampleCategory } = useDrawCard();
 
   onMounted(async () => {
     categorySetting.value.categories = await initDrawingSampleCategory();
@@ -293,6 +294,11 @@
     }));
   });
 
+  //画同款
+  const go = useGo();
+  const goDrawing = async (queryParams) => {
+    go('/mmj/index?activeTab=TextToImageForm&prompt=' + queryParams);
+  };
   /****************************** 类目相关  ****************************** */
 
   const categorySetting = ref({

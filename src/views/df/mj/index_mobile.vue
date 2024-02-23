@@ -6,11 +6,11 @@
           <a-card
             :bordered="true"
             class="no-padding-header ar-card"
-            :bodyStyle="{ padding: '1px 10px 1px 10px', width: '100%' }"
+            :bodyStyle="{ padding: '1px 0px 1px 0px', width: '100%' }"
             :headStyle="{ padding: '0px' }"
           >
             <template #title>
-              <a-card :bodyStyle="{ padding: 0, height: '50px' }">
+              <div style="height: 50px">
                 <a-row
                   ref="formRef"
                   style="
@@ -45,11 +45,7 @@
                         </a-button>
                       </a-tooltip>
                       <a-tooltip title="🥤系统相关操作说明以及Midjouney教程文档库 ~">
-                        <a-button
-                          ref="teachStep"
-                          @click="openNewWindow"
-                          style="padding: 5px"
-                        
+                        <a-button ref="teachStep" @click="openNewWindow" style="padding: 5px"
                           ><SvgIcon name="jiaocheng"
                         /></a-button>
                       </a-tooltip>
@@ -70,50 +66,44 @@
                     </a-button-group>
                   </div>
                 </a-row>
-              </a-card>
+              </div>
             </template>
 
-            <a-tabs class="edit-tab" v-model="activeTab">
-              <a-tab-pane key="TextToImg">
-                <template #tab>
-                  <span>
-                    <Icon icon="fluent:draw-image-24-filled" style="margin-right:1px" />文生图
-                  </span>
+            <a-card
+              style="margin: 2px 0"
+              :bordered="false"
+              :bodyStyle="{ padding: '2px 3px 2px 3px' }"
+            >
+              <a-segmented block v-model:value="tabValue" :options="tabOptions" style="width: 100%">
+                <template #label="{ payload }">
+                  <div style="padding: 4px">
+                    <div>
+                      <Icon :icon="payload.icon" style="margin: 0" aria-hidden="true" />{{
+                        payload.subTitle
+                      }}
+                    </div>
+                  </div>
                 </template>
-                <TextToImage
-                  ref="textToImageRef"
-                  style="text-align: center"
-                  @startLoading="startLoadingHandler"
-                  @endLoading="endLoadingHandler"
-                />
-              </a-tab-pane>
-              <a-tab-pane key="MixImage">
-                <template #tab>
-                  <span>
-                    <Icon icon="fluent:image-table-16-filled" style="margin-right:1px" />混图
-                  </span>
-                </template>
-                
-                <Blend
-                  @startLoading="startLoadingHandler"
-                  @endLoading="endLoadingHandler"
-                  style="width: 100%"
-                />
-              </a-tab-pane>
-              <a-tab-pane key="Describe">
-                <template #tab>
-                  <span>
-                    <Icon icon="fluent:image-search-24-filled" style="margin-right:1px" />解析图
-                  </span>
-                </template>
-                <Describe
-                  @startLoading="startLoadingHandler"
-                  @endLoading="endLoadingHandler"
-                  style="width: 100%"
-                />
-              </a-tab-pane>
-              <a-tab-pane key="other" disabled tab="🎎其它" />
-            </a-tabs>
+              </a-segmented>
+            </a-card>
+
+            <Describe
+              v-if="tabValue === 'desc'"
+              @startLoading="startLoadingHandler"
+              @endLoading="endLoadingHandler"
+            />
+            <Blend
+              v-if="tabValue === 'blend'"
+              @startLoading="startLoadingHandler"
+              @endLoading="endLoadingHandler"
+            />
+            <TextToImage
+              v-if="tabValue === 'TextToImageForm'"
+              ref="textToImageRef"
+              style="text-align: center"
+              @startLoading="startLoadingHandler"
+              @endLoading="endLoadingHandler"
+            />
           </a-card>
         </a-sider>
       </a-col>
@@ -447,6 +437,40 @@
       textToImageRef.value.textToImageStepOpen(true);
     }
   };
+
+  //***********************  tab  ***************************** */
+  const tabOptions = ref([
+    {
+      value: 'TextToImageForm',
+      payload: {
+        icon: 'streamline-emojis:robot-face-1',
+        subTitle: '文生图',
+      },
+    },
+    {
+      value: 'blend',
+      payload: {
+        icon: 'streamline-emojis:robot-face-2',
+        subTitle: '混合图',
+      },
+    },
+    {
+      value: 'desc',
+      payload: {
+        icon: 'streamline-emojis:robot-face-3',
+        subTitle: '解析图',
+      },
+    },
+    {
+      disabled: 'false',
+      value: 'other',
+      payload: {
+        icon: 'streamline-emojis:beaming-face-with-smiling-eyes',
+        subTitle: '待开发',
+      },
+    },
+  ]);
+  const tabValue = ref('TextToImageForm');
 </script>
 
 <style scoped>
@@ -498,31 +522,7 @@
     padding: 0 !important;
   }
 
-  .custom-tour >>> .ant-tour {
-    width: 300px !important;
-  }
-
-  .custom-tour ::v-deep .ant-tour {
-    width: 300px !important;
-  }
-
-  .custom-tour ::v-deep .ant-tour-content {
-    width: 300px !important;
-  }
-
-  .custom-tour >>> .ant-tour-content {
-    width: 300px !important;
-  }
-
-  :deep(.ant-tour-content) {
-    width: 300px !important;
-  }
-
-  ::v-deep .ant-tour-content {
-    width: 300px !important;
-  }
-
-  :global(.ant-tour-content) {
-    width: 350px !important;
+  :global(.ant-tour) {
+    width: auto !important;
   }
 </style>

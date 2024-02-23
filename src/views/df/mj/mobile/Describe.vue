@@ -1,98 +1,124 @@
 <template>
   <div style="text-align: left" ref="formRef">
-    <div :style="{ height: `calc(${contentHeight}px`, overflow: 'auto' }">
-      <a-upload
-        v-model:file-list="fileList"
-        :before-upload="beforeUpload"
-        list-type="picture-card"
-        @preview="handlePreview"
-        style="display: flex; align-items: flex-start; justify-content: flex-start"
+    <div :style="{ height: `calc(${contentHeight}px`, overflow: 'auto', padding: '3px' }">
+      <a-card
+        size="small"
+        :bodyStyle="{ padding: '5px 0px' }"
+        style="min-height: 32px"
+        class="ar-card2"
       >
-        <div v-if="fileList.length < 1">
-          <plus-outlined />
-          <div style="margin-top: 8px">上传图片</div>
-        </div>
-      </a-upload>
-
-      <a-divider orientation="left" />
-
-      <a-row style="margin-top: 5px">
-        <a-input-group compact style="display: flex">
-          <a-tooltip
-            title="niji机器人在处理中文Prompt有很大优势~"
+        <template #title>
+          <div
+            style="justify-content: flex-start; height: 32px; font-weight: bold"
+            class="quality-tag"
           >
-            <a-tag class="line-label tag-no-right-border" color="default">机 器 人</a-tag>
-          </a-tooltip>
+            <Icon icon="streamline-emojis:tent" /> 上传解析图片
+          </div>
+        </template>
+        <a-upload
+          v-model:file-list="fileList"
+          :before-upload="beforeUpload"
+          list-type="picture-card"
+          @preview="handlePreview"
+          style="display: flex; align-items: flex-start; justify-content: flex-start"
+        >
+          <div v-if="fileList.length < 1">
+            <plus-outlined />
+            <div style="margin-top: 8px">上传图片</div>
+          </div>
+        </a-upload>
+      </a-card>
 
-          <a-select
-            class="line-input tag-no-right-border"
-           
-            v-model:value="compRender.robotSelect.value"
-            :size="compRender.robotSelect.size"
-            :options="compRender.robotSelect.options"
-          />
-        </a-input-group>
-      </a-row>
-      
-      <a-row style="margin-top: 5px">
-        <a-input-group compact style="display: flex">
-          <a-tooltip
-            title="不指定账号的话，随机根据账号现有负载情况选择资源最空的一个账号，优先默认账号。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
-          >
-            <a-tag class="line-label tag-no-right-border" color="default">执行账号</a-tag>
-          </a-tooltip>
+      <a-card
+        size="small"
+        ref="accountStep"
+        style="margin-top: 5px"
+        :bordered="true"
+        :bodyStyle="{ padding: '5px' }"
+        class="ar-card2"
+      >
+        <template #title>
+          <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
+            ><Icon icon="streamline-emojis:blossom" /> 执行配置
+            <a-tooltip title="这里的账号配置针对任务列表以及个人收藏是通用的！">
+              <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
+          ></span>
+        </template>
+        <a-row style="margin-top: 5px">
+          <a-input-group compact style="display: flex">
+            <a-tooltip title="niji机器人在处理中文Prompt有很大优势~">
+              <a-tag class="line-label tag-no-right-border" color="default">机 器 人</a-tag>
+            </a-tooltip>
 
-          <a-select
-            class="line-input tag-no-right-border"
-            @change="handleAccountSetting"
-            placeholder="随机选取账号，优先默认"
-            v-model:value="accountForm.useAccountId"
-            :size="accountViewForm.accountSelector.size"
-            :options="accountViewForm.accountSelector.options"
-          />
-        </a-input-group>
-      </a-row>
+            <a-select
+              class="line-input tag-no-right-border"
+              v-model:value="compRender.robotSelect.value"
+              :size="compRender.robotSelect.size"
+              :options="compRender.robotSelect.options"
+            />
+          </a-input-group>
+        </a-row>
 
-      <a-row style="margin-top: 5px" v-if="accountForm.useAccountId">
-        <a-input-group compact style="display: flex">
-          <a-tooltip
-            title="不指定频道的话，默认账户组中的频道。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
-          >
-            <a-tag class="line-label tag-no-right-border" color="default">执行频道</a-tag>
-          </a-tooltip>
+        <a-row style="margin-top: 5px">
+          <a-input-group compact style="display: flex">
+            <a-tooltip
+              title="不指定账号的话，随机根据账号现有负载情况选择资源最空的一个账号，优先默认账号。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
+            >
+              <a-tag class="line-label tag-no-right-border" color="default">执行账号</a-tag>
+            </a-tooltip>
 
-          <a-select
-            class="line-input tag-no-right-border"
-            @change="handleChannelSetting"
-            placeholder="请选择ChannelId"
-            v-model:value="accountForm.useChannelId"
-            :size="accountViewForm.accountSelector.size"
-            :options="accountViewForm.channelSelector.options"
-          />
-        </a-input-group>
-      </a-row>
-      <a-row style="margin-top: 5px">
-        <a-input-group compact style="display: flex">
-          <a-tooltip
-            title="休闲模式->快速模式->涡轮模式 速度依次递增。这里的模式是会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
-          >
-            <a-tag class="line-label tag-no-right-border" color="default"
-              >执行模式
-            </a-tag></a-tooltip
-          >
+            <a-select
+              class="line-input tag-no-right-border"
+              @change="handleAccountSetting"
+              placeholder="随机选取账号，优先默认"
+              v-model:value="accountForm.useAccountId"
+              :size="accountViewForm.accountSelector.size"
+              :options="accountViewForm.accountSelector.options"
+            />
+          </a-input-group>
+        </a-row>
 
-          <a-select
-            class="line-input tag-no-right-border"
-            placeholder="默认休闲模式"
-            v-model:value="accountForm.mode"
-          >
-            <!-- <a-select-option>不设置</a-select-option> -->
-            <a-select-option value="relax">休闲模式</a-select-option>
-            <a-select-option value="fast">快速模式</a-select-option>
-            <a-select-option value="turbo">涡轮模式</a-select-option>
-          </a-select>
-        </a-input-group>
-      </a-row>
+        <a-row style="margin-top: 5px" v-if="accountForm.useAccountId">
+          <a-input-group compact style="display: flex">
+            <a-tooltip
+              title="不指定频道的话，默认账户组中的频道。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
+            >
+              <a-tag class="line-label tag-no-right-border" color="default">执行频道</a-tag>
+            </a-tooltip>
+
+            <a-select
+              class="line-input tag-no-right-border"
+              @change="handleChannelSetting"
+              placeholder="请选择ChannelId"
+              v-model:value="accountForm.useChannelId"
+              :size="accountViewForm.accountSelector.size"
+              :options="accountViewForm.channelSelector.options"
+            />
+          </a-input-group>
+        </a-row>
+        <a-row style="margin-top: 5px">
+          <a-input-group compact style="display: flex">
+            <a-tooltip
+              title="休闲模式->快速模式->涡轮模式 速度依次递增。这里的模式是会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
+            >
+              <a-tag class="line-label tag-no-right-border" color="default"
+                >执行模式
+              </a-tag></a-tooltip
+            >
+
+            <a-select
+              class="line-input tag-no-right-border"
+              placeholder="默认休闲模式"
+              v-model:value="accountForm.mode"
+            >
+              <!-- <a-select-option>不设置</a-select-option> -->
+              <a-select-option value="relax">休闲模式</a-select-option>
+              <a-select-option value="fast">快速模式</a-select-option>
+              <a-select-option value="turbo">涡轮模式</a-select-option>
+            </a-select>
+          </a-input-group>
+        </a-row>
+      </a-card>
       <a-row style="margin-top: 10px">
         <a-col span="24">
           <a-card>
@@ -131,6 +157,7 @@
   import type { UploadFile } from 'ant-design-vue/es/upload/interface';
   import { queryList, availableList } from '/@/api/df/account';
   import { accountInfoApi } from '../accountInfo';
+  import Icon from '@/components/Icon/Icon.vue';
 
   const {
     accountForm,
@@ -151,7 +178,7 @@
   const substractSpaceRefs = ref([card]);
   const upwardSpace = computed(() => 1);
   //移动设备底部导航栏
-  const offsetHeightRef = ref(47);
+  const offsetHeightRef = ref(55);
   const subtractHeightRefs = ref([button]);
 
   // 使用hook
@@ -370,7 +397,7 @@
   .no-preview-icon >>> .ant-upload-list-item-actions .anticon-eye {
     display: none;
   }
-  
+
   .line-label {
     display: flex;
     align-items: center;

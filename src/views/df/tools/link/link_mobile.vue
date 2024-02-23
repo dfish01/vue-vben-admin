@@ -43,6 +43,30 @@
               <a-button style="height: 32px" type="primary" @click="doAnalysis">立即解析</a-button>
             </a-input-group>
           </a-col>
+          <a-col
+            :span="24"
+            style="
+              display: flex;
+              justify-content: center;
+              margin-top: 10px;
+              border: 1px solid transparent;
+              border-radius: 8px;
+            "
+          >
+            <div
+              style="
+                padding: 5px;
+                border: 1px solid transparent;
+                border-radius: 4px;
+                background-color: #fff7e8;
+              "
+            >
+              <span style="padding: 3px 1px; color: rgb(0 0 0 / 70%); font-size: 10px">
+                <Icon icon="flat-color-icons:idea" />
+                复制小红书分享链接即可一键解析，点击大图后右键下载无水印原图！</span
+              >
+            </div>
+          </a-col>
         </a-row>
 
         <!-- 解析内容框 -->
@@ -99,7 +123,7 @@
   const substractSpaceRefs = ref([]);
   const upwardSpace = computed(() => 0);
   //移动设备底部导航栏
-  const offsetHeightRef = ref(97);
+  const offsetHeightRef = ref(107);
   const subtractHeightRefs = ref([]);
 
   // 使用hook
@@ -129,7 +153,7 @@
   });
 
   const openDraw = async () => {
-    go('/mj/index');
+    go('/mmj/index');
   };
 
   const doAnalysis = async () => {

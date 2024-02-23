@@ -22,7 +22,7 @@
                 <SvgIcon name="list_search" size="20" />
               </a-button>
             </a-tooltip>
-            <a-tooltip title="市场">
+            <a-tooltip title="集市">
               <a-button @click="goView('/goods/index')" style="padding: 5px">
                 <SvgIcon name="shopping" size="20" />
               </a-button>
@@ -305,7 +305,7 @@
   const substractSpaceRefs = ref([]);
   const upwardSpace = computed(() => 0);
   //移动设备底部导航栏
-  const offsetHeightRef = ref(95);
+  const offsetHeightRef = ref(110);
   const subtractHeightRefs = ref([buttonRef]);
 
   // 使用hook

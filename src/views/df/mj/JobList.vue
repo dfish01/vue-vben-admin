@@ -556,7 +556,11 @@
                           >
                           <a-menu-item key="4" @click="() => copyText(card.messageHash)"
                             ><Icon icon="fluent-emoji-flat:id-button" color="grey" />
-                            复制任务ID</a-menu-item
+                            复制 Job ID</a-menu-item
+                          >
+                          <a-menu-item key="6" @click="() => copyText(card.id)"
+                            ><Icon icon="fluent-emoji-flat:id-button" color="grey" />
+                            复制系统任务ID</a-menu-item
                           >
                         </a-menu>
                       </template>

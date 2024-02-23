@@ -2,7 +2,7 @@
   <a-layout style="width: 100%; overflow: auto">
     <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
     <a-card
-      :style="{ height: `calc(100vh - 49px)`, overflow: 'auto' }"
+      :style="{ height: `calc(100vh - 56px - 56px)`, overflow: 'auto' }"
       :bodyStyle="{ padding: '0px' }"
     >
       <a-card title="邀请中心" :bodyStyle="{ padding: '5px' }">
@@ -131,11 +131,11 @@
           </a-table-column>
 
           <a-table-column
-            title="订单金额"
+            title="金额"
             dataIndex="orderAmount"
             key="orderAmount"
             align="left"
-            :width="100"
+            :width="120"
           />
           <a-table-column title="佣金" dataIndex="amount" key="amount" align="left" :width="100" />
 

@@ -643,8 +643,12 @@
     (emailFormRef.value as any).validate((valid) => {
       if (valid) {
         // 调用邮箱更新的API
-        resetEmail(formData);
-        createMessage.success('邮箱已切换成功！,请去新邮箱激活账号');
+        try {
+          resetEmail(formData);
+          createMessage.success('邮箱已切换成功！,请去新邮箱激活账号');
+        } finally {
+          loading.value = false;
+        }
       } else {
         console.error('Email form validation failed!');
       }
@@ -655,11 +659,16 @@
     (phoneFormRef.value as any)
       .validate()
       .then(async () => {
-        await resetPhone(formData);
-        createMessage.success('手机号绑定成功！');
-        viewAgg.value.phoneShow = false;
-        //待处理触发右侧列表刷新
-        userInfo.value.phone = formData.phone;
+        loading.value = true;
+        try {
+          await resetPhone(formData);
+          createMessage.success('手机号绑定成功！');
+          viewAgg.value.phoneShow = false;
+          //待处理触发右侧列表刷新
+          userInfo.value.phone = formData.phone;
+        } finally {
+          loading.value = false;
+        }
       })
       .catch((error) => {
         console.log('error', error);
@@ -679,10 +688,13 @@
       .validate()
       .then(async () => {
         // 成功的处理逻辑
-        console.log(1111);
-        await changePassword(formData);
+        try {
+          await changePassword(formData);
 
-        createMessage.success('密码修改成功！');
+          createMessage.success('密码修改成功！');
+        } finally {
+          loading.value = false;
+        }
       })
       .catch(() => {
         console.error('Password form validation failed!');
@@ -753,6 +765,10 @@
     }
   };
 
+  const openNewWindow = () => {
+    window.open('https://www.midjourneyers.com', '_blank');
+  };
+
   const appObj = ref<any>({
     setting: [
       {
@@ -815,7 +831,7 @@
         routeUrl: '',
         type: 'func',
         showFlag: systemConfigForm.value.tutorialInfo !== null,
-        func: openTutorialView,
+        func: openNewWindow,
       },
       {
         name: '售后服务',
