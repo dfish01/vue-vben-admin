@@ -21,7 +21,7 @@
 
     <div :style="{ height: `calc(${contentHeight}px `, width: '100%', padding: 0 }">
       <iframe
-        src="https://chat.gfish.top"
+        src="https://chat.caifree.com"
         :style="{ height: '100%', width: '100%', padding: 0 }"
       ></iframe>
     </div>

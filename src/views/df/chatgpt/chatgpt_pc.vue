@@ -1,7 +1,7 @@
 <template>
   <div>
     <iframe
-      :src="url"
+      src="https://chat.caifree.com"
       :style="{ height: 'calc(100vh - 53px)', width: '100%' }"
       sandbox="allow-same-origin allow-scripts"
     >
@@ -18,7 +18,7 @@
   const url = ref('');
   onMounted(async () => {
     console.log(route.query.openUrl);
-    url.value = route.query.openUrl ? route.query.openUrl : 'https://chat.gfish.top';
+    url.value = route.query.openUrl ? route.query.openUrl : 'https://chat.caifree.com';
   });
 </script>
 
