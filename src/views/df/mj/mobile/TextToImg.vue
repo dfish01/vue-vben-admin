@@ -213,7 +213,7 @@
           <div class="ar-card-title-be">
             <div>
               <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
-                ><Icon icon="streamline-emojis:tent" /> 风格参考
+                ><Icon icon="streamline-emojis:rainbow" /> 风格参考
                 <a-tooltip title="让MJ按参考图的风格进行绘制。仅niji6 和 v6 适用">
                   <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
               ></span>
@@ -628,7 +628,7 @@
           <div class="ar-card-title-be">
             <div>
               <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
-                ><Icon icon="streamline-emojis:bouquet" /> 运行模型
+                ><Icon icon="streamline-emojis:fuel-pump" /> 运行模型
                 <a-tooltip
                   title="不一样的模型会有不一样的出图效果以及不一样的参数支持。Niji模型在动漫风格这块有很好的效果~"
                 >

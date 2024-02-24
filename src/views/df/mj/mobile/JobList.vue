@@ -2025,7 +2025,7 @@
 
   onMounted(() => {
     window.addEventListener('message', handleMessage, false);
-    <!-- initAllCollectCategory(); -->
+   
   });
 
   onBeforeUnmount(() => {

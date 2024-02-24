@@ -81,10 +81,10 @@
               :hoverable="true"
             >
               <img
-                @click="showInfoImage(analysisResult.images, card.url)"
+                @click="showInfoImage(analysisResult.images,  'https://images.weserv.nl/?url=' + card.url)"
                 @mouseenter="card.enterFlag = true"
                 @mouseleave="card.enterFlag = false"
-                v-lazy.container="card.url"
+                v-lazy.container="'https://images.weserv.nl/?url=' + card.url"
                 fallback=""
                 alt=""
                 style="max-width: 100%; transition: transform 0.3s ease; border-radius: 9px"
