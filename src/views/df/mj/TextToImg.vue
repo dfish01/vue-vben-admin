@@ -493,7 +493,7 @@
                 v-model:value="textToImgForm.tagName"
                 rows="3"
                 placeholder="标签配置：用@可触发最近的标签！多个标签'空格符'隔开,最多5个。每个长度不超过16个字。~"
-                :options="textToImgForm.tagNameOptions"
+                :options="drawTagForm.tagNameOptions"
                 @select="onChangeLabel"
               />
             </a-input-group>
@@ -1674,10 +1674,17 @@
   import { message, UploadProps, Upload } from 'ant-design-vue';
   import { useRoute } from 'vue-router';
   import { AxiosProgressEvent } from 'axios';
-  import { accountInfoApi } from './accountInfo';
   import { textFormApi } from './jobList.pageQuery';
   import { getAppEnvConfig } from '/@/utils/env';
   import { useUserStoreWithOut } from '/@/store/modules/user';
+  import { accountInfoApi, tagInfoApi, drawCollectCategoryApi } from './accountInfo';
+  const {
+    // 响应式引用
+    initTag,
+    drawTagForm,
+
+  } = tagInfoApi();
+
 
   const userStore = useUserStoreWithOut();
   const token = userStore.getToken;
@@ -1706,12 +1713,8 @@
     // initAccountInfo();
 
     //查询最近使用的tag
-    const resp = await genTagList({});
-    const options = resp.map((item) => ({
-      value: item,
-      label: item,
-    }));
-    textToImgForm.tagNameOptions = options;
+    initTag();
+    
   });
 
   /** prompt 页面数据传递 */

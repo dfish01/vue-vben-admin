@@ -361,12 +361,20 @@ export function drawCollectCategoryApi() {
     },
   );
 
-  const showAddCollectCategoryModel = (card) => {
+  const showAddCollectCategoryModel = async (card) => {
     collectTaskForm.value.taskId = card.id;
     collectTaskForm.value.oriCategoryId = null;
     collectCategoryViewForm.value.title = '添加到收藏';
-    collectCategoryViewForm.value.loading = false;
+    collectCategoryViewForm.value.loading = true;
     collectCategoryViewForm.value.viewFlag = true;
+
+    //初始化类目
+    try {
+      await initAllCollectCategory();
+    } finally {
+      collectCategoryViewForm.value.loading = false;
+    }
+    
   };
 
   const showMoveCollectCategoryModel = (card) => {

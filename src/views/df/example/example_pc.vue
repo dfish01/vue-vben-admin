@@ -439,11 +439,11 @@
     noticeForm.value.viewFlag = false;
   };
   onMounted(async () => {
-    const response = await getRecentNotice();
-    if (response) {
-      noticeForm.value.viewFlag = true;
-      noticeForm.value.content = response;
-    }
+    // const response = await getRecentNotice();
+    // if (response) {
+    //   noticeForm.value.viewFlag = true;
+    //   noticeForm.value.content = response;
+    // }
   });
   /*********************************** 基础配置 ******************************** */
   const userSetting = ref({

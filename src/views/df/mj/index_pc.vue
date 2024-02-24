@@ -579,8 +579,9 @@
 
   //===================================== 导入discod记录 ================================
   onMounted(async () => {
-    await queryAccountList();
-    loadSystemInfoConfig();
+    await loadSystemInfoConfig();
+    await nextTick();
+    indexStepOpen(true);
   });
 
   const changeImportMode = () => {
@@ -632,7 +633,7 @@
   };
 
   onMounted(async () => {
-    await initAccountInfo();
+    // await initAccountInfo();
     if (tableData.value.length > 1) {
       return;
     }
@@ -642,9 +643,7 @@
       accountForm.currentSpaceId = item.id;
       accountForm.currentSpaceTitle = item.title;
     }
-    await loadSystemInfoConfig();
-    await nextTick();
-    indexStepOpen(true);
+    
   });
 
   /************************漫游引导********************** */
