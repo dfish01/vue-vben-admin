@@ -222,11 +222,14 @@
                 <ExclamationCircleOutlined style="margin-left: 5px; cursor: pointer" />
               </a-tooltip>
             </div>
-            <a-switch
-              size="small"
-              :disabled="!(paramDataValue.version === 'v 6' || paramDataValue.version === 'niji 6')"
-              v-model:checked="viewForm.srefFlag"
-            />
+            <span
+                style="font-size: 10px"
+                v-if="!(paramDataValue.version === 'v 6' || paramDataValue.version === 'niji 6')"
+              >
+                仅niji6 和 v6 模型可用
+                
+            </span>
+            <a-switch size="small" v-else v-model:checked="viewForm.srefFlag" />
           </div>
         </template>
         <div v-if="viewForm.srefFlag">
