@@ -1,38 +1,45 @@
 <template>
-  <a-layout v-loading="loadingRef" loading-tip="加载中...">
-    <div style="margin-bottom: 64px">
+  <a-layout style="height: 100vh">
+    <a-card  >
+      <div style="margin-bottom: 64px" class="container" >
+        <a-card :bodyStyle="{padding: '10px', display:'flex', }">
+          <p> <Icon icon="flat-color-icons:idea" />  收集一些常用的白嫖资源，让大家能更低门槛的接触到AI，提高做事效率。资源内可能有部分链接带有收费事项，白嫖点到为止就好。如果好用就快点个收藏吧~</p>
 
-    </div>
-    <div class="VPFeatures VPHomeFeatures" style="margin-bottom: 64px" v-for="category in categories" :key="categoryCode">
-      <div class="container" >
-        <div class="VPTeamPageTitle" style="display: flex; ">
-          <h1 style="margin-bottom: 24px; font-size:22px; font-weight: bold"> {{category.title}} </h1>
-        </div>
-        <div class="items">
-          <div class="item grid-6" v-for="(feature, index) in categoryItems(category.title)" :key="index">
-            <a-card class="nav-card" :bodyStyle="{padding:'0'}" :bordered="true" :hoverable="false">
+        </a-card>
+      </div>
+      <div class="VPFeatures VPHomeFeatures" style="margin-bottom: 64px" v-for="category in categories" :key="categoryCode">
+        <div class="container" >
+          <div class="VPTeamPageTitle" style="display: flex; ">
+            <h1 style="margin-bottom: 24px; font-size:22px; font-weight: bold"> 
+              <Icon :icon="category.icon" size="20" /> {{category.title}} </h1>
+          </div>
+          <div class="items">
+            <div class="item grid-6" v-for="(feature, index) in categoryItems(category.title)" :key="index">
+              <a-card class="nav-card" :bodyStyle="{padding:'0'}" :bordered="true" :hoverable="false">
 
-            <a @click="skipUrl(feature.id)"  class="VPLink no-icon VPFeature">
-              <article class="box">
-                <!-- <img data-v-8043377a="" class="VPImage" :src="feature.iconSrc" height="48" width="48" alt=""> -->
-                <h2 class="title">{{ feature.title }}</h2>
-                <p class="details">{{ feature.summary }}</p>
-                <!--v-if-->
-                <div  class="link-text">
-                  <p  class="link-text-value"> 立即前往
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="link-text-icon">
-                      <path d="M19.9,12.4c0.1-0.2,0.1-0.5,0-0.8c-0.1-0.1-0.1-0.2-0.2-0.3l-7-7c-0.4-0.4-1-0.4-1.4,0s-0.4,1,0,1.4l5.3,5.3H5c-0.6,0-1,0.4-1,1s0.4,1,1,1h11.6l-5.3,5.3c-0.4,0.4-0.4,1,0,1.4c0.2,0.2,0.5,0.3,0.7,0.3s0.5-0.1,0.7-0.3l7-7C19.8,12.6,19.9,12.5,19.9,12.4z">
-                      </path>
-                    </svg>
-                  </p>
-                </div>
-              </article>
-            </a>
-          </a-card>
+              <a @click="skipUrl(feature.id)"  class="VPLink no-icon VPFeature">
+                <article class="box">
+                  <!-- <img data-v-8043377a="" class="VPImage" :src="feature.iconSrc" height="48" width="48" alt=""> -->
+                  <h2 class="title">{{ feature.title }}</h2>
+                  <p class="details">{{ feature.summary }}</p>
+                  <!--v-if-->
+                  <div  class="link-text">
+                    <p  class="link-text-value"> 立即前往
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="link-text-icon">
+                        <path d="M19.9,12.4c0.1-0.2,0.1-0.5,0-0.8c-0.1-0.1-0.1-0.2-0.2-0.3l-7-7c-0.4-0.4-1-0.4-1.4,0s-0.4,1,0,1.4l5.3,5.3H5c-0.6,0-1,0.4-1,1s0.4,1,1,1h11.6l-5.3,5.3c-0.4,0.4-0.4,1,0,1.4c0.2,0.2,0.5,0.3,0.7,0.3s0.5-0.1,0.7-0.3l7-7C19.8,12.6,19.9,12.5,19.9,12.4z">
+                        </path>
+                      </svg>
+                    </p>
+                  </div>
+                </article>
+              </a>
+            </a-card>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </a-card>
+    <Loading :loading="loadingRef" :absolute="true" tip="数加载中..." />
   </a-layout>
 </template>
 
@@ -43,7 +50,8 @@
   import { useAppInject } from '/@/hooks/web/useAppInject';
   import { allChatgptShare, getUrl  } from '/@/api/df/chatgptShare';
   import data from './data.json';
-
+  import { Loading } from '/@/components/Loading';
+  import Icon from '@/components/Icon/Icon.vue';
 
   const categories = ref([]);
 
@@ -169,6 +177,7 @@
 
   .details {
     flex-grow: 1;
+    height: 48px;
     padding-top: 8px;
     color: var(--vp-c-text-2);
     font-size: 14px;
