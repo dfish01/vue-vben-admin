@@ -271,7 +271,7 @@
   const substractSpaceRefs = ref([]);
   const upwardSpace = computed(() => 0);
   //移动设备底部导航栏
-  const offsetHeightRef = ref(134);
+  const offsetHeightRef = ref(133);
   const subtractHeightRefs = ref([]);
 
   // 使用hook

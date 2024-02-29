@@ -1,8 +1,8 @@
 <template>
-  <a-layout style="width: 100%; overflow: hidden">
+  <a-layout ref="formRef" style="width: 100%; overflow: hidden">
     <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
     <a-card
-      :style="{ height: `calc(100vh - 56px)`, overflow: 'auto' }"
+      :style="{  height: `calc(${contentHeight}px)`, overflow: 'auto' }"
       :bodyStyle="{ padding: '0px' }"
     >
       <a-card :bodyStyle="{ padding: '7px' }">
@@ -308,7 +308,7 @@
 </template>
 
 <script setup lang="ts">
-  import { onMounted, onUnmounted, ref, reactive, createVNode } from 'vue';
+  import { onMounted, onUnmounted, ref, reactive, computed, unref , createVNode } from 'vue';
   import { MarkdownViewer } from '/@/components/Markdown';
   import { LazyImg, Waterfall } from 'vue-waterfall-plugin-next';
   import 'vue-waterfall-plugin-next/dist/style.css';
@@ -340,11 +340,32 @@
     createShareTrade,
   } from '/@/api/df/trade';
   import { useUserStoreWithOut } from '/@/store/modules/user';
+  import { useContentHeight } from '/@/hooks/web/useContentHeight';
 
   const userStore = useUserStoreWithOut();
   const token = userStore.getToken;
 
   const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
+
+
+   /** 页面高度计算开始 */
+   const formRef = ref();
+  //页面高度处理
+  const substractSpaceRefs = ref([]);
+  const upwardSpace = computed(() => 1);
+  //移动设备底部导航栏
+  const offsetHeightRef = ref(55);
+  const subtractHeightRefs = ref([]);
+
+  // 使用hook
+  const { contentHeight, redoHeight } = useContentHeight(
+    computed(() => true),
+    formRef,
+    unref(subtractHeightRefs), // 使用 unref 获取数组值
+    unref(substractSpaceRefs),
+    upwardSpace,
+    offsetHeightRef,
+  );
 
   /***************************支付************************* */
 

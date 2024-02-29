@@ -1,5 +1,5 @@
 <template>
-  <div ref="formRef" >
+  <a-layout ref="formRef" >
     <!-- 查询选项卡 -->
     <a-card :bodyStyle="{ padding: 0, height: '50px' }">
       <a-row
@@ -105,7 +105,7 @@
     </div>
 
     <Loading :loading="loadingRef" absolute="false" tip="正在加载中~" />
-  </div>
+  </a-layout>
 </template>
 
 <script lang="ts" setup>

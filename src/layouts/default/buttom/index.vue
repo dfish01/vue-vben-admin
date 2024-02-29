@@ -227,6 +227,7 @@
 
   .flex-menu {
     display: flex;
+    z-index: 9999;
     justify-content: space-around;
     height: 55px;
   }

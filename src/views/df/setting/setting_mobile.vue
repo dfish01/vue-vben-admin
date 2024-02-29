@@ -1,11 +1,12 @@
 <template>
-  <a-layout ref="formRef" class="custom-font">
-    <a-card
+  <a-layout ref="formRef" class="custom-font" >
+    <a-card 
       :style="{
         width: '100%',
-        height: `calc(100vh - 56px) `,
-        'overflow-y': 'scroll',
+        height: `calc(${contentHeight}px)`,
+        'overflow-y': 'auto',
         padding: 0,
+        margin: 0,
       }"
       :bodyStyle="{ padding: '5px 5px' }"
     >
@@ -550,9 +551,9 @@
   const formRef = ref();
   //页面高度处理
   const substractSpaceRefs = ref([]);
-  const upwardSpace = computed(() => 1);
+  const upwardSpace = computed(() => 0);
   //移动设备底部导航栏
-  const offsetHeightRef = ref(56);
+  const offsetHeightRef = ref(55);
   const subtractHeightRefs = ref([]);
 
   // 使用hook
@@ -577,6 +578,15 @@
 
     goView('/login');
   };
+
+  // 使用 ref 来保存是否为 Google 浏览器
+const isGoogleBrowser = ref(false);
+
+onMounted(() => {
+  // 检测浏览器类型并设置 isGoogleBrowser 值
+  const ua = window.navigator.userAgent;
+  isGoogleBrowser.value = ua.indexOf('Chrome') > -1 || ua.indexOf('Google') > -1;
+});
 
   /****************************** 建议相关 ******************************** */
   const suggestForm = ref({
@@ -862,6 +872,19 @@
   };
 </script>
 <style lang="less">
+
+
+/* 适用于 Newbing 浏览器的样式 */
+@media all and (min-device-pixel-ratio: 0) and (min-resolution: .001dpcm) { 
+    .bottom-space {
+        margin-bottom: 0;
+    }
+}
+
+.bottom-space {
+    margin-bottom: 56px;
+}
+
   .account-setting {
     margin: 12px;
     background-color: @component-background;

@@ -512,7 +512,7 @@
   const buttonRef = ref(null);
   const substractSpaceRefs = ref([]);
   const upwardSpace = computed(() => 0);
-  const offsetHeightRef = ref(110);
+  const offsetHeightRef = ref(109);
   const subtractHeightRefs = ref([buttonRef]);
   const formRef = ref();
   // 使用hook
