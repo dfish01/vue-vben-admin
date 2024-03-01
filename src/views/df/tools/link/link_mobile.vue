@@ -1,5 +1,5 @@
 <template>
-  <div ref="formRef" v-loading="loadingRef" loading-tip="加载中...">
+  <div ref="formRef" >
     <!-- 查询选项卡 -->
     <a-card :bodyStyle="{ padding: 0, height: '50px' }">
       <a-row
@@ -84,7 +84,7 @@
                 v-for="(imageUrl, index) in analysisResult.images"
                 :style="{ width: '200px', flexShrink: 0 }"
                 :key="index"
-                :src="imageUrl"
+                :src="'https://images.weserv.nl/?url=' + imageUrl"
               />
             </a-image-preview-group>
           </a-col>

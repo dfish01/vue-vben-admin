@@ -2030,7 +2030,7 @@
     }
     console.log('onMounted subUrl ' + varyRegionForm.value.subUrl);
     (window as any).varyRegionForm = varyRegionForm;
-    loadTagList();
+    //标签在textToImage 初始化了
   });
 
   // 监听来自 iframe 的消息
@@ -2064,8 +2064,7 @@
       pagination.value.pageSize = 30;
     }
     window.addEventListener('message', handleMessage, false);
-    //初始化类目
-    initAllCollectCategory();
+
   });
 
   onBeforeUnmount(() => {
@@ -2179,25 +2178,31 @@
       exampleForm.value.loading = false;
     }
   };
-  const showSampleView = (card) => {
+  const showSampleView = async (card) => {
     exampleForm.value.drawTaskId = card.id;
     showExampleViewFlag.value = true;
-  };
-  onMounted(async () => {
-    if (accountViewForm.drawingSampleCategory.length === 0) {
-      const response = await drawingSampleCategory();
-      const transformedList = response.map((item) => ({
-        label: item.name,
-        value: item.code,
-      }));
+    exampleForm.value.loading = true;
+    try {
+      //初始化官方案例类目
+      if (accountViewForm.drawingSampleCategory.length === 0) {
+        const response = await drawingSampleCategory();
+        const transformedList = response.map((item) => ({
+          label: item.name,
+          value: item.code,
+        }));
 
-      const finalList = [...transformedList];
-      exampleForm.value.drawingSampleCategory = finalList;
-      accountViewForm.drawingSampleCategory = finalList;
-    } else {
-      exampleForm.value.drawingSampleCategory = accountViewForm.drawingSampleCategory;
+        const finalList = [...transformedList];
+        exampleForm.value.drawingSampleCategory = finalList;
+        accountViewForm.drawingSampleCategory = finalList;
+      } else {
+        exampleForm.value.drawingSampleCategory = accountViewForm.drawingSampleCategory;
+      }
+    }finally {
+      exampleForm.value.loading = false;
     }
-  });
+
+  };
+  
 
   /*************************************** 相关包装方法 ********************************************* */
 

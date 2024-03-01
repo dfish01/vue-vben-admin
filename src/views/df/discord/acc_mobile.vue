@@ -1092,6 +1092,8 @@
       return { text: '异常', color: '#ff4d4f', status: 'error' };
     } else if (state === 'unvalid') {
       return { text: '待验证', color: '#d9d9d9', status: 'warning' };
+    } else if (state === 'sale') {
+      return { text: '出售中', color: '#337357', status: 'warning' };
     } else {
       return { text: '过期', color: '#d9d9d9', status: 'default' };
     }

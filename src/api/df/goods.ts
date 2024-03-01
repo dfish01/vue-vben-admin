@@ -17,6 +17,7 @@ enum Api {
   ChangeGoodsState = '/open/goods/changeGoodsState',
   GoodsInfo = '/open/goods/goodsInfo',
   ModifiedNewGoods = '/open/goods/modifiedNewGoods',
+  CancelSecondHandGoods = '/open/goods/cancelSecondHandGoods',
 }
 
 export function addGoods(params: GoodsAddParams, mode: ErrorMessageMode = 'message') {
@@ -60,6 +61,25 @@ export function deploySecondHandGoods(params: any, mode: ErrorMessageMode = 'mes
   return defHttp.post<void>(
     {
       url: Api.DeploySecondHandGoods,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+      successMessageMode: mode,
+    },
+  );
+}
+
+/**
+ * 取消发布二手商品
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function cancelSecondHandGoods(params: IdReq, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<void>(
+    {
+      url: Api.CancelSecondHandGoods,
       params,
     },
     {

@@ -3,7 +3,7 @@
     <a-card
       :style="{
         width: '100%',
-        height: `calc(100vh - 56px - 55px) `,
+        height: `calc(100vh - 56px) `,
         'overflow-y': 'scroll',
         padding: 0,
       }"
@@ -102,6 +102,7 @@
           <a-card
             size="small"
             :bordered="true"
+            style="width: 100%"
             :bodyStyle="{ padding: '0px 0px', 'justify-content': 'center' }"
             title="交易中心"
           >
@@ -176,6 +177,7 @@
           <a-card
             size="small"
             :bordered="true"
+            style="width: 100%"
             :bodyStyle="{ padding: '0px 0px', 'justify-content': 'center' }"
             title="福利集"
           >

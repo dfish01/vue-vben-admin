@@ -443,10 +443,10 @@
                         <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)"
                           ><Icon icon="streamline-emojis:blossom" /> 添加标签</a-menu-item
                         >
-                        <a-menu-item key="3" @click="() => showSampleView(card)"
+                        <!-- <a-menu-item key="3" @click="() => showSampleView(card)"
                           ><Icon icon="streamline-emojis:globe-showing-europe-africa" />
                           添加到官方案例</a-menu-item
-                        >
+                        > -->
                         <a-menu-item key="8" @click="() => getSeed(card.id, false)"
                           ><Icon icon="streamline-emojis:rocket" /> 获取Seed</a-menu-item
                         >

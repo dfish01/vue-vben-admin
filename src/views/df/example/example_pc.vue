@@ -439,11 +439,11 @@
     noticeForm.value.viewFlag = false;
   };
   onMounted(async () => {
-    const response = await getRecentNotice();
-    if (response) {
-      noticeForm.value.viewFlag = true;
-      noticeForm.value.content = response;
-    }
+    // const response = await getRecentNotice();
+    // if (response) {
+    //   noticeForm.value.viewFlag = true;
+    //   noticeForm.value.content = response;
+    // }
   });
   /*********************************** 基础配置 ******************************** */
   const userSetting = ref({
@@ -481,15 +481,15 @@
       },
       1800: {
         // 当屏幕宽度小于等于1200
-        rowPerView: 9,
+        rowPerView: 7,
       },
       1600: {
         // 当屏幕宽度小于等于1200
-        rowPerView: 8,
+        rowPerView: 6,
       },
       1200: {
         // 当屏幕宽度小于等于1200
-        rowPerView: 6,
+        rowPerView: 5,
       },
       800: {
         // 当屏幕宽度小于等于800

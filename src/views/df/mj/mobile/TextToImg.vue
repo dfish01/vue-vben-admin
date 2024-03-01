@@ -213,7 +213,7 @@
           <div class="ar-card-title-be">
             <div>
               <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
-                ><Icon icon="streamline-emojis:tent" /> 风格参考
+                ><Icon icon="streamline-emojis:rainbow" /> 风格参考
                 <a-tooltip title="让MJ按参考图的风格进行绘制。仅niji6 和 v6 适用">
                   <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
               ></span>
@@ -497,7 +497,7 @@
                 v-model:value="textToImgForm.tagName"
                 rows="3"
                 placeholder="标签配置：用@可触发最近的标签！多个标签'空格符'隔开,最多5个。每个长度不超过16个字。~"
-                :options="textToImgForm.tagNameOptions"
+                :options="drawTagForm.tagNameOptions"
                 @select="onChangeLabel"
               />
             </a-input-group>
@@ -628,7 +628,7 @@
           <div class="ar-card-title-be">
             <div>
               <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
-                ><Icon icon="streamline-emojis:bouquet" /> 运行模型
+                ><Icon icon="streamline-emojis:fuel-pump" /> 运行模型
                 <a-tooltip
                   title="不一样的模型会有不一样的出图效果以及不一样的参数支持。Niji模型在动漫风格这块有很好的效果~"
                 >
@@ -1683,11 +1683,16 @@
   import { message, UploadProps, Upload } from 'ant-design-vue';
   import { useRoute } from 'vue-router';
   import { useUserStore, useUserStoreWithOut } from '/@/store/modules/user';
-  import { accountInfoApi } from '../accountInfo';
   import { textFormApi } from '../jobList.pageQuery';
   import { userStep } from '/@/api/df/user';
   import { getAppEnvConfig } from '/@/utils/env';
   import Icon from '@/components/Icon/Icon.vue';
+  import { accountInfoApi, tagInfoApi, drawCollectCategoryApi } from '../accountInfo';
+  const {
+    // 响应式引用
+    initTag,
+    drawTagForm,
+  } = tagInfoApi();
 
   const userStore = useUserStoreWithOut();
   const token = userStore.getToken;
@@ -1714,12 +1719,7 @@
     await initAccountInfo();
 
     //查询最近使用的tag
-    const resp = await genTagList({});
-    const options = resp.map((item) => ({
-      value: item,
-      label: item,
-    }));
-    textToImgForm.tagNameOptions = options;
+    initTag();
   });
 
   const route = useRoute();

@@ -365,7 +365,7 @@
   };
 
   onMounted(async () => {
-    await initAccountInfo();
+    // await initAccountInfo();
     if (tableData.value.length > 1) {
       return;
     }
@@ -375,11 +375,17 @@
       accountForm.currentSpaceId = item.id;
       accountForm.currentSpaceTitle = item.title;
     }
+   
+  });
+
+  
+  onMounted(async () => {
     await loadSystemInfoConfig();
     //引导
     await nextTick();
     indexStepOpen(true);
   });
+
 
   const showJobList = () => {
     // go('/jobList/index/' + currentSpace.id + '/' + currentSpace.title);

@@ -2,7 +2,7 @@
   <a-layout style="width: 100%; overflow: auto">
     <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
     <a-card
-      :style="{ height: `calc(100vh - 56px - 56px)`, overflow: 'auto' }"
+      :style="{ height: `calc(100vh - 56px )`, overflow: 'auto' }"
       :bodyStyle="{ padding: '0px' }"
     >
       <a-card title="邀请中心" :bodyStyle="{ padding: '5px' }">
