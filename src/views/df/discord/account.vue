@@ -114,7 +114,7 @@
                   <Icon icon="uil:server" class="vel-icon icon" aria-hidden="true" size="14" />
                   频道： <span style="font-size: 13px">{{ card.channelTitle }}</span></span
                 >
-                <span v-if="card.state === 'normal' && card.canSale === 'Y'">
+                <!-- <span v-if="card.state === 'normal' && card.canSale !== 'Y'">
                   <a-popconfirm
                     v-if="card.ownerFlag === 'N'"
                     title="发布商品到交易市场，将停止账号的使用。是否确认？"
@@ -134,8 +134,44 @@
                       ></a-button
                     >
                   </a-popconfirm>
+                </span> -->
+
+                <span v-if="card.state === 'sale'">
+                  <a-popconfirm
+                    v-if="card.ownerFlag === 'N'"
+                    title="是否撤回该商品的二次售出？"
+                    ok-text="确定"
+                    cancel-text="取消"
+                    @confirm="doCancelSecondHandGoods(card)"
+                  >
+                    <a-button size="small" style="font-size: 12px">
+                      <span>
+                        <Icon
+                          icon="mingcute:sale-line"
+                          class="vel-icon icon"
+                          aria-hidden="true"
+                          size="14"
+                        />
+                        取消出售
+                      </span>
+                    </a-button>
+                  </a-popconfirm>
+                </span>
+                <span v-if="card.state === 'normal' && card.canSale === 'Y'">
+                  <a-button size="small" style="font-size: 12px" @click="showRedeploy(card)">
+                    <span>
+                      <Icon
+                        icon="mingcute:sale-line"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                        size="14"
+                      />
+                      出售商品
+                    </span>
+                  </a-button>
                 </span>
               </a-row>
+
               <a-row class="card-tags">
                 <span style="font-size: 13px">
                   <Icon
@@ -215,7 +251,7 @@
               <a-row class="card-tags" style="margin-top: 5px" v-if="card.ownerFlag === 'Y'">
                 <a-col
                   :span="24"
-                  style="display: flex; justify-content: center; align-item: center"
+                  style="display: flex; align-items: center; justify-content: center"
                 >
                   <a-button-group type="text" style="width: 100%">
                     <a-popconfirm
@@ -981,6 +1017,7 @@
                   v-model:value="deployGoodsForm.goodsRemark"
                   placeholder="请输入商品说明"
                   :rows="3"
+                  show-count :maxlength="60"
                 />
               </a-form-item>
             </a-col>
@@ -1109,6 +1146,7 @@
       title="Midjouney授权激活"
       ok-text="提交"
       @ok="onActiveAccount"
+      :confirmLoading="activeData.loading"
     >
       <a-card>
         <a-form layout="vertical">
@@ -1242,6 +1280,57 @@
       </div>
     </a-modal>
 
+    <!-- 二次出售 -->
+    <a-modal
+      v-model:open="redeployForm.isActiveVisible"
+      title="再次出售"
+      ok-text="提交"
+      @ok="onRedeploy"
+      :confirmLoading="redeployForm.loading"
+    >
+      <a-card>
+        <a-form layout="vertical" :model="redeployForm" ref="redeployFormRef">
+          <a-row gutter="24">
+            <a-col :span="24">
+              <a-form-item
+                label="商品标题"
+                name="goodsTitle"
+                :rules="[{ required: true, message: '请输入商品标题!' }]"
+              >
+                <a-input show-count :maxlength="15" v-model:value="redeployForm.goodsTitle" placeholder="请输入商品标题" />
+              </a-form-item>
+            </a-col>
+
+            <a-col :span="24">
+              <a-form-item
+                label="商品说明"
+                name="goodsRemark"
+                :rules="[{ required: false, message: '请输入商品说明!' }]"
+              >
+                <a-textarea
+                  v-model:value="redeployForm.goodsRemark"
+                  placeholder="请输入商品说明"
+                  :rows="3"
+
+                  show-count :maxlength="60"
+                />
+              </a-form-item>
+            </a-col>
+
+            <a-col :span="24">
+              <a-form-item
+                label="商品售价"
+                name="goodsPrice"
+                :rules="[{ required: true, message: '请输入出售价格!' }]"
+              >
+                <a-input v-model:value="redeployForm.goodsPrice" placeholder="请输入出售价格~" />
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
+      </a-card>
+    </a-modal>
+
     <!-- 详情模态窗口组件 -->
     <account-details-modal
       style="top: 80px"
@@ -1284,7 +1373,7 @@
   import { IdReq } from '/@/api/model/baseModel';
   import Goods from './goods.vue';
   import AccountGroup from './account_group.vue';
-  import { deployNewGoods, deploySecondHandGoods } from '/@/api/df/goods';
+  import { deployNewGoods, deploySecondHandGoods, cancelSecondHandGoods } from '/@/api/df/goods';
   import Discord from './discord.vue';
   import { message } from 'ant-design-vue';
   import {
@@ -1302,6 +1391,10 @@
   import { getCustomLocalCache, setCustomLocalCache } from '/@/utils/custom';
   import { MJ_ACCOUNT_TOUR } from '/@/enums/cacheEnum';
   import { userStep } from '/@/api/df/user';
+  import { useUserStore } from '/@/store/modules/user';
+
+  const userStore = useUserStore();
+  const userInfo = ref(userStore.getUserInfo); // 直接赋值
 
   /** 页面高度计算开始 */
   const button = ref(null);
@@ -1526,6 +1619,8 @@
       return { text: '异常', color: '#ff4d4f', status: 'error' };
     } else if (state === 'unvalid') {
       return { text: '待验证', color: '#d9d9d9', status: 'warning' };
+    } else if (state === 'sale') {
+      return { text: '出售中', color: '#337357', status: 'warning' };
     } else {
       return { text: '过期', color: '#d9d9d9', status: 'default' };
     }
@@ -1680,6 +1775,51 @@
       // onSearch();
     } finally {
       deployGoodsForm.value.loading = false;
+    }
+  };
+
+  /************************************发布二手商品********************************* */
+  const redeployFormRef = ref();
+  const redeployForm = ref({
+    loading: false,
+    isActiveVisible: false,
+    goodsTitle: null,
+    goodsRemark: null,
+    goodsPrice: null,
+    accountId: null,
+  });
+
+  const showRedeploy = async (card) => {
+    redeployForm.value.isActiveVisible = true;
+    redeployForm.value.accountId = card.id;
+  };
+
+  const hideRedeploy = async () => {
+    redeployForm.value.isActiveVisible = false;
+  };
+
+  const onRedeploy = async () => {
+    redeployForm.value.loading = true;
+    try {
+      await redeployFormRef.value.validate();
+      await deploySecondHandGoods(redeployForm.value);
+      const foundItem = tableData.value.find(item => item.id === redeployForm.value.accountId);
+      foundItem.state = 'sale';
+
+      redeployForm.value.isActiveVisible = false;
+      // onSearch();
+    } finally {
+      redeployForm.value.loading = false;
+    }
+  };
+
+  const doCancelSecondHandGoods = async (card) => {
+    globalLoading.value = true;
+    try {
+      const state = await cancelSecondHandGoods({ id: card.id });
+      card.state = state;
+    } finally {
+      globalLoading.value = false;
     }
   };
 
@@ -1838,20 +1978,24 @@
   });
 
   const accountStepOpen = async (val) => {
-    if (val === true) {
-      const needShow = getCustomLocalCache(MJ_ACCOUNT_TOUR);
-      if (needShow && needShow === true) {
-        return;
-      }
-      setCustomLocalCache(MJ_ACCOUNT_TOUR, true);
-    }
-
-    // const resp = await userStep({ content: 'MJ_ACCOUNT_TOUR' });
-    // if (resp) {
-    //   accountStep.value.open = val;
+    // if (val === true) {
+    //   const needShow = getCustomLocalCache(MJ_ACCOUNT_TOUR);
+    //   if (needShow && needShow === true) {
+    //     return;
+    //   }
+    //   setCustomLocalCache(MJ_ACCOUNT_TOUR, true);
     // }
 
+    const userInfo = userStore.getUserInfo; // 直接赋值
+
+    if(userInfo.coursePop === 2 || coursePop == 3) {
+      return;
+    }
     accountStep.value.open = val;
+    const resp = await userStep({ content: 'MJ_ACCOUNT_TOUR' });
+    userInfo.coursePop = resp;
+    userStore.setUserInfo(userInfo);
+    indexStep.value.open = val;
   };
 
   defineExpose({

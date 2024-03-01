@@ -54,6 +54,7 @@ export interface UserInfo {
   desc?: string;
   homePath?: string;
   roles: RoleInfo[];
+  coursePop: number;
 }
 
 export interface BeforeMiniState {

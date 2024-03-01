@@ -18,7 +18,7 @@
         </div>
         <div style="display: flex; gap: 5px">
           <a-button-group>
-            <a-tooltip title="偷个懒，请去PC端添加Open ai和Discord账号~">
+            <a-tooltip title="偷个懒，请去PC端执行添加账号操作吧~">
               <a-dropdown :trigger="['click']" disabled>
                 <a-button style="padding: 5px"
                   ><Icon icon="mdi:account-multiple-add" size="22"
@@ -54,11 +54,23 @@
                 <SvgIcon name="list_search" size="20" />
               </a-button>
             </a-tooltip>
-            <a-tooltip title="商品市场">
-              <a-button @click="goView('/goods/index')" style="padding: 5px">
-                <SvgIcon name="shopping" size="20" />
-              </a-button>
-            </a-tooltip>
+            
+   
+            <a-dropdown :trigger="['click']">
+              <a-button style="padding: 5px" 
+                > <SvgIcon size="20" name="shopping" /></a-button>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item key="4" @click="goView('/goods/index')">商品市场
+                  </a-menu-item>
+                  <a-menu-item key="5" @click="goView('/sec_goods/index')">转售市场
+                  </a-menu-item>
+
+                  
+                </a-menu>
+              </template>
+            </a-dropdown>
+
 
             <a-tooltip title="">
               <a-button @click="onShowActive" style="padding: 5px">
@@ -84,30 +96,37 @@
       :style="{
         height: `calc(${contentHeight}px)`,
         overflow: 'auto',
-        padding: '0px 10px',
+        padding: '4px 6px',
       }"
     >
       <div v-for="card in tableData" :key="card.id" :trigger="['contextmenu']">
-        <a-badge-ribbon
-          :text="card.ownerFlag == 'Y' ? '主账号' : '授权'"
-          :color="card.ownerFlag == 'Y' ? 'red' : ''"
-        >
-          <a-card :bodyStyle="{ padding: '0px' }" class="card account-card" hoverable>
+        
+          <a-card :size="small" :style="{'margin-left': 0}" style="margin-bottom: 1px" :bodyStyle="{ padding: '0px', margin: '0px' }" class="card account-card" hoverable>
             <template #extra>
               <div
-                style="
-                  display: flex;
-                  flex-direction: row;
-                  justify-content: space-between;
-                  width: 250px;
-                "
-              >
-                <div style="justify-content: left">
-                  <span style="font-weight: bold"> {{ card.accountName }}</span>
-                </div>
+              style="
+                display: flex;
+                width: 250px;
+               
+              "
+            >
+              <div style="justify-content: left">
+                <Icon icon="ic:outline-bookmark-add" /><span style="margin-left: 5px">
+                  {{ card.accountName }}</span
+                >
               </div>
+            </div>
+              
+              
             </template>
             <div style="display: flex; flex-direction: column; padding: 10px">
+              <a-row class="card-tags">
+                <span>
+                  <Icon icon="ic:outline-emoji-flags" class="vel-icon icon" aria-hidden="true" size="14" />
+                  类型： <span style="font-size: 13px"><a-tag :color="card.ownerFlag == 'Y' ? 'red' : 'blue'">{{ card.ownerFlag == 'Y' ? '主账号' : '授权' }}</a-tag> </span></span
+                >
+              </a-row>
+             
               <a-row class="card-tags">
                 <span>
                   <Icon icon="uil:server" class="vel-icon icon" aria-hidden="true" size="14" />
@@ -119,11 +138,40 @@
                   <Icon icon="uil:server" class="vel-icon icon" aria-hidden="true" size="14" />
                   频道： <span style="font-size: 13px">{{ card.channelTitle }}</span></span
                 >
-                <!-- <a-badge
-                  style="font-size: 13px"
-                  :status="card.numAvailableDiscordAccount > 0 ? 'processing' : 'default'"
-                  :text="card.numAvailableDiscordAccount + '/' + card.numTotalDiscordAccount"
-                /> -->
+                <span v-if="card.state === 'sale'">
+                  <a-popconfirm
+                    v-if="card.ownerFlag === 'N'"
+                    title="是否撤回该商品的二次售出？"
+                    ok-text="确定"
+                    cancel-text="取消"
+                    @confirm="doCancelSecondHandGoods(card)"
+                  >
+                    <a-button size="small" style="font-size: 12px">
+                      <span>
+                        <Icon
+                          icon="mingcute:sale-line"
+                          class="vel-icon icon"
+                          aria-hidden="true"
+                          size="14"
+                        />
+                        取消出售
+                      </span>
+                    </a-button>
+                  </a-popconfirm>
+                </span>
+                <span v-if="card.state === 'normal' && card.canSale === 'Y'">
+                  <a-button size="small" style="font-size: 12px" @click="showRedeploy(card)">
+                    <span>
+                      <Icon
+                        icon="mingcute:sale-line"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                        size="14"
+                      />
+                      出售商品
+                    </span>
+                  </a-button>
+                </span>
               </a-row>
               <a-row class="card-tags">
                 <span style="font-size: 13px">
@@ -160,9 +208,17 @@
                   />
                 </span>
                 <span>
-                  <a-button size="small" style="font-size: 12px" @click="showDetails(card.id)"
-                    >使用概况</a-button
-                  >
+                  <a-button size="small" style="font-size: 12px" @click="showDetails(card.id)">
+                    <span>
+                    <Icon
+                        icon="basil:info-rect-outline"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                        size="14"
+                      />
+                      使用概况
+                    </span>
+                  </a-button>
                 </span>
               </a-row>
               <a-row class="card-tags">
@@ -175,7 +231,17 @@
                   style="font-size: 12px"
                   @click="doSetDefault(card.id)"
                 >
-                  {{ card.defaultFlag === 'Y' ? '默认账号' : '设置默认' }}</a-button
+                <span
+                    ><Icon
+                      icon="fluent:tap-double-20-filled"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                      size="14"
+                    />
+                    {{ card.defaultFlag === 'Y' ? '默认账号' : '设置默认' }}</span
+                  >
+
+              </a-button
                 >
                 <a-col :span="24">
                   <a-divider
@@ -276,7 +342,7 @@
             </div>
             <!-- 更多卡片内容 -->
           </a-card>
-        </a-badge-ribbon>
+        
       </div>
     </div>
 
@@ -734,6 +800,68 @@
       </a-card>
     </a-modal>
 
+     <!-- 二次出售 -->
+     <a-modal
+      v-model:open="redeployForm.isActiveVisible"
+      title="转售"
+      ok-text="提交"
+      @ok="onRedeploy"
+      :confirmLoading="redeployForm.loading"
+      :bodyStyle="{padding: 0}"
+      width="100%"
+    >
+      <a-card>
+        <a-form layout="vertical" :model="redeployForm" ref="redeployFormRef">
+          <a-row gutter="24">
+            <a-col :span="24">
+              <a-form-item
+                label="商品标题"
+                name="goodsTitle"
+                :rules="[{ required: true, message: '请输入商品标题!' }]"
+              >
+                <a-input show-count :maxlength="15" v-model:value="redeployForm.goodsTitle" placeholder="请输入商品标题" />
+              </a-form-item>
+            </a-col>
+
+            <a-col :span="24">
+              <a-form-item
+                label="商品说明"
+                name="goodsRemark"
+                :rules="[{ required: false, message: '请输入商品说明!' }]"
+              >
+                <a-textarea
+                  v-model:value="redeployForm.goodsRemark"
+                  placeholder="请输入商品说明"
+                  :rows="3"
+
+                  show-count :maxlength="60"
+                />
+              </a-form-item>
+            </a-col>
+
+            <a-col :span="24">
+              <a-form-item
+                label="商品售价"
+                name="goodsPrice"
+                :rules="[{ required: true, message: '请输入出售价格!' }]"
+              >
+              <a-input-number
+                  v-model:value="redeployForm.goodsPrice"
+                  style="width: 100%"
+                  :min="1"
+                  :max="9999"
+                  placeholder="请输入出售价格"
+                  :step="1"
+                  string-mode
+                />
+                <!-- <a-input v-model:value="redeployForm.goodsPrice" placeholder="请输入出售价格~" /> -->
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
+      </a-card>
+    </a-modal>
+
     <!-- 授权列表 -->
     <a-modal
       v-model:open="authListForm.isAuthModalVisible"
@@ -871,6 +999,7 @@
     channelList,
     guildList,
   } from '/@/api/df/discord';
+  import { deployNewGoods, deploySecondHandGoods, cancelSecondHandGoods } from '/@/api/df/goods';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
   import { discordApi } from './discord';
@@ -1092,6 +1221,8 @@
       return { text: '异常', color: '#ff4d4f', status: 'error' };
     } else if (state === 'unvalid') {
       return { text: '待验证', color: '#d9d9d9', status: 'warning' };
+    } else if (state === 'sale') {
+      return { text: '出售中', color: '#337357', status: 'warning' };
     } else {
       return { text: '过期', color: '#d9d9d9', status: 'default' };
     }
@@ -1282,6 +1413,52 @@
       activeData.value.loading = false;
     }
   };
+
+    /************************************发布二手商品********************************* */
+    const redeployFormRef = ref();
+  const redeployForm = ref({
+    loading: false,
+    isActiveVisible: false,
+    goodsTitle: null,
+    goodsRemark: null,
+    goodsPrice: null,
+    accountId: null,
+  });
+
+  const showRedeploy = async (card) => {
+    redeployForm.value.isActiveVisible = true;
+    redeployForm.value.accountId = card.id;
+  };
+
+  const hideRedeploy = async () => {
+    redeployForm.value.isActiveVisible = false;
+  };
+
+  const onRedeploy = async () => {
+    redeployForm.value.loading = true;
+    try {
+      await redeployFormRef.value.validate();
+      await deploySecondHandGoods(redeployForm.value);
+      const foundItem = tableData.value.find(item => item.id === redeployForm.value.accountId);
+      foundItem.state = 'sale';
+
+      redeployForm.value.isActiveVisible = false;
+      // onSearch();
+    } finally {
+      redeployForm.value.loading = false;
+    }
+  };
+
+  const doCancelSecondHandGoods = async (card) => {
+    globalLoading.value = true;
+    try {
+      const state = await cancelSecondHandGoods({ id: card.id });
+      console.log("=============" + state)
+      card.state = state;
+    } finally {
+      globalLoading.value = false;
+    }
+  };
 </script>
 
 <style scoped>
@@ -1458,6 +1635,15 @@
     margin-right: 0;
     font-size: 15px;
   }
+
+  .account-card >>> .ant-card-head-title {
+    padding: 0 !important;
+  }
+
+  .account-card >>> .ant-card-extra {
+    margin-left: 0 !important;
+  }
+
 </style>
 <style lang="less">
   .full-modal {

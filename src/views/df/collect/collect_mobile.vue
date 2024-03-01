@@ -1699,11 +1699,11 @@
   } from '../mj/tools';
   import { Empty } from 'ant-design-vue';
   import { useRoute } from 'vue-router';
+  import { useGo } from '/@/hooks/web/usePage';
   import { accountInfoApi, tagInfoApi, drawCollectCategoryApi } from '../mj/accountInfo';
   import { collectCategoryApi } from './category';
   import { useDrawCard } from '../example/card';
 
-  const { goDrawing } = useDrawCard();
   const {
     refreshCollectCategory,
     collectCategoryViewForm,
@@ -1957,6 +1957,11 @@
     // 判断时间差异是否不超过5天
     console.log('needShow ' + daysDifference);
     return daysDifference <= 5;
+  };
+
+  const go = useGo();
+  const goDrawing = async (queryParams) => {
+    go('/mmj/index?activeTab=TextToImageForm&prompt=' + queryParams);
   };
 </script>
 

@@ -118,16 +118,16 @@
               ><span><Icon icon="heroicons:shopping-bag-16-solid" /> 官方商品</span></a-card-grid
             >
 
-            <a-popconfirm title="正在开发中，请稍后~" cancel-text="取消">
+            
               <a-card-grid
                 :style="{ padding: '10px 0px', width: '34%', 'text-align': 'center' }"
-                :hoverable="false"
-                disabled
+                :hoverable="true"
+                @click="goView('/sec_goods/index')"
                 ><span
-                  ><Icon icon="fluent:shopping-bag-arrow-left-24-regular" /> 二手商品</span
+                  ><Icon icon="fluent:shopping-bag-arrow-left-24-regular" /> 转售市场</span
                 ></a-card-grid
               >
-            </a-popconfirm>
+          
 
             <a-card-grid
               :hoverable="true"

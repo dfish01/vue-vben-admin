@@ -1832,6 +1832,7 @@
   import { addSpaceTask, removeSpaceTask, allUserSpace } from '/@/api/df/workSpace';
   import { accountInfoApi, tagInfoApi, drawCollectCategoryApi } from '../accountInfo';
   import { SvgIcon } from '/@/components/Icon';
+  import { useGo } from '/@/hooks/web/usePage';
   import {
     ref,
     computed,
@@ -1866,7 +1867,6 @@
   import { useRoute } from 'vue-router';
   import { useDrawCard } from '/@/views/df/example/card';
 
-  const { goDrawing } = useDrawCard();
   const { setPrompt } = textFormApi();
   const {
     refreshCollectCategory,
@@ -2230,6 +2230,11 @@
     // 判断时间差异是否不超过5天
     console.log('needShow ' + daysDifference);
     return daysDifference <= 5;
+  };
+
+  const go = useGo();
+  const goDrawing = async (queryParams) => {
+    go('/mmj/index?activeTab=TextToImageForm&prompt=' + queryParams);
   };
 </script>
 

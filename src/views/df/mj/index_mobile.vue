@@ -301,6 +301,7 @@
   import { spaceInfoApi, systemInfoApi } from './index';
   import { getCustomCache, setCustomCache } from '/@/utils/custom';
   import { MJ_DRAW_MOBILE_TOUR } from '/@/enums/cacheEnum';
+  const userStore = useUserStore();
 
   const {
     accountForm,
@@ -427,7 +428,7 @@
   });
 
   const textToImageRef = ref();
-  const indexStepOpen = (val: boolean): void => {
+  const indexStepOpen =  async(val: boolean): void => {
     // if (val === true) {
     //   const needShow = getCustomCache(MJ_DRAW_MOBILE_TOUR);
     //   if (needShow && needShow === true) {
@@ -435,8 +436,18 @@
     //   }
     //   setCustomCache(MJ_DRAW_MOBILE_TOUR, true);
     // }
+    const userInfo = userStore.getUserInfo; // 直接赋值
+
+    if(userInfo.coursePop === 1 || userInfo.coursePop == 3) {
+      return;
+    }
     indexStep.value.open = val;
+    const resp = await userStep({ content: 'MJ_DRAW_TOUR' });
+    userInfo.coursePop = resp;
+    userStore.setUserInfo(userInfo);
+
   };
+
   const changeStep = (current: number): void => {
     if (current === 2) {
       indexStep.value.open = false;

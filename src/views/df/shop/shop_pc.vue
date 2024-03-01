@@ -805,7 +805,7 @@
     if (card.shopType === 'THIRD') {
       window.open(card.linkUrl, '_blank');
     } else {
-      go('/goods/index');
+      go(card.linkUrl);
     }
   };
 

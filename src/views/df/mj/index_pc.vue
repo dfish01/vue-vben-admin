@@ -488,6 +488,8 @@
   import { getCustomLocalCache, setCustomLocalCache } from '/@/utils/custom';
   import { MJ_DRAW_TOUR } from '/@/enums/cacheEnum';
 
+  const userStore = useUserStore();
+  
   const {
     accountForm,
     accountViewForm,
@@ -533,8 +535,6 @@
     queryDiscordList,
     queryAccountList,
   } = discordApi();
-
-  const userStore = useUserStore();
 
   const route = useRoute();
 
@@ -710,21 +710,25 @@
   });
 
   const indexStepOpen = async (val: boolean): void => {
-    if (val === true) {
-      const needShow = getCustomLocalCache(MJ_DRAW_TOUR);
-      if (needShow && needShow === true) {
-        return;
-      }
+    // if (val === true) {
+    //   const needShow = getCustomLocalCache(MJ_DRAW_TOUR);
+    //   if (needShow && needShow === true) {
+    //     return;
+    //   }
 
-      setCustomLocalCache(MJ_DRAW_TOUR, true);
-      console.log('setCustomLocalCache ' + getCustomLocalCache(MJ_DRAW_TOUR));
-    }
-
-    // const resp = await userStep({ content: 'MJ_DRAW_TOUR' });
-    // if (resp) {
-    //   indexStep.value.open = val;
+    //   setCustomLocalCache(MJ_DRAW_TOUR, true);
+    //   console.log('setCustomLocalCache ' + getCustomLocalCache(MJ_DRAW_TOUR));
     // }
+    const userInfo = userStore.getUserInfo; // 直接赋值
+
+    if(userInfo.coursePop === 1 || userInfo.coursePop == 3) {
+      return;
+    }
     indexStep.value.open = val;
+    const resp = await userStep({ content: 'MJ_DRAW_TOUR' });
+    userInfo.coursePop = resp;
+    userStore.setUserInfo(userInfo);
+    
   };
 
   const changeStep = (current: number): void => {
