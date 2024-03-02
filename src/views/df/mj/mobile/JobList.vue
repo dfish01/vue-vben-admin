@@ -1,249 +1,220 @@
 <template>
   <a-layout class="app" v-loading="loadingRef">
-    <a-card :bodyStyle="{ padding: 0, height: '50px' }">
-      <a-row
-        ref="formRef"
-        style="
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          height: 50px;
-          padding: 0 10px;
-        "
-      >
-        <div style="display: flex; align-items: center">
-          <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
-          <span style="margin-left: 5px; font-size: 16px; font-weight: bold"
-            >{{ accountForm.currentSpaceTitle }}
-          </span>
-          工作区
-        </div>
-        <div style="display: flex; gap: 5px">
-          <a-button-group>
-            <a-tooltip>
-              <a-button @click="showQueryView" @click.prevent style="padding: 5px">
-                <SvgIcon name="list_search" size="20" />
-              </a-button>
-            </a-tooltip>
-
-            <a-tooltip>
-              <a-dropdown :trigger="['click']">
-                <a-button style="padding: 5px">
-                  <SvgIcon name="sys_setting02" size="20" />
+    <a-card :bodyStyle="{padding: '0'}"> 
+      <a-card :bodyStyle="{ padding: 0, height: '50px' }">
+        <a-row
+          ref="formRef"
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 50px;
+            padding: 0 10px;
+          "
+        >
+          <div style="display: flex; align-items: center">
+            <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
+            <span style="margin-left: 5px; font-size: 16px; font-weight: bold"
+              >{{ accountForm.currentSpaceTitle }}
+            </span>
+            工作区
+          </div>
+          <div style="display: flex; gap: 5px">
+            <a-button-group>
+              <a-tooltip>
+                <a-button @click="showQueryView" @click.prevent style="padding: 5px">
+                  <SvgIcon name="list_search" size="20" />
                 </a-button>
-                <template #overlay>
-                  <a-menu>
-                    <a-menu-item key="11">
-                      <a-popconfirm
-                        :title="
-                          userSetting.cardShow === 'SINGLE'
-                            ? '开启后，列表显示4图，点击可放大。明细页在右键列表~'
-                            : '开启后，列表显示单图，点击出现明细页~'
-                        "
-                        :ok-text="userSetting.cardShow === 'SINGLE' ? '立即开启' : '立即开启'"
-                        cancel-text="取消"
-                        @confirm="setCardShow()"
-                      >
-                        ✨{{ userSetting.cardShow === 'SINGLE' ? '列表4图模式' : '列表单图模式' }}
-                      </a-popconfirm>
-                    </a-menu-item>
-                    <a-menu-divider />
-                    <a-menu-item key="5">
-                      <a-popconfirm
-                        title="⚠️以卡片的方式进行预览，建议配合原图模式。"
-                        ok-text="立即预览"
-                        cancel-text="取消"
-                        @confirm="showAllImage(false)"
-                      >
-                        📺全量清晰预览
-                      </a-popconfirm>
-                    </a-menu-item>
-                    <a-menu-item key="5">
-                      <a-popconfirm
-                        title="⚠️以卡片的方式进行预览，建议配合原图模式。"
-                        ok-text="立即预览"
-                        cancel-text="取消"
-                        @confirm="showAllImage(true)"
-                      >
-                        📺全量预览
-                      </a-popconfirm>
-                    </a-menu-item>
+              </a-tooltip>
 
-                    <a-menu-divider />
-                    <a-menu-item key="4" disabled>
-                      <a-popconfirm
-                        title="该选项默认暂时未作存储，默认关闭状态，刷新就失效了！分割图场景适用~"
-                        :ok-text="userSetting.useUpImage ? '确认关闭' : '确认开启'"
-                        cancel-text="取消"
-                        @confirm="setUseUpImage()"
-                      >
-                        🍝{{ userSetting.useUpImage ? '开启缩略图' : '开启原图' }}
-                      </a-popconfirm>
-                    </a-menu-item>
+              <a-tooltip>
+                <a-dropdown :trigger="['click']">
+                  <a-button style="padding: 5px">
+                    <SvgIcon name="sys_setting02" size="20" />
+                  </a-button>
+                  <template #overlay>
+                    <a-menu>
+                      <a-menu-item key="11">
+                        <a-popconfirm
+                          :title="
+                            userSetting.cardShow === 'SINGLE'
+                              ? '开启后，列表显示4图，点击可放大。明细页在右键列表~'
+                              : '开启后，列表显示单图，点击出现明细页~'
+                          "
+                          :ok-text="userSetting.cardShow === 'SINGLE' ? '立即开启' : '立即开启'"
+                          cancel-text="取消"
+                          @confirm="setCardShow()"
+                        >
+                          ✨{{ userSetting.cardShow === 'SINGLE' ? '列表4图模式' : '列表单图模式' }}
+                        </a-popconfirm>
+                      </a-menu-item>
+                      <a-menu-divider />
+                      <a-menu-item key="5">
+                        <a-popconfirm
+                          title="⚠️以卡片的方式进行预览，建议配合原图模式。"
+                          ok-text="立即预览"
+                          cancel-text="取消"
+                          @confirm="showAllImage(false)"
+                        >
+                          📺全量清晰预览
+                        </a-popconfirm>
+                      </a-menu-item>
+                      <a-menu-item key="5">
+                        <a-popconfirm
+                          title="⚠️以卡片的方式进行预览，建议配合原图模式。"
+                          ok-text="立即预览"
+                          cancel-text="取消"
+                          @confirm="showAllImage(true)"
+                        >
+                          📺全量预览
+                        </a-popconfirm>
+                      </a-menu-item>
 
-                    <a-menu-item key="5" disabled>
-                      <a-popconfirm
-                        title="我的网速无懈可击！！！"
-                        :ok-text="userSetting.usePersonNet ? '还是加速吧' : '就是要原连接'"
-                        cancel-text="取消"
-                        @confirm="setUsePersonNet()"
-                      >
-                        🏄{{ userSetting.usePersonNet ? '加速连接' : '使用原连接' }}
-                      </a-popconfirm>
-                    </a-menu-item>
-                  </a-menu>
-                </template>
-              </a-dropdown>
-            </a-tooltip>
-            <a-tooltip>
-              <a-dropdown :trigger="['click']">
-                <a-button style="padding: 5px"><SvgIcon name="sys_setting03" size="20" /></a-button>
-                <template #overlay>
-                  <a-menu>
-                    <a-menu-item key="3" class="delete">
-                      <a-popconfirm
-                        title="请确认相关账号的remix状态，这里只是控制弹窗而已（暂时未接入实时控制Remix）。如果remix状态不匹配，会导致任务失败!"
-                        :ok-text="remix.enable_flag ? '关闭Remix' : '开启Remix'"
-                        cancel-text="取消"
-                        @confirm="changeRemix()"
-                      >
-                        📝{{ remix.enable_flag ? '关闭Remix' : '开启Remix' }}
-                      </a-popconfirm>
-                    </a-menu-item>
-                    <a-menu-item key="5">
-                      <a-popconfirm
-                        title="提交任务自动刷新！！！"
-                        :ok-text="userSetting.taskRefresh ? '关闭刷新' : '开启刷新'"
-                        cancel-text="取消"
-                        @confirm="setTaskRefresh()"
-                      >
-                        💫{{ userSetting.taskRefresh ? '关闭刷新' : '开启刷新' }}
-                      </a-popconfirm>
-                    </a-menu-item>
-                  </a-menu>
-                </template>
-              </a-dropdown>
-            </a-tooltip>
-            <a-tooltip>
-              <a-dropdown :trigger="['click']">
-                <a-button style="padding: 5px"><SvgIcon name="delete" size="20" /></a-button>
-                <template #overlay>
-                  <a-menu>
-                    <a-menu-item key="1">
-                      <a-popconfirm
-                        title="将永久删除该空间下的全部排队记录，是否确认删除?"
-                        ok-text="确认删除"
-                        cancel-text="取消"
-                        @confirm="deleteBatchHandle('QUEUED')"
-                      >
-                        <a>❌排队</a>
-                      </a-popconfirm>
-                    </a-menu-item>
+                      <a-menu-divider />
+                      <a-menu-item key="4" disabled>
+                        <a-popconfirm
+                          title="该选项默认暂时未作存储，默认关闭状态，刷新就失效了！分割图场景适用~"
+                          :ok-text="userSetting.useUpImage ? '确认关闭' : '确认开启'"
+                          cancel-text="取消"
+                          @confirm="setUseUpImage()"
+                        >
+                          🍝{{ userSetting.useUpImage ? '开启缩略图' : '开启原图' }}
+                        </a-popconfirm>
+                      </a-menu-item>
 
-                    <a-menu-item key="2">
-                      <a-popconfirm
-                        title="将永久删除该空间下的全部失败记录，是否确认删除?"
-                        ok-text="确认删除"
-                        cancel-text="取消"
-                        @confirm="deleteBatchHandle('FAILED')"
-                      >
-                        <a>❌失败</a>
-                      </a-popconfirm>
-                    </a-menu-item>
-                  </a-menu>
-                </template>
-              </a-dropdown>
-            </a-tooltip>
-          </a-button-group>
-        </div>
-      </a-row>
-    </a-card>
+                      <a-menu-item key="5" disabled>
+                        <a-popconfirm
+                          title="我的网速无懈可击！！！"
+                          :ok-text="userSetting.usePersonNet ? '还是加速吧' : '就是要原连接'"
+                          cancel-text="取消"
+                          @confirm="setUsePersonNet()"
+                        >
+                          🏄{{ userSetting.usePersonNet ? '加速连接' : '使用原连接' }}
+                        </a-popconfirm>
+                      </a-menu-item>
+                    </a-menu>
+                  </template>
+                </a-dropdown>
+              </a-tooltip>
+              <a-tooltip>
+                <a-dropdown :trigger="['click']">
+                  <a-button style="padding: 5px"><SvgIcon name="sys_setting03" size="20" /></a-button>
+                  <template #overlay>
+                    <a-menu>
+                      <a-menu-item key="3" class="delete">
+                        <a-popconfirm
+                          title="请确认相关账号的remix状态，这里只是控制弹窗而已（暂时未接入实时控制Remix）。如果remix状态不匹配，会导致任务失败!"
+                          :ok-text="remix.enable_flag ? '关闭Remix' : '开启Remix'"
+                          cancel-text="取消"
+                          @confirm="changeRemix()"
+                        >
+                          📝{{ remix.enable_flag ? '关闭Remix' : '开启Remix' }}
+                        </a-popconfirm>
+                      </a-menu-item>
+                      <a-menu-item key="5">
+                        <a-popconfirm
+                          title="提交任务自动刷新！！！"
+                          :ok-text="userSetting.taskRefresh ? '关闭刷新' : '开启刷新'"
+                          cancel-text="取消"
+                          @confirm="setTaskRefresh()"
+                        >
+                          💫{{ userSetting.taskRefresh ? '关闭刷新' : '开启刷新' }}
+                        </a-popconfirm>
+                      </a-menu-item>
+                    </a-menu>
+                  </template>
+                </a-dropdown>
+              </a-tooltip>
+              <a-tooltip>
+                <a-dropdown :trigger="['click']">
+                  <a-button style="padding: 5px"><SvgIcon name="delete" size="20" /></a-button>
+                  <template #overlay>
+                    <a-menu>
+                      <a-menu-item key="1">
+                        <a-popconfirm
+                          title="将永久删除该空间下的全部排队记录，是否确认删除?"
+                          ok-text="确认删除"
+                          cancel-text="取消"
+                          @confirm="deleteBatchHandle('QUEUED')"
+                        >
+                          <a>❌排队</a>
+                        </a-popconfirm>
+                      </a-menu-item>
 
-    <div
-      v-if="cards.length === 0"
-      style="display: flex; align-items: center; justify-content: center"
-      :style="{ height: `calc(${contentHeight}px `, overflow: 'auto' }"
-    >
-      <a-empty :image="simpleImage" />
-    </div>
-    <div v-else class="cards" :style="{ height: `calc(${contentHeight}px `, overflow: 'auto' }">
-      <div v-for="card in cards" :key="card.id" :trigger="['contextmenu']">
-        <a-card :bodyStyle="{ padding: '0px' }" class="card" hoverable>
-          <div v-if="card.state === 'QUEUED'" class="mask-queued label-front">
-            <div
-              style="
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-              "
-            >
-              <span>
-                <Icon icon="line-md:coffee-loop" size="70" color="#91C8E4" />
-              </span>
-              <div>
-                <span> 正在排队中... </span>
-              </div>
-              <div style="padding: 0 18px">
-                <span>
-                  {{ '共享账号使用非公平调度！尽最大可能保证每个用户轮流使用。请耐心等待...' }}
-                </span>
-              </div>
-            </div>
+                      <a-menu-item key="2">
+                        <a-popconfirm
+                          title="将永久删除该空间下的全部失败记录，是否确认删除?"
+                          ok-text="确认删除"
+                          cancel-text="取消"
+                          @confirm="deleteBatchHandle('FAILED')"
+                        >
+                          <a>❌失败</a>
+                        </a-popconfirm>
+                      </a-menu-item>
+                    </a-menu>
+                  </template>
+                </a-dropdown>
+              </a-tooltip>
+            </a-button-group>
           </div>
-          <div v-if="card.state === 'RUNNING'" class="mask-queued label-front">
-            <div
-              style="
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-              "
-            >
-              <span>
-                <Icon icon="line-md:coffee-half-empty-twotone-loop" size="70" color="#749BC2" />
-              </span>
-              <div>
-                <span>
-                  {{ card.mjExecute === 'N' ? '正在执行中...' : 'MJ正在绘画中...' }}
-                </span>
-              </div>
-              <div v-if="card.process">
-                <span>
-                  {{ '绘画进度：' + card.process }}
-                </span>
-              </div>
-              <div v-else>
-                <span v-if="card.mode === 'turbo'">
-                  {{ 'turbo模式预计30秒内完成...' }}
-                </span>
-                <span v-if="card.mode === 'fast'">
-                  {{ 'fast模式预计1分30秒内完成...' }}
-                </span>
-                <span v-if="card.mode === 'relax'">
-                  {{ 'relax模式预计3~6分钟完成...' }}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div v-if="card.state === 'READY'" class="mask-queued label-front">
-            <div
-              style="
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-              "
-            >
-              <span>
-                <Icon icon="line-md:coffee-half-empty-twotone-loop" size="70" color="#749BC2" />
-              </span>
+        </a-row>
+      </a-card>
 
-              <div>
+      <div
+        v-if="cards.length === 0"
+        style="display: flex; align-items: center; justify-content: center"
+        :style="{ height: `calc(${contentHeight}px `, overflow: 'auto' }"
+      >
+        <a-empty :image="simpleImage" />
+      </div>
+      <div v-else class="cards" :style="{ height: `calc(${contentHeight}px `, overflow: 'auto', 'padding-top':'4px' }">
+        <div v-for="card in cards" :key="card.id" :trigger="['contextmenu']">
+          <a-card :bodyStyle="{ padding: '0px' }" class="card" hoverable>
+            <div v-if="card.state === 'QUEUED'" class="mask-queued label-front">
+              <div
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <span>
+                  <Icon icon="line-md:coffee-loop" size="70" color="#91C8E4" />
+                </span>
                 <div>
-                  <span> {{ '任务已准备就绪，即将执行...' }} </span>
+                  <span> 正在排队中... </span>
                 </div>
+                <div style="padding: 0 18px">
+                  <span>
+                    {{ '共享账号使用非公平调度！尽最大可能保证每个用户轮流使用。请耐心等待...' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div v-if="card.state === 'RUNNING'" class="mask-queued label-front">
+              <div
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <span>
+                  <Icon icon="line-md:coffee-half-empty-twotone-loop" size="70" color="#749BC2" />
+                </span>
                 <div>
+                  <span>
+                    {{ card.mjExecute === 'N' ? '正在执行中...' : 'MJ正在绘画中...' }}
+                  </span>
+                </div>
+                <div v-if="card.process">
+                  <span>
+                    {{ '绘画进度：' + card.process }}
+                  </span>
+                </div>
+                <div v-else>
                   <span v-if="card.mode === 'turbo'">
                     {{ 'turbo模式预计30秒内完成...' }}
                   </span>
@@ -256,1015 +227,1045 @@
                 </div>
               </div>
             </div>
-          </div>
-          <div v-if="card.state === 'FAILED'" class="mask-queued label-front">
-            <div
-              style="
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-              "
-              class="error-text"
-            >
-              <span>
-                <Icon icon="carbon:face-dizzy-filled" size="60" color="#FF6969" />
-              </span>
-              <div v-if="card.failMsg">
-                <span v-if="card.failMsg" style="margin-top: 10px"> {{ card.failMsg }} </span>
-              </div>
-              <div v-else>
-                <span> {{ '失败了，多次失败请联系客服！' }} </span>
+            <div v-if="card.state === 'READY'" class="mask-queued label-front">
+              <div
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <span>
+                  <Icon icon="line-md:coffee-half-empty-twotone-loop" size="70" color="#749BC2" />
+                </span>
+
+                <div>
+                  <div>
+                    <span> {{ '任务已准备就绪，即将执行...' }} </span>
+                  </div>
+                  <div>
+                    <span v-if="card.mode === 'turbo'">
+                      {{ 'turbo模式预计30秒内完成...' }}
+                    </span>
+                    <span v-if="card.mode === 'fast'">
+                      {{ 'fast模式预计1分30秒内完成...' }}
+                    </span>
+                    <span v-if="card.mode === 'relax'">
+                      {{ 'relax模式预计3~6分钟完成...' }}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-          <div v-if="card.state === 'SUCCESS'">
-            <div v-if="userSetting.cardShow === 'MULTI'">
-              <a-card
-                :bodyStyle="{ padding: '0px' }"
-                class="my-transparent-card"
-                style="width: 100%; border: none; background: transparent"
-                v-if="card.taskImage.infoImageList.length > 1"
-                :bordered="false"
-                :hoverable="false"
+            <div v-if="card.state === 'FAILED'" class="mask-queued label-front">
+              <div
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                "
+                class="error-text"
               >
-                <a-card-grid
-                  v-for="infoImage in card.taskImage.infoImageList"
-                  :key="infoImage.url"
-                  style="
-                    position: relative;
-                    width: 49%;
-                    margin: 0;
-                    padding: 0;
-                    border-radius: 8px;
-                    text-align: center;
-                  "
+                <span>
+                  <Icon icon="carbon:face-dizzy-filled" size="60" color="#FF6969" />
+                </span>
+                <div v-if="card.failMsg">
+                  <span v-if="card.failMsg" style="margin-top: 10px"> {{ card.failMsg }} </span>
+                </div>
+                <div v-else>
+                  <span> {{ '失败了，多次失败请联系客服！' }} </span>
+                </div>
+              </div>
+            </div>
+            <div v-if="card.state === 'SUCCESS'">
+              <div v-if="userSetting.cardShow === 'MULTI'">
+                <a-card
+                  :bodyStyle="{ padding: '0px' }"
+                  class="my-transparent-card"
+                  style="width: 100%; border: none; background: transparent"
+                  v-if="card.taskImage.infoImageList.length > 1"
+                  :bordered="false"
+                  :hoverable="false"
                 >
-                  <!-- <div
-                    v-show="!infoImage.loaded"
-                    :style="{
-                      width: '100%',
-                      height: '100%',
-                      paddingBottom: `${
-                        (card.taskImage.imageHeight / card.taskImage.imageWidth) * 100
-                      }%`,
-                    }"
+                  <a-card-grid
+                    v-for="infoImage in card.taskImage.infoImageList"
+                    :key="infoImage.url"
+                    style="
+                      position: relative;
+                      width: 49%;
+                      margin: 0;
+                      padding: 0;
+                      border-radius: 8px;
+                      text-align: center;
+                    "
                   >
-                    <SvgIcon
-                      name="loading"
-                      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
+                    <!-- <div
+                      v-show="!infoImage.loaded"
+                      :style="{
+                        width: '100%',
+                        height: '100%',
+                        paddingBottom: `${
+                          (card.taskImage.imageHeight / card.taskImage.imageWidth) * 100
+                        }%`,
+                      }"
+                    >
+                      <SvgIcon
+                        name="loading"
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
+                      />
+                    </div> -->
+                    <img
+                      @click="showInfoImage(getImageList(card), infoImage.url)"
+                      v-lazy.container="infoImage.mediaUrl"
+                      style="max-width: 100%; border-radius: 8px"
+                      alt=""
+                      @load="imageLoaded(infoImage)"
                     />
-                  </div> -->
-                  <img
-                    @click="showInfoImage(getImageList(card), infoImage.url)"
-                    v-lazy.container="infoImage.mediaUrl"
-                    style="max-width: 100%; border-radius: 8px"
-                    alt=""
-                    @load="imageLoaded(infoImage)"
-                  />
-                </a-card-grid>
-              </a-card>
-              <a-card
-                :bodyStyle="{ padding: '0px' }"
-                style="width: 100%"
-                :bordered="false"
-                :hoverable="false"
-                class="my-transparent-card"
-                v-else
-                ><a-card-grid
-                  v-for="infoImage in card.taskImage.infoImageList"
-                  :key="infoImage.url"
-                  style="width: 100%; padding: 0; border-radius: 8px; text-align: center"
+                  </a-card-grid>
+                </a-card>
+                <a-card
+                  :bodyStyle="{ padding: '0px' }"
+                  style="width: 100%"
+                  :bordered="false"
+                  :hoverable="false"
+                  class="my-transparent-card"
+                  v-else
+                  ><a-card-grid
+                    v-for="infoImage in card.taskImage.infoImageList"
+                    :key="infoImage.url"
+                    style="width: 100%; padding: 0; border-radius: 8px; text-align: center"
+                  >
+                    <img
+                      @click="showInfoImage(getImageList(card), infoImage.url)"
+                      v-lazy.container="infoImage.mediaUrl"
+                      style="max-width: 100%; border-radius: 8px"
+                      alt=""
+                      @load="imageLoaded(card)"
+                    />
+                  </a-card-grid>
+                </a-card>
+              </div>
+              <div v-else>
+                <a-card
+                  :bodyStyle="{ padding: '0px' }"
+                  class="my-transparent-card"
+                  style="width: 100%; border: none; background: transparent"
+                  :bordered="false"
+                  :hoverable="false"
                 >
                   <img
-                    @click="showInfoImage(getImageList(card), infoImage.url)"
-                    v-lazy.container="infoImage.mediaUrl"
-                    style="max-width: 100%; border-radius: 8px"
+                    @click="showInfoImage([card.taskImage.imageUrl], card.taskImage.imageUrl)"
+                    v-lazy.container="card.taskImage.mediaImageUrl"
+                    fallback=""
                     alt=""
                     @load="imageLoaded(card)"
                   />
-                </a-card-grid>
-              </a-card>
-            </div>
-            <div v-else>
-              <a-card
-                :bodyStyle="{ padding: '0px' }"
-                class="my-transparent-card"
-                style="width: 100%; border: none; background: transparent"
-                :bordered="false"
-                :hoverable="false"
-              >
-                <img
-                  @click="showInfoImage([card.taskImage.imageUrl], card.taskImage.imageUrl)"
-                  v-lazy.container="card.taskImage.mediaImageUrl"
-                  fallback=""
-                  alt=""
-                  @load="imageLoaded(card)"
-                />
-              </a-card>
-            </div>
-          </div>
-
-          <div
-            v-if="card.state != 'SUCCESS'"
-            style="
-              display: flex;
-              position: absolute;
-              bottom: 35px;
-              flex-direction: row;
-              justify-content: center;
-              width: 100%;
-            "
-          >
-            <a-button-group size="small" buttonStyle="solid">
-              <a-tooltip title="" v-if="card.state === 'FAILED'">
-                <a-popconfirm
-                  title="是否重新提交该任务?"
-                  ok-text="重新提交"
-                  cancel-text="取消"
-                  @confirm="doRetryDrawTask(card)"
-                >
-                  <a-button class="card-icon-button">
-                    <Icon icon="pajamas:retry" size="14" color="#4F709C" />
-                  </a-button>
-                </a-popconfirm>
-              </a-tooltip>
-              <a-tooltip v-if="card.prompt" :overlayStyle="{ maxWidth: '500px' }" trigger="click">
-                <template #title>
-                  <p v-for="(part, index) in card.prompt.split('\n\n')" :key="index">{{
-                    part.trim()
-                  }}</p>
-                </template>
-                <a-button class="card-icon-button">
-                  <Icon icon="ic:outline-info" size="14" color="#FFCC70" />
-                </a-button>
-              </a-tooltip>
-              <a-tooltip>
-                <template #title>
-                  <p
-                    style="margin: 5px; font-size: 12px; line-height: 1"
-                    v-for="(part, index) in generateTooltipText(card)"
-                    :key="index"
-                  >
-                    {{ part.trim() }}
-                  </p>
-                </template>
-                <a-button class="card-icon-button">
-                  <Icon icon="ic:baseline-add-alarm" size="14" color="#EE9322" />
-                </a-button>
-              </a-tooltip>
-              <a-tooltip title="删除">
-                <a-popconfirm
-                  :title="
-                    card.secState === 'SUBMITTED' || card.secState === 'IN_PROGRESS'
-                      ? '是否确认移除任务？注意：该状态不会退还资源！请等待任务完成或者自动超时失败退还资源！'
-                      : '是否确认移除任务？'
-                  "
-                  ok-text="确认删除"
-                  cancel-text="取消"
-                  @confirm="deleteCard(card)"
-                >
-                  <a-button class="card-icon-button">
-                    <Icon icon="ic:baseline-delete-forever" size="14" color="#FF6969" />
-                  </a-button>
-                </a-popconfirm>
-              </a-tooltip>
-            </a-button-group>
-          </div>
-
-          <div
-            v-else
-            style="display: flex; flex-direction: column; padding-right: 4px; padding-bottom: 5px"
-          >
-            <div class="card-tags">
-              <div class="custom-radio-group">
-                <a-button-group size="small" buttonStyle="solid">
-                  <!-- <a-tooltip
-                    :title="
-                      card.privacyMode === 'Y' ? '点击公开图片' : '当前公开图片，点击将关闭公开'
-                    "
-                    v-if="card.state === 'SUCCESS' && card.commandType != 'DESCRIBE'"
-                  >
-                    <a-button @click="toggleVisibility(card)" class="card-icon-button">
-                      <span v-if="card.privacyMode === 'Y'">
-                        <Icon icon="material-symbols:public-off" size="14" color="#B4B4B3" />
-                      </span>
-                      <span v-else>
-                        <Icon icon="material-symbols:public" size="14" color="#8ECDDD" />
-                      </span>
-                    </a-button>
-                  </a-tooltip> -->
-                  <a-tooltip title="任务概况">
-                    <a-button class="card-icon-button" @click="() => showTaskInfo(card)">
-                      <Icon icon="streamline-emojis:television" size="14" />
-                    </a-button>
-                  </a-tooltip>
-
-                  <!-- prompt 相关 -->
-                  <a-tooltip title="Prompt操作">
-                    <a-dropdown trigger="click">
-                      <a-button class="card-icon-button">
-                        <Icon icon="streamline-emojis:bell" size="14" color="#FFCC70" />
-                      </a-button>
-                      <template #overlay>
-                        <a-menu>
-                          <a-menu-item key="5" @click="() => goDrawing(card.prompt)"
-                            ><Icon icon="streamline-emojis:artist-palette" color="grey" />
-                            画同款</a-menu-item
-                          >
-                          <a-menu-item key="5" @click="() => copyText(card.prompt)"
-                            ><Icon icon="streamline-emojis:baseball" color="grey" />
-                            复制Prompt</a-menu-item
-                          >
-                          <a-menu-item key="4" @click="() => copyText(card.messageHash)"
-                            ><Icon icon="fluent-emoji-flat:id-button" color="grey" />
-                            复制任务ID</a-menu-item
-                          >
-                        </a-menu>
-                      </template>
-                    </a-dropdown>
-                  </a-tooltip>
-
-                  <!-- 添加到收藏 -->
-                  <a-tooltip title="添加到收藏">
-                    <a-button
-                      class="card-icon-button"
-                      @click="() => showAddCollectCategoryModel(card)"
-                    >
-                      <Icon icon="streamline-emojis:heart-with-arrow" size="14" color="#4F709C" />
-                    </a-button>
-                  </a-tooltip>
-
-                  <!-- <a-tooltip
-                    v-if="card.prompt"
-                    :overlayStyle="{ maxWidth: '500px' }"
-                    trigger="click"
-                  >
-                    <template #title>
-                      <p v-for="(part, index) in card.prompt.split('\n\n')" :key="index">{{
-                        part.trim()
-                      }}</p>
-                    </template>
-                    <a-button class="card-icon-button">
-                      <Icon icon="ic:outline-info" size="14" color="#FFCC70" />
-                    </a-button>
-                  </a-tooltip> -->
-                  <a-tooltip>
-                    <template #title>
-                      <p
-                        style="margin: 5px; font-size: 12px; line-height: 1"
-                        v-for="(part, index) in generateTooltipText(card)"
-                        :key="index"
-                      >
-                        {{ part.trim() }}
-                      </p>
-                    </template>
-                    <a-button class="card-icon-button">
-                      <Icon icon="ic:baseline-add-alarm" size="14" color="#EE9322" />
-                    </a-button>
-                  </a-tooltip>
-
-                  <a-tooltip title="删除">
-                    <!-- <a-popover trigger="click">
-                      <a-button class="card-icon-button">
-                        <Icon icon="ic:baseline-delete-forever" size="14" color="#FF6969" />
-                      </a-button>
-                      <template #title></template>
-                      <template #content>
-                        <div style="width: 300px">
-                          <a-row>
-                            <p style="width: 300px">⚠ 相关操作不可逆，请小心操作~</p>
-                          </a-row>
-                          <a-row style="justify-content: right">
-                            <a-button size="small" @click="handleCustomButton1">取消</a-button>
-                            <a-tooltip title="从全部空间移除该任务！">
-                              <a-popconfirm
-                                title="该操作不可逆，是否确认删除?"
-                                ok-text="确认删除"
-                                cancel-text="取消"
-                                @confirm="deleteCard(card)"
-                              >
-                                <a-button size="small" type="danger">删除任务</a-button>
-                              </a-popconfirm>
-                            </a-tooltip>
-                            <a-tooltip title="移除当前空间的任务！">
-                              <a-button
-                                size="small"
-                                type="primary"
-                                @click="deleteSpaceCard(card, spaceId)"
-                                >移除任务</a-button
-                              >
-                            </a-tooltip>
-                          </a-row>
-                        </div>
-                      </template>
-                    </a-popover> -->
-
-                    <a-popconfirm
-                      :title="
-                        card.secState === 'SUBMITTED' ||
-                        card.secState === 'IN_PROGRESS' ||
-                        card.secState === 'SUCCESS'
-                          ? '是否确认移除任务？注意：该状态不会退还资源！请等待任务完成或者自动超时失败退还资源！'
-                          : '是否确认移除任务？'
-                      "
-                      ok-text="确认删除"
-                      cancel-text="取消"
-                      @confirm="deleteCard(card)"
-                    >
-                      <a-button class="card-icon-button">
-                        <SvgIcon name="delete" size="14" />
-                      </a-button>
-                    </a-popconfirm>
-                  </a-tooltip>
-
-                  <a-tooltip
-                    title="下载"
-                    v-if="card.state === 'SUCCESS' && card.commandType != 'DESCRIBE'"
-                  >
-                    <a-button class="card-icon-button" @click="doDownload(card)">
-                      <Icon icon="bx:bxs-cloud-download" size="14" color="#4F709C" />
-                    </a-button>
-                  </a-tooltip>
-                  <!-- 其他设置 -->
-                  <a-dropdown trigger="click">
-                    <a-button class="card-icon-button"><SvgIcon name="menu" size="14" /></a-button>
-                    <template #overlay>
-                      <a-menu>
-                        <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)"
-                          ><Icon icon="streamline-emojis:blossom" /> 添加标签</a-menu-item
-                        >
-                        <a-menu-item key="3" @click="() => showSampleView(card)"
-                          ><Icon icon="streamline-emojis:globe-showing-europe-africa" />
-                          添加到官方案例</a-menu-item
-                        >
-                        <a-menu-item key="8" @click="() => getSeed(card.id, false)"
-                          ><Icon icon="streamline-emojis:rocket" /> 获取Seed</a-menu-item
-                        >
-                      </a-menu>
-                    </template>
-                  </a-dropdown>
-                </a-button-group>
+                </a-card>
               </div>
             </div>
-            <div class="card-date-actions">
-              <a-button-group>
-                <div>
-                  <div
-                    v-if="
-                      card.state === 'SUCCESS' &&
-                      (card.commandType === 'IMAGINE' ||
-                        card.commandType === 'BLEND' ||
-                        card.commandType === 'ZOOM' ||
-                        card.commandType === 'PAN' ||
-                        card.commandType === 'VARIATION')
-                    "
+
+            <div
+              v-if="card.state != 'SUCCESS'"
+              style="
+                display: flex;
+                position: absolute;
+                bottom: 35px;
+                flex-direction: row;
+                justify-content: center;
+                width: 100%;
+              "
+            >
+              <a-button-group size="small" buttonStyle="solid">
+                <a-tooltip title="" v-if="card.state === 'FAILED'">
+                  <a-popconfirm
+                    title="是否重新提交该任务?"
+                    ok-text="重新提交"
+                    cancel-text="取消"
+                    @confirm="doRetryDrawTask(card)"
                   >
-                    <a-dropdown>
-                      <template #overlay>
-                        <a-menu>
-                          <a-menu-item
-                            @click="handleU(card, 'U1', 'image')"
-                            key="1"
-                            v-if="card.buttonMap['U1']"
-                            ><Icon
-                              icon="fluent:scale-fill-24-regular"
-                              size="14px"
-                              style="margin: 0"
-                            />U1</a-menu-item
-                          >
-                          <a-menu-item
-                            @click="handleU(card, 'U2', 'image')"
-                            key="2"
-                            v-if="card.buttonMap['U2']"
-                            ><Icon
-                              icon="fluent:scale-fill-24-regular"
-                              size="14px"
-                              style="margin: 0"
-                            />U2</a-menu-item
-                          >
-                          <a-menu-item
-                            @click="handleU(card, 'U3', 'image')"
-                            key="3"
-                            v-if="card.buttonMap['U3']"
-                            ><Icon
-                              icon="fluent:scale-fill-24-regular"
-                              size="14px"
-                              style="margin: 0"
-                            />U3</a-menu-item
-                          >
-                          <a-menu-item
-                            @click="handleU(card, 'U4', 'image')"
-                            key="4"
-                            v-if="card.buttonMap['U4']"
-                            ><Icon
-                              icon="fluent:scale-fill-24-regular"
-                              size="14px"
-                              style="margin: 0"
-                            />U4</a-menu-item
-                          >
-                        </a-menu>
-                      </template>
-                      <a-button size="small" class="card-button">
-                        <Icon icon="fluent:scale-fill-24-regular" size="14px" style="margin: 0" />
-                        <span style="margin: 0">提升</span>
-                        <DownOutlined />
-                      </a-button>
-                    </a-dropdown>
+                    <a-button class="card-icon-button">
+                      <Icon icon="pajamas:retry" size="14" color="#4F709C" />
+                    </a-button>
+                  </a-popconfirm>
+                </a-tooltip>
+                <a-tooltip v-if="card.prompt" :overlayStyle="{ maxWidth: '500px' }" trigger="click">
+                  <template #title>
+                    <p v-for="(part, index) in card.prompt.split('\n\n')" :key="index">{{
+                      part.trim()
+                    }}</p>
+                  </template>
+                  <a-button class="card-icon-button">
+                    <Icon icon="ic:outline-info" size="14" color="#FFCC70" />
+                  </a-button>
+                </a-tooltip>
+                <a-tooltip>
+                  <template #title>
+                    <p
+                      style="margin: 5px; font-size: 12px; line-height: 1"
+                      v-for="(part, index) in generateTooltipText(card)"
+                      :key="index"
+                    >
+                      {{ part.trim() }}
+                    </p>
+                  </template>
+                  <a-button class="card-icon-button">
+                    <Icon icon="ic:baseline-add-alarm" size="14" color="#EE9322" />
+                  </a-button>
+                </a-tooltip>
+                <a-tooltip title="删除">
+                  <a-popconfirm
+                    :title="
+                      card.secState === 'SUBMITTED' || card.secState === 'IN_PROGRESS'
+                        ? '是否确认移除任务？注意：该状态不会退还资源！请等待任务完成或者自动超时失败退还资源！'
+                        : '是否确认移除任务？'
+                    "
+                    ok-text="确认删除"
+                    cancel-text="取消"
+                    @confirm="deleteCard(card)"
+                  >
+                    <a-button class="card-icon-button">
+                      <Icon icon="ic:baseline-delete-forever" size="14" color="#FF6969" />
+                    </a-button>
+                  </a-popconfirm>
+                </a-tooltip>
+              </a-button-group>
+            </div>
 
-                    <a-dropdown v-if="card.commandType != 'PAN'">
+            <div
+              v-else
+              style="display: flex; flex-direction: column; padding-right: 4px; padding-bottom: 5px"
+            >
+              <div class="card-tags">
+                <div class="custom-radio-group">
+                  <a-button-group size="small" buttonStyle="solid">
+                    <!-- <a-tooltip
+                      :title="
+                        card.privacyMode === 'Y' ? '点击公开图片' : '当前公开图片，点击将关闭公开'
+                      "
+                      v-if="card.state === 'SUCCESS' && card.commandType != 'DESCRIBE'"
+                    >
+                      <a-button @click="toggleVisibility(card)" class="card-icon-button">
+                        <span v-if="card.privacyMode === 'Y'">
+                          <Icon icon="material-symbols:public-off" size="14" color="#B4B4B3" />
+                        </span>
+                        <span v-else>
+                          <Icon icon="material-symbols:public" size="14" color="#8ECDDD" />
+                        </span>
+                      </a-button>
+                    </a-tooltip> -->
+                    <a-tooltip title="任务概况">
+                      <a-button class="card-icon-button" @click="() => showTaskInfo(card)">
+                        <Icon icon="streamline-emojis:television" size="14" />
+                      </a-button>
+                    </a-tooltip>
+
+                    <!-- prompt 相关 -->
+                    <a-tooltip title="Prompt操作">
+                      <a-dropdown trigger="click">
+                        <a-button class="card-icon-button">
+                          <Icon icon="streamline-emojis:bell" size="14" color="#FFCC70" />
+                        </a-button>
+                        <template #overlay>
+                          <a-menu>
+                            <a-menu-item key="5" @click="() => goDrawing(card.prompt)"
+                              ><Icon icon="streamline-emojis:artist-palette" color="grey" />
+                              画同款</a-menu-item
+                            >
+                            <a-menu-item key="5" @click="() => copyText(card.prompt)"
+                              ><Icon icon="streamline-emojis:baseball" color="grey" />
+                              复制Prompt</a-menu-item
+                            >
+                            <a-menu-item key="4" @click="() => copyText(card.messageHash)"
+                              ><Icon icon="fluent-emoji-flat:id-button" color="grey" />
+                              复制任务ID</a-menu-item
+                            >
+                          </a-menu>
+                        </template>
+                      </a-dropdown>
+                    </a-tooltip>
+
+                    <!-- 添加到收藏 -->
+                    <a-tooltip title="添加到收藏">
+                      <a-button
+                        class="card-icon-button"
+                        @click="() => showAddCollectCategoryModel(card)"
+                      >
+                        <Icon icon="streamline-emojis:heart-with-arrow" size="14" color="#4F709C" />
+                      </a-button>
+                    </a-tooltip>
+
+                    <!-- <a-tooltip
+                      v-if="card.prompt"
+                      :overlayStyle="{ maxWidth: '500px' }"
+                      trigger="click"
+                    >
+                      <template #title>
+                        <p v-for="(part, index) in card.prompt.split('\n\n')" :key="index">{{
+                          part.trim()
+                        }}</p>
+                      </template>
+                      <a-button class="card-icon-button">
+                        <Icon icon="ic:outline-info" size="14" color="#FFCC70" />
+                      </a-button>
+                    </a-tooltip> -->
+                    <a-tooltip>
+                      <template #title>
+                        <p
+                          style="margin: 5px; font-size: 12px; line-height: 1"
+                          v-for="(part, index) in generateTooltipText(card)"
+                          :key="index"
+                        >
+                          {{ part.trim() }}
+                        </p>
+                      </template>
+                      <a-button class="card-icon-button">
+                        <Icon icon="ic:baseline-add-alarm" size="14" color="#EE9322" />
+                      </a-button>
+                    </a-tooltip>
+
+                    <a-tooltip title="删除">
+                      <!-- <a-popover trigger="click">
+                        <a-button class="card-icon-button">
+                          <Icon icon="ic:baseline-delete-forever" size="14" color="#FF6969" />
+                        </a-button>
+                        <template #title></template>
+                        <template #content>
+                          <div style="width: 300px">
+                            <a-row>
+                              <p style="width: 300px">⚠ 相关操作不可逆，请小心操作~</p>
+                            </a-row>
+                            <a-row style="justify-content: right">
+                              <a-button size="small" @click="handleCustomButton1">取消</a-button>
+                              <a-tooltip title="从全部空间移除该任务！">
+                                <a-popconfirm
+                                  title="该操作不可逆，是否确认删除?"
+                                  ok-text="确认删除"
+                                  cancel-text="取消"
+                                  @confirm="deleteCard(card)"
+                                >
+                                  <a-button size="small" type="danger">删除任务</a-button>
+                                </a-popconfirm>
+                              </a-tooltip>
+                              <a-tooltip title="移除当前空间的任务！">
+                                <a-button
+                                  size="small"
+                                  type="primary"
+                                  @click="deleteSpaceCard(card, spaceId)"
+                                  >移除任务</a-button
+                                >
+                              </a-tooltip>
+                            </a-row>
+                          </div>
+                        </template>
+                      </a-popover> -->
+
+                      <a-popconfirm
+                        :title="
+                          card.secState === 'SUBMITTED' ||
+                          card.secState === 'IN_PROGRESS' ||
+                          card.secState === 'SUCCESS'
+                            ? '是否确认移除任务？注意：该状态不会退还资源！请等待任务完成或者自动超时失败退还资源！'
+                            : '是否确认移除任务？'
+                        "
+                        ok-text="确认删除"
+                        cancel-text="取消"
+                        @confirm="deleteCard(card)"
+                      >
+                        <a-button class="card-icon-button">
+                          <SvgIcon name="delete" size="14" />
+                        </a-button>
+                      </a-popconfirm>
+                    </a-tooltip>
+
+                    <a-tooltip
+                      title="下载"
+                      v-if="card.state === 'SUCCESS' && card.commandType != 'DESCRIBE'"
+                    >
+                      <a-button class="card-icon-button" @click="doDownload(card)">
+                        <Icon icon="bx:bxs-cloud-download" size="14" color="#4F709C" />
+                      </a-button>
+                    </a-tooltip>
+                    <!-- 其他设置 -->
+                    <a-dropdown trigger="click">
+                      <a-button class="card-icon-button"><SvgIcon name="menu" size="14" /></a-button>
                       <template #overlay>
                         <a-menu>
-                          <a-menu-item
-                            key="V1"
-                            v-if="card.buttonMap['V1']"
-                            @click="($event) => handleV(card, 'variation', 'V1')"
-                            ><Icon
-                              icon="ph:magic-wand-fill"
-                              size="14px"
-                              style="margin: 0"
-                            />V1</a-menu-item
+                          <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)"
+                            ><Icon icon="streamline-emojis:blossom" /> 添加标签</a-menu-item
                           >
-                          <a-menu-item
-                            key="V2"
-                            v-if="card.buttonMap['V2']"
-                            @click="($event) => handleV(card, 'variation', 'V2')"
-                            ><Icon
-                              icon="ph:magic-wand-fill"
-                              size="14px"
-                              style="margin: 0"
-                            />V2</a-menu-item
+                          <a-menu-item key="3" @click="() => showSampleView(card)"
+                            ><Icon icon="streamline-emojis:globe-showing-europe-africa" />
+                            添加到官方案例</a-menu-item
                           >
-                          <a-menu-item
-                            key="V3"
-                            v-if="card.buttonMap['V3']"
-                            @click="($event) => handleV(card, 'variation', 'V3')"
-                            ><Icon
-                              icon="ph:magic-wand-fill"
-                              size="14px"
-                              style="margin: 0"
-                            />V3</a-menu-item
+                          <a-menu-item key="8" @click="() => getSeed(card.id, false)"
+                            ><Icon icon="streamline-emojis:rocket" /> 获取Seed</a-menu-item
                           >
-                          <a-menu-item
-                            key="V4"
-                            v-if="card.buttonMap['V4']"
-                            @click="($event) => handleV(card, 'variation', 'V4')"
-                            ><Icon
-                              icon="ph:magic-wand-fill"
-                              size="14px"
-                              style="margin: 0"
-                            />V4</a-menu-item
-                          >
-                          <!-- <a-menu-item
-                            key="🔄"
-                            v-if="card.buttonMap['🔄']"
-                            @click="($event) => handleV(card, 'reroll', '🔄')"
-                            >🔄</a-menu-item
-                          > -->
                         </a-menu>
                       </template>
-                      <a-button size="small" class="card-button">
-                        <Icon icon="ph:magic-wand-fill" size="14px" style="margin: 0" />
-                        <span style="margin: 0">变化</span>
-                        <DownOutlined />
-                      </a-button>
                     </a-dropdown>
-                  </div>
-                  <div v-if="card.state === 'SUCCESS' && card.commandType === 'UPSCALE'">
-                    <a-dropdown
+                  </a-button-group>
+                </div>
+              </div>
+              <div class="card-date-actions">
+                <a-button-group>
+                  <div>
+                    <div
                       v-if="
-                        card.buttonMap['⬆️'] ||
-                        card.buttonMap['⬅️'] ||
-                        card.buttonMap['⬇️'] ||
-                        card.buttonMap['➡️']
+                        card.state === 'SUCCESS' &&
+                        (card.commandType === 'IMAGINE' ||
+                          card.commandType === 'BLEND' ||
+                          card.commandType === 'ZOOM' ||
+                          card.commandType === 'PAN' ||
+                          card.commandType === 'VARIATION')
                       "
                     >
-                      <template #overlay>
-                        <a-menu @click="($event) => handlePan(card, 'PAN', $event)">
-                          <a-menu-item key="up" v-if="card.buttonMap['⬆️']"
-                            ><Icon icon="mdi:pan-up" size="14px" style="margin: 0" />上</a-menu-item
-                          >
-                          <a-menu-item key="down" v-if="card.buttonMap['⬇️']"
-                            ><Icon
-                              icon="mdi:pan-down"
-                              size="14px"
-                              style="margin: 0"
-                            />下</a-menu-item
-                          >
-                          <a-menu-item key="left" v-if="card.buttonMap['⬅️']"
-                            ><Icon
-                              icon="mdi:pan-left"
-                              size="14px"
-                              style="margin: 0"
-                            />左</a-menu-item
-                          >
-                          <a-menu-item key="right" v-if="card.buttonMap['➡️']"
-                            ><Icon
-                              icon="mdi:pan-right"
-                              size="14px"
-                              style="margin: 0"
-                            />右</a-menu-item
-                          >
-                        </a-menu>
-                      </template>
-                      <a-button size="small" class="card-button">
-                        <Icon icon="mdi:pan" size="14px" style="margin: 0" />
-                        <span style="margin: 0">平移</span>
-                        <DownOutlined />
-                      </a-button>
-                    </a-dropdown>
-                    <a-dropdown v-if="card.buttonMap['Zoom Out 1.5x']">
-                      <template #overlay>
-                        <a-menu @click="($event) => handleZoom(card, 'ZOOM', $event)">
-                          <a-menu-item key="Zoom Out 1.5x" v-if="card.buttonMap['Zoom Out 1.5x']"
-                            ><Icon
-                              icon="fluent:zoom-fit-16-regular"
-                              size="14px"
-                              style="margin: 0"
-                            />1.5倍</a-menu-item
-                          >
-                          <a-menu-item key="Zoom Out 2x" v-if="card.buttonMap['Zoom Out 2x']"
-                            ><Icon
-                              icon="fluent:zoom-fit-16-regular"
-                              size="14px"
-                              style="margin: 0"
-                            />2 倍</a-menu-item
-                          >
-                          <a-menu-item key="Custom Zoom" v-if="card.buttonMap['Custom Zoom']"
-                            ><Icon
-                              icon="material-symbols:pinch-zoom-out-outline-rounded"
-                              size="14px"
-                              style="margin: 0"
-                            />自定义</a-menu-item
-                          >
-                          <a-menu-item key="Make Square" v-if="card.buttonMap['Make Square']"
-                            ><Icon
-                              icon="ph:square"
-                              size="14px"
-                              style="margin: 0"
-                            />转成1:1</a-menu-item
-                          >
-                        </a-menu>
-                      </template>
-                      <a-button size="small" class="card-button">
-                        <Icon icon="fluent:zoom-fit-16-regular" size="14px" style="margin: 0" />
-                        <span style="margin: 0">缩放</span>
-                        <DownOutlined />
-                      </a-button>
-                    </a-dropdown>
-
-                    <a-dropdown
-                      v-if="
-                        card.buttonMap['Vary (Strong)'] ||
-                        card.buttonMap['Vary (Subtle)'] ||
-                        card.buttonMap['Upscale (2x)'] ||
-                        card.buttonMap['Upscale (4x)'] ||
-                        card.buttonMap['Redo Upscale (Subtle)'] ||
-                        card.buttonMap['Redo Upscale (Creative)'] ||
-                        card.buttonMap['Upscale (Subtle)'] ||
-                        card.buttonMap['Upscale (Creative)']
-                      "
-                    >
-                      <template #overlay>
-                        <a-menu>
-                          <a-menu-item
-                            key="Vary (Strong)"
-                            v-if="card.buttonMap['Vary (Strong)']"
-                            @click="($event) => handleV(card, 'variation', 'Vary (Strong)')"
-                            ><Icon
-                              icon="ph:magic-wand-fill"
-                              size="14px"
-                              style="margin: 0"
-                            />强(Strong)</a-menu-item
-                          >
-                          <a-menu-item
-                            key="Vary (Subtle)"
-                            v-if="card.buttonMap['Vary (Subtle)']"
-                            @click="($event) => handleV(card, 'variation', 'Vary (Subtle)')"
-                            ><Icon
-                              icon="ph:magic-wand-fill"
-                              size="14px"
-                              style="margin: 0"
-                            />微(Subtle)</a-menu-item
-                          >
-                          <a-menu-item
-                            key="Vary (Region)"
-                            v-if="remix.enable_flag && card.buttonMap['Vary (Region)']"
-                            @click="($event) => openVaryRegion(card, 'variation', 'Vary (Region)')"
-                            ><Icon
-                              icon="pepicons-pencil:paint-pallet"
-                              size="14px"
-                              style="margin: 0"
-                            />局部重绘</a-menu-item
-                          >
-                          <a-menu-item
-                            key="Upscale (2x)"
-                            v-if="card.buttonMap['Upscale (2x)']"
-                            @click="($event) => handleU(card, 'Upscale (2x)', 'upscale2')"
-                            ><Icon
-                              icon="ph:caret-up-bold"
-                              size="14px"
-                              style="margin: 0"
-                            />2倍放大</a-menu-item
-                          >
-                          <a-menu-item
-                            key="Upscale (4x)"
-                            v-if="card.buttonMap['Upscale (4x)']"
-                            @click="($event) => handleU(card, 'Upscale (4x)', 'upscale4')"
-                            ><Icon
-                              icon="ph:caret-double-up-bold"
-                              size="14px"
-                              style="margin: 0"
-                            />4倍放大</a-menu-item
-                          >
-                          <a-menu-item
-                            key="Upscale (Creative)"
-                            v-if="card.buttonMap['Upscale (Creative)']"
-                            @click="($event) => handleU(card, 'Upscale (Creative)', 'creative')"
-                            ><Icon
-                              icon="fluent:scale-fill-24-regular"
-                              size="14px"
-                              style="margin: 0"
-                            />创意 (Creative)
-                          </a-menu-item>
-                          <a-menu-item
-                            key="Upscale (Subtle)"
-                            v-if="card.buttonMap['Upscale (Subtle)']"
-                            @click="($event) => handleU(card, 'Upscale (Subtle)', 'subtle')"
-                            ><Icon
-                              icon="fluent:scale-fill-24-regular"
-                              size="14px"
-                              style="margin: 0"
-                            />细致 (Subtle)
-                          </a-menu-item>
-
-                          <a-menu-item
-                            key="Redo Upscale (Creative)"
-                            v-if="card.buttonMap['Redo Upscale (Creative)']"
-                            @click="
-                              ($event) => handleU(card, 'Redo Upscale (Creative)', 'creative')
-                            "
-                            ><Icon
-                              icon="fluent:scale-fill-24-regular"
-                              size="14px"
-                              style="margin: 0"
-                            />
-                            重做-创意 (Creative)
-                          </a-menu-item>
-                          <a-menu-item
-                            key="Redo Upscale (Subtle)"
-                            v-if="card.buttonMap['Redo Upscale (Subtle)']"
-                            @click="($event) => handleU(card, 'Redo Upscale (Subtle)', 'subtle')"
-                            ><Icon
-                              icon="fluent:scale-fill-24-regular"
-                              size="14px"
-                              style="margin: 0"
-                            />重做-细致 (Subtle)
-                          </a-menu-item>
-                        </a-menu>
-                      </template>
-                      <a-button size="small" class="card-button">
-                        <Icon icon="ph:magic-wand-fill" size="14px" style="margin: 0" />
-                        <span style="margin: 0">变化</span>
-                        <DownOutlined />
-                      </a-button>
-                    </a-dropdown>
-                    <a-dropdown
-                      v-if="
-                        card.buttonMap['Redo Upscale (4x)'] || card.buttonMap['Redo Upscale (2x)']
-                      "
-                    >
-                      <template #overlay>
-                        <a-menu>
-                          <a-menu-item
-                            key="Redo Upscale (2x)"
-                            v-if="card.buttonMap['Redo Upscale (2x)']"
-                            @click="($event) => handleU(card, 'Redo Upscale (2x)', 'upscale2')"
-                            ><Icon
-                              icon="ph:caret-up-bold"
-                              size="14px"
-                              style="margin: 0"
-                            />重做-2倍</a-menu-item
-                          >
-                          <a-menu-item
-                            key="Redo Upscale (4x)"
-                            v-if="card.buttonMap['Redo Upscale (4x)']"
-                            @click="($event) => handleU(card, 'Redo Upscale (4x)', 'upscale4')"
-                            ><Icon icon="ph:caret-double-up-bold" size="14px" style="margin: 0" />
-                            重做-4倍</a-menu-item
-                          >
-                        </a-menu>
-                      </template>
-                      <a-button size="small" class="card-button">
-                        <Icon icon="fluent:scale-fill-24-regular" size="14px" style="margin: 0" />
-                        <span style="margin: 0">提升</span>
-                        <DownOutlined />
-                      </a-button>
-                    </a-dropdown>
-                  </div>
-                  <div v-if="card.state === 'SUCCESS' && card.commandType === 'DESCRIBE'">
-                    <a-row>
                       <a-dropdown>
                         <template #overlay>
-                          <a-menu @click="($event) => handleDraw(card, $event)">
-                            <a-menu-item key="0"
+                          <a-menu>
+                            <a-menu-item
+                              @click="handleU(card, 'U1', 'image')"
+                              key="1"
+                              v-if="card.buttonMap['U1']"
                               ><Icon
-                                icon="tabler:square-number-1"
+                                icon="fluent:scale-fill-24-regular"
                                 size="14px"
                                 style="margin: 0"
-                              />Prompt</a-menu-item
+                              />U1</a-menu-item
                             >
-                            <a-menu-item key="1"
-                              ><Icon icon="tabler:square-number-2" size="14px" style="margin: 0" />
-                              Prompt</a-menu-item
+                            <a-menu-item
+                              @click="handleU(card, 'U2', 'image')"
+                              key="2"
+                              v-if="card.buttonMap['U2']"
+                              ><Icon
+                                icon="fluent:scale-fill-24-regular"
+                                size="14px"
+                                style="margin: 0"
+                              />U2</a-menu-item
                             >
-                            <a-menu-item key="2"
-                              ><Icon icon="tabler:square-number-3" size="14px" style="margin: 0" />
-                              Prompt</a-menu-item
+                            <a-menu-item
+                              @click="handleU(card, 'U3', 'image')"
+                              key="3"
+                              v-if="card.buttonMap['U3']"
+                              ><Icon
+                                icon="fluent:scale-fill-24-regular"
+                                size="14px"
+                                style="margin: 0"
+                              />U3</a-menu-item
                             >
-                            <a-menu-item key="3"
-                              ><Icon icon="tabler:square-number-4" size="14px" style="margin: 0" />
-                              Prompt</a-menu-item
+                            <a-menu-item
+                              @click="handleU(card, 'U4', 'image')"
+                              key="4"
+                              v-if="card.buttonMap['U4']"
+                              ><Icon
+                                icon="fluent:scale-fill-24-regular"
+                                size="14px"
+                                style="margin: 0"
+                              />U4</a-menu-item
                             >
-                            <a-menu-item key="4">全部 Prompt</a-menu-item>
                           </a-menu>
                         </template>
                         <a-button size="small" class="card-button">
-                          <Icon icon="fluent:slide-text-24-regular" size="14px" style="margin: 0" />
-                          <span style="margin: 0">提示词</span>
+                          <Icon icon="fluent:scale-fill-24-regular" size="14px" style="margin: 0" />
+                          <span style="margin: 0">提升</span>
+                          <DownOutlined />
                         </a-button>
                       </a-dropdown>
-                      <a-radio
-                        class="check"
-                        v-if="needShow(card)"
-                        style="margin-left: 5px"
-                        v-model:value="describeInfo.autoReferImage"
-                        >垫图</a-radio
+
+                      <a-dropdown v-if="card.commandType != 'PAN'">
+                        <template #overlay>
+                          <a-menu>
+                            <a-menu-item
+                              key="V1"
+                              v-if="card.buttonMap['V1']"
+                              @click="($event) => handleV(card, 'variation', 'V1')"
+                              ><Icon
+                                icon="ph:magic-wand-fill"
+                                size="14px"
+                                style="margin: 0"
+                              />V1</a-menu-item
+                            >
+                            <a-menu-item
+                              key="V2"
+                              v-if="card.buttonMap['V2']"
+                              @click="($event) => handleV(card, 'variation', 'V2')"
+                              ><Icon
+                                icon="ph:magic-wand-fill"
+                                size="14px"
+                                style="margin: 0"
+                              />V2</a-menu-item
+                            >
+                            <a-menu-item
+                              key="V3"
+                              v-if="card.buttonMap['V3']"
+                              @click="($event) => handleV(card, 'variation', 'V3')"
+                              ><Icon
+                                icon="ph:magic-wand-fill"
+                                size="14px"
+                                style="margin: 0"
+                              />V3</a-menu-item
+                            >
+                            <a-menu-item
+                              key="V4"
+                              v-if="card.buttonMap['V4']"
+                              @click="($event) => handleV(card, 'variation', 'V4')"
+                              ><Icon
+                                icon="ph:magic-wand-fill"
+                                size="14px"
+                                style="margin: 0"
+                              />V4</a-menu-item
+                            >
+                            <!-- <a-menu-item
+                              key="🔄"
+                              v-if="card.buttonMap['🔄']"
+                              @click="($event) => handleV(card, 'reroll', '🔄')"
+                              >🔄</a-menu-item
+                            > -->
+                          </a-menu>
+                        </template>
+                        <a-button size="small" class="card-button">
+                          <Icon icon="ph:magic-wand-fill" size="14px" style="margin: 0" />
+                          <span style="margin: 0">变化</span>
+                          <DownOutlined />
+                        </a-button>
+                      </a-dropdown>
+                    </div>
+                    <div v-if="card.state === 'SUCCESS' && card.commandType === 'UPSCALE'">
+                      <a-dropdown
+                        v-if="
+                          card.buttonMap['⬆️'] ||
+                          card.buttonMap['⬅️'] ||
+                          card.buttonMap['⬇️'] ||
+                          card.buttonMap['➡️']
+                        "
                       >
-                    </a-row>
+                        <template #overlay>
+                          <a-menu @click="($event) => handlePan(card, 'PAN', $event)">
+                            <a-menu-item key="up" v-if="card.buttonMap['⬆️']"
+                              ><Icon icon="mdi:pan-up" size="14px" style="margin: 0" />上</a-menu-item
+                            >
+                            <a-menu-item key="down" v-if="card.buttonMap['⬇️']"
+                              ><Icon
+                                icon="mdi:pan-down"
+                                size="14px"
+                                style="margin: 0"
+                              />下</a-menu-item
+                            >
+                            <a-menu-item key="left" v-if="card.buttonMap['⬅️']"
+                              ><Icon
+                                icon="mdi:pan-left"
+                                size="14px"
+                                style="margin: 0"
+                              />左</a-menu-item
+                            >
+                            <a-menu-item key="right" v-if="card.buttonMap['➡️']"
+                              ><Icon
+                                icon="mdi:pan-right"
+                                size="14px"
+                                style="margin: 0"
+                              />右</a-menu-item
+                            >
+                          </a-menu>
+                        </template>
+                        <a-button size="small" class="card-button">
+                          <Icon icon="mdi:pan" size="14px" style="margin: 0" />
+                          <span style="margin: 0">平移</span>
+                          <DownOutlined />
+                        </a-button>
+                      </a-dropdown>
+                      <a-dropdown v-if="card.buttonMap['Zoom Out 1.5x']">
+                        <template #overlay>
+                          <a-menu @click="($event) => handleZoom(card, 'ZOOM', $event)">
+                            <a-menu-item key="Zoom Out 1.5x" v-if="card.buttonMap['Zoom Out 1.5x']"
+                              ><Icon
+                                icon="fluent:zoom-fit-16-regular"
+                                size="14px"
+                                style="margin: 0"
+                              />1.5倍</a-menu-item
+                            >
+                            <a-menu-item key="Zoom Out 2x" v-if="card.buttonMap['Zoom Out 2x']"
+                              ><Icon
+                                icon="fluent:zoom-fit-16-regular"
+                                size="14px"
+                                style="margin: 0"
+                              />2 倍</a-menu-item
+                            >
+                            <a-menu-item key="Custom Zoom" v-if="card.buttonMap['Custom Zoom']"
+                              ><Icon
+                                icon="material-symbols:pinch-zoom-out-outline-rounded"
+                                size="14px"
+                                style="margin: 0"
+                              />自定义</a-menu-item
+                            >
+                            <a-menu-item key="Make Square" v-if="card.buttonMap['Make Square']"
+                              ><Icon
+                                icon="ph:square"
+                                size="14px"
+                                style="margin: 0"
+                              />转成1:1</a-menu-item
+                            >
+                          </a-menu>
+                        </template>
+                        <a-button size="small" class="card-button">
+                          <Icon icon="fluent:zoom-fit-16-regular" size="14px" style="margin: 0" />
+                          <span style="margin: 0">缩放</span>
+                          <DownOutlined />
+                        </a-button>
+                      </a-dropdown>
+
+                      <a-dropdown
+                        v-if="
+                          card.buttonMap['Vary (Strong)'] ||
+                          card.buttonMap['Vary (Subtle)'] ||
+                          card.buttonMap['Upscale (2x)'] ||
+                          card.buttonMap['Upscale (4x)'] ||
+                          card.buttonMap['Redo Upscale (Subtle)'] ||
+                          card.buttonMap['Redo Upscale (Creative)'] ||
+                          card.buttonMap['Upscale (Subtle)'] ||
+                          card.buttonMap['Upscale (Creative)']
+                        "
+                      >
+                        <template #overlay>
+                          <a-menu>
+                            <a-menu-item
+                              key="Vary (Strong)"
+                              v-if="card.buttonMap['Vary (Strong)']"
+                              @click="($event) => handleV(card, 'variation', 'Vary (Strong)')"
+                              ><Icon
+                                icon="ph:magic-wand-fill"
+                                size="14px"
+                                style="margin: 0"
+                              />强(Strong)</a-menu-item
+                            >
+                            <a-menu-item
+                              key="Vary (Subtle)"
+                              v-if="card.buttonMap['Vary (Subtle)']"
+                              @click="($event) => handleV(card, 'variation', 'Vary (Subtle)')"
+                              ><Icon
+                                icon="ph:magic-wand-fill"
+                                size="14px"
+                                style="margin: 0"
+                              />微(Subtle)</a-menu-item
+                            >
+                            <a-menu-item
+                              key="Vary (Region)"
+                              v-if="remix.enable_flag && card.buttonMap['Vary (Region)']"
+                              @click="($event) => openVaryRegion(card, 'variation', 'Vary (Region)')"
+                              ><Icon
+                                icon="pepicons-pencil:paint-pallet"
+                                size="14px"
+                                style="margin: 0"
+                              />局部重绘</a-menu-item
+                            >
+                            <a-menu-item
+                              key="Upscale (2x)"
+                              v-if="card.buttonMap['Upscale (2x)']"
+                              @click="($event) => handleU(card, 'Upscale (2x)', 'upscale2')"
+                              ><Icon
+                                icon="ph:caret-up-bold"
+                                size="14px"
+                                style="margin: 0"
+                              />2倍放大</a-menu-item
+                            >
+                            <a-menu-item
+                              key="Upscale (4x)"
+                              v-if="card.buttonMap['Upscale (4x)']"
+                              @click="($event) => handleU(card, 'Upscale (4x)', 'upscale4')"
+                              ><Icon
+                                icon="ph:caret-double-up-bold"
+                                size="14px"
+                                style="margin: 0"
+                              />4倍放大</a-menu-item
+                            >
+                            <a-menu-item
+                              key="Upscale (Creative)"
+                              v-if="card.buttonMap['Upscale (Creative)']"
+                              @click="($event) => handleU(card, 'Upscale (Creative)', 'creative')"
+                              ><Icon
+                                icon="fluent:scale-fill-24-regular"
+                                size="14px"
+                                style="margin: 0"
+                              />创意 (Creative)
+                            </a-menu-item>
+                            <a-menu-item
+                              key="Upscale (Subtle)"
+                              v-if="card.buttonMap['Upscale (Subtle)']"
+                              @click="($event) => handleU(card, 'Upscale (Subtle)', 'subtle')"
+                              ><Icon
+                                icon="fluent:scale-fill-24-regular"
+                                size="14px"
+                                style="margin: 0"
+                              />细致 (Subtle)
+                            </a-menu-item>
+
+                            <a-menu-item
+                              key="Redo Upscale (Creative)"
+                              v-if="card.buttonMap['Redo Upscale (Creative)']"
+                              @click="
+                                ($event) => handleU(card, 'Redo Upscale (Creative)', 'creative')
+                              "
+                              ><Icon
+                                icon="fluent:scale-fill-24-regular"
+                                size="14px"
+                                style="margin: 0"
+                              />
+                              重做-创意 (Creative)
+                            </a-menu-item>
+                            <a-menu-item
+                              key="Redo Upscale (Subtle)"
+                              v-if="card.buttonMap['Redo Upscale (Subtle)']"
+                              @click="($event) => handleU(card, 'Redo Upscale (Subtle)', 'subtle')"
+                              ><Icon
+                                icon="fluent:scale-fill-24-regular"
+                                size="14px"
+                                style="margin: 0"
+                              />重做-细致 (Subtle)
+                            </a-menu-item>
+                          </a-menu>
+                        </template>
+                        <a-button size="small" class="card-button">
+                          <Icon icon="ph:magic-wand-fill" size="14px" style="margin: 0" />
+                          <span style="margin: 0">变化</span>
+                          <DownOutlined />
+                        </a-button>
+                      </a-dropdown>
+                      <a-dropdown
+                        v-if="
+                          card.buttonMap['Redo Upscale (4x)'] || card.buttonMap['Redo Upscale (2x)']
+                        "
+                      >
+                        <template #overlay>
+                          <a-menu>
+                            <a-menu-item
+                              key="Redo Upscale (2x)"
+                              v-if="card.buttonMap['Redo Upscale (2x)']"
+                              @click="($event) => handleU(card, 'Redo Upscale (2x)', 'upscale2')"
+                              ><Icon
+                                icon="ph:caret-up-bold"
+                                size="14px"
+                                style="margin: 0"
+                              />重做-2倍</a-menu-item
+                            >
+                            <a-menu-item
+                              key="Redo Upscale (4x)"
+                              v-if="card.buttonMap['Redo Upscale (4x)']"
+                              @click="($event) => handleU(card, 'Redo Upscale (4x)', 'upscale4')"
+                              ><Icon icon="ph:caret-double-up-bold" size="14px" style="margin: 0" />
+                              重做-4倍</a-menu-item
+                            >
+                          </a-menu>
+                        </template>
+                        <a-button size="small" class="card-button">
+                          <Icon icon="fluent:scale-fill-24-regular" size="14px" style="margin: 0" />
+                          <span style="margin: 0">提升</span>
+                          <DownOutlined />
+                        </a-button>
+                      </a-dropdown>
+                    </div>
+                    <div v-if="card.state === 'SUCCESS' && card.commandType === 'DESCRIBE'">
+                      <a-row>
+                        <a-dropdown>
+                          <template #overlay>
+                            <a-menu @click="($event) => handleDraw(card, $event)">
+                              <a-menu-item key="0"
+                                ><Icon
+                                  icon="tabler:square-number-1"
+                                  size="14px"
+                                  style="margin: 0"
+                                />Prompt</a-menu-item
+                              >
+                              <a-menu-item key="1"
+                                ><Icon icon="tabler:square-number-2" size="14px" style="margin: 0" />
+                                Prompt</a-menu-item
+                              >
+                              <a-menu-item key="2"
+                                ><Icon icon="tabler:square-number-3" size="14px" style="margin: 0" />
+                                Prompt</a-menu-item
+                              >
+                              <a-menu-item key="3"
+                                ><Icon icon="tabler:square-number-4" size="14px" style="margin: 0" />
+                                Prompt</a-menu-item
+                              >
+                              <a-menu-item key="4">全部 Prompt</a-menu-item>
+                            </a-menu>
+                          </template>
+                          <a-button size="small" class="card-button">
+                            <Icon icon="fluent:slide-text-24-regular" size="14px" style="margin: 0" />
+                            <span style="margin: 0">提示词</span>
+                          </a-button>
+                        </a-dropdown>
+                        <a-radio
+                          class="check"
+                          v-if="needShow(card)"
+                          style="margin-left: 5px"
+                          v-model:value="describeInfo.autoReferImage"
+                          >垫图</a-radio
+                        >
+                      </a-row>
+                    </div>
                   </div>
-                </div>
-              </a-button-group>
+                </a-button-group>
+              </div>
             </div>
-          </div>
-          <!-- 更多卡片内容 -->
-        </a-card>
-      </div>
-      <!-- 灯箱-->
-      <vue-easy-lightbox
-        :visible="lightBoxOptions.visibleRef"
-        :imgs="lightBoxOptions.imgsRef"
-        :index="lightBoxOptions.indexRef"
-        @hide="onHide"
-        @on-next-click="onNextClick"
-        @on-prev-click="onPrevClick"
-      >
-        <template #prev-btn="{ prev }">
-          <div
-            v-if="lightBoxOptions.imgsRef.length > 1"
-            @click="prev"
-            role="button"
-            aria-label="previous image button"
-            class="btn__prev disable"
-            ><svg class="vel-icon icon" aria-hidden="true"><use xlink:href="#icon-prev" /></svg
-          ></div>
-        </template>
+            <!-- 更多卡片内容 -->
+          </a-card>
+        </div>
+        <!-- 灯箱-->
+        <vue-easy-lightbox
+          :visible="lightBoxOptions.visibleRef"
+          :imgs="lightBoxOptions.imgsRef"
+          :index="lightBoxOptions.indexRef"
+          @hide="onHide"
+          @on-next-click="onNextClick"
+          @on-prev-click="onPrevClick"
+        >
+          <template #prev-btn="{ prev }">
+            <div
+              v-if="lightBoxOptions.imgsRef.length > 1"
+              @click="prev"
+              role="button"
+              aria-label="previous image button"
+              class="btn__prev disable"
+              ><svg class="vel-icon icon" aria-hidden="true"><use xlink:href="#icon-prev" /></svg
+            ></div>
+          </template>
 
-        <template #next-btn="{ next }">
-          <div
-            v-if="lightBoxOptions.imgsRef.length > 1"
-            @click="next"
-            role="button"
-            aria-label="next image button"
-            class="btn__next"
-            ><svg class="vel-icon icon" aria-hidden="true"><use xlink:href="#icon-next" /></svg
-          ></div>
-        </template>
+          <template #next-btn="{ next }">
+            <div
+              v-if="lightBoxOptions.imgsRef.length > 1"
+              @click="next"
+              role="button"
+              aria-label="next image button"
+              class="btn__next"
+              ><svg class="vel-icon icon" aria-hidden="true"><use xlink:href="#icon-next" /></svg
+            ></div>
+          </template>
 
-        <template #close-btn="{ close }">
-          <div
-            @click="close"
-            role="button"
-            aria-label="close image preview button"
-            class="btn__close"
-            ><svg class="vel-icon icon" aria-hidden="true"><use xlink:href="#icon-close" /></svg
-          ></div>
-        </template>
-        <!-- 相关操作按钮 -->
-        <template #toolbar="{ toolbarMethods }">
-          <div class="vel-toolbar" v-if="lightBoxOptions.currentItem.state === 'SUCCESS'">
+          <template #close-btn="{ close }">
             <div
-              @click="addDrawCollect(lightBoxOptions.currentItem)"
+              @click="close"
               role="button"
-              aria-label="zoom in button"
-              class="toolbar-btn toolbar-btn__zoomin"
-              :color="lightBoxOptions.currentItem.collectFlag === 'Y' ? 'red' : 'default'"
-            >
-              <Icon
-                class="vel-icon icon"
-                v-if="lightBoxOptions.currentItem.collectFlag === 'N'"
-                icon="material-symbols:heart-plus-outline"
-                size="20"
-              />
-              <Icon
-                class="vel-icon icon"
-                v-else
-                icon="material-symbols:heart-plus"
-                color="#c85762"
-                size="20"
-              />
-            </div>
-            <div
-              @click="doDownload(lightBoxOptions.currentItem)"
-              role="button"
-              aria-label="zoom in button"
-              class="toolbar-btn toolbar-btn__zoomin"
-            >
-              <a-tooltip
-                title="下载"
-                v-if="
-                  lightBoxOptions.currentItem.state === 'SUCCESS' &&
-                  lightBoxOptions.currentItem.commandType != 'DESCRIBE'
-                "
-              >
-                <Icon
-                  icon="bx:bxs-cloud-download"
-                  class="vel-icon icon"
-                  aria-hidden="true"
-                  size="20"
-                />
-              </a-tooltip>
-            </div>
-            <div
-              @click="splitAndDownloadImage(lightBoxOptions.currentItem)"
-              role="button"
-              aria-label="zoom in button"
-              class="toolbar-btn toolbar-btn__zoomin"
-            >
-              <a-tooltip
-                title="分割下载"
-                v-if="
-                  lightBoxOptions.currentItem.state === 'SUCCESS' &&
-                  lightBoxOptions.currentItem.commandType != 'DESCRIBE'
-                "
-              >
-                <Icon
-                  icon="ri:scissors-cut-fill"
-                  class="vel-icon icon"
-                  aria-hidden="true"
-                  size="20"
-                />
-              </a-tooltip>
-            </div>
-
-            <div
-              @click="copyText(lightBoxOptions.currentItem.prompt)"
-              role="button"
-              aria-label="zoom in button"
-              class="toolbar-btn toolbar-btn__zoomin"
-            >
-              <a-tooltip
-                title="复制prompt"
-                v-if="
-                  lightBoxOptions.currentItem.state === 'SUCCESS' &&
-                  lightBoxOptions.currentItem.commandType != 'DESCRIBE'
-                "
-              >
-                <Icon
-                  icon="material-symbols:file-copy-rounded"
-                  class="vel-icon icon"
-                  aria-hidden="true"
-                  size="18"
-                />
-              </a-tooltip>
-            </div>
-            <div
-              @click="handleU(lightBoxOptions.currentItem, 'U1', 'image')"
-              role="button"
-              aria-label="zoom out button"
-              class="toolbar-btn toolbar-btn__zoomout"
-              v-if="lightBoxOptions.currentItem.buttonMap['U1']"
-            >
-              <SearchOutlined class="vel-icon icon" aria-hidden="true" />U1
-            </div>
-            <div
-              @click="handleU(lightBoxOptions.currentItem, 'U2', 'image')"
-              role="button"
-              aria-label="zoom out button"
-              class="toolbar-btn toolbar-btn__zoomout"
-              v-if="lightBoxOptions.currentItem.buttonMap['U2']"
-            >
-              <SearchOutlined class="vel-icon icon" aria-hidden="true" />U2
-            </div>
-            <div
-              @click="handleU(lightBoxOptions.currentItem, 'U3', 'image')"
-              role="button"
-              aria-label="zoom out button"
-              class="toolbar-btn toolbar-btn__zoomout"
-              v-if="lightBoxOptions.currentItem.buttonMap['U3']"
-            >
-              <SearchOutlined class="vel-icon icon" aria-hidden="true" />U3
-            </div>
-            <div
-              @click="handleU(lightBoxOptions.currentItem, 'U4', 'image')"
-              role="button"
-              aria-label="zoom out button"
-              class="toolbar-btn toolbar-btn__zoomout"
-              v-if="lightBoxOptions.currentItem.buttonMap['U4']"
-            >
-              <SearchOutlined class="vel-icon icon" aria-hidden="true" />U4
-            </div>
-            <!-- <div
-              @click="
-                handleV(
-                  lightBoxOptions.currentItem,
-                  'variation',
-                  lightBoxOptions.currentItem.buttonMap['V1'].id,
-                )
-              "
-              role="button"
-              aria-label="resize image button"
-              class="toolbar-btn toolbar-btn__resize"
-            >
-              <span class="vel-icon icon"> V1 </span> </div
-            > -->
-          </div>
-
-          <!-- 顶部居中 -->
-          <div class="opt-top-center">
-            <div class="vel-toolbar">
+              aria-label="close image preview button"
+              class="btn__close"
+              ><svg class="vel-icon icon" aria-hidden="true"><use xlink:href="#icon-close" /></svg
+            ></div>
+          </template>
+          <!-- 相关操作按钮 -->
+          <template #toolbar="{ toolbarMethods }">
+            <div class="vel-toolbar" v-if="lightBoxOptions.currentItem.state === 'SUCCESS'">
               <div
-                @click="toolbarMethods.zoomIn"
+                @click="addDrawCollect(lightBoxOptions.currentItem)"
                 role="button"
                 aria-label="zoom in button"
                 class="toolbar-btn toolbar-btn__zoomin"
-                ><svg class="vel-icon icon" aria-hidden="true">
-                  <use xlink:href="#icon-zoomin" /></svg></div
-              ><div
-                @click="toolbarMethods.zoomOut"
+                :color="lightBoxOptions.currentItem.collectFlag === 'Y' ? 'red' : 'default'"
+              >
+                <Icon
+                  class="vel-icon icon"
+                  v-if="lightBoxOptions.currentItem.collectFlag === 'N'"
+                  icon="material-symbols:heart-plus-outline"
+                  size="20"
+                />
+                <Icon
+                  class="vel-icon icon"
+                  v-else
+                  icon="material-symbols:heart-plus"
+                  color="#c85762"
+                  size="20"
+                />
+              </div>
+              <div
+                @click="doDownload(lightBoxOptions.currentItem)"
+                role="button"
+                aria-label="zoom in button"
+                class="toolbar-btn toolbar-btn__zoomin"
+              >
+                <a-tooltip
+                  title="下载"
+                  v-if="
+                    lightBoxOptions.currentItem.state === 'SUCCESS' &&
+                    lightBoxOptions.currentItem.commandType != 'DESCRIBE'
+                  "
+                >
+                  <Icon
+                    icon="bx:bxs-cloud-download"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                    size="20"
+                  />
+                </a-tooltip>
+              </div>
+              <div
+                @click="splitAndDownloadImage(lightBoxOptions.currentItem)"
+                role="button"
+                aria-label="zoom in button"
+                class="toolbar-btn toolbar-btn__zoomin"
+              >
+                <a-tooltip
+                  title="分割下载"
+                  v-if="
+                    lightBoxOptions.currentItem.state === 'SUCCESS' &&
+                    lightBoxOptions.currentItem.commandType != 'DESCRIBE'
+                  "
+                >
+                  <Icon
+                    icon="ri:scissors-cut-fill"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                    size="20"
+                  />
+                </a-tooltip>
+              </div>
+
+              <div
+                @click="copyText(lightBoxOptions.currentItem.prompt)"
+                role="button"
+                aria-label="zoom in button"
+                class="toolbar-btn toolbar-btn__zoomin"
+              >
+                <a-tooltip
+                  title="复制prompt"
+                  v-if="
+                    lightBoxOptions.currentItem.state === 'SUCCESS' &&
+                    lightBoxOptions.currentItem.commandType != 'DESCRIBE'
+                  "
+                >
+                  <Icon
+                    icon="material-symbols:file-copy-rounded"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                    size="18"
+                  />
+                </a-tooltip>
+              </div>
+              <div
+                @click="handleU(lightBoxOptions.currentItem, 'U1', 'image')"
                 role="button"
                 aria-label="zoom out button"
                 class="toolbar-btn toolbar-btn__zoomout"
-                ><svg class="vel-icon icon" aria-hidden="true">
-                  <use xlink:href="#icon-zoomout" /></svg></div
-              ><div
-                @click="toolbarMethods.resize"
+                v-if="lightBoxOptions.currentItem.buttonMap['U1']"
+              >
+                <SearchOutlined class="vel-icon icon" aria-hidden="true" />U1
+              </div>
+              <div
+                @click="handleU(lightBoxOptions.currentItem, 'U2', 'image')"
+                role="button"
+                aria-label="zoom out button"
+                class="toolbar-btn toolbar-btn__zoomout"
+                v-if="lightBoxOptions.currentItem.buttonMap['U2']"
+              >
+                <SearchOutlined class="vel-icon icon" aria-hidden="true" />U2
+              </div>
+              <div
+                @click="handleU(lightBoxOptions.currentItem, 'U3', 'image')"
+                role="button"
+                aria-label="zoom out button"
+                class="toolbar-btn toolbar-btn__zoomout"
+                v-if="lightBoxOptions.currentItem.buttonMap['U3']"
+              >
+                <SearchOutlined class="vel-icon icon" aria-hidden="true" />U3
+              </div>
+              <div
+                @click="handleU(lightBoxOptions.currentItem, 'U4', 'image')"
+                role="button"
+                aria-label="zoom out button"
+                class="toolbar-btn toolbar-btn__zoomout"
+                v-if="lightBoxOptions.currentItem.buttonMap['U4']"
+              >
+                <SearchOutlined class="vel-icon icon" aria-hidden="true" />U4
+              </div>
+              <!-- <div
+                @click="
+                  handleV(
+                    lightBoxOptions.currentItem,
+                    'variation',
+                    lightBoxOptions.currentItem.buttonMap['V1'].id,
+                  )
+                "
                 role="button"
                 aria-label="resize image button"
                 class="toolbar-btn toolbar-btn__resize"
-                ><svg class="vel-icon icon" aria-hidden="true">
-                  <use xlink:href="#icon-resize" /></svg></div
-              ><div
-                @click="toolbarMethods.rotateLeft"
-                role="button"
-                aria-label="image rotate left button"
-                class="toolbar-btn toolbar-btn__rotate"
-                ><svg class="vel-icon icon" aria-hidden="true">
-                  <use xlink:href="#icon-rotate-left" /></svg></div
-              ><div
-                @click="toolbarMethods.rotateRight"
-                role="button"
-                aria-label="image rotate right button"
-                class="toolbar-btn toolbar-btn__rotate"
-                ><svg class="vel-icon icon" aria-hidden="true">
-                  <use xlink:href="#icon-rotate-right" />
-                </svg>
+              >
+                <span class="vel-icon icon"> V1 </span> </div
+              > -->
+            </div>
+
+            <!-- 顶部居中 -->
+            <div class="opt-top-center">
+              <div class="vel-toolbar">
+                <div
+                  @click="toolbarMethods.zoomIn"
+                  role="button"
+                  aria-label="zoom in button"
+                  class="toolbar-btn toolbar-btn__zoomin"
+                  ><svg class="vel-icon icon" aria-hidden="true">
+                    <use xlink:href="#icon-zoomin" /></svg></div
+                ><div
+                  @click="toolbarMethods.zoomOut"
+                  role="button"
+                  aria-label="zoom out button"
+                  class="toolbar-btn toolbar-btn__zoomout"
+                  ><svg class="vel-icon icon" aria-hidden="true">
+                    <use xlink:href="#icon-zoomout" /></svg></div
+                ><div
+                  @click="toolbarMethods.resize"
+                  role="button"
+                  aria-label="resize image button"
+                  class="toolbar-btn toolbar-btn__resize"
+                  ><svg class="vel-icon icon" aria-hidden="true">
+                    <use xlink:href="#icon-resize" /></svg></div
+                ><div
+                  @click="toolbarMethods.rotateLeft"
+                  role="button"
+                  aria-label="image rotate left button"
+                  class="toolbar-btn toolbar-btn__rotate"
+                  ><svg class="vel-icon icon" aria-hidden="true">
+                    <use xlink:href="#icon-rotate-left" /></svg></div
+                ><div
+                  @click="toolbarMethods.rotateRight"
+                  role="button"
+                  aria-label="image rotate right button"
+                  class="toolbar-btn toolbar-btn__rotate"
+                  ><svg class="vel-icon icon" aria-hidden="true">
+                    <use xlink:href="#icon-rotate-right" />
+                  </svg>
+                </div>
               </div>
             </div>
-          </div>
-          <!-- prompt -->
-          <div class="vel-img-title">
-            {{ lightBoxOptions.currentItem.prompt }}
-          </div>
-        </template>
-      </vue-easy-lightbox>
-    </div>
+            <!-- prompt -->
+            <div class="vel-img-title">
+              {{ lightBoxOptions.currentItem.prompt }}
+            </div>
+          </template>
+        </vue-easy-lightbox>
+      </div>
 
-    <div ref="buttonRef" style="bottom: 0; width: 100%">
-      <a-card
-        :bodyStyle="{
-          padding: '1px 1px 1px 8px',
-          width: '100%',
-          display: 'flex',
-          'align-items': 'center',
-          height: '45px',
-        }"
-        class="pagination"
-      >
-        <a-pagination
-          size="small"
-          :current="pagination.current"
-          :pageSize="pagination.pageSize"
-          :pageSizeOptions="pagination.pageSizeOptions"
-          :total="pagination.total"
-          :showSizeChanger="pagination.showSizeChanger"
-          :showTotal="pagination.showTotal"
-          @change="pageChange"
-          @showSizeChange="pageSizeChange"
-        />
-      </a-card>
-    </div>
-
+      <div ref="buttonRef" style="bottom: 0; width: 100%">
+        <a-card
+          :bodyStyle="{
+            padding: '1px 1px 1px 8px',
+            width: '100%',
+            display: 'flex',
+            'align-items': 'center',
+            height: '45px',
+          }"
+          class="pagination"
+        >
+          <a-pagination
+            size="small"
+            :current="pagination.current"
+            :pageSize="pagination.pageSize"
+            :pageSizeOptions="pagination.pageSizeOptions"
+            :total="pagination.total"
+            :showSizeChanger="pagination.showSizeChanger"
+            :showTotal="pagination.showTotal"
+            @change="pageChange"
+            @showSizeChange="pageSizeChange"
+          />
+        </a-card>
+      </div>
+    </a-card>
     <!-- remix弹窗-->
     <div>
       <a-modal
@@ -1381,25 +1382,18 @@
       v-model:open="showQueryViewFlag"
       width="100%"
       title="🔍️条件查询"
-      :bodyStyle="{ padding: '7px 0px', width: '100%', 'align-items': 'center' }"
+      :bodyStyle="{ padding: '7px 10px 7px 10px', width: '100%', 'align-items': 'center' }"
     >
       <template #footer>
         <a-button key="submit" type="primary" @click="doModelSearch()">立即查询</a-button>
       </template>
-      <a-card
-        :bordered="false"
-        :bodyStyle="{ padding: '1px 3px', width: '100%', 'align-items': 'center' }"
-      >
-        <a-row :gutter="[0, 2]" type="flex">
-          <a-col flex="80px">
-            <a-tag class="quality-tag" color="default">🍺状态 </a-tag>
-          </a-col>
-          <a-col flex="auto">
+        <a-row :gutter="[0, 2]" type="flex" style="margin-top: 3px">
+          <a-input-group compact style="display: flex">
+            <a-tag class="line-label tag-no-right-border" color="default">🍺状态</a-tag>
             <a-select
-              placeholder="任务状态"
               v-model:value="searchForm.state"
-              style="width: 100%"
-              class="mobile-select"
+              placeholder="任务状态"
+              class="line-input tag-no-right-border"
             >
               <a-select-option value="">全部</a-select-option>
               <a-select-option value="QUEUED">排队中</a-select-option>
@@ -1407,18 +1401,17 @@
               <a-select-option value="SUCCESS">已完成</a-select-option>
               <a-select-option value="FAILED">已失败</a-select-option>
             </a-select>
-          </a-col>
+            
+          </a-input-group>
+          
         </a-row>
-        <a-row :gutter="[0, 2]" type="flex" style="margin-top: 7px">
-          <a-col flex="80px">
-            <a-tag class="quality-tag" color="default">🍥类型 </a-tag>
-          </a-col>
-          <a-col flex="auto">
+        <a-row :gutter="[0, 2]" type="flex" style="margin-top: 3px">
+          <a-input-group compact style="display: flex">
+            <a-tag class="line-label tag-no-right-border" color="default">🍥类型</a-tag>
             <a-select
-              placeholder="任务类型"
               v-model:value="searchForm.commandType"
-              class="mobile-select"
-              style="width: 100%"
+              placeholder="任务类型"
+              class="line-input tag-no-right-border"
             >
               <a-select-option value="">全部</a-select-option>
               <a-select-option value="IMAGINE">文生图</a-select-option>
@@ -1429,24 +1422,25 @@
               <a-select-option value="PAN">填充</a-select-option>
               <a-select-option value="ZOOM">缩放</a-select-option>
             </a-select>
-          </a-col>
+          </a-input-group>
+          
         </a-row>
-        <a-row type="flex" :gutter="[0, 2]" style="margin-top: 7px">
-          <a-col flex="80px">
-            <a-tag class="quality-tag" color="default">🥝标签 </a-tag>
-          </a-col>
-          <a-col flex="auto">
+        <a-row type="flex" :gutter="[0, 2]" style="margin-top: 3px">
+          <a-input-group compact style="display: flex">
+            <a-tag class="line-label tag-no-right-border" color="default">🥝标签</a-tag>
             <a-mentions
+            class="line-input "
               v-model:value="searchForm.tagName"
               autofocus
               placeholder="输入@可以引用最近的标签哟~"
               :options="drawTagForm.tagNameOptions"
               @select="onChangeSearchLabel"
             />
-          </a-col>
+          </a-input-group>
+          
         </a-row>
-      </a-card>
     </a-modal>
+
     <!-- 案例添加 -->
     <a-modal
       v-model:open="showExampleViewFlag"
@@ -2508,6 +2502,26 @@
     padding-right: 0;
     padding-left: 0;
   }
+
+  .line-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 25%;
+    height: 32px;
+    margin-right: 0;
+    font-size: 15px;
+  }
+
+  .line-input {
+    width: 75%;
+    height: 32px;
+  }
+
+  .tag-no-right-border {
+    border-right: none;
+  }
+
 </style>
 <style lang="less">
   .full-modal {

@@ -1,166 +1,176 @@
 <template>
   <a-layout class="app" v-loading="loadingRef">
-    <a-card :bodyStyle="{ padding: 0, height: '50px' }">
-      <a-row
-        ref="formRef"
-        style="
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          height: 50px;
-          padding: 0 10px;
-        "
-      >
-        <div style="display: flex; align-items: center">
-          <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
-          <span style="margin-left: 5px; font-size: 16px; font-weight: bold">交易记录</span>
-        </div>
-        <div style="display: flex; gap: 5px">
-          <a-button-group>
-            <a-tooltip title="订单查询">
-              <a-button @click="showQueryView" style="padding: 5px">
-                <SvgIcon name="list_search" size="20" />
-              </a-button>
-            </a-tooltip>
-            <a-tooltip title="集市">
-              <a-button @click="goView('/goods/index')" style="padding: 5px">
-                <SvgIcon name="shopping" size="20" />
-              </a-button>
-            </a-tooltip>
-            <a-tooltip title="去激活">
-              <a-button @click="goView('/accDiscord/index')" style="padding: 5px">
-                <Icon icon="solar:key-square-2-linear" size="20" color="green" />
-              </a-button>
-            </a-tooltip>
-          </a-button-group>
-        </div>
-      </a-row>
-    </a-card>
+    <a-card :bodyStyle="{padding: '0'}"> 
+      <a-card :bodyStyle="{ padding: 0, height: '50px' }">
+        <a-row
+          ref="formRef"
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 50px;
+            padding: 0 10px;
+          "
+        >
+          <div style="display: flex; align-items: center">
+            <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
+            <span style="margin-left: 5px; font-size: 16px; font-weight: bold">交易记录</span>
+          </div>
+          <div style="display: flex; gap: 5px">
+            <a-button-group>
+              <a-tooltip title="订单查询">
+                <a-button @click="showQueryView" style="padding: 5px">
+                  <SvgIcon name="list_search" size="20" />
+                </a-button>
+              </a-tooltip>
+              <a-dropdown :trigger="['click']">
+                <a-button style="padding: 5px" 
+                  > <SvgIcon size="20" name="shopping" /></a-button>
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item key="4" @click="goView('/goods/index')">商品市场
+                    </a-menu-item>
+                    <a-menu-item key="5" @click="goView('/sec_goods/index')">转售市场
+                    </a-menu-item>
+                  </a-menu>
+                </template>
+              </a-dropdown>
 
-    <div
-      v-if="cards.length === 0"
-      style="display: flex; align-items: center; justify-content: center"
-      :style="{ height: `calc(${contentHeight}px `, overflow: 'auto', padding: '8px' }"
-    >
-      <a-empty :image="simpleImage" />
-    </div>
-    <div
-      v-else
-      class="cards"
-      :style="{
-        height: `calc(${contentHeight}px `,
-        overflow: 'auto',
-        padding: '0 8px',
-      }"
-    >
-      <div v-for="card in cards" :key="card.id" :trigger="['contextmenu']">
-        <a-badge-ribbon :text="getStateText(card)" :color="getStateColor(card)">
-          <a-card :bodyStyle="{ padding: '0px' }" class="card" hoverable>
-            <!-- <a-image :src="card.imageUrl" class="card-image" preview="false" fallback="" /> -->
-
-            <div style="display: flex; flex-direction: column; padding: 10px">
-              <a-row class="card-tags">
-                <span>
-                  <Icon icon="mdi:tag" class="vel-icon icon" aria-hidden="true" />交易名称：
-                  <span style="font-weight: bolder">{{ card.goodsTitle }}</span></span
-                >
-              </a-row>
-              <a-row class="card-tags">
-                <span>
-                  <Icon
-                    icon="fluent-mdl2:tag-unknown"
-                    class="vel-icon icon"
-                    aria-hidden="true"
-                  />订单类型：
-                  <span style="font-weight: bolder">{{ card.tradeTypeStr }}</span></span
-                >
-              </a-row>
-              <a-row class="card-tags">
-                <span>
-                  <Icon
-                    icon="mdi:state-machine"
-                    class="vel-icon icon"
-                    aria-hidden="true"
-                  />订单状态：
-                  <span style="font-weight: bolder">
-                    <a-tag :color="getStateColor(card)">{{ getStateText(card) }} </a-tag>
-                  </span></span
-                >
-              </a-row>
-
-              <a-row class="card-tags">
-                <span>
-                  <Icon
-                    icon="mdi:timer-sync-outline"
-                    class="vel-icon icon"
-                    aria-hidden="true"
-                  />下单时间： <span>{{ card.gmtCreate }}</span></span
-                >
-              </a-row>
-              <a-row class="card-tags">
-                <span>
-                  <Icon
-                    icon="ic:outline-timer"
-                    class="vel-icon icon"
-                    aria-hidden="true"
-                  />支付时间： <span>{{ getPayTimeText(card) }}</span></span
-                >
-              </a-row>
-              <a-row class="card-tags">
-                <a-col :span="24" v-if="card.state === 'WAIT_PAY'">
-                  <a-button-group style="width: 100%">
-                    <a-button type="primary" @click="payOrder(card)" style="width: 50%"
-                      >立即支付
-                    </a-button>
-                    <a-button @click="cancelOrder(card)" style="width: 50%">取消交易 </a-button>
-                  </a-button-group>
-                </a-col>
-                <a-col :span="24" v-if="card.state === 'WAIT_SEND'">
-                  <a-button-group style="width: 100%">
-                    <a-button type="warning" @click="openSpeedSend(card)" style="width: 50%"
-                      >催发货
-                    </a-button>
-                    <a-button @click="openAfterSaleView(card)" style="width: 50%"
-                      >联系客服
-                    </a-button>
-                  </a-button-group>
-                </a-col>
-                <a-col :span="24" v-if="card.state === 'CANCEL'">
-                  <a-button type="primary" @click="reBuyGoods(card)" style="width: 100%"
-                    >重新购买</a-button
-                  >
-                </a-col>
-                <a-col :span="24" v-if="card.state === 'FINISHED' || card.state === 'CLOSED'">
-                  <a-button-group style="width: 100%">
-                    <a-button type="primary" @click="reBuyGoods(card)" style="width: 50%"
-                      >再来一单</a-button
-                    >
-                    <a-button @click="openDeliverInfo(card)" style="width: 50%">发货信息</a-button>
-                  </a-button-group>
-                </a-col>
-              </a-row>
-            </div>
-            <!-- 更多卡片内容 -->
-          </a-card>
-        </a-badge-ribbon>
-      </div>
-    </div>
-    <div ref="buttonRef">
-      <a-card class="pagination">
-        <a-pagination
-          size="small"
-          :current="pagination.current"
-          :pageSize="pagination.pageSize"
-          :pageSizeOptions="pagination.pageSizeOptions"
-          :total="pagination.total"
-          :showSizeChanger="pagination.showSizeChanger"
-          :showTotal="pagination.showTotal"
-          @change="pageChange"
-          @showSizeChange="pageSizeChange"
-          style="margin-left: 10px"
-        />
+              <a-tooltip title="去激活">
+                <a-button @click="goView('/accDiscord/index')" style="padding: 5px">
+                  <Icon icon="solar:key-square-2-linear" size="20" color="green" />
+                </a-button>
+              </a-tooltip>
+            </a-button-group>
+          </div>
+        </a-row>
       </a-card>
-    </div>
+
+      <div
+        v-if="cards.length === 0"
+        style="display: flex; align-items: center; justify-content: center"
+        :style="{ height: `calc(${contentHeight}px `, overflow: 'auto', padding: '3px' }"
+      >
+        <a-empty :image="simpleImage" />
+      </div>
+      <div
+        v-else
+        class="cards"
+        :style="{
+          height: `calc(${contentHeight}px `,
+          overflow: 'auto',
+          padding: '0 8px',
+        }"
+      >
+        <div v-for="card in cards" :key="card.id" :trigger="['contextmenu']">
+          <a-badge-ribbon :text="getStateText(card)" :color="getStateColor(card)">
+            <a-card :bodyStyle="{ padding: '0px' }" class="card" hoverable>
+              <!-- <a-image :src="card.imageUrl" class="card-image" preview="false" fallback="" /> -->
+
+              <div style="display: flex; flex-direction: column; padding: 10px">
+                <a-row class="card-tags">
+                  <span>
+                    <Icon icon="mdi:tag" class="vel-icon icon" aria-hidden="true" />交易名称：
+                    <span style="font-weight: bolder">{{ card.goodsTitle }}</span></span
+                  >
+                </a-row>
+                <a-row class="card-tags">
+                  <span>
+                    <Icon
+                      icon="fluent-mdl2:tag-unknown"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />订单类型：
+                    <span style="font-weight: bolder">{{ card.tradeTypeStr }}</span></span
+                  >
+                </a-row>
+                <a-row class="card-tags">
+                  <span>
+                    <Icon
+                      icon="mdi:state-machine"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />订单状态：
+                    <span style="font-weight: bolder">
+                      <a-tag :color="getStateColor(card)">{{ getStateText(card) }} </a-tag>
+                    </span></span
+                  >
+                </a-row>
+
+                <a-row class="card-tags">
+                  <span>
+                    <Icon
+                      icon="mdi:timer-sync-outline"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />下单时间： <span>{{ card.gmtCreate }}</span></span
+                  >
+                </a-row>
+                <a-row class="card-tags">
+                  <span>
+                    <Icon
+                      icon="ic:outline-timer"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                    />支付时间： <span>{{ getPayTimeText(card) }}</span></span
+                  >
+                </a-row>
+                <a-row class="card-tags">
+                  <a-col :span="24" v-if="card.state === 'WAIT_PAY'">
+                    <a-button-group style="width: 100%">
+                      <a-button type="primary" @click="payOrder(card)" style="width: 50%"
+                        >立即支付
+                      </a-button>
+                      <a-button @click="cancelOrder(card)" style="width: 50%">取消交易 </a-button>
+                    </a-button-group>
+                  </a-col>
+                  <a-col :span="24" v-if="card.state === 'WAIT_SEND'">
+                    <a-button-group style="width: 100%">
+                      <a-button type="warning" @click="openSpeedSend(card)" style="width: 50%"
+                        >催发货
+                      </a-button>
+                      <a-button @click="openAfterSaleView(card)" style="width: 50%"
+                        >联系客服
+                      </a-button>
+                    </a-button-group>
+                  </a-col>
+                  <a-col :span="24" v-if="card.state === 'CANCEL'">
+                    <a-button type="primary" @click="reBuyGoods(card)" style="width: 100%"
+                      >重新购买</a-button
+                    >
+                  </a-col>
+                  <a-col :span="24" v-if="card.state === 'FINISHED' || card.state === 'CLOSED'">
+                    <a-button-group style="width: 100%">
+                      <a-button type="primary" @click="reBuyGoods(card)" style="width: 50%"
+                        >再来一单</a-button
+                      >
+                      <a-button @click="openDeliverInfo(card)" style="width: 50%">发货信息</a-button>
+                    </a-button-group>
+                  </a-col>
+                </a-row>
+              </div>
+              <!-- 更多卡片内容 -->
+            </a-card>
+          </a-badge-ribbon>
+        </div>
+      </div>
+      <div ref="buttonRef">
+        <a-card class="pagination">
+          <a-pagination
+            size="small"
+            :current="pagination.current"
+            :pageSize="pagination.pageSize"
+            :pageSizeOptions="pagination.pageSizeOptions"
+            :total="pagination.total"
+            :showSizeChanger="pagination.showSizeChanger"
+            :showTotal="pagination.showTotal"
+            @change="pageChange"
+            @showSizeChange="pageSizeChange"
+            style="margin-left: 10px"
+          />
+        </a-card>
+      </div>
+    </a-card>
     <!-- 支付弹窗 -->
     <a-modal
       v-model:open="payForm.viewFlag"
@@ -186,20 +196,14 @@
       <template #footer>
         <a-button key="submit" type="primary" @click="doSearch()">立即查询</a-button>
       </template>
-      <a-card
-        :bordered="false"
-        :bodyStyle="{ padding: '1px 1px 1px 1px', width: '100%', 'align-items': 'center' }"
-      >
+     
         <a-row :gutter="[0, 2]" type="flex">
-          <a-col flex="100px">
-            <a-tag class="quality-tag" color="default">🍺订单状态 </a-tag>
-          </a-col>
-          <a-col flex="auto">
+          <a-input-group compact style="display: flex">
+            <a-tag class="line-label tag-no-right-border" color="default">🍺订单状态 </a-tag>
             <a-select
               placeholder="订单状态"
               v-model:value="tradeForm.state"
-              class="mobile-select"
-              style="width: 100%"
+              class="line-input tag-no-right-border"
             >
               <a-select-option value="">全部</a-select-option>
               <a-select-option value="WAIT_PAY">待支付</a-select-option>
@@ -207,24 +211,21 @@
               <a-select-option value="CANCEL">取消</a-select-option>
               <a-select-option value="CLOSED">关闭</a-select-option>
             </a-select>
-          </a-col>
+            
+          </a-input-group>
         </a-row>
-        <a-row type="flex" :gutter="[0, 2]" style="margin-top: 7px">
-          <a-col flex="100px">
-            <a-tag class="quality-tag" color="default"
-              ><Icon icon="fluent-emoji-flat:label" size="20" /> 商品名称
-            </a-tag>
-          </a-col>
-          <a-col flex="auto">
+        <a-row type="flex" :gutter="[0, 2]" style="margin-top: 3px">
+          <a-input-group compact style="display: flex">
+            <a-tag class="line-label tag-no-right-border" color="default"><Icon icon="fluent-emoji-flat:label" size="20" /> 商品名称 </a-tag>
             <a-input
               v-model:value="tradeForm.goodsTitle"
               autofocus
               placeholder="商品名称模糊查询~"
-              style="width: 100%"
+              class="line-input "
             />
-          </a-col>
+          </a-input-group>
         </a-row>
-      </a-card>
+      
     </a-modal>
     <!-- 联系客服 -->
     <a-modal v-model:open="systemConfigViewForm.viewFlag">
@@ -742,5 +743,24 @@
     height: 32px;
     margin-right: 0;
     font-size: 15px;
+  }
+
+  .line-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 25%;
+    height: 32px;
+    margin-right: 0;
+    font-size: 15px;
+  }
+
+  .line-input {
+    width: 75%;
+    height: 32px;
+  }
+
+  .tag-no-right-border {
+    border-right: none;
   }
 </style>

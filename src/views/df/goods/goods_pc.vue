@@ -288,7 +288,7 @@
                 </div>
 
                 <div style="display: flex; flex: 1; justify-content: flex-end">
-                  <a-button type="primary" @click="buyGoods(card)" :disabled="card.stock > 0"
+                  <a-button type="primary" @click="buyGoods(card)"
                     >立即购买
                   </a-button>
                 </div>
@@ -871,7 +871,7 @@
     </a-modal>
 
     <!-- 库存列表 -->
-    <a-modal v-model:open="stockListForm.viewFlag" title="授权列表" width="75%" ok-text="">
+    <a-modal v-model:open="stockListForm.viewFlag" title="库存列表" width="75%" ok-text="">
       <template #footer>
         <a-button key="submit" type="primary" @click="closeStockModal">已知晓</a-button>
       </template>

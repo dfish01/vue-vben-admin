@@ -1,152 +1,167 @@
 <template>
   <a-layout class="app" loading-tip="加载中...">
-    <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
-    <!-- 查询选项卡 -->
-    <a-card :bodyStyle="{ padding: 0, height: '50px' }" ref="formRef">
-      <a-row
-        style="
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          height: 50px;
-          padding: 0 10px;
-        "
-      >
-        <div style="display: flex; align-items: center">
-          <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
-          <span style="margin-left: 5px; font-size: 16px; font-weight: bold">账号管理</span>
-        </div>
-        <div style="display: flex; gap: 5px">
-          <a-button-group>
-            <a-tooltip title="偷个懒，请去PC端执行添加账号操作吧~">
-              <a-dropdown :trigger="['click']" disabled>
-                <a-button style="padding: 5px"
-                  ><Icon icon="mdi:account-multiple-add" size="22"
-                /></a-button>
+    <a-card :bodyStyle="{padding: '0'}"> 
+      <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
+      <!-- 查询选项卡 -->
+      <a-card :bodyStyle="{ padding: 0, height: '50px' }" ref="formRef">
+        <a-row
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 50px;
+            padding: 0 10px;
+          "
+        >
+          <div style="display: flex; align-items: center">
+            <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
+            <span style="margin-left: 5px; font-size: 16px; font-weight: bold">账号管理</span>
+          </div>
+          <div style="display: flex; gap: 5px">
+            <a-button-group>
+              <a-tooltip title="偷个懒，请去PC端执行添加账号操作吧~">
+                <a-dropdown :trigger="['click']" disabled>
+                  <a-button style="padding: 5px"
+                    ><Icon icon="mdi:account-multiple-add" size="22"
+                  /></a-button>
+                  <template #overlay>
+                    <a-menu disabled>
+                      <a-menu-item key="5" disabled>
+                        <a-popconfirm
+                          title="⚠️新增账号"
+                          ok-text="立即预览"
+                          cancel-text="取消"
+                          @confirm="onAdd"
+                        >
+                          📺新增账户
+                        </a-popconfirm>
+                      </a-menu-item>
+                      <a-menu-item key="5" disabled>
+                        <a-popconfirm
+                          title="⚠️创建账号组"
+                          ok-text="立即预览"
+                          cancel-text="取消"
+                          @confirm="onAdd"
+                        >
+                          📝创建账号组
+                        </a-popconfirm>
+                      </a-menu-item>
+                    </a-menu>
+                  </template>
+                </a-dropdown>
+              </a-tooltip>
+              <a-tooltip title="">
+                <a-button @click="showQueryView" @click.prevent style="padding: 5px">
+                  <SvgIcon name="list_search" size="20" />
+                </a-button>
+              </a-tooltip>
+              
+    
+              <a-dropdown :trigger="['click']">
+                <a-button style="padding: 5px" 
+                  > <SvgIcon size="20" name="shopping" /></a-button>
                 <template #overlay>
-                  <a-menu disabled>
-                    <a-menu-item key="5" disabled>
-                      <a-popconfirm
-                        title="⚠️新增账号"
-                        ok-text="立即预览"
-                        cancel-text="取消"
-                        @confirm="onAdd"
-                      >
-                        📺新增账户
-                      </a-popconfirm>
+                  <a-menu>
+                    <a-menu-item key="4" @click="goView('/goods/index')">商品市场
                     </a-menu-item>
-                    <a-menu-item key="5" disabled>
-                      <a-popconfirm
-                        title="⚠️创建账号组"
-                        ok-text="立即预览"
-                        cancel-text="取消"
-                        @confirm="onAdd"
-                      >
-                        📝创建账号组
-                      </a-popconfirm>
+                    <a-menu-item key="5" @click="goView('/sec_goods/index')">转售市场
                     </a-menu-item>
+
+                    
                   </a-menu>
                 </template>
               </a-dropdown>
-            </a-tooltip>
-            <a-tooltip title="">
-              <a-button @click="showQueryView" @click.prevent style="padding: 5px">
-                <SvgIcon name="list_search" size="20" />
-              </a-button>
-            </a-tooltip>
-            
-   
-            <a-dropdown :trigger="['click']">
-              <a-button style="padding: 5px" 
-                > <SvgIcon size="20" name="shopping" /></a-button>
-              <template #overlay>
-                <a-menu>
-                  <a-menu-item key="4" @click="goView('/goods/index')">商品市场
-                  </a-menu-item>
-                  <a-menu-item key="5" @click="goView('/sec_goods/index')">转售市场
-                  </a-menu-item>
-
-                  
-                </a-menu>
-              </template>
-            </a-dropdown>
 
 
-            <a-tooltip title="">
-              <a-button @click="onShowActive" style="padding: 5px">
-                <Icon icon="solar:key-square-2-linear" size="20" color="green" />
-              </a-button>
-            </a-tooltip>
-          </a-button-group>
-        </div>
-      </a-row>
-    </a-card>
+              <a-tooltip title="">
+                <a-button @click="onShowActive" style="padding: 5px">
+                  <Icon icon="solar:key-square-2-linear" size="20" color="green" />
+                </a-button>
+              </a-tooltip>
+            </a-button-group>
+          </div>
+        </a-row>
+      </a-card>
 
-    <div
-      v-if="tableData.length === 0"
-      style="display: flex; align-items: center; justify-content: center"
-      :style="{ height: `calc(${contentHeight}px )`, overflow: 'auto' }"
-    >
-      <a-empty :image="simpleImage" />
-    </div>
+      <div
+        v-if="tableData.length === 0"
+        style="display: flex; align-items: center; justify-content: center"
+        :style="{ height: `calc(${contentHeight}px )`, overflow: 'auto' }"
+      >
+        <a-empty :image="simpleImage" />
+      </div>
 
-    <div
-      class="cards"
-      v-else
-      :style="{
-        height: `calc(${contentHeight}px)`,
-        overflow: 'auto',
-        padding: '4px 6px',
-      }"
-    >
-      <div v-for="card in tableData" :key="card.id" :trigger="['contextmenu']">
-        
-          <a-card :size="small" :style="{'margin-left': 0}" style="margin-bottom: 1px" :bodyStyle="{ padding: '0px', margin: '0px' }" class="card account-card" hoverable>
-            <template #extra>
-              <div
-              style="
-                display: flex;
-                width: 250px;
-               
-              "
-            >
-              <div style="justify-content: left">
-                <Icon icon="ic:outline-bookmark-add" /><span style="margin-left: 5px">
-                  {{ card.accountName }}</span
-                >
-              </div>
-            </div>
-              
-              
-            </template>
-            <div style="display: flex; flex-direction: column; padding: 10px">
-              <a-row class="card-tags">
-                <span>
-                  <Icon icon="ic:outline-emoji-flags" class="vel-icon icon" aria-hidden="true" size="14" />
-                  类型： <span style="font-size: 13px"><a-tag :color="card.ownerFlag == 'Y' ? 'red' : 'blue'">{{ card.ownerFlag == 'Y' ? '主账号' : '授权' }}</a-tag> </span></span
-                >
-              </a-row>
-             
-              <a-row class="card-tags">
-                <span>
-                  <Icon icon="uil:server" class="vel-icon icon" aria-hidden="true" size="14" />
-                  服务器： <span style="font-size: 13px">{{ card.guildTitle }}</span></span
-                >
-              </a-row>
-              <a-row class="card-tags">
-                <span>
-                  <Icon icon="uil:server" class="vel-icon icon" aria-hidden="true" size="14" />
-                  频道： <span style="font-size: 13px">{{ card.channelTitle }}</span></span
-                >
-                <span v-if="card.state === 'sale'">
-                  <a-popconfirm
-                    v-if="card.ownerFlag === 'N'"
-                    title="是否撤回该商品的二次售出？"
-                    ok-text="确定"
-                    cancel-text="取消"
-                    @confirm="doCancelSecondHandGoods(card)"
+      <div
+        class="cards"
+        v-else
+        :style="{
+          height: `calc(${contentHeight}px)`,
+          overflow: 'auto',
+          padding: '4px 6px',
+        }"
+      >
+        <div v-for="card in tableData" :key="card.id" :trigger="['contextmenu']">
+          
+            <a-card :size="small" :style="{'margin-left': 0}" style="margin-bottom: 1px" :bodyStyle="{ padding: '0px', margin: '0px' }" class="card account-card" hoverable>
+              <template #extra>
+                <div
+                style="
+                  display: flex;
+                  width: 250px;
+                
+                "
+              >
+                <div style="justify-content: left">
+                  <Icon icon="fluent-emoji-high-contrast:name-badge" /><span style="margin-left: 5px">
+                    {{ card.accountName }}</span
                   >
-                    <a-button size="small" style="font-size: 12px">
+                </div>
+              </div>
+                
+                
+              </template>
+              <div style="display: flex; flex-direction: column; padding: 10px">
+                <a-row class="card-tags">
+                  <span>
+                    <Icon icon="ic:outline-bookmark-add" class="vel-icon icon" aria-hidden="true" size="14" />
+                    类型： <span style="font-size: 13px"><a-tag :color="card.ownerFlag == 'Y' ? 'red' : 'blue'">{{ card.ownerFlag == 'Y' ? '主账号' : '授权' }}</a-tag> </span></span
+                  >
+                </a-row>
+              
+                <a-row class="card-tags">
+                  <span>
+                    <Icon icon="uil:server" class="vel-icon icon" aria-hidden="true" size="14" />
+                    服务器： <span style="font-size: 13px">{{ card.guildTitle }}</span></span
+                  >
+                </a-row>
+                <a-row class="card-tags">
+                  <span>
+                    <Icon icon="uil:server" class="vel-icon icon" aria-hidden="true" size="14" />
+                    频道： <span style="font-size: 13px">{{ card.channelTitle }}</span></span
+                  >
+                  <span v-if="card.state === 'sale'">
+                    <a-popconfirm
+                      v-if="card.ownerFlag === 'N'"
+                      title="是否撤回该商品的二次售出？"
+                      ok-text="确定"
+                      cancel-text="取消"
+                      @confirm="doCancelSecondHandGoods(card)"
+                    >
+                      <a-button size="small" style="font-size: 12px">
+                        <span>
+                          <Icon
+                            icon="mingcute:sale-line"
+                            class="vel-icon icon"
+                            aria-hidden="true"
+                            size="14"
+                          />
+                          取消出售
+                        </span>
+                      </a-button>
+                    </a-popconfirm>
+                  </span>
+                  <span v-if="card.state === 'normal' && card.canSale === 'Y'">
+                    <a-button size="small" style="font-size: 12px" @click="showRedeploy(card)">
                       <span>
                         <Icon
                           icon="mingcute:sale-line"
@@ -154,108 +169,158 @@
                           aria-hidden="true"
                           size="14"
                         />
-                        取消出售
+                        出售商品
                       </span>
                     </a-button>
-                  </a-popconfirm>
-                </span>
-                <span v-if="card.state === 'normal' && card.canSale === 'Y'">
-                  <a-button size="small" style="font-size: 12px" @click="showRedeploy(card)">
-                    <span>
-                      <Icon
-                        icon="mingcute:sale-line"
-                        class="vel-icon icon"
-                        aria-hidden="true"
-                        size="14"
-                      />
-                      出售商品
-                    </span>
-                  </a-button>
-                </span>
-              </a-row>
-              <a-row class="card-tags">
-                <span style="font-size: 13px">
-                  <Icon
-                    icon="streamline:computer-battery-medium-1-phone-mobile-charge-medium-device-electricity-power-battery"
-                    class="vel-icon icon"
-                    aria-hidden="true"
-                    size="17"
-                  />
-                  状态：<a-badge
-                    v-if="card.ownerFlag === 'Y'"
-                    style="font-size: 13px"
-                    :status="card.numAvailableDiscordAccount > 0 ? 'processing' : 'default'"
-                    :text="
-                      (card.numAvailableDiscordAccount > 0 ? '正常' : '无效') +
-                      '（账号：' +
-                      card.numAvailableDiscordAccount +
-                      ' / ' +
-                      card.numTotalDiscordAccount +
-                      '）'
-                    "
-                  /><a-badge
-                    v-else
-                    style="font-size: 13px"
-                    :status="getStateContent(card.state).status"
-                    :text="
-                      getStateContent(card.state).text +
-                      '(账号：' +
-                      card.numAvailableDiscordAccount +
-                      '/' +
-                      card.numTotalDiscordAccount +
-                      ')'
-                    "
-                  />
-                </span>
-                <span>
-                  <a-button size="small" style="font-size: 12px" @click="showDetails(card.id)">
-                    <span>
+                  </span>
+                </a-row>
+                <a-row class="card-tags">
+                  <span style="font-size: 13px">
                     <Icon
-                        icon="basil:info-rect-outline"
-                        class="vel-icon icon"
-                        aria-hidden="true"
-                        size="14"
-                      />
-                      使用概况
-                    </span>
-                  </a-button>
-                </span>
-              </a-row>
-              <a-row class="card-tags">
-                <span>
-                  🕐︎ <span style="font-size: 12px">{{ card.gmtCreate }}</span></span
-                >
-                <a-button
-                  :disabled="card.defaultFlag === 'Y'"
-                  size="small"
-                  style="font-size: 12px"
-                  @click="doSetDefault(card.id)"
-                >
-                <span
-                    ><Icon
-                      icon="fluent:tap-double-20-filled"
+                      icon="streamline:computer-battery-medium-1-phone-mobile-charge-medium-device-electricity-power-battery"
                       class="vel-icon icon"
                       aria-hidden="true"
-                      size="14"
+                      size="17"
                     />
-                    {{ card.defaultFlag === 'Y' ? '默认账号' : '设置默认' }}</span
+                    状态：<a-badge
+                      v-if="card.ownerFlag === 'Y'"
+                      style="font-size: 13px"
+                      :status="card.numAvailableDiscordAccount > 0 ? 'processing' : 'default'"
+                      :text="
+                        (card.numAvailableDiscordAccount > 0 ? '正常' : '无效') +
+                        '（账号：' +
+                        card.numAvailableDiscordAccount +
+                        ' / ' +
+                        card.numTotalDiscordAccount +
+                        '）'
+                      "
+                    /><a-badge
+                      v-else
+                      style="font-size: 13px"
+                      :status="getStateContent(card.state).status"
+                      :text="
+                        getStateContent(card.state).text +
+                        '(账号：' +
+                        card.numAvailableDiscordAccount +
+                        '/' +
+                        card.numTotalDiscordAccount +
+                        ')'
+                      "
+                    />
+                  </span>
+                  <span>
+                    <a-button size="small" style="font-size: 12px" @click="showDetails(card.id)">
+                      <span>
+                      <Icon
+                          icon="basil:info-rect-outline"
+                          class="vel-icon icon"
+                          aria-hidden="true"
+                          size="14"
+                        />
+                        使用概况
+                      </span>
+                    </a-button>
+                  </span>
+                </a-row>
+                <a-row class="card-tags">
+                  <span>
+                    🕐︎ <span style="font-size: 12px">{{ card.gmtCreate }}</span></span
                   >
+                  <a-button
+                    :disabled="card.defaultFlag === 'Y'"
+                    size="small"
+                    style="font-size: 12px"
+                    @click="doSetDefault(card.id)"
+                  >
+                  <span
+                      ><Icon
+                        icon="fluent:tap-double-20-filled"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                        size="14"
+                      />
+                      {{ card.defaultFlag === 'Y' ? '默认账号' : '设置默认' }}</span
+                    >
 
-              </a-button
-                >
-                <a-col :span="24">
-                  <a-divider
-                    style="width: 100%; margin-top: 8px; margin-bottom: 1px; margin-left: 0"
-                  />
-                </a-col>
-              </a-row>
+                </a-button
+                  >
+                  <a-col :span="24">
+                    <a-divider
+                      style="width: 100%; margin-top: 8px; margin-bottom: 1px; margin-left: 0"
+                    />
+                  </a-col>
+                </a-row>
 
-              <a-row class="card-tags" style="margin-top: 5px" v-if="card.ownerFlag === 'Y'">
-                <a-col
-                  :span="24"
-                  style="display: flex; justify-content: center; align-item: center"
-                >
-                  <a-button-group type="text" style="width: 100%">
+                <a-row class="card-tags" style="margin-top: 5px" v-if="card.ownerFlag === 'Y'">
+                  <a-col
+                    :span="24"
+                    style="display: flex; justify-content: center; align-item: center"
+                  >
+                    <a-button-group type="text" style="width: 100%">
+                      <a-popconfirm
+                        title="是否确认删除账户？"
+                        ok-text="Yes"
+                        cancel-text="No"
+                        @confirm="deleteAccount(card.id)"
+                      >
+                        <a-tooltip title="删除账号">
+                          <a-button type="text" style="width: 100%">
+                            <Icon
+                              icon="material-symbols:delete-outline"
+                              class="vel-icon icon"
+                              aria-hidden="true"
+                              size="17"
+                            />
+                          </a-button>
+                        </a-tooltip>
+                      </a-popconfirm>
+                      <a-tooltip title="授权列表">
+                        <a-button
+                          type="text"
+                          @click="showAuthorizationList(card.id)"
+                          style="width: 100%"
+                        >
+                          <Icon
+                            icon="ph:user-list-bold"
+                            class="vel-icon icon"
+                            aria-hidden="true"
+                            size="17"
+                          />
+                        </a-button>
+                      </a-tooltip>
+                      <a-popconfirm
+                        title="是否确认生成授权？目前生成授权后账户禁止删除！"
+                        ok-text="立即生成"
+                        cancel-text="下次吧"
+                        @confirm="showCreateAuth(card)"
+                      >
+                        <a-tooltip title="生成授权">
+                          <a-button type="text" style="width: 100%">
+                            <Icon
+                              icon="mdi:genie-lamp"
+                              class="vel-icon icon"
+                              aria-hidden="true"
+                              size="17"
+                            />
+                          </a-button>
+                        </a-tooltip>
+                      </a-popconfirm>
+
+                      <a-tooltip title="追加账号">
+                        <a-button type="text" @click="showAccountModified(card)" style="width: 100%">
+                          <Icon
+                            icon="clarity:update-line"
+                            class="vel-icon icon"
+                            aria-hidden="true"
+                            size="17"
+                          />
+                        </a-button>
+                      </a-tooltip>
+                    </a-button-group>
+                  </a-col>
+                </a-row>
+                <a-row class="card-tags" v-else>
+                  <a-col :span="24">
                     <a-popconfirm
                       title="是否确认删除账户？"
                       ok-text="Yes"
@@ -273,96 +338,32 @@
                         </a-button>
                       </a-tooltip>
                     </a-popconfirm>
-                    <a-tooltip title="授权列表">
-                      <a-button
-                        type="text"
-                        @click="showAuthorizationList(card.id)"
-                        style="width: 100%"
-                      >
-                        <Icon
-                          icon="ph:user-list-bold"
-                          class="vel-icon icon"
-                          aria-hidden="true"
-                          size="17"
-                        />
-                      </a-button>
-                    </a-tooltip>
-                    <a-popconfirm
-                      title="是否确认生成授权？目前生成授权后账户禁止删除！"
-                      ok-text="立即生成"
-                      cancel-text="下次吧"
-                      @confirm="showCreateAuth(card)"
-                    >
-                      <a-tooltip title="生成授权">
-                        <a-button type="text" style="width: 100%">
-                          <Icon
-                            icon="mdi:genie-lamp"
-                            class="vel-icon icon"
-                            aria-hidden="true"
-                            size="17"
-                          />
-                        </a-button>
-                      </a-tooltip>
-                    </a-popconfirm>
-
-                    <a-tooltip title="追加账号">
-                      <a-button type="text" @click="showAccountModified(card)" style="width: 100%">
-                        <Icon
-                          icon="clarity:update-line"
-                          class="vel-icon icon"
-                          aria-hidden="true"
-                          size="17"
-                        />
-                      </a-button>
-                    </a-tooltip>
-                  </a-button-group>
-                </a-col>
-              </a-row>
-              <a-row class="card-tags" v-else>
-                <a-col :span="24">
-                  <a-popconfirm
-                    title="是否确认删除账户？"
-                    ok-text="Yes"
-                    cancel-text="No"
-                    @confirm="deleteAccount(card.id)"
-                  >
-                    <a-tooltip title="删除账号">
-                      <a-button type="text" style="width: 100%">
-                        <Icon
-                          icon="material-symbols:delete-outline"
-                          class="vel-icon icon"
-                          aria-hidden="true"
-                          size="17"
-                        />
-                      </a-button>
-                    </a-tooltip>
-                  </a-popconfirm>
-                </a-col>
-              </a-row>
-            </div>
-            <!-- 更多卡片内容 -->
-          </a-card>
-        
+                  </a-col>
+                </a-row>
+              </div>
+              <!-- 更多卡片内容 -->
+            </a-card>
+          
+        </div>
       </div>
-    </div>
 
-    <div ref="button">
-      <a-card class="pagination">
-        <a-pagination
-          size="small"
-          :current="pagination.current"
-          :pageSize="pagination.pageSize"
-          :pageSizeOptions="pagination.pageSizeOptions"
-          :total="pagination.total"
-          :showSizeChanger="pagination.showSizeChanger"
-          :showTotal="pagination.showTotal"
-          @change="pageChange"
-          @showSizeChange="pageSizeChange"
-          style="margin-left: 10px"
-        />
-      </a-card>
-    </div>
-
+      <div ref="button">
+        <a-card class="pagination">
+          <a-pagination
+            size="small"
+            :current="pagination.current"
+            :pageSize="pagination.pageSize"
+            :pageSizeOptions="pagination.pageSizeOptions"
+            :total="pagination.total"
+            :showSizeChanger="pagination.showSizeChanger"
+            :showTotal="pagination.showTotal"
+            @change="pageChange"
+            @showSizeChange="pageSizeChange"
+            style="margin-left: 10px"
+          />
+        </a-card>
+      </div>
+    </a-card>
     <!-- 使用情况 -->
     <a-modal
       v-model:open="statisticsForm.viewFlag"
@@ -783,13 +784,14 @@
     <!-- 激活授权账号 -->
     <a-modal
       v-model:open="activeData.isActiveVisible"
-      title="Midjouney授权激活"
-      ok-text="提交"
+      title="账号授权激活"
+      ok-text="立即激活"
       @ok="onActiveAccount"
+      :bodyStyle="{padding:'10px 20px'}"
     >
-      <a-card>
+     
         <a-form layout="vertical">
-          <a-row gutter="24">
+          <a-row >
             <a-col :span="24">
               <a-form-item label="账号授权码">
                 <a-input v-model:value="activeData.activeCode" placeholder="输入授权码" />
@@ -797,7 +799,7 @@
             </a-col>
           </a-row>
         </a-form>
-      </a-card>
+      
     </a-modal>
 
      <!-- 二次出售 -->
@@ -912,10 +914,7 @@
       <template #footer>
         <a-button key="submit" type="primary" @click="doModelSearch()">立即查询</a-button>
       </template>
-      <a-card
-        :bordered="false"
-        :bodyStyle="{ padding: '1px 1px 1px 1px', width: '100%', 'align-items': 'center' }"
-      >
+      
         <!-- <a-row :gutter="[0, 2]" type="flex">
           <a-col flex="80px">
             <a-tag class="quality-tag" color="default">🍺状态 </a-tag>
@@ -930,32 +929,32 @@
             </a-select>
           </a-col>
         </a-row> -->
-        <a-row :gutter="[0, 2]" type="flex" style="margin-top: 7px">
-          <a-col flex="80px">
-            <a-tag class="quality-tag" color="default">🍥权限 </a-tag>
-          </a-col>
-          <a-col flex="auto">
+        <a-row type="flex" :gutter="[0, 2]" style="margin-top: 3px">
+          <a-input-group compact style="display: flex">
+            <a-tag class="line-label tag-no-right-border" color="default">🍥权限</a-tag>
+
             <a-select
               placeholder="选择账号权限"
               v-model:value="search.ownerFlag"
-              class="mobile-select"
-              style="width: 100%"
+              class="line-input tag-no-right-border"
             >
               <a-select-option value="">全部</a-select-option>
               <a-select-option value="N">授权</a-select-option>
               <a-select-option value="Y">自有</a-select-option>
             </a-select>
-          </a-col>
+
+            
+            </a-input-group>
         </a-row>
-        <a-row type="flex" :gutter="[0, 2]" style="margin-top: 7px">
-          <a-col flex="80px">
-            <a-tag class="quality-tag" color="default">🥝名称 </a-tag>
-          </a-col>
-          <a-col flex="auto">
-            <a-input v-model:value="search.accountName" placeholder="输入账号名称" />
-          </a-col>
+ 
+        <a-row type="flex" :gutter="[0, 2]" style="margin-top: 3px">
+          <a-input-group compact style="display: flex">
+            <a-tag class="line-label tag-no-right-border" color="default">🥝名称</a-tag>
+
+            <a-input v-model:value="search.accountName" class="line-input" placeholder="输入账号名称" />
+          </a-input-group>
         </a-row>
-      </a-card>
+      
     </a-modal>
   </a-layout>
 </template>
@@ -1404,6 +1403,9 @@
 
   const onActiveAccount = async () => {
     activeData.value.loading = true;
+    if(activeData.value === null || activeData.value === '') {
+      message.error('请输入正确的授权码！');
+    }
     try {
       await activeAuthAccount(activeData.value);
       activeData.value.isActiveVisible = false;
@@ -1642,6 +1644,26 @@
 
   .account-card >>> .ant-card-extra {
     margin-left: 0 !important;
+  }
+
+  
+  .line-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 25%;
+    height: 32px;
+    margin-right: 0;
+    font-size: 15px;
+  }
+
+  .line-input {
+    width: 75%;
+    height: 32px;
+  }
+
+  .tag-no-right-border {
+    border-right: none;
   }
 
 </style>

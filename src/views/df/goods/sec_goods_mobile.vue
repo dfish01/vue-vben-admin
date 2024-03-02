@@ -1,294 +1,296 @@
 <template>
   <a-layout class="app" v-loading="loadingRef">
-    <a-card ref="formRef" :bodyStyle="{ padding: 0, height: '50px' }">
-      <a-row
-        style="
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          height: 50px;
-          padding: 0 10px;
-        "
-      >
-        <div style="display: flex; align-items: center">
-          <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
-          <span style="margin-left: 5px; font-size: 16px; font-weight: bold">转售市场</span>
-        </div>
-        <div style="display: flex; gap: 5px">
-          <a-button-group>
-            <a-tooltip title="商品查询">
-              <a-button @click="showQueryView" style="padding: 5px">
-                <SvgIcon name="list_search" size="20" />
-              </a-button>
-            </a-tooltip>
-            <a-tooltip title="交易记录">
-              <a-button @click="goView('/trade/index')" style="padding: 5px">
-                <SvgIcon name="trade" size="20" />
-              </a-button>
-            </a-tooltip>
-          </a-button-group>
-        </div>
-      </a-row>
-    </a-card>
-
-    <div
-      v-if="cards.length === 0"
-      style="display: flex; align-items: center; justify-content: center"
-      :style="{ height: `calc(${contentHeight}px)`, overflow: 'auto', padding: '8px' }"
-    >
-      <a-empty :image="simpleImage" />
-    </div>
-    <div
-      v-else
-      class="cards"
-      :style="{
-        height: `calc(${contentHeight}px `,
-        overflow: 'auto',
-        padding: '0 8px',
-      }"
-    >
-      <div v-for="card in cards" :key="card.id" :trigger="['contextmenu']">
-        <!-- Midjourney -->
-        <a-card
-          v-if="card.goodsType === 'SEC_GOODS'"
-          :bodyStyle="{ padding: '0px', opacity: '0.75', 'line-height': 1 }"
-          class="account-card" style="margin-bottom:3px"
-          hoverable
+    <a-card :bodyStyle="{padding: '0'}"> 
+      <a-card ref="formRef" :bodyStyle="{ padding: 0, height: '50px' }">
+        <a-row
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 50px;
+            padding: 0 10px;
+          "
         >
-          <!-- <a-image :src="card.imageUrl" class="card-image" preview="false" fallback="" /> -->
-          <template #title>
+          <div style="display: flex; align-items: center">
+            <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
+            <span style="margin-left: 5px; font-size: 16px; font-weight: bold">转售市场</span>
+          </div>
+          <div style="display: flex; gap: 5px">
+            <a-button-group>
+              <a-tooltip title="商品查询">
+                <a-button @click="showQueryView" style="padding: 5px">
+                  <SvgIcon name="list_search" size="20" />
+                </a-button>
+              </a-tooltip>
+              <a-tooltip title="交易记录">
+                <a-button @click="goView('/trade/index')" style="padding: 5px">
+                  <SvgIcon name="trade" size="20" />
+                </a-button>
+              </a-tooltip>
+            </a-button-group>
+          </div>
+        </a-row>
+      </a-card>
+
+      <div
+        v-if="cards.length === 0"
+        style="display: flex; align-items: center; justify-content: center"
+        :style="{ height: `calc(${contentHeight}px)`, overflow: 'auto', padding: '8px' }"
+      >
+        <a-empty :image="simpleImage" />
+      </div>
+      <div
+        v-else
+        class="cards"
+        :style="{
+          height: `calc(${contentHeight}px `,
+          overflow: 'auto',
+          padding: '0 8px',
+        }"
+      >
+        <div v-for="card in cards" :key="card.id" :trigger="['contextmenu']">
+          <!-- Midjourney -->
+          <a-card
+            v-if="card.goodsType === 'SEC_GOODS'"
+            :bodyStyle="{ padding: '0px', opacity: '0.75', 'line-height': 1 }"
+            class="account-card" style="margin-bottom:3px"
+            hoverable
+          >
+            <!-- <a-image :src="card.imageUrl" class="card-image" preview="false" fallback="" /> -->
+            <template #title>
+              <div
+                style="
+                  display: flex;
+                  flex-direction: row;
+                  justify-content: space-between;
+                  width: 250px;
+                "
+              >
+                <div style="justify-content: left">
+                  <Icon icon="ic:outline-bookmark-add" /><span style="margin-left: 5px">
+                    {{ card.goodsTitle }}</span
+                  >
+                </div>
+              </div>
+            </template>
             <div
               style="
                 display: flex;
-                flex-direction: row;
+                flex-direction: column;
                 justify-content: space-between;
-                width: 250px;
+                min-height: 250px;
+                padding: 10px;
               "
             >
-              <div style="justify-content: left">
-                <Icon icon="ic:outline-bookmark-add" /><span style="margin-left: 5px">
-                  {{ card.goodsTitle }}</span
-                >
-              </div>
-            </div>
-          </template>
-          <div
-            style="
-              display: flex;
-              flex-direction: column;
-              justify-content: space-between;
-              min-height: 250px;
-              padding: 10px;
-            "
-          >
-            <div>
-              <a-row  style="height: 48px; margin: 0 5px">
-                  
-                  <span style="font-size:12px; line-height: 1.3;">
-                    {{ card.infoBody.goodsRemark }}
-                  </span>
-               
-              </a-row>
-              <div v-if="card.infoBody.billingMethod === 'INTEGRAL'" style="height: 68px">
-               
-
-                <a-row class="card-tags">
-                  <a-col flex="90px">
-                    <span style="font-weight: bolder">
-                      <Icon icon="material-symbols:money-outline-rounded" color="#A94438" /> 剩余积分
+              <div>
+                <a-row  style="height: 48px; margin: 0 5px">
+                    
+                    <span style="font-size:12px; line-height: 1.3;">
+                      {{ card.infoBody.goodsRemark }}
                     </span>
-                  </a-col>
-                  <a-col flex="auto">
-                    <span>
-                      {{ card.infoBody.score }}
-                      <a-tooltip
-                        color="#99BC85"
-                        v-if="card.infoBody.integralRule"
-                        :overlayStyle="{ maxWidth: '500px' }"
-                      >
-                        <template #title>
-                          <p
-                            v-for="(part, index) in card.infoBody.integralRule.split(';')"
-                            :key="index"
-                            >{{ part.trim() }}</p
-                          >
-                        </template>
-                        <a-tag style="align-items: center"
-                          ><Icon icon="basil:info-rect-outline" color="#0B60B0" />规则</a-tag
+                
+                </a-row>
+                <div v-if="card.infoBody.billingMethod === 'INTEGRAL'" style="height: 68px">
+                
+
+                  <a-row class="card-tags">
+                    <a-col flex="90px">
+                      <span style="font-weight: bolder">
+                        <Icon icon="material-symbols:money-outline-rounded" color="#A94438" /> 剩余积分
+                      </span>
+                    </a-col>
+                    <a-col flex="auto">
+                      <span>
+                        {{ card.infoBody.score }}
+                        <a-tooltip
+                          color="#99BC85"
+                          v-if="card.infoBody.integralRule"
+                          :overlayStyle="{ maxWidth: '500px' }"
                         >
-                      </a-tooltip>
-                    </span>
-                  </a-col>
-                </a-row>
-                <a-row class="card-tags">
-                  <a-col flex="90px">
-                    <span style="font-weight: bolder">
-                      <Icon icon="material-symbols:money-outline-rounded" color="#A94438" /> 历史积分
-                    </span>
-                  </a-col>
-                  <a-col flex="auto">
-                    <span>
-                      {{card.infoBody.totalScore}}积分
-                      
-                    </span>
-                  </a-col>
-                </a-row>
-                <a-row class="card-tags" v-if="card.infoBody.remark">
-                  <a-col flex="90px">
-                    <span style="font-weight: bolder">
-                      <Icon icon="emojione-v1:note-page" /> 备注
-                    </span>
-                  </a-col>
-                  <a-col flex="auto">
-                    <span>
-                      {{ card.infoBody.remark }}
-                    </span>
-                  </a-col>
-                </a-row>
-              </div>
-              <div v-else style="height: 68px">
-                <a-row class="card-tags">
-                  <a-col flex="90px">
-                    <span style="font-weight: bolder">
-                      <Icon icon="emojione-v1:lightning-mood" /> Turbo
-                    </span>
-                  </a-col>
-                  <a-col flex="auto">
-                    <span>
-                      可用<span>{{
-                        card.infoBody.turboTimes !== null ? card.infoBody.turboTimes : '无限'
-                      }}</span
-                      >次 {{card.infoBody.turboTimes !== null ? '（原' + card.infoBody.totalTurboTimes + '次' :''}}
-                    </span>
-                  </a-col>
-                </a-row>
-                <a-row class="card-tags">
-                  <a-col flex="90px">
-                    <span style="font-weight: bolder"> <Icon icon="openmoji:rabbit" /> Fast </span>
-                  </a-col>
-                  <a-col flex="auto">
-                    <span>
-                      可用{{
-                        card.infoBody.fastTimes !== null ? card.infoBody.fastTimes : '无限'
-                      }}次{{card.infoBody.fastTimes !== null ? '（原' + card.infoBody.totalFastTimes + '次' :''}}
-                    </span>
-                  </a-col>
-                </a-row>
-                <a-row class="card-tags">
-                  <a-col flex="90px">
-                    <span style="font-weight: bolder">
-                      <Icon icon="streamline-emojis:turtle" /> Relax
-                    </span>
-                  </a-col>
-                  <a-col flex="auto">
-                    <span>
-                      可用{{
-                        card.infoBody.relaxTimes !== null ? card.infoBody.relaxTimes : '无限'
-                      }}次 {{card.infoBody.relaxTimes !== null ? '（原' + card.infoBody.totalRelaxTimes + '次' :''}}
-                    </span>
-                  </a-col>
-                </a-row>
-              </div>
-
-              <a-row class="card-tags">
-                <a-col flex="90px">
-                  <span style="font-weight: bolder">
-                    <Icon icon="tabler:needle-thread" /> 队列数
-                  </span>
-                </a-col>
-                <a-col flex="auto">
-                  <span> 最多同时提交{{ card.infoBody.maxSubmit }}个任务 </span>
-                </a-col>
-              </a-row>
-              <a-row class="card-tags">
-                <a-col flex="90px">
-                  <span style="font-weight: bolder">
-                    <Icon icon="tabler:needle-thread" /> 并发线程
-                  </span>
-                </a-col>
-                <a-col flex="auto" v-if="card.infoBody.conExecute">
-                  <span> 最多同时运行{{ card.infoBody.conExecute }}个任务 </span>
-                </a-col>
-                <a-col flex="auto" v-else>
-                  <span> 同时运行任务数同主账号 </span>
-                </a-col>
-              </a-row>
-
-              <a-row class="card-tags">
-                <a-col flex="90px">
-                  <span style="font-weight: bolder"> <Icon icon="openmoji:timer" /> 有效期至 </span>
-                </a-col>
-                <a-col flex="auto">
-                  <span> {{ card.infoBody.authExpireTimes }} </span>
-                </a-col>
-              </a-row>
-              <a-row class="card-tags">
-                <a-col v-if="card.specialLabel">
-                  <a-tag color="red">{{ card.specialLabel }} </a-tag>
-                </a-col>
-              </a-row>
-            </div>
-            <div>
-              <a-row class="card-tags" style="display: flex; justify-content: space-between">
-                <div style="display: flex; align-items: center; width: 150px">
-                  <span style="color: #e36414; font-size: 20px; font-weight: orange">
-                    <Icon icon="icon-park-solid:paper-money" size="20px" /> {{ card.goodsPrice }}
-                  </span>
-                  <span style="bottom: 0; margin-left: 10px; font-size: 20px">
-                    <a-typography-text delete>
-                      {{ card.oriGoodsPrice }}
-                    </a-typography-text>
-                  </span>
+                          <template #title>
+                            <p
+                              v-for="(part, index) in card.infoBody.integralRule.split(';')"
+                              :key="index"
+                              >{{ part.trim() }}</p
+                            >
+                          </template>
+                          <a-tag style="align-items: center"
+                            ><Icon icon="basil:info-rect-outline" color="#0B60B0" />规则</a-tag
+                          >
+                        </a-tooltip>
+                      </span>
+                    </a-col>
+                  </a-row>
+                  <a-row class="card-tags">
+                    <a-col flex="90px">
+                      <span style="font-weight: bolder">
+                        <Icon icon="material-symbols:money-outline-rounded" color="#A94438" /> 历史积分
+                      </span>
+                    </a-col>
+                    <a-col flex="auto">
+                      <span>
+                        {{card.infoBody.totalScore}}积分
+                        
+                      </span>
+                    </a-col>
+                  </a-row>
+                  <a-row class="card-tags" v-if="card.infoBody.remark">
+                    <a-col flex="90px">
+                      <span style="font-weight: bolder">
+                        <Icon icon="emojione-v1:note-page" /> 备注
+                      </span>
+                    </a-col>
+                    <a-col flex="auto">
+                      <span>
+                        {{ card.infoBody.remark }}
+                      </span>
+                    </a-col>
+                  </a-row>
+                </div>
+                <div v-else style="height: 68px">
+                  <a-row class="card-tags">
+                    <a-col flex="90px">
+                      <span style="font-weight: bolder">
+                        <Icon icon="emojione-v1:lightning-mood" /> Turbo
+                      </span>
+                    </a-col>
+                    <a-col flex="auto">
+                      <span>
+                        可用<span>{{
+                          card.infoBody.turboTimes !== null ? card.infoBody.turboTimes : '无限'
+                        }}</span
+                        >次 {{card.infoBody.turboTimes !== null ? '（原' + card.infoBody.totalTurboTimes + '次' :''}}
+                      </span>
+                    </a-col>
+                  </a-row>
+                  <a-row class="card-tags">
+                    <a-col flex="90px">
+                      <span style="font-weight: bolder"> <Icon icon="openmoji:rabbit" /> Fast </span>
+                    </a-col>
+                    <a-col flex="auto">
+                      <span>
+                        可用{{
+                          card.infoBody.fastTimes !== null ? card.infoBody.fastTimes : '无限'
+                        }}次{{card.infoBody.fastTimes !== null ? '（原' + card.infoBody.totalFastTimes + '次' :''}}
+                      </span>
+                    </a-col>
+                  </a-row>
+                  <a-row class="card-tags">
+                    <a-col flex="90px">
+                      <span style="font-weight: bolder">
+                        <Icon icon="streamline-emojis:turtle" /> Relax
+                      </span>
+                    </a-col>
+                    <a-col flex="auto">
+                      <span>
+                        可用{{
+                          card.infoBody.relaxTimes !== null ? card.infoBody.relaxTimes : '无限'
+                        }}次 {{card.infoBody.relaxTimes !== null ? '（原' + card.infoBody.totalRelaxTimes + '次' :''}}
+                      </span>
+                    </a-col>
+                  </a-row>
                 </div>
 
-                <div style="display: flex; flex: 1; justify-content: flex-end">
-                  <a-button type="primary" @click="buyGoods(card)" 
-                    >立即购买
+                <a-row class="card-tags">
+                  <a-col flex="90px">
+                    <span style="font-weight: bolder">
+                      <Icon icon="tabler:needle-thread" /> 队列数
+                    </span>
+                  </a-col>
+                  <a-col flex="auto">
+                    <span> 最多同时提交{{ card.infoBody.maxSubmit }}个任务 </span>
+                  </a-col>
+                </a-row>
+                <a-row class="card-tags">
+                  <a-col flex="90px">
+                    <span style="font-weight: bolder">
+                      <Icon icon="tabler:needle-thread" /> 并发线程
+                    </span>
+                  </a-col>
+                  <a-col flex="auto" v-if="card.infoBody.conExecute">
+                    <span> 最多同时运行{{ card.infoBody.conExecute }}个任务 </span>
+                  </a-col>
+                  <a-col flex="auto" v-else>
+                    <span> 同时运行任务数同主账号 </span>
+                  </a-col>
+                </a-row>
+
+                <a-row class="card-tags">
+                  <a-col flex="90px">
+                    <span style="font-weight: bolder"> <Icon icon="openmoji:timer" /> 有效期至 </span>
+                  </a-col>
+                  <a-col flex="auto">
+                    <span> {{ card.infoBody.authExpireTimes }} </span>
+                  </a-col>
+                </a-row>
+                <a-row class="card-tags">
+                  <a-col v-if="card.specialLabel">
+                    <a-tag color="red">{{ card.specialLabel }} </a-tag>
+                  </a-col>
+                </a-row>
+              </div>
+              <div>
+                <a-row class="card-tags" style="display: flex; justify-content: space-between">
+                  <div style="display: flex; align-items: center; width: 150px">
+                    <span style="color: #e36414; font-size: 20px; font-weight: orange">
+                      <Icon icon="icon-park-solid:paper-money" size="20px" /> {{ card.goodsPrice }}
+                    </span>
+                    <span style="bottom: 0; margin-left: 10px; font-size: 20px">
+                      <a-typography-text delete>
+                        {{ card.oriGoodsPrice }}
+                      </a-typography-text>
+                    </span>
+                  </div>
+
+                  <div style="display: flex; flex: 1; justify-content: flex-end">
+                    <a-button type="primary" @click="buyGoods(card)" 
+                      >立即购买
+                    </a-button>
+                  </div>
+                </a-row>
+              </div>
+            </div>
+            <a-row
+              v-if="card.editFlag && card.editFlag == true"
+              class="card-tags"
+              style="margin-bottom: 10px"
+            >
+              <a-col :span="24">
+                
+                <a-popconfirm
+                      title="是否撤回该商品的二次售出？"
+                      ok-text="确定"
+                      cancel-text="取消"
+                      @confirm="doCancelSecondHandGoods(card)"
+                    >
+                  <a-button type="primary" style="width: 100%" >
+                      取消出售
                   </a-button>
-                </div>
-              </a-row>
-            </div>
-          </div>
-          <a-row
-            v-if="card.editFlag && card.editFlag == true"
-            class="card-tags"
-            style="margin-bottom: 10px"
-          >
-            <a-col :span="24">
-              
-              <a-popconfirm
-                    title="是否撤回该商品的二次售出？"
-                    ok-text="确定"
-                    cancel-text="取消"
-                    @confirm="doCancelSecondHandGoods(card)"
-                  >
-                <a-button type="primary" style="width: 100%" >
-                    取消出售
-                </a-button>
-         
-              </a-popconfirm>
-            </a-col>
-          </a-row>
-          <!-- 更多卡片内容 -->
+          
+                </a-popconfirm>
+              </a-col>
+            </a-row>
+            <!-- 更多卡片内容 -->
+          </a-card>
+        </div>
+      </div>
+      <div ref="buttonRef">
+        <a-card class="pagination">
+          <a-pagination
+            size="small"
+            :current="pagination.current"
+            :pageSize="pagination.pageSize"
+            :pageSizeOptions="pagination.pageSizeOptions"
+            :total="pagination.total"
+            :showSizeChanger="pagination.showSizeChanger"
+            :showTotal="pagination.showTotal"
+            @change="pageChange"
+            @showSizeChange="pageSizeChange"
+            style="margin-left: 10px"
+          />
         </a-card>
       </div>
-    </div>
-    <div ref="buttonRef">
-      <a-card class="pagination">
-        <a-pagination
-          size="small"
-          :current="pagination.current"
-          :pageSize="pagination.pageSize"
-          :pageSizeOptions="pagination.pageSizeOptions"
-          :total="pagination.total"
-          :showSizeChanger="pagination.showSizeChanger"
-          :showTotal="pagination.showTotal"
-          @change="pageChange"
-          @showSizeChange="pageSizeChange"
-          style="margin-left: 10px"
-        />
-      </a-card>
-    </div>
+    </a-card>
     <!-- 支付弹窗 -->
     <a-modal
       v-model:open="payForm.viewFlag"
@@ -305,7 +307,7 @@
     </a-modal>
 
     <!-- 条件查询 -->
-    <a-modal
+   <a-modal
       v-model:open="searchForm.viewFlag"
       width="100%"
       title="🔍️条件查询"
@@ -314,41 +316,49 @@
       <template #footer>
         <a-button key="submit" type="primary" @click="doSearch()">立即查询</a-button>
       </template>
-      <a-card
-        :bordered="false"
-        :bodyStyle="{ padding: '1px 1px 1px 1px', width: '100%', 'align-items': 'center' }"
-      >
+
         <a-row :gutter="[0, 2]" type="flex">
-          <a-col flex="100px">
-            <a-tag class="quality-tag" color="default">🍺商品类型 </a-tag>
-          </a-col>
-          <a-col flex="auto">
+          <a-input-group compact style="display: flex"> 
+            <a-tag class="line-label tag-no-right-border" color="default"> <Icon icon="streamline-emojis:leaf-fluttering-in-wind" size="20" />商品类型</a-tag>
+
             <a-select
               placeholder="商品类型"
               v-model:value="searchForm.goodsType"
-              class="mobile-select"
-              style="width: 100%"
+              class="line-input tag-no-right-border"
             >
               <a-select-option value="SEC_GOODS">转售商品</a-select-option>
             </a-select>
-          </a-col>
+
+            </a-input-group>
         </a-row>
-        <a-row type="flex" :gutter="[0, 2]" style="margin-top: 7px">
-          <a-col flex="100px">
-            <a-tag class="quality-tag" color="default"
-              ><Icon icon="fluent-emoji-flat:label" size="20" /> 商品名称
-            </a-tag>
-          </a-col>
-          <a-col flex="auto">
+        <a-row type="flex" :gutter="[0, 2]" style="margin-top: 3px">
+          <a-input-group compact style="display: flex">
+            <a-tag class="line-label tag-no-right-border" color="default"><Icon icon="streamline-emojis:fire" size="20" /> 商品名称</a-tag>
+
             <a-input
               v-model:value="searchForm.goodsTitle"
               autofocus
               placeholder="商品名称模糊查询~"
-              style="width: 100%"
+              class="line-input "
             />
-          </a-col>
+            </a-input-group>
         </a-row>
-      </a-card>
+   
+        <a-row :gutter="[0, 2]" type="flex" style="margin-top: 3px">
+          <a-input-group compact style="display: flex">
+            <a-tag class="line-label tag-no-right-border" color="default"><Icon icon="streamline-emojis:person-wearing-turban-1" size="20" />商品归属</a-tag>
+
+            <a-select
+              placeholder="商品归属"
+              v-model:value="searchForm.ownerFlag"
+              class="line-input tag-no-right-border"
+            >
+            <a-select-option value="false">集市</a-select-option>
+              <a-select-option value="true">我的</a-select-option>
+            </a-select>
+
+            </a-input-group>
+        </a-row>
     </a-modal>
   </a-layout>
 </template>
@@ -578,6 +588,19 @@
     }
     return '';
   };
+
+    /********************************** 取消出售 **************************************** */
+
+    const doCancelSecondHandGoods = async (card) => {
+    loadingRef.value = true;
+    try {
+      const state = await cancelSecondHandGoods({ id: card.refId });
+      cards.value = cards.value.filter(record => record.id !== card.id);
+    } finally {
+      loadingRef.value = false;
+    }
+  };
+
 </script>
 
 <style scoped>
@@ -777,6 +800,26 @@
     height: 32px;
     margin-right: 0;
     font-size: 15px;
+  }
+  
+  
+  .line-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 25%;
+    height: 32px;
+    margin-right: 0;
+    font-size: 15px;
+  }
+
+  .line-input {
+    width: 75%;
+    height: 32px;
+  }
+
+  .tag-no-right-border {
+    border-right: none;
   }
 </style>
 <style lang="less">

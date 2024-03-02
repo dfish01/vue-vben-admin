@@ -49,7 +49,8 @@
                     >账号组管理{{ props.contentHeight }}</a-button
                   > -->
                 </a-button-group>
-                <a-button @click="goThirdShop(card)" ref="goodsStep">
+                <a-button-group>
+                <a-button @click="goThirdShop('/goods/index')" ref="goodsStep">
                   <Icon
                     icon="simple-icons:shopee"
                     class="vel-icon icon"
@@ -59,6 +60,17 @@
                   />
                   购买账号
                 </a-button>
+                <a-button @click="goThirdShop('/sec_goods/index')">
+                  <Icon
+                    icon="simple-icons:shopee"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                    color="#EE4266"
+                    size="17"
+                  />
+                  转售市场
+                </a-button>
+              </a-button-group>
               </a-space>
             </a-form-item>
           </a-form>
@@ -1173,7 +1185,7 @@
       </template>
       <template #footer>
         <a-button key="submit" type="primary" @click="closeAuthModal"
-          >已知晓 {{ authListForm.tabKey }}</a-button
+          >已知晓</a-button
         >
       </template>
       <Loading :loading="authListForm.loading" :absolute="true" tip="数加载中..." />
@@ -1930,8 +1942,8 @@
 
   //跳转商品页面
   const go = useGo();
-  const goThirdShop = async (card) => {
-    go('/goods/index');
+  const goThirdShop = async (uri) => {
+    go(uri);
   };
   const closeModal = () => {
     isDetailsModalVisible.value = false;
@@ -1988,7 +2000,7 @@
 
     const userInfo = userStore.getUserInfo; // 直接赋值
 
-    if(userInfo.coursePop === 2 || coursePop == 3) {
+    if(userInfo.coursePop === 2 || userInfo.coursePop == 3) {
       return;
     }
     accountStep.value.open = val;

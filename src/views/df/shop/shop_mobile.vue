@@ -1,343 +1,345 @@
 <template>
   <a-layout class="app" v-loading="loadingRef">
-    <a-card ref="formRef" :bodyStyle="{ padding: 0, height: '50px' }">
-      <a-row
-        style="
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          height: 50px;
-          padding: 0 10px;
-        "
+    <a-card :bodyStyle="{ padding: 0}" >
+      <a-card ref="formRef" :bodyStyle="{ padding: 0, height: '50px' }">
+        <a-row
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 50px;
+            padding: 0 10px;
+          "
+        >
+          <div style="display: flex; align-items: center">
+            <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
+            <span style="margin-left: 5px; font-size: 16px; font-weight: bold">集市</span>
+          </div>
+          <div style="display: flex; gap: 5px; justify-content: flex-end">
+            <a-button @click="queryMyShop">我的店铺</a-button>
+          </div>
+        </a-row>
+      </a-card>
+
+      <div
+        v-if="tableData.length === 0"
+        style="display: flex; align-items: center; justify-content: center"
+        :style="{ height: `calc(${contentHeight}px)`, overflow: 'auto', padding: '8px' }"
       >
-        <div style="display: flex; align-items: center">
-          <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
-          <span style="margin-left: 5px; font-size: 16px; font-weight: bold">集市</span>
-        </div>
-        <div style="display: flex; gap: 5px; justify-content: flex-end">
-          <a-button @click="queryMyShop">我的店铺</a-button>
-        </div>
-      </a-row>
-    </a-card>
+        <a-empty :image="simpleImage" />
+      </div>
+      <div
+        v-else
+        class="cards"
+        :style="{
+          height: `calc(${contentHeight}px)`,
+          overflow: 'auto',
 
-    <div
-      v-if="tableData.length === 0"
-      style="display: flex; align-items: center; justify-content: center"
-      :style="{ height: `calc(${contentHeight}px)`, overflow: 'auto', padding: '8px' }"
-    >
-      <a-empty :image="simpleImage" />
-    </div>
-    <div
-      v-else
-      class="cards"
-      :style="{
-        height: `calc(${contentHeight}px)`,
-        overflow: 'auto',
-
-        padding: '0 8px',
-      }"
-    >
-      <div v-for="card in tableData" :key="card.id" :trigger="['contextmenu']">
-        <a-badge-ribbon :text="card.shopLabel" :color="card.shopLabel === '官方' ? 'red' : 'green'">
-          <a-card :bodyStyle="{ padding: '0px' }" class="card account-card" hoverable>
-            <template #extra>
-              <div
-                style="
-                  display: flex;
-                  flex-direction: row;
-                  justify-content: space-between;
-                  width: 250px;
-                "
-              >
-                <div style="justify-content: left">
-                  <span style="font-weight: bold"> {{ card.shopName }} </span>
-                  <span style="font-size: 12px"> - N.{{ card.shopNo }} </span>
+          padding: '0 8px',
+        }"
+      >
+        <div v-for="card in tableData" :key="card.id" :trigger="['contextmenu']">
+          <a-badge-ribbon :text="card.shopLabel" :color="card.shopLabel === '官方' ? 'red' : 'green'">
+            <a-card :bodyStyle="{ padding: '0px' }" class="card account-card" hoverable>
+              <template #extra>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-between;
+                    width: 250px;
+                  "
+                >
+                  <div style="justify-content: left">
+                    <span style="font-weight: bold"> {{ card.shopName }} </span>
+                    <span style="font-size: 12px"> - N.{{ card.shopNo }} </span>
+                  </div>
                 </div>
-              </div>
-            </template>
-            <div style="display: flex; flex-direction: column; padding: 10px">
-              <a-row class="card-tags">
-                <a-col :span="24" class="card-tags">
-                  <span style="font-size: 13px">
-                    <Icon
-                      icon="fluent-emoji:bookmark-tabs"
-                      class="vel-icon icon"
-                      aria-hidden="true"
-                      size="13"
+              </template>
+              <div style="display: flex; flex-direction: column; padding: 10px">
+                <a-row class="card-tags">
+                  <a-col :span="24" class="card-tags">
+                    <span style="font-size: 13px">
+                      <Icon
+                        icon="fluent-emoji:bookmark-tabs"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                        size="13"
+                      />
+                      店铺自述
+                    </span>
+                    <a-tag v-if="card.shopType === 'THIRD'" color="orange"> 外部店铺 </a-tag>
+                    <a-tag color="blue" v-else>内置店铺</a-tag>
+                  </a-col>
+                  <a-col :span="24">
+                    <a-divider
+                      style="width: 100%; margin-top: 4px; margin-bottom: 5px; margin-left: 0"
                     />
-                    店铺自述
-                  </span>
-                  <a-tag v-if="card.shopType === 'THIRD'" color="orange"> 外部店铺 </a-tag>
-                  <a-tag color="blue" v-else>内置店铺</a-tag>
-                </a-col>
-                <a-col :span="24">
-                  <a-divider
-                    style="width: 100%; margin-top: 4px; margin-bottom: 5px; margin-left: 0"
-                  />
-                </a-col>
-                <a-col
-                  :span="24"
-                  style="
-                    width: 100%;
-                    height: 115px;
-                    margin-top: 1px;
-                    margin-bottom: 5px;
-                    margin-left: 2px;
-                  "
-                >
-                  <span
-                    style="font-size: 12px; line-height: 1.5; filter: brightness(50%) saturate(20%)"
+                  </a-col>
+                  <a-col
+                    :span="24"
+                    style="
+                      width: 100%;
+                      height: 115px;
+                      margin-top: 1px;
+                      margin-bottom: 5px;
+                      margin-left: 2px;
+                    "
                   >
-                    {{ card.describeInfo }}
-                  </span>
-                </a-col>
-              </a-row>
+                    <span
+                      style="font-size: 12px; line-height: 1.5; filter: brightness(50%) saturate(20%)"
+                    >
+                      {{ card.describeInfo }}
+                    </span>
+                  </a-col>
+                </a-row>
 
-              <a-row class="card-tags">
-                <a-col :span="24" style="margin-top: 2px">
-                  <span style="font-size: 13px">
-                    <Icon
-                      icon="fluent-emoji:currency-exchange"
-                      class="vel-icon icon"
-                      aria-hidden="true"
-                      size="13"
+                <a-row class="card-tags">
+                  <a-col :span="24" style="margin-top: 2px">
+                    <span style="font-size: 13px">
+                      <Icon
+                        icon="fluent-emoji:currency-exchange"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                        size="13"
+                      />
+                      营业范围
+                    </span>
+                  </a-col>
+                  <a-col :span="24">
+                    <a-divider
+                      style="width: 100%; margin-top: 4px; margin-bottom: 5px; margin-left: 0"
                     />
-                    营业范围
-                  </span>
-                </a-col>
-                <a-col :span="24">
-                  <a-divider
-                    style="width: 100%; margin-top: 4px; margin-bottom: 5px; margin-left: 0"
-                  />
-                </a-col>
+                  </a-col>
 
-                <a-col
-                  :span="24"
-                  style="
-                    width: 100%;
-                    height: 55px;
-                    margin-top: 1px;
-                    margin-bottom: 5px;
-                    margin-left: 2px;
-                  "
-                >
-                  <a-tag
-                    v-for="tag in card.tagList"
-                    :key="tag"
-                    :bordered="false"
-                    :color="stringToColor(tag)"
-                    style="margin-top: 3px; margin-bottom: 3px"
-                    >{{ tag }}</a-tag
+                  <a-col
+                    :span="24"
+                    style="
+                      width: 100%;
+                      height: 55px;
+                      margin-top: 1px;
+                      margin-bottom: 5px;
+                      margin-left: 2px;
+                    "
                   >
-                </a-col>
-                <a-col :span="24">
-                  <a-divider
-                    style="width: 100%; margin-top: 4px; margin-bottom: 5px; margin-left: 0"
-                  />
-                </a-col>
-              </a-row>
-              <a-row v-if="card.applyStatus !== 'SUCCESS'">
-                <a-col :span="24" class="card-tags">
-                  <span style="font-size: 13px">
-                    <Icon
-                      icon="solar:mask-happly-broken"
-                      class="vel-icon icon"
-                      aria-hidden="true"
-                      size="13"
+                    <a-tag
+                      v-for="tag in card.tagList"
+                      :key="tag"
+                      :bordered="false"
+                      :color="stringToColor(tag)"
+                      style="margin-top: 3px; margin-bottom: 3px"
+                      >{{ tag }}</a-tag
+                    >
+                  </a-col>
+                  <a-col :span="24">
+                    <a-divider
+                      style="width: 100%; margin-top: 4px; margin-bottom: 5px; margin-left: 0"
                     />
-                    审核状态
-                  </span>
-                  <span style="font-size: 13px">
-                    <a-tag v-if="card.applyStatus === 'APPLY'"> 申请中 </a-tag>
-                    <a-tooltip :title="card.rejectReason" v-if="card.applyStatus === 'REJECT'">
-                      <a-tag color="red">
-                        <Icon
-                          icon="akar-icons:info"
-                          class="vel-icon icon"
-                          aria-hidden="true"
-                          size="13"
-                        />
-                        已驳回
-                      </a-tag>
-                    </a-tooltip>
-                  </span>
-                </a-col>
-                <a-col :span="24" class="card-tags">
-                  <span style="font-size: 13px">
-                    <Icon
-                      icon="fluent-emoji:timer-clock"
-                      class="vel-icon icon"
-                      aria-hidden="true"
-                      size="13"
-                    />
-                    申请时间
-                  </span>
-                  <span style="font-size: 13px">
-                    {{ card.gmtCreate }}
-                  </span>
-                </a-col>
-                <a-col :span="24">
-                  <a-divider
-                    style="width: 100%; margin-top: 4px; margin-bottom: 5px; margin-left: 0"
-                  />
-                </a-col>
-              </a-row>
-
-              <a-row class="card-tags" v-if="card.applyStatus === 'SUCCESS'">
-                <a-col :span="24" class="card-tags">
-                  <span style="font-size: 13px">
-                    <Icon
-                      icon="fluent-emoji:timer-clock"
-                      class="vel-icon icon"
-                      aria-hidden="true"
-                      size="13"
-                    />
-                    开店时间
-                  </span>
-                  <span style="font-size: 13px">
-                    {{ card.gmtCreate }}
-                  </span>
-                </a-col>
-                <a-col :span="24" class="card-tags">
-                  <span style="font-size: 13px">
-                    <Icon
-                      icon="twemoji:credit-card"
-                      class="vel-icon icon"
-                      aria-hidden="true"
-                      size="13"
-                    />
-                    信用等级
-                  </span>
-                  <span style="font-size: 13px">
-                    {{ card.creditLevel }}
-                  </span>
-                </a-col>
-                <a-col :span="24">
-                  <a-divider
-                    style="width: 100%; margin-top: 4px; margin-bottom: 5px; margin-left: 0"
-                  />
-                </a-col>
-              </a-row>
-
-              <a-row class="card-tags" style="margin-top: 10px" v-if="card.ownerFlag === 'Y'">
-                <a-col :span="24" style="display: flex; justify-content: center">
-                  <a-button-group style="width: 100%">
-                    <a-tooltip title="删除店铺">
-                      <a-popconfirm
-                        title="是否确认删除店铺？"
-                        ok-text="立即删除"
-                        cancel-text="我再想想"
-                        @confirm="doDeleteShop(card.id)"
-                      >
-                        <a-button type="text" style="width: 100%">
+                  </a-col>
+                </a-row>
+                <a-row v-if="card.applyStatus !== 'SUCCESS'">
+                  <a-col :span="24" class="card-tags">
+                    <span style="font-size: 13px">
+                      <Icon
+                        icon="solar:mask-happly-broken"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                        size="13"
+                      />
+                      审核状态
+                    </span>
+                    <span style="font-size: 13px">
+                      <a-tag v-if="card.applyStatus === 'APPLY'"> 申请中 </a-tag>
+                      <a-tooltip :title="card.rejectReason" v-if="card.applyStatus === 'REJECT'">
+                        <a-tag color="red">
                           <Icon
-                            icon="material-symbols:delete-outline"
+                            icon="akar-icons:info"
+                            class="vel-icon icon"
+                            aria-hidden="true"
+                            size="13"
+                          />
+                          已驳回
+                        </a-tag>
+                      </a-tooltip>
+                    </span>
+                  </a-col>
+                  <a-col :span="24" class="card-tags">
+                    <span style="font-size: 13px">
+                      <Icon
+                        icon="fluent-emoji:timer-clock"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                        size="13"
+                      />
+                      申请时间
+                    </span>
+                    <span style="font-size: 13px">
+                      {{ card.gmtCreate }}
+                    </span>
+                  </a-col>
+                  <a-col :span="24">
+                    <a-divider
+                      style="width: 100%; margin-top: 4px; margin-bottom: 5px; margin-left: 0"
+                    />
+                  </a-col>
+                </a-row>
+
+                <a-row class="card-tags" v-if="card.applyStatus === 'SUCCESS'">
+                  <a-col :span="24" class="card-tags">
+                    <span style="font-size: 13px">
+                      <Icon
+                        icon="fluent-emoji:timer-clock"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                        size="13"
+                      />
+                      开店时间
+                    </span>
+                    <span style="font-size: 13px">
+                      {{ card.gmtCreate }}
+                    </span>
+                  </a-col>
+                  <a-col :span="24" class="card-tags">
+                    <span style="font-size: 13px">
+                      <Icon
+                        icon="twemoji:credit-card"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                        size="13"
+                      />
+                      信用等级
+                    </span>
+                    <span style="font-size: 13px">
+                      {{ card.creditLevel }}
+                    </span>
+                  </a-col>
+                  <a-col :span="24">
+                    <a-divider
+                      style="width: 100%; margin-top: 4px; margin-bottom: 5px; margin-left: 0"
+                    />
+                  </a-col>
+                </a-row>
+
+                <a-row class="card-tags" style="margin-top: 10px" v-if="card.ownerFlag === 'Y'">
+                  <a-col :span="24" style="display: flex; justify-content: center">
+                    <a-button-group style="width: 100%">
+                      <a-tooltip title="删除店铺">
+                        <a-popconfirm
+                          title="是否确认删除店铺？"
+                          ok-text="立即删除"
+                          cancel-text="我再想想"
+                          @confirm="doDeleteShop(card.id)"
+                        >
+                          <a-button type="text" style="width: 100%">
+                            <Icon
+                              icon="material-symbols:delete-outline"
+                              class="vel-icon icon"
+                              aria-hidden="true"
+                              size="17"
+                            />
+                          </a-button>
+                        </a-popconfirm>
+                      </a-tooltip>
+                      <a-tooltip title="立即前往">
+                        <a-button type="text" @click="goThirdShop(card)" style="width: 100%">
+                          <Icon
+                            icon="majesticons:door-enter"
                             class="vel-icon icon"
                             aria-hidden="true"
                             size="17"
                           />
                         </a-button>
-                      </a-popconfirm>
-                    </a-tooltip>
-                    <a-tooltip title="立即前往">
-                      <a-button type="text" @click="goThirdShop(card)" style="width: 100%">
-                        <Icon
-                          icon="majesticons:door-enter"
-                          class="vel-icon icon"
-                          aria-hidden="true"
-                          size="17"
-                        />
-                      </a-button>
-                    </a-tooltip>
-                    <div v-if="card.applyStatus === 'SUCCESS'">
-                      <a-tooltip title="开启店铺" v-if="card.status === 'CLOSED'">
-                        <a-popconfirm
-                          title="是否立即开启店铺？"
-                          ok-text="立即开启"
-                          cancel-text="容我再想想"
-                          @confirm="doOpenShop(card.id)"
-                        >
-                          <a-button type="text" style="width: 100%">
-                            <Icon
-                              icon="pepicons-print:lock-open-circle"
-                              class="vel-icon icon"
-                              aria-hidden="true"
-                              size="17"
-                            />
-                          </a-button>
-                        </a-popconfirm>
                       </a-tooltip>
-                      <a-tooltip title="关闭店铺" v-else>
-                        <a-popconfirm
-                          title="是否立即关闭店铺？"
-                          ok-text="立即关闭"
-                          cancel-text="容我再想想"
-                          @confirm="doCloseShop(card.id)"
-                        >
-                          <a-button type="text" style="width: 100%">
-                            <Icon
-                              icon="pepicons-print:lock-closed-circle-filled"
-                              class="vel-icon icon"
-                              aria-hidden="true"
-                              size="17"
-                            />
-                          </a-button>
-                        </a-popconfirm>
-                      </a-tooltip>
-                    </div>
+                      <div v-if="card.applyStatus === 'SUCCESS'">
+                        <a-tooltip title="开启店铺" v-if="card.status === 'CLOSED'">
+                          <a-popconfirm
+                            title="是否立即开启店铺？"
+                            ok-text="立即开启"
+                            cancel-text="容我再想想"
+                            @confirm="doOpenShop(card.id)"
+                          >
+                            <a-button type="text" style="width: 100%">
+                              <Icon
+                                icon="pepicons-print:lock-open-circle"
+                                class="vel-icon icon"
+                                aria-hidden="true"
+                                size="17"
+                              />
+                            </a-button>
+                          </a-popconfirm>
+                        </a-tooltip>
+                        <a-tooltip title="关闭店铺" v-else>
+                          <a-popconfirm
+                            title="是否立即关闭店铺？"
+                            ok-text="立即关闭"
+                            cancel-text="容我再想想"
+                            @confirm="doCloseShop(card.id)"
+                          >
+                            <a-button type="text" style="width: 100%">
+                              <Icon
+                                icon="pepicons-print:lock-closed-circle-filled"
+                                class="vel-icon icon"
+                                aria-hidden="true"
+                                size="17"
+                              />
+                            </a-button>
+                          </a-popconfirm>
+                        </a-tooltip>
+                      </div>
 
-                    <a-tooltip title="编辑店铺">
-                      <a-button type="text" @click="onModified(card)" style="width: 100%">
-                        <Icon
-                          icon="material-symbols:edit-calendar-outline-sharp"
-                          class="vel-icon icon"
-                          aria-hidden="true"
-                          size="17"
-                        />
-                      </a-button>
-                    </a-tooltip>
-                  </a-button-group>
-                </a-col>
-              </a-row>
-              <a-row class="card-tags" v-else>
-                <a-col :span="24">
-                  <a-button
-                    :disabled="card.status === 'PENDING'"
-                    @click="goThirdShop(card)"
-                    style="width: 100%"
-                  >
-                    <Icon
-                      icon="majesticons:door-enter"
-                      class="vel-icon icon"
-                      aria-hidden="true"
-                      size="17"
-                    />
-                    {{ card.status === 'PENDING' ? '重新装修中，暂停访问' : '前往店铺' }}
-                  </a-button>
-                </a-col>
-              </a-row>
-            </div>
-            <!-- 更多卡片内容 -->
-          </a-card>
-        </a-badge-ribbon>
+                      <a-tooltip title="编辑店铺">
+                        <a-button type="text" @click="onModified(card)" style="width: 100%">
+                          <Icon
+                            icon="material-symbols:edit-calendar-outline-sharp"
+                            class="vel-icon icon"
+                            aria-hidden="true"
+                            size="17"
+                          />
+                        </a-button>
+                      </a-tooltip>
+                    </a-button-group>
+                  </a-col>
+                </a-row>
+                <a-row class="card-tags" v-else>
+                  <a-col :span="24">
+                    <a-button
+                      :disabled="card.status === 'PENDING'"
+                      @click="goThirdShop(card)"
+                      style="width: 100%"
+                    >
+                      <Icon
+                        icon="majesticons:door-enter"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                        size="17"
+                      />
+                      {{ card.status === 'PENDING' ? '重新装修中，暂停访问' : '前往店铺' }}
+                    </a-button>
+                  </a-col>
+                </a-row>
+              </div>
+              <!-- 更多卡片内容 -->
+            </a-card>
+          </a-badge-ribbon>
+        </div>
       </div>
-    </div>
-    <div ref="buttonRef">
-      <a-card class="pagination">
-        <a-pagination
-          size="small"
-          :current="pagination.current"
-          :pageSize="pagination.pageSize"
-          :pageSizeOptions="pagination.pageSizeOptions"
-          :total="pagination.total"
-          :showSizeChanger="pagination.showSizeChanger"
-          :showTotal="pagination.showTotal"
-          @change="pageChange"
-          @showSizeChange="pageSizeChange"
-          style="margin-left: 10px"
-        />
-      </a-card>
-    </div>
+      <div ref="buttonRef">
+        <a-card class="pagination">
+          <a-pagination
+            size="small"
+            :current="pagination.current"
+            :pageSize="pagination.pageSize"
+            :pageSizeOptions="pagination.pageSizeOptions"
+            :total="pagination.total"
+            :showSizeChanger="pagination.showSizeChanger"
+            :showTotal="pagination.showTotal"
+            @change="pageChange"
+            @showSizeChange="pageSizeChange"
+            style="margin-left: 10px"
+          />
+        </a-card>
+      </div>
+    </a-card>
   </a-layout>
 </template>
 
@@ -649,7 +651,7 @@
     if (card.shopType === 'THIRD') {
       window.open(card.linkUrl, '_blank');
     } else {
-      go('/goods/index');
+      go(card.linkUrl);
     }
   };
 

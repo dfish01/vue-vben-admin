@@ -1,357 +1,291 @@
 <template>
   <a-layout class="app" v-loading="loadingRef">
-    <a-card ref="formRef" :bodyStyle="{ padding: 0, height: '50px' }">
-      <a-row
-        style="
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          height: 50px;
-          padding: 0 10px;
-        "
-      >
-        <div style="display: flex; align-items: center">
-          <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
-          <span style="margin-left: 5px; font-size: 16px; font-weight: bold">商品市场</span>
-        </div>
-        <div style="display: flex; gap: 5px">
-          <a-button-group>
-            <a-tooltip title="商品查询">
-              <a-button @click="showQueryView" style="padding: 5px">
-                <SvgIcon name="list_search" size="20" />
-              </a-button>
-            </a-tooltip>
-            <a-tooltip title="交易记录">
-              <a-button @click="goView('/trade/index')" style="padding: 5px">
-                <SvgIcon name="trade" size="20" />
-              </a-button>
-            </a-tooltip>
-          </a-button-group>
-        </div>
-      </a-row>
-    </a-card>
-
-    <div
-      v-if="cards.length === 0"
-      style="display: flex; align-items: center; justify-content: center"
-      :style="{ height: `calc(${contentHeight}px)`, overflow: 'auto', padding: '8px' }"
-    >
-      <a-empty :image="simpleImage" />
-    </div>
-    <div
-      v-else
-      class="cards"
-      :style="{
-        height: `calc(${contentHeight}px `,
-        overflow: 'auto',
-        padding: '0 8px',
-      }"
-    >
-      <div v-for="card in cards" :key="card.id" :trigger="['contextmenu']">
-        <!-- Midjourney -->
-        <a-card
-          v-if="card.goodsType === 'MIDJOURNEY'"
-          :bodyStyle="{ padding: '0px', opacity: '0.75', 'line-height': 1 }"
-          class="account-card"
-          hoverable
+    <a-card :bodyStyle="{padding: '0'}"> 
+      <a-card ref="formRef" :bodyStyle="{ padding: 0, height: '50px' }">
+        <a-row
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 50px;
+            padding: 0 10px;
+          "
         >
-          <!-- <a-image :src="card.imageUrl" class="card-image" preview="false" fallback="" /> -->
-          <template #title>
-            <div
-              style="
-                display: flex;
-                flex-direction: row;
-                justify-content: space-between;
-                width: 250px;
-              "
-            >
-              <div style="justify-content: left">
-                <Icon icon="ic:outline-bookmark-add" /><span style="margin-left: 5px">
-                  {{ card.goodsTitle }}</span
-                >
-              </div>
-            </div>
-          </template>
-          <div
-            style="
-              display: flex;
-              flex-direction: column;
-              justify-content: space-between;
-              padding: 10px;
-            "
-          >
-            <div>
-              <div v-if="card.infoBody.billingMethod === 'INTEGRAL'">
-                <a-row class="card-tags">
-                  <a-col flex="90px">
-                    <span style="font-weight: bolder">
-                      <Icon icon="material-symbols:money-outline-rounded" color="#A94438" /> 积分
-                    </span>
-                  </a-col>
-                  <a-col flex="auto">
-                    <span>
-                      {{ card.infoBody.score }} 积分
-                      <a-tooltip
-                        color="#99BC85"
-                        v-if="card.infoBody.integralRule"
-                        :overlayStyle="{ maxWidth: '500px' }"
-                      >
-                        <template #title>
-                          <p
-                            v-for="(part, index) in card.infoBody.integralRule.split(';')"
-                            :key="index"
-                            >{{ part.trim() }}</p
-                          >
-                        </template>
-                        <a-tag style="align-items: center"
-                          ><Icon icon="basil:info-rect-outline" color="#0B60B0" />规则</a-tag
-                        >
-                      </a-tooltip>
-                    </span>
-                  </a-col>
-                </a-row>
-
-                <a-row class="card-tags" v-if="card.infoBody.remark">
-                  <a-col flex="90px">
-                    <span style="font-weight: bolder">
-                      <Icon icon="emojione-v1:note-page" /> 备注
-                    </span>
-                  </a-col>
-                  <a-col flex="auto">
-                    <span>
-                      {{ card.infoBody.remark }}
-                    </span>
-                  </a-col>
-                </a-row>
-              </div>
-              <div v-else>
-                <a-row class="card-tags">
-                  <a-col flex="90px">
-                    <span style="font-weight: bolder">
-                      <Icon icon="emojione-v1:lightning-mood" /> Turbo
-                    </span>
-                  </a-col>
-                  <a-col flex="auto">
-                    <span>
-                      可用<span>{{
-                        card.infoBody.turboTimes !== null ? card.infoBody.turboTimes : '无限'
-                      }}</span
-                      >次
-                    </span>
-                  </a-col>
-                </a-row>
-                <a-row class="card-tags">
-                  <a-col flex="90px">
-                    <span style="font-weight: bolder"> <Icon icon="openmoji:rabbit" /> Fast </span>
-                  </a-col>
-                  <a-col flex="auto">
-                    <span>
-                      可用{{
-                        card.infoBody.fastTimes !== null ? card.infoBody.fastTimes : '无限'
-                      }}次
-                    </span>
-                  </a-col>
-                </a-row>
-                <a-row class="card-tags">
-                  <a-col flex="90px">
-                    <span style="font-weight: bolder">
-                      <Icon icon="streamline-emojis:turtle" /> Relax
-                    </span>
-                  </a-col>
-                  <a-col flex="auto">
-                    <span>
-                      可用{{
-                        card.infoBody.relaxTimes !== null ? card.infoBody.relaxTimes : '无限'
-                      }}次
-                    </span>
-                  </a-col>
-                </a-row>
-              </div>
-
-              <a-row class="card-tags">
-                <a-col flex="90px">
-                  <span style="font-weight: bolder">
-                    <Icon icon="tabler:needle-thread" /> 队列数
-                  </span>
-                </a-col>
-                <a-col flex="auto">
-                  <span> 最多同时提交{{ card.infoBody.maxSubmit }}个任务 </span>
-                </a-col>
-              </a-row>
-              <a-row class="card-tags">
-                <a-col flex="90px">
-                  <span style="font-weight: bolder">
-                    <Icon icon="tabler:needle-thread" /> 并发线程
-                  </span>
-                </a-col>
-                <a-col flex="auto" v-if="card.infoBody.conExecute">
-                  <span> 最多同时运行{{ card.infoBody.conExecute }}个任务 </span>
-                </a-col>
-                <a-col flex="auto" v-else>
-                  <span> 同时运行任务数同主账号 </span>
-                </a-col>
-              </a-row>
-
-              <a-row
-                class="card-tags"
-                style="display: flex; justify-content: space-between"
-                v-if="card.infoBody.infoBodyStr"
-              >
-                <div style="width: 90px">
-                  <span style="font-weight: bolder">
-                    <Icon icon="material-symbols:other-admission-outline" /> 其他福利
-                  </span>
-                </div>
-                <div style="flex: 1; flex-wrap: false">
-                  <a-typography-text
-                    style="width: 160px"
-                    :ellipsis="{ tooltip: card.infoBody.infoBodyStr }"
-                    :content="card.infoBody.infoBodyStr"
-                  />
-                </div>
-              </a-row>
-              <a-row class="card-tags">
-                <a-col flex="90px">
-                  <span style="font-weight: bolder"> <Icon icon="openmoji:timer" /> 有效期至 </span>
-                </a-col>
-                <a-col flex="auto">
-                  <span v-if="card.infoBody.authWay === 'DAY'">
-                    激活后 {{ card.infoBody.authDays }} 天
-                  </span>
-                  <span v-else> {{ card.infoBody.authExpireTimes }} </span>
-                </a-col>
-              </a-row>
-
-              <a-row class="card-tags">
-                <a-col flex="90px">
-                  <span style="font-weight: bolder">
-                    <Icon icon="flat-color-icons:shipped" /> 发货方式
-                  </span>
-                </a-col>
-                <a-col flex="auto">
-                  <span v-if="card.shipType === 'AUTO'"> 拍下后自动发货 </span>
-                  <span v-if="card.shipType === 'HAND'"> 请联系客服手动发货 </span>
-                  <span v-if="card.shipType === 'SYSTEM_ACTIVE'"> 拍下后自动发货并激活 </span>
-                </a-col>
-              </a-row>
-              <a-row class="card-tags">
-                <a-col flex="90px">
-                  <span style="font-weight: bolder"> <Icon icon="jam:box" /> 当前库存 </span>
-                </a-col>
-                <a-col flex="auto" v-if="card.editFlag && card.editFlag == true">
-                  {{ card.stock }}/真实库存{{ card.realStock ? card.realStock : 0 }}
-                </a-col>
-                <a-col flex="auto" v-else> {{ card.stock }} 件 </a-col>
-              </a-row>
-              <a-row class="card-tags">
-                <a-col flex="90px">
-                  <span style="font-weight: bolder">
-                    <Icon icon="foundation:burst-sale" color="red" /> 已售出
-                  </span>
-                </a-col>
-
-                <a-col flex="auto"> {{ card.numSale }} 件 </a-col>
-              </a-row>
-              <a-row class="card-tags">
-                <a-col v-if="card.specialLabel">
-                  <a-tag color="red">{{ card.specialLabel }} </a-tag>
-                </a-col>
-              </a-row>
-            </div>
-            <div>
-              <a-row class="card-tags" style="display: flex; justify-content: space-between">
-                <div style="display: flex; align-items: center; width: 150px">
-                  <span style="color: #e36414; font-size: 20px; font-weight: orange">
-                    <Icon icon="icon-park-solid:paper-money" size="20px" /> {{ card.goodsPrice }}
-                  </span>
-                  <span style="bottom: 0; margin-left: 10px; font-size: 20px">
-                    <a-typography-text delete>
-                      {{ card.oriGoodsPrice }}
-                    </a-typography-text>
-                  </span>
-                </div>
-
-                <div style="display: flex; flex: 1; justify-content: flex-end">
-                  <a-button type="primary" @click="buyGoods(card)" :disabled="card.stock > 0"
-                    >立即购买
-                  </a-button>
-                </div>
-              </a-row>
-            </div>
+          <div style="display: flex; align-items: center">
+            <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
+            <span style="margin-left: 5px; font-size: 16px; font-weight: bold">商品市场</span>
           </div>
-          <!-- 更多卡片内容 -->
-        </a-card>
-        <!-- chatGPt -->
-        <a-card
-          v-else
-          :bodyStyle="{ padding: '0px', opacity: '0.75', 'line-height': 1 }"
-          class="account-card"
-          hoverable
-        >
-          <template #title>
+          <div style="display: flex; gap: 5px">
+            <a-button-group>
+              <a-tooltip title="商品查询">
+                <a-button @click="showQueryView" style="padding: 5px">
+                  <SvgIcon name="list_search" size="20" />
+                </a-button>
+              </a-tooltip>
+              <a-tooltip title="交易记录">
+                <a-button @click="goView('/trade/index')" style="padding: 5px">
+                  <SvgIcon name="trade" size="20" />
+                </a-button>
+              </a-tooltip>
+            </a-button-group>
+          </div>
+        </a-row>
+      </a-card>
+
+      <div
+        v-if="cards.length === 0"
+        style="display: flex; align-items: center; justify-content: center"
+        :style="{ height: `calc(${contentHeight}px)`, overflow: 'auto', padding: '8px' }"
+      >
+        <a-empty :image="simpleImage" />
+      </div>
+      <div
+        v-else
+        class="cards"
+        :style="{
+          height: `calc(${contentHeight}px `,
+          overflow: 'auto',
+          padding: '0 8px',
+        }"
+      >
+        <div v-for="card in cards" :key="card.id" :trigger="['contextmenu']">
+          <!-- Midjourney -->
+          <a-card
+            v-if="card.goodsType === 'MIDJOURNEY'"
+            :bodyStyle="{ padding: '0px', opacity: '0.75', 'line-height': 1 }"
+            class="account-card"
+            hoverable
+          >
+            <!-- <a-image :src="card.imageUrl" class="card-image" preview="false" fallback="" /> -->
+            <template #title>
+              <div
+                style="
+                  display: flex;
+                  flex-direction: row;
+                  justify-content: space-between;
+                  width: 250px;
+                "
+              >
+                <div style="justify-content: left">
+                  <Icon icon="ic:outline-bookmark-add" /><span style="margin-left: 5px">
+                    {{ card.goodsTitle }}</span
+                  >
+                </div>
+              </div>
+            </template>
             <div
               style="
                 display: flex;
-                flex-direction: row;
+                flex-direction: column;
                 justify-content: space-between;
-                width: 250px;
+                padding: 10px;
               "
             >
-              <div style="justify-content: left">
-                <Icon icon="ic:outline-bookmark-add" /><span style="margin-left: 5px">
-                  {{ card.goodsTitle }}</span
+              <div>
+                <div v-if="card.infoBody.billingMethod === 'INTEGRAL'">
+                  <a-row class="card-tags">
+                    <a-col flex="90px">
+                      <span style="font-weight: bolder">
+                        <Icon icon="material-symbols:money-outline-rounded" color="#A94438" /> 积分
+                      </span>
+                    </a-col>
+                    <a-col flex="auto">
+                      <span>
+                        {{ card.infoBody.score }} 积分
+                        <a-tooltip
+                          color="#99BC85"
+                          v-if="card.infoBody.integralRule"
+                          :overlayStyle="{ maxWidth: '500px' }"
+                        >
+                          <template #title>
+                            <p
+                              v-for="(part, index) in card.infoBody.integralRule.split(';')"
+                              :key="index"
+                              >{{ part.trim() }}</p
+                            >
+                          </template>
+                          <a-tag style="align-items: center"
+                            ><Icon icon="basil:info-rect-outline" color="#0B60B0" />规则</a-tag
+                          >
+                        </a-tooltip>
+                      </span>
+                    </a-col>
+                  </a-row>
+
+                  <a-row class="card-tags" v-if="card.infoBody.remark">
+                    <a-col flex="90px">
+                      <span style="font-weight: bolder">
+                        <Icon icon="emojione-v1:note-page" /> 备注
+                      </span>
+                    </a-col>
+                    <a-col flex="auto">
+                      <span>
+                        {{ card.infoBody.remark }}
+                      </span>
+                    </a-col>
+                  </a-row>
+                </div>
+                <div v-else>
+                  <a-row class="card-tags">
+                    <a-col flex="90px">
+                      <span style="font-weight: bolder">
+                        <Icon icon="emojione-v1:lightning-mood" /> Turbo
+                      </span>
+                    </a-col>
+                    <a-col flex="auto">
+                      <span>
+                        可用<span>{{
+                          card.infoBody.turboTimes !== null ? card.infoBody.turboTimes : '无限'
+                        }}</span
+                        >次
+                      </span>
+                    </a-col>
+                  </a-row>
+                  <a-row class="card-tags">
+                    <a-col flex="90px">
+                      <span style="font-weight: bolder"> <Icon icon="openmoji:rabbit" /> Fast </span>
+                    </a-col>
+                    <a-col flex="auto">
+                      <span>
+                        可用{{
+                          card.infoBody.fastTimes !== null ? card.infoBody.fastTimes : '无限'
+                        }}次
+                      </span>
+                    </a-col>
+                  </a-row>
+                  <a-row class="card-tags">
+                    <a-col flex="90px">
+                      <span style="font-weight: bolder">
+                        <Icon icon="streamline-emojis:turtle" /> Relax
+                      </span>
+                    </a-col>
+                    <a-col flex="auto">
+                      <span>
+                        可用{{
+                          card.infoBody.relaxTimes !== null ? card.infoBody.relaxTimes : '无限'
+                        }}次
+                      </span>
+                    </a-col>
+                  </a-row>
+                </div>
+
+                <a-row class="card-tags">
+                  <a-col flex="90px">
+                    <span style="font-weight: bolder">
+                      <Icon icon="tabler:needle-thread" /> 队列数
+                    </span>
+                  </a-col>
+                  <a-col flex="auto">
+                    <span> 最多同时提交{{ card.infoBody.maxSubmit }}个任务 </span>
+                  </a-col>
+                </a-row>
+                <a-row class="card-tags">
+                  <a-col flex="90px">
+                    <span style="font-weight: bolder">
+                      <Icon icon="tabler:needle-thread" /> 并发线程
+                    </span>
+                  </a-col>
+                  <a-col flex="auto" v-if="card.infoBody.conExecute">
+                    <span> 最多同时运行{{ card.infoBody.conExecute }}个任务 </span>
+                  </a-col>
+                  <a-col flex="auto" v-else>
+                    <span> 同时运行任务数同主账号 </span>
+                  </a-col>
+                </a-row>
+
+                <a-row
+                  class="card-tags"
+                  style="display: flex; justify-content: space-between"
+                  v-if="card.infoBody.infoBodyStr"
                 >
+                  <div style="width: 90px">
+                    <span style="font-weight: bolder">
+                      <Icon icon="material-symbols:other-admission-outline" /> 其他福利
+                    </span>
+                  </div>
+                  <div style="flex: 1; flex-wrap: false">
+                    <a-typography-text
+                      style="width: 160px"
+                      :ellipsis="{ tooltip: card.infoBody.infoBodyStr }"
+                      :content="card.infoBody.infoBodyStr"
+                    />
+                  </div>
+                </a-row>
+                <a-row class="card-tags">
+                  <a-col flex="90px">
+                    <span style="font-weight: bolder"> <Icon icon="openmoji:timer" /> 有效期至 </span>
+                  </a-col>
+                  <a-col flex="auto">
+                    <span v-if="card.infoBody.authWay === 'DAY'">
+                      激活后 {{ card.infoBody.authDays }} 天
+                    </span>
+                    <span v-else> {{ card.infoBody.authExpireTimes }} </span>
+                  </a-col>
+                </a-row>
+
+                <a-row class="card-tags">
+                  <a-col flex="90px">
+                    <span style="font-weight: bolder">
+                      <Icon icon="flat-color-icons:shipped" /> 发货方式
+                    </span>
+                  </a-col>
+                  <a-col flex="auto">
+                    <span v-if="card.shipType === 'AUTO'"> 拍下后自动发货 </span>
+                    <span v-if="card.shipType === 'HAND'"> 请联系客服手动发货 </span>
+                    <span v-if="card.shipType === 'SYSTEM_ACTIVE'"> 拍下后自动发货并激活 </span>
+                  </a-col>
+                </a-row>
+                <a-row class="card-tags">
+                  <a-col flex="90px">
+                    <span style="font-weight: bolder"> <Icon icon="jam:box" /> 当前库存 </span>
+                  </a-col>
+                  <a-col flex="auto" v-if="card.editFlag && card.editFlag == true">
+                    {{ card.stock }}/真实库存{{ card.realStock ? card.realStock : 0 }}
+                  </a-col>
+                  <a-col flex="auto" v-else> {{ card.stock }} 件 </a-col>
+                </a-row>
+                <a-row class="card-tags">
+                  <a-col flex="90px">
+                    <span style="font-weight: bolder">
+                      <Icon icon="foundation:burst-sale" color="red" /> 已售出
+                    </span>
+                  </a-col>
+
+                  <a-col flex="auto"> {{ card.numSale }} 件 </a-col>
+                </a-row>
+                <a-row class="card-tags">
+                  <a-col v-if="card.specialLabel">
+                    <a-tag color="red">{{ card.specialLabel }} </a-tag>
+                  </a-col>
+                </a-row>
+              </div>
+              <div>
+                <a-row class="card-tags" style="display: flex; justify-content: space-between">
+                  <div style="display: flex; align-items: center; width: 150px">
+                    <span style="color: #e36414; font-size: 20px; font-weight: orange">
+                      <Icon icon="icon-park-solid:paper-money" size="20px" /> {{ card.goodsPrice }}
+                    </span>
+                    <span style="bottom: 0; margin-left: 10px; font-size: 20px">
+                      <a-typography-text delete>
+                        {{ card.oriGoodsPrice }}
+                      </a-typography-text>
+                    </span>
+                  </div>
+
+                  <div style="display: flex; flex: 1; justify-content: flex-end">
+                    <a-button type="primary" @click="buyGoods(card)" 
+                      >立即购买
+                    </a-button>
+                  </div>
+                </a-row>
               </div>
             </div>
-          </template>
-          <div style="display: flex; flex-direction: column; padding: 10px">
-            <a-row class="card-tags">
-              <MarkdownViewer :value="card.infoBody.infoBodyStr" />
-            </a-row>
-            <a-divider style="height: 1px; margin: 4px" />
-            <a-row class="card-tags">
-              <a-col flex="90px">
-                <span style="font-weight: bolder"> <Icon icon="openmoji:timer" /> 有效期至 </span>
-              </a-col>
-              <a-col flex="auto">
-                <span v-if="card.infoBody.authWay === 'DAY'">
-                  激活后 {{ card.infoBody.authDays }} 天
-                </span>
-                <span v-else> {{ card.infoBody.authExpireTimes }} </span>
-              </a-col>
-            </a-row>
-            <a-row class="card-tags">
-              <a-col flex="90px">
-                <span style="font-weight: bolder">
-                  <Icon icon="flat-color-icons:shipped" /> 发货方式
-                </span>
-              </a-col>
-              <a-col flex="auto">
-                <span v-if="card.shipType === 'AUTO'"> 拍下后自动发货 </span>
-                <span v-if="card.shipType === 'HAND'"> 请联系客服手动发货 </span>
-                <span v-if="card.shipType === 'SYSTEM_ACTIVE'"> 拍下后自动发货并激活 </span>
-              </a-col>
-            </a-row>
-            <a-row class="card-tags">
-              <a-col flex="90px">
-                <span style="font-weight: bolder"> <Icon icon="jam:box" /> 库存 </span>
-              </a-col>
-              <a-col flex="auto">
-                {{ card.stock }}
-              </a-col>
-            </a-row>
-            <a-row class="card-tags" style="display: flex; justify-content: space-between">
-              <div style="display: flex; align-items: center; width: 100px">
-                <span style="color: #e36414; font-size: 20px; font-weight: orange">
-                  <Icon icon="icon-park-solid:paper-money" size="23px" /> {{ card.goodsPrice }}
-                </span>
-              </div>
-
-              <div style="display: flex; flex: 1; justify-content: flex-end">
-                <a-button type="primary" @click="buyGoods(card)">立即购买 </a-button>
-              </div>
-            </a-row>
-            <a-row v-if="card.editFlag && card.editFlag == true" class="card-tags">
+            <!-- 更多卡片内容 -->
+            <a-row
+              v-if="card.editFlag && card.editFlag == true"
+              class="card-tags"
+              style="margin-bottom: 10px"
+            >
               <a-col :span="24">
                 <a-button-group style="width: 100%">
                   <a-button style="width: 25%" @click="showModifiedNewGoods(card)">编辑 </a-button>
@@ -372,27 +306,120 @@
                 </a-button-group>
               </a-col>
             </a-row>
-          </div>
-          <!-- 更多卡片内容 -->
+          </a-card>
+          <!-- chatGPt -->
+          <a-card
+            v-else
+            :bodyStyle="{ padding: '0px', opacity: '0.75', 'line-height': 1 }"
+            class="account-card"
+            hoverable
+          >
+            <template #title>
+              <div
+                style="
+                  display: flex;
+                  flex-direction: row;
+                  justify-content: space-between;
+                  width: 250px;
+                "
+              >
+                <div style="justify-content: left">
+                  <Icon icon="ic:outline-bookmark-add" /><span style="margin-left: 5px">
+                    {{ card.goodsTitle }}</span
+                  >
+                </div>
+              </div>
+            </template>
+            <div style="display: flex; flex-direction: column; padding: 10px">
+              <a-row class="card-tags">
+                <MarkdownViewer :value="card.infoBody.infoBodyStr" />
+              </a-row>
+              <a-divider style="height: 1px; margin: 4px" />
+              <a-row class="card-tags">
+                <a-col flex="90px">
+                  <span style="font-weight: bolder"> <Icon icon="openmoji:timer" /> 有效期至 </span>
+                </a-col>
+                <a-col flex="auto">
+                  <span v-if="card.infoBody.authWay === 'DAY'">
+                    激活后 {{ card.infoBody.authDays }} 天
+                  </span>
+                  <span v-else> {{ card.infoBody.authExpireTimes }} </span>
+                </a-col>
+              </a-row>
+              <a-row class="card-tags">
+                <a-col flex="90px">
+                  <span style="font-weight: bolder">
+                    <Icon icon="flat-color-icons:shipped" /> 发货方式
+                  </span>
+                </a-col>
+                <a-col flex="auto">
+                  <span v-if="card.shipType === 'AUTO'"> 拍下后自动发货 </span>
+                  <span v-if="card.shipType === 'HAND'"> 请联系客服手动发货 </span>
+                  <span v-if="card.shipType === 'SYSTEM_ACTIVE'"> 拍下后自动发货并激活 </span>
+                </a-col>
+              </a-row>
+              <a-row class="card-tags">
+                <a-col flex="90px">
+                  <span style="font-weight: bolder"> <Icon icon="jam:box" /> 库存 </span>
+                </a-col>
+                <a-col flex="auto">
+                  {{ card.stock }}
+                </a-col>
+              </a-row>
+              <a-row class="card-tags" style="display: flex; justify-content: space-between">
+                <div style="display: flex; align-items: center; width: 100px">
+                  <span style="color: #e36414; font-size: 20px; font-weight: orange">
+                    <Icon icon="icon-park-solid:paper-money" size="23px" /> {{ card.goodsPrice }}
+                  </span>
+                </div>
+
+                <div style="display: flex; flex: 1; justify-content: flex-end">
+                  <a-button type="primary" @click="buyGoods(card)">立即购买 </a-button>
+                </div>
+              </a-row>
+              <a-row v-if="card.editFlag && card.editFlag == true" class="card-tags">
+                <a-col :span="24">
+                  <a-button-group style="width: 100%">
+                    <a-button style="width: 25%" @click="showModifiedNewGoods(card)">编辑 </a-button>
+                    <a-button
+                      v-if="card.goodsState === 'DOWN'"
+                      style="width: 25%"
+                      @click="doChangeGoodsState(card, 'UP')"
+                      >上架
+                    </a-button>
+                    <a-button
+                      v-if="card.goodsState === 'UP'"
+                      style="width: 25%"
+                      @click="doChangeGoodsState(card, 'DOWN')"
+                      >下架
+                    </a-button>
+                    <a-button style="width: 25%" @click="doDeleteGoods(card.id)">删除 </a-button>
+                    <a-button style="width: 25%" @click="showStockList(card)">库存 </a-button>
+                  </a-button-group>
+                </a-col>
+              </a-row>
+            </div>
+            <!-- 更多卡片内容 -->
+          </a-card>
+        </div>
+      </div>
+      <div ref="buttonRef">
+        <a-card class="pagination">
+          <a-pagination
+            size="small"
+            :current="pagination.current"
+            :pageSize="pagination.pageSize"
+            :pageSizeOptions="pagination.pageSizeOptions"
+            :total="pagination.total"
+            :showSizeChanger="pagination.showSizeChanger"
+            :showTotal="pagination.showTotal"
+            @change="pageChange"
+            @showSizeChange="pageSizeChange"
+            style="margin-left: 10px"
+          />
         </a-card>
       </div>
-    </div>
-    <div ref="buttonRef">
-      <a-card class="pagination">
-        <a-pagination
-          size="small"
-          :current="pagination.current"
-          :pageSize="pagination.pageSize"
-          :pageSizeOptions="pagination.pageSizeOptions"
-          :total="pagination.total"
-          :showSizeChanger="pagination.showSizeChanger"
-          :showTotal="pagination.showTotal"
-          @change="pageChange"
-          @showSizeChange="pageSizeChange"
-          style="margin-left: 10px"
-        />
-      </a-card>
-    </div>
+    </a-card>
     <!-- 支付弹窗 -->
     <a-modal
       v-model:open="payForm.viewFlag"
@@ -418,43 +445,566 @@
       <template #footer>
         <a-button key="submit" type="primary" @click="doSearch()">立即查询</a-button>
       </template>
-      <a-card
-        :bordered="false"
-        :bodyStyle="{ padding: '1px 1px 1px 1px', width: '100%', 'align-items': 'center' }"
-      >
+
         <a-row :gutter="[0, 2]" type="flex">
-          <a-col flex="100px">
-            <a-tag class="quality-tag" color="default">🍺商品类型 </a-tag>
-          </a-col>
-          <a-col flex="auto">
+          <a-input-group compact style="display: flex">
+            <a-tag class="line-label tag-no-right-border" color="default"><Icon icon="streamline-emojis:leaf-fluttering-in-wind" size="20" />商品类型</a-tag>
+
             <a-select
               placeholder="商品类型"
               v-model:value="searchForm.goodsType"
-              class="mobile-select"
-              style="width: 100%"
+              class="line-input tag-no-right-border"
             >
               <a-select-option value="MIDJOURNEY">MJ绘画</a-select-option>
               <a-select-option value="GPT">chatGPt</a-select-option>
               <a-select-option value="SYSTEM">系统</a-select-option>
               <a-select-option value="GROUP">拼团</a-select-option>
             </a-select>
-          </a-col>
+
+            </a-input-group>
         </a-row>
-        <a-row type="flex" :gutter="[0, 2]" style="margin-top: 7px">
-          <a-col flex="100px">
-            <a-tag class="quality-tag" color="default"
-              ><Icon icon="fluent-emoji-flat:label" size="20" /> 商品名称
-            </a-tag>
-          </a-col>
-          <a-col flex="auto">
+        <a-row type="flex" :gutter="[0, 2]" style="margin-top: 3px">
+          <a-input-group compact style="display: flex">
+            <a-tag class="line-label tag-no-right-border" color="default"><Icon icon="streamline-emojis:fire" size="20" /> 商品名称</a-tag>
+
             <a-input
               v-model:value="searchForm.goodsTitle"
               autofocus
               placeholder="商品名称模糊查询~"
-              style="width: 100%"
+              class="line-input "
             />
-          </a-col>
+            </a-input-group>
         </a-row>
+   
+        <a-row :gutter="[0, 2]" type="flex" style="margin-top: 3px">
+          <a-input-group compact style="display: flex">
+            <a-tag class="line-label tag-no-right-border" color="default"><Icon icon="streamline-emojis:person-wearing-turban-1" size="20" /> 商品归属</a-tag>
+            <a-select
+              placeholder="商品归属"
+              v-model:value="searchForm.ownerFlag"
+              class="line-input tag-no-right-border"
+            >
+              <a-select-option value="false">集市</a-select-option>
+              <a-select-option value="true">我的</a-select-option>
+            </a-select>
+          </a-input-group>
+        </a-row>
+    </a-modal>
+
+    
+    <!-- 发布商品 -->
+    <a-modal
+      v-model:open="deployGoodsForm.isActiveVisible"
+      width="100%"
+        wrap-class-name="full-modal"
+        :bodyStyle="{ padding: '0 10px 30px 10px' }"
+      :ok-text="deployGoodsForm.id ? '提交更新' : '立即创建'"
+      @ok="onDeployGoods"
+      @cancel="hideDeployGoods"
+      :confirmLoading="deployGoodsForm.loading"
+    >
+      <template #title>
+        <span>
+          <Icon icon="fluent:drawer-add-24-filled" class="vel-icon icon" aria-hidden="true" />
+          {{ deployGoodsForm.title }}
+        </span>
+      </template>
+      <a-card>
+        <Loading :loading="deployGoodsForm.loading" :absolute="true" tip="正在生成中..." />
+        <a-form layout="vertical" :model="deployGoodsForm" ref="deployGoodsFormRef">
+          <a-row gutter="24">
+            <a-col :span="24">
+              <a-form-item
+                label="商品标题"
+                name="goodsTitle"
+                :rules="[{ required: true, message: '请输入商品标题!' }]"
+              >
+                <a-input v-model:value="deployGoodsForm.goodsTitle" placeholder="请输入商品标题" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24">
+              <a-form-item
+                label="商品说明（暂时未显示）"
+                name="goodsRemark"
+                :rules="[{ required: false, message: '请输入商品说明!' }]"
+              >
+                <a-textarea
+                  v-model:value="deployGoodsForm.goodsRemark"
+                  placeholder="请输入商品说明"
+                  :rows="3"
+                  show-count :maxlength="60"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12">
+              <a-form-item
+                label="商品售价"
+                name="goodsPrice"
+                :rules="[{ required: true, message: '请输入出售价格!' }]"
+              >
+                <a-input v-model:value="deployGoodsForm.goodsPrice" placeholder="请输入出售价格~" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12">
+              <a-form-item
+                label="商品原价"
+                name="oriGoodsPrice"
+                :rules="[{ required: true, message: '请输入商品原价格!' }]"
+              >
+                <a-input
+                  v-model:value="deployGoodsForm.oriGoodsPrice"
+                  placeholder="请输入商品原价格~"
+                />
+              </a-form-item>
+            </a-col>
+
+            <a-col :span="12">
+              <a-form-item
+                label="发货方式"
+                name="shipType"
+                :rules="[{ required: true, message: '请选择发货方式!' }]"
+              >
+                <a-select
+                  v-model:value="deployGoodsForm.shipType"
+                  style="width: 100%"
+                  placeholder="发货方式"
+                >
+                  <a-select-option value="AUTO">自动发货</a-select-option>
+                  <a-select-option value="HAND">手动发货</a-select-option>
+                  <a-select-option value="SYSTEM_ACTIVE">自动系统激活</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="12">
+              <a-form-item
+                label="库存"
+                name="stock"
+                :rules="[{ required: true, message: '请输入出售的库存!' }]"
+              >
+                <a-input-number
+                  v-model:value="deployGoodsForm.stock"
+                  placeholder="请输入出售的库存~"
+                  min="1"
+                  max="50"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12">
+              <a-form-item
+                label="授权类型"
+                :name="['infoBody', 'authWay']"
+                :rules="[{ required: true, message: '请选择授权类型' }]"
+              >
+                <a-select
+                  v-model:value="deployGoodsForm.infoBody.authWay"
+                  @change="changeAuthWay"
+                  placeholder="授权方式"
+                >
+                  <a-select-option value="DAY">按天计算</a-select-option>
+                  <a-select-option value="TIME">指定到期时间</a-select-option>
+                  <a-select-option value="NONE">无需时间</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+
+            <a-col :span="12" v-if="deployGoodsForm.infoBody.authWay === 'DAY'">
+              <a-form-item
+                label="授权天数（0~365）"
+                :name="['infoBody', 'authDays']"
+                :rules="[{ required: true, message: '请输入授权天数' }]"
+              >
+                <a-input-number
+                  v-model:value="deployGoodsForm.infoBody.authDays"
+                  placeholder="请输入授权天数，为空则是永久~"
+                  min="0"
+                  max="365"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" v-if="deployGoodsForm.infoBody.authWay === 'TIME'">
+              <a-form-item
+                label="到期时间"
+                :name="['infoBody', 'authExpireTimes']"
+                :rules="[{ required: true, message: '请选择到期时间' }]"
+              >
+                <a-date-picker
+                  show-time
+                  style="width: 100%"
+                  width="100%"
+                  v-model:value="deployGoodsForm.infoBody.authExpireTimes"
+                  placeholder="到期时间，为空则是永久~"
+                  @change="onChangePicker"
+                />
+              </a-form-item>
+            </a-col>
+          </a-row>
+          <a-col :span="24">
+            <a-form-item
+              label="发货邮件模板（用于组装发货内容）"
+              name="emailTemplate"
+              :rules="[{ required: false, message: '请输入发货邮件模板!' }]"
+            >
+              <a-textarea
+                v-model:value="deployGoodsForm.emailTemplate"
+                placeholder="您好，您购买的商品发货啦！发货内容：${content} "
+                :rows="3"
+              />
+            </a-form-item>
+          </a-col>
+          <a-row gutter="24" v-if="deployGoodsForm.goodsType === 'MIDJOURNEY'">
+            <a-col :span="12">
+              <a-form-item
+                label="追加库存"
+                :name="['autoGenStock', 'genWay']"
+                :rules="[{ required: true, message: '请选择追加库存的方式!' }]"
+              >
+                <a-select
+                  v-model:value="deployGoodsForm.autoGenStock.genWay"
+                  style="width: 100%"
+                  placeholder="追加库存"
+                >
+                  <a-select-option value="NONE">暂不追加</a-select-option>
+                  <a-select-option value="ACCOUNT">自动追加</a-select-option>
+                  <a-select-option value="HAND">手动追加</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="12">
+              <a-form-item
+                label="排序值"
+                name="sort"
+                :rules="[{ required: true, message: '请输入排序值!' }]"
+              >
+                <a-input-number
+                  v-model:value="deployGoodsForm.sort"
+                  placeholder="请输入排序值~"
+                  min="1"
+                  max="9999"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="24" v-if="deployGoodsForm.autoGenStock.genWay === 'HAND'">
+              <a-form-item
+                label="商品库存"
+                :name="['autoGenStock', 'appendStockInfo']"
+                :rules="[{ required: false, message: '请输入商品库存!' }]"
+              >
+                <a-textarea
+                  v-model:value="deployGoodsForm.autoGenStock.appendStockInfo"
+                  placeholder="请输入商品库存，多个用|分割"
+                  :rows="3"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" v-if="deployGoodsForm.autoGenStock.genWay === 'ACCOUNT'">
+              <a-form-item
+                :name="['autoGenStock', 'autoGenAccountId']"
+                :rules="[{ required: true, message: '请选择账号!' }]"
+              >
+                <template #label>
+                  <span>指定账号</span
+                  ><span style="color: red; font-size: 10px">
+                    （将自动生成授权码，无需单独维护库存）
+                  </span>
+                </template>
+                <a-select
+                  placeholder="请选择账号"
+                  style="width: 100%; height: 32px"
+                  v-model:value="deployGoodsForm.autoGenStock.autoGenAccountId"
+                  :options="selectForm.accountOptions"
+                />
+              </a-form-item>
+            </a-col>
+            <a-col :span="12" v-if="deployGoodsForm.autoGenStock.genWay === 'ACCOUNT'">
+              <a-form-item
+                label="追加库存数量"
+                :name="['autoGenStock', 'autoGenStockNum']"
+                :rules="[{ required: false, message: '请输入追加库存数量!' }]"
+              >
+                <a-input-number
+                  v-model:value="deployGoodsForm.autoGenStock.autoGenStockNum"
+                  placeholder="请输入追加库存数量~"
+                  min="1"
+                  max="100"
+                />
+              </a-form-item>
+            </a-col>
+          </a-row>
+          <a-row gutter="24">
+            <a-col :span="24">
+              <a-tabs v-model:activeKey="deployGoodsForm.goodsType" @change="changeTab">
+                <a-tab-pane key="MIDJOURNEY" tab="Midjourney">
+                  <a-row gutter="24">
+                    <a-col :span="12">
+                      <a-form-item label="提交任务数" :name="['infoBody', 'maxSubmit']">
+                        <a-input-number
+                          v-model:value="deployGoodsForm.infoBody.maxSubmit"
+                          placeholder="请输提交任务数，为空则上限为主账号上限~"
+                          min="1"
+                          :max="deployGoodsForm.infoBody.maxNumExecute"
+                        />
+                      </a-form-item>
+                    </a-col>
+                    <a-col :span="12">
+                      <a-form-item label="并发任务数" :name="['infoBody', 'conExecute']">
+                        <a-input-number
+                          v-model:value="deployGoodsForm.infoBody.conExecute"
+                          placeholder="请输并发任务数，为空则上限为主账号上限~"
+                          min="1"
+                          :max="deployGoodsForm.infoBody.conExecute"
+                        />
+                      </a-form-item>
+                    </a-col>
+                  </a-row>
+                  <a-row gutter="24" v-if="deployGoodsForm.infoBody.billingMethod === 'TIMES'">
+                    <a-col :span="12">
+                      <a-form-item
+                        label="计费方式"
+                        :name="['infoBody', 'billingMethod']"
+                        :rules="[{ required: true, message: '请选择计费方式!' }]"
+                      >
+                        <a-select
+                          v-model:value="deployGoodsForm.infoBody.billingMethod"
+                          style="width: 100%"
+                          placeholder="计费方式"
+                        >
+                          <a-select-option value="INTEGRAL">积分计费</a-select-option>
+                          <a-select-option value="TIMES">次数计费</a-select-option>
+                        </a-select>
+                      </a-form-item>
+                    </a-col>
+                    <a-col :span="12">
+                      <a-form-item
+                        label="TURBO模式次数（0~9999）"
+                        :name="['infoBody', 'turboTimes']"
+                      >
+                        <a-input-number
+                          v-model:value="deployGoodsForm.infoBody.turboTimes"
+                          placeholder="请输入TURBO次数，为空则是永久~"
+                          min="0"
+                          max="9999"
+                        />
+                      </a-form-item>
+                    </a-col>
+                    <a-col :span="12">
+                      <a-form-item label="FAST模式次数（0~9999）" :name="['infoBody', 'fastTimes']">
+                        <a-input-number
+                          v-model:value="deployGoodsForm.infoBody.fastTimes"
+                          placeholder="请输入Fast次数，为空则是永久~"
+                          min="0"
+                          max="9999"
+                        />
+                      </a-form-item>
+                    </a-col>
+                    <a-col :span="12">
+                      <a-form-item
+                        label="Relax模式次数（0~9999）"
+                        :name="['infoBody', 'relaxTimes']"
+                      >
+                        <a-input
+                          v-model:value="deployGoodsForm.infoBody.relaxTimes"
+                          placeholder="请输入Relax次数，为空则是永久~"
+                          min="0"
+                          max="9999"
+                        />
+                      </a-form-item>
+                    </a-col>
+                  </a-row>
+                  <a-row gutter="24" v-else>
+                    <a-col :span="12">
+                      <a-form-item
+                        label="计费方式"
+                        :name="['infoBody', 'billingMethod']"
+                        :rules="[{ required: true, message: '请选择计费方式!' }]"
+                      >
+                        <a-select
+                          v-model:value="deployGoodsForm.infoBody.billingMethod"
+                          style="width: 100%"
+                          placeholder="计费方式"
+                        >
+                          <a-select-option value="INTEGRAL">积分计费</a-select-option>
+                          <a-select-option value="TIMES">次数计费</a-select-option>
+                        </a-select>
+                      </a-form-item>
+                    </a-col>
+                    <a-col :span="12">
+                      <a-form-item label="积分" :name="['infoBody', 'score']">
+                        <a-input-number
+                          v-model:value="deployGoodsForm.infoBody.score"
+                          placeholder="请输入积分~"
+                          min="0"
+                          max="9999"
+                        />
+                      </a-form-item>
+                    </a-col>
+                    <a-col :span="24">
+                      <a-form-item
+                        label="备注"
+                        name="goodsRemark"
+                        :rules="[{ required: false, message: '请输入备注!' }]"
+                      >
+                        <a-textarea
+                          v-model:value="deployGoodsForm.infoBody.remark"
+                          placeholder="请输入备注"
+                          :rows="3"
+                        />
+                      </a-form-item>
+                    </a-col>
+                  </a-row>
+                  <a-row gutter="24">
+                    <a-col :span="24">
+                      <a-form-item
+                        label="追加内容"
+                        name="appendInfo"
+                        :rules="[{ required: false, message: '请输入追加内容!' }]"
+                      >
+                        <a-textarea
+                          v-model:value="deployGoodsForm.infoBody.infoBodyStr"
+                          placeholder="请输入追加显示内容"
+                          :rows="3"
+                        />
+                      </a-form-item>
+                    </a-col>
+                  </a-row>
+                </a-tab-pane>
+                <a-tab-pane key="GPT" tab="Chatgpt" force-render>
+                  <MarkDown
+                    v-model:value="deployGoodsForm.infoBody.infoBodyStr"
+                    placeholder="请输入商品内容"
+                  />
+                  <span style="color: red; font-size: 12px"> 请自行调节内容，以保证最佳显示 </span>
+                </a-tab-pane>
+                <a-tab-pane key="SYSTEM" tab="系统">
+                  <MarkDown
+                    v-model:value="deployGoodsForm.infoBody.infoBodyStr"
+                    placeholder="请输入商品内容"
+                  />
+                  <span style="color: red; font-size: 12px"> 请自行调节内容，以保证最佳显示 </span>
+                </a-tab-pane>
+                <a-tab-pane key="GROUP" tab="拼团">
+                  <MarkDown
+                    v-model:value="deployGoodsForm.infoBody.infoBodyStr"
+                    placeholder="请输入商品内容"
+                  />
+                  <span style="color: red; font-size: 12px"> 请自行调节内容，以保证最佳显示 </span>
+                </a-tab-pane>
+                <a-tab-pane key="CUSTOM" tab="自定义">
+                  <MarkDown
+                    v-model:value="deployGoodsForm.infoBody.infoBodyStr"
+                    placeholder="请输入商品内容"
+                  />
+                  <span style="color: red; font-size: 12px"> 请自行调节内容，以保证最佳显示 </span>
+                </a-tab-pane>
+              </a-tabs>
+            </a-col>
+          </a-row>
+        </a-form>
+      </a-card>
+    </a-modal>
+
+    <!-- 库存列表 -->
+    <a-modal v-model:open="stockListForm.viewFlag" title="库存列表"       width="100%"
+        wrap-class-name="full-modal"
+        :bodyStyle="{ padding: '0 10px 30px 10px' }" ok-text="">
+      <template #footer>
+        <a-button key="submit" type="primary" @click="closeStockModal">已知晓</a-button>
+      </template>
+      <Loading :loading="stockListForm.loading" :absolute="true" tip="数据加载中..." />
+      <div style="width: 100%; padding: 5px 10px; overflow-x: auto">
+        <a-button @click="showAppendStock" style="margin-bottom: 8px">追加</a-button>
+        <a-table :dataSource="stockListTableData" class="a-table" :scroll="{ x: 'max-content' }">
+          <a-table-column
+            key="state"
+            title="发货内容"
+            data-index="infoBody"
+            align="center"
+            :width="200"
+          />
+          <a-table-column
+            key="state"
+            title="交易单号"
+            data-index="orderId"
+            align="center"
+            :width="100"
+          />
+          <a-table-column key="state" title="状态" data-index="state" align="center" :width="80">
+            <template #default="{ text }">
+              <span>
+                <a-tag v-if="text === 'NONE'" color="#597E52">待使用</a-tag>
+                <a-tag v-if="text === 'PREEMPT'" color="#91C8E4">已占用</a-tag>
+                <a-tag v-if="text === 'OUT_BOUND'" color="#68A7AD">已出库</a-tag>
+                <a-tag v-if="text === 'DISCARD'" color="#A9A9A9">丢弃</a-tag>
+              </span>
+            </template>
+          </a-table-column>
+          <a-table-column
+            key="state"
+            title="更新时间"
+            data-index="gmtModified"
+            align="center"
+            :width="130"
+          />
+
+          <a-table-column title="操作" key="actions" fixed="right" :width="80">
+            <template #default="{ record }">
+              <a-button-group>
+                <a-button
+                  type="warning"
+                  v-if="record.state === 'NONE'"
+                  @click="doDiscardStock(record)"
+                  >丢弃</a-button
+                >
+                <a-button
+                  type="primary"
+                  danger
+                  v-if="record.state === 'DISCARD'"
+                  @click="doDeleteStock(record.id)"
+                  >删除</a-button
+                >
+              </a-button-group>
+            </template>
+          </a-table-column>
+        </a-table>
+      </div>
+    </a-modal>
+
+    <!-- 追加库存 -->
+    <a-modal
+      v-model:open="appendStockForm.viewFlag"
+      width="100%"
+        wrap-class-name="full-modal"
+        :bodyStyle="{ padding: '0 10px 30px 10px' }"
+      ok-text="立即追加"
+      @ok="doAppendStock"
+      :confirmLoading="appendStockForm.loading"
+    >
+      <template #title>
+        <span
+          ><Icon icon="fluent:drawer-add-24-filled" class="vel-icon icon" aria-hidden="true" />{{
+            appendStockForm.title
+          }}</span
+        >
+      </template>
+      <a-card>
+        <Loading :loading="appendStockForm.loading" :absolute="true" tip="正在生成中..." />
+        <a-form layout="vertical" :model="appendStockForm" ref="appendStockFormRef">
+          <a-row gutter="24">
+            <a-col :span="24">
+              <a-form-item
+                label="商品库存"
+                name="stockInfo"
+                :rules="[{ required: true, message: '请输入商品库存!' }]"
+              >
+                <a-textarea
+                  v-model:value="appendStockForm.stockInfo"
+                  placeholder="请输入商品库存，多个用|分割"
+                  :rows="5"
+                />
+                <span style="color: red; font-size: 10px"> 这个是追加库存，不是覆盖</span>
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
       </a-card>
     </a-modal>
   </a-layout>
@@ -484,7 +1034,16 @@
     GoodsListResp,
     ListResultModel,
   } from '/@/api/df/model/goodsModel';
-  import { addGoods, goodsList, deleteGoods } from '/@/api/df/goods';
+  import {
+    addGoods,
+    goodsList,
+    deleteGoods,
+    deployNewGoods,
+    deploySecondHandGoods,
+    changeGoodsState,
+    modifiedNewGoods,
+    goodsInfo,
+  } from '/@/api/df/goods';
   import { createTradeApi, tradeListApi, fetchPayResultApi, cancelTradeApi } from '/@/api/df/trade';
   import { IdReq } from '/@/api/model/baseModel';
   import { listCollects, removeCollect, createCollect } from '/@/api/df/drawCollect';
@@ -493,6 +1052,7 @@
     DrawCollectListQueryReq,
     DrawCollectListResp,
   } from '/@/api/df/model/drawCollectModel';
+  import { appendStock, stockList, discardStock, deleteStock } from '/@/api/df/goodsStock'; 
   import { genPromptList, genTagList } from '/@/api/df/dataCache';
   import { message, Empty } from 'ant-design-vue';
   import Icon from '/@/components/Icon/Icon.vue';
@@ -500,6 +1060,7 @@
   import { addTag } from '/@/api/df/drawTaskTag';
   import { useGo } from '/@/hooks/web/usePage';
   import { EllipsisText } from '@/components/EllipsisText';
+  import { availableList } from '/@/api/df/account';
 
   const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
   const go = useGo();
@@ -620,6 +1181,268 @@
     loadingRef.value = false;
     console.log(111111111111);
   };
+
+   /************************************发布商品********************************* */
+   const deployGoodsFormRef = ref();
+  const deployGoodsForm = ref({
+    id: null,
+    title: '',
+    loading: false,
+    isActiveVisible: false,
+    goodsTitle: null,
+    goodsRemark: null,
+    goodsPrice: null,
+    oriGoodsPrice: null,
+    stock: null,
+    accountId: null,
+    shipType: 'AUTO',
+    goodsType: 'MIDJOURNEY',
+    emailTemplate: '您购买的商品发货啦！系统已帮您自动激活咯! 发货内容：${content}',
+    sort: 99,
+    autoGenStock: {
+      genWay: 'NONE',
+      appendStockInfo: null,
+      autoGenAccountId: null,
+      autoGenStockNum: null,
+    },
+
+    infoBody: {
+      score: 10,
+      billingMethod: 'TIMES',
+      remark: null,
+      authWay: 'DAY',
+      authDays: null,
+      authExpireTimes: null,
+      maxNumExecute: 300,
+      turboTimes: null,
+      fastTimes: null,
+      relaxTimes: null,
+      maxSubmit: null,
+      conExecute: null,
+      infoBodyStr: '',
+    },
+  });
+
+  const selectForm = ref({
+    accountOptions: [],
+  });
+  const showDeployGoods = async (card) => {
+    deployGoodsForm.value.title = '发布新商品';
+
+    deployGoodsForm.value.accountId = card.id;
+    deployGoodsForm.value.infoBody.maxNumExecute = card.maxSubmit;
+    deployGoodsForm.value.id = null;
+    deployGoodsForm.value.stock = null;
+    deployGoodsForm.value.infoBody.authWay = 'DAY';
+    deployGoodsForm.value.infoBody.authDays = null;
+    deployGoodsForm.value.infoBody.authExpireTimes = null;
+    deployGoodsForm.value.infoBody.turboTimes = null;
+    deployGoodsForm.value.infoBody.turboTimes = null;
+    deployGoodsForm.value.infoBody.fastTimes = null;
+    deployGoodsForm.value.infoBody.relaxTimes = null;
+    deployGoodsForm.value.infoBody.maxSubmit = null;
+    deployGoodsForm.value.autoGenStock = {
+      genWay: 'NONE',
+      appendStockInfo: null,
+      autoGenAccountId: null,
+      autoGenStockNum: null,
+    };
+    deployGoodsForm.value.isActiveVisible = true;
+    initAccountList();
+  };
+
+  const initAccountList = async () => {
+    if (selectForm.value.accountOptions && selectForm.value.accountOptions.length > 0) {
+      return;
+    }
+    deployGoodsForm.value.loading = true;
+    try {
+      const response = await availableList({
+        accMode: '',
+        ownerFlag: 'Y',
+      });
+
+      // 使用 map 方法转换数组
+      const transformedList = response.map((item) => ({
+        label: item.accountName,
+        value: item.id,
+      }));
+
+      // 如果您想在转换后的数组前面添加一个特定的对象，可以使用以下方法：
+      const finalList = [...transformedList];
+      selectForm.value.accountOptions = finalList;
+    } finally {
+      deployGoodsForm.value.loading = false;
+    }
+  };
+
+  const hideDeployGoods = async () => {
+    deployGoodsForm.value.isActiveVisible = false;
+  };
+  const onDeployGoods = async () => {
+    deployGoodsForm.value.loading = true;
+    try {
+      await deployGoodsFormRef.value.validate();
+      if (deployGoodsForm.value.id) {
+        await modifiedNewGoods(deployGoodsForm.value);
+      } else {
+        await deployNewGoods(deployGoodsForm.value);
+      }
+
+      deployGoodsForm.value.isActiveVisible = false;
+      // onSearch();
+    } finally {
+      deployGoodsForm.value.loading = false;
+    }
+  };
+
+  const onChangePicker = (value: [Dayjs, Dayjs], dateString: [string, string]) => {
+    deployGoodsForm.value.authDays = dateString;
+  };
+  const changeAuthWay = () => {
+    if (deployGoodsForm.value.authWay === 'DAY') {
+      deployGoodsForm.value.authDays = '1';
+    } else if (deployGoodsForm.value.authWay === 'TIME') {
+      deployGoodsForm.value.authDays = null;
+      deployGoodsForm.value.authExpireTimes = null;
+    }
+  };
+
+  const changeTab = (activeKey) => {
+    deployGoodsForm.value.infoBody.infoBodyStr = '';
+  };
+
+  /**
+   * 上下架
+   */
+  const doChangeGoodsState = async (card, state) => {
+    loadingRef.value = true;
+    try {
+      await changeGoodsState({ id: card.id, goodsState: state });
+      card.goodsState = state;
+    } finally {
+      loadingRef.value = false;
+    }
+  };
+  /**
+   * 删除商品
+   */
+  const doDeleteGoods = async (id) => {
+    loadingRef.value = true;
+    try {
+      await deleteGoods({ id: id });
+      onSearch(1);
+    } finally {
+      loadingRef.value = false;
+    }
+  };
+
+  const showModifiedNewGoods = (card) => {
+    console.log(card.goodsTitle);
+    deployGoodsForm.value.title = '更新【' + card.goodsTitle + '】';
+    console.log(deployGoodsForm.value.title);
+    deployGoodsForm.value = card;
+    deployGoodsForm.value.loading = false;
+
+    deployGoodsForm.value.autoGenStock = {
+      genWay: 'NONE',
+      appendStockInfo: null,
+      autoGenAccountId: null,
+      autoGenStockNum: null,
+    };
+    deployGoodsForm.value.isActiveVisible = true;
+    initAccountList();
+  };
+
+  //*****************************************库存 开始************************************/
+  const stockListForm = ref({
+    loading: false,
+    viewFlag: false,
+    goodsId: null,
+    goodsTitle: null,
+  });
+  const stockListTableData = ref<any[]>([
+    // 更多数据...
+  ]);
+
+  const stockColumns = [
+    { title: '内容', dataIndex: 'infoBody', key: 'infoBody' },
+    // { title: '邮件模板', dataIndex: 'emailTemplate', key: 'emailTemplate', width: 100 },
+    { title: '状态', dataIndex: 'stateStr', key: 'stateStr', width: 100 },
+    { title: '关联单号', dataIndex: 'orderId', key: 'orderId', width: 100 },
+  ];
+
+  const showStockList = async (card) => {
+    stockListForm.value.goodsId = card.id;
+    stockListForm.value.goodsTitle = card.goodsTitle;
+    // 显示授权列表
+    stockListForm.value.loading = true;
+    try {
+      stockListForm.value.viewFlag = true;
+      stockListTableData.value = await stockList({ goodsId: card.id });
+    } finally {
+      stockListForm.value.loading = false;
+    }
+    // console.log(response);
+    // stockListForm.value.authList = response;
+  };
+  const doDiscardStock = async (record) => {
+    loadingRef.value = true;
+    try {
+      stockListForm.value.viewFlag = true;
+      await discardStock({ id: record.id });
+      record.state = 'DISCARD';
+    } finally {
+      loadingRef.value = false;
+    }
+    // console.log(response);
+    // stockListForm.value.authList = response;
+  };
+  const doDeleteStock = async (id) => {
+    loadingRef.value = true;
+    try {
+      stockListForm.value.viewFlag = true;
+      await deleteStock({ id: id });
+      stockListTableData.value = await stockList({ goodsId: stockListForm.value.goodsId });
+    } finally {
+      loadingRef.value.loading = false;
+    }
+  };
+
+  const closeStockModal = () => {
+    stockListForm.value.viewFlag = false;
+  };
+
+  const appendStockFormRef = ref();
+  const appendStockForm = ref({
+    title: '',
+    viewFlag: false,
+    loading: false,
+    goodsId: null,
+    stockInfo: null,
+  });
+
+  const showAppendStock = () => {
+    appendStockForm.value.goodsId = stockListForm.value.goodsId;
+    appendStockForm.value.title = '追加【' + stockListForm.value.goodsTitle + '】库存';
+    appendStockForm.value.viewFlag = true;
+  };
+
+  const doAppendStock = async () => {
+    appendStockForm.value.loading = true;
+    try {
+      await appendStockFormRef.value.validate();
+      await appendStock(appendStockForm.value);
+      stockListTableData.value = await stockList({ goodsId: stockListForm.value.goodsId });
+      appendStockForm.value.viewFlag = false;
+    } finally {
+      stockListForm.value.loading = false;
+    }
+  };
+
+  //*****************************************库存相关 结束 *************************************/
+
+  
   /***************************支付************************* */
   const payForm = ref({
     qrCodeUrl: 'https://qr.alipay.com/bax03494nng4xiqjw5kt5559',
@@ -884,6 +1707,26 @@
     margin-right: 0;
     font-size: 15px;
   }
+
+  
+  .line-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 25%;
+    height: 32px;
+    margin-right: 0;
+    font-size: 15px;
+  }
+
+  .line-input {
+    width: 75%;
+    height: 32px;
+  }
+
+  .tag-no-right-border {
+    border-right: none;
+  }
 </style>
 <style lang="less">
   .full-modal {
@@ -904,4 +1747,5 @@
       flex: 1;
     }
   }
+
 </style>
