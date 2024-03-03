@@ -1,7 +1,7 @@
 <template>
   <a-layout class="app" v-loading="loadingRef">
-    <a-card :bodyStyle="{ padding: 0}" >
-      <a-card ref="formRef" :bodyStyle="{ padding: 0, height: '50px' }">
+    <a-card class="no-radius"  :bodyStyle="{ padding: 0}" >
+      <a-card class="no-radius"  ref="formRef" :bodyStyle="{ padding: 0, height: '50px' }">
         <a-row
           style="
             display: flex;
@@ -324,7 +324,7 @@
         </div>
       </div>
       <div ref="buttonRef">
-        <a-card class="pagination">
+        <a-card class="pagination no-radius">
           <a-pagination
             size="small"
             :current="pagination.current"

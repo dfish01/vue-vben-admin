@@ -1,11 +1,29 @@
 <template>
   <a-layout ref="formRef" style="width: 100%; overflow: hidden">
     <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
+    <a-card ref="formRef" class="no-radius" :bodyStyle="{ padding: 0, height: '50px' }">
+      <a-row
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          height: 50px;
+          padding: 0 10px;
+        "
+      >
+        <div style="display: flex; align-items: center">
+          <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
+          <span style="margin-left: 5px; font-size: 16px; font-weight: bold">余额中心</span>
+        </div>
+      </a-row>
+    </a-card>
     <a-card
+      :bordered="false"
+      class="no-radius"
       :style="{  height: `calc(${contentHeight}px)`, overflow: 'auto' }"
       :bodyStyle="{ padding: '0px' }"
     >
-      <a-card :bodyStyle="{ padding: '7px' }">
+      <a-card  :bordered="false" class="no-radius" :bodyStyle="{ padding: '7px' }">
         <a-row
           justify="start"
           align="top"
@@ -104,7 +122,7 @@
           :pagination="pagination"
           :scroll="{ x: 'calc(80% - 50px)' }"
         >
-          <a-table-column title="账单名称" dataIndex="title" key="title" align="left" :width="150">
+          <a-table-column title="账单名称" dataIndex="title" fixed="left" key="title" align="left" :width="150">
             <template #default="{ record }">
               <div>
                 <div>
@@ -114,38 +132,38 @@
               </div>
             </template>
           </a-table-column>
-          <a-table-column title="金额" dataIndex="amount" key="amount" align="left" :width="150" />
+          <a-table-column title="金额" dataIndex="amount" key="amount" align="left" :width="80" />
 
           <a-table-column
             title="变更前"
             dataIndex="beforeAmount"
             key="beforeAmount"
             align="left"
-            :width="100"
+            :width="90"
           />
           <a-table-column
             title="变更后"
             dataIndex="remainAmount"
             key="remainAmount"
             align="left"
-            :width="100"
+            :width="90"
           />
 
           <a-table-column
-            title="时间"
+            title="创建时间"
             dataIndex="gmtCreate"
             key="gmtCreate"
             align="left"
-            :width="150"
+            :width="180"
           />
 
-          <!-- <a-table-column title="操作" key="actions" fixed="right" :width="200">
+          <a-table-column title="操作" style="padding:5px" key="actions" fixed="right" :width="75">
             <template #default="{ record }">
               <a-button-group>
-                <a-button @click="showDiscordForm" disabled>查看订单</a-button>
+                <a-button size="small" @click="showTableRecordForm(record)" >明细</a-button>
               </a-button-group>
             </template>
-          </a-table-column> -->
+          </a-table-column>
         </a-table>
       </div>
     </a-card>
@@ -304,6 +322,32 @@
         </a-form>
       </a-card>
     </a-modal>
+
+    <!-- 记录明细 -->
+    <a-modal v-model:open="tableRecordForm.viewFlag" title="明细记录">
+      <template #footer>
+        <a-button
+          @click="closeTableRecordForm"
+        >
+          已知晓
+        </a-button>
+      </template>
+      <div style="margin: 10px">
+        <a-descriptions bordered>
+          <a-descriptions-item label="账单名称">{{tableRecordForm.title}}</a-descriptions-item>
+          <a-descriptions-item label="业务ID">{{tableRecordForm.bizId}}</a-descriptions-item>
+          
+          <a-descriptions-item label="金额">{{tableRecordForm.amount}}</a-descriptions-item>
+          <a-descriptions-item label="变更前金额">{{tableRecordForm.beforeAmount}}</a-descriptions-item>
+          <a-descriptions-item label="变更后金额">{{tableRecordForm.remainAmount}}</a-descriptions-item>
+          <a-descriptions-item label="创建时间">
+            {{tableRecordForm.gmtCreate}}
+          </a-descriptions-item>
+
+        </a-descriptions>
+      </div>
+    </a-modal>
+
   </a-layout>
 </template>
 
@@ -354,7 +398,7 @@
   const substractSpaceRefs = ref([]);
   const upwardSpace = computed(() => 1);
   //移动设备底部导航栏
-  const offsetHeightRef = ref(55);
+  const offsetHeightRef = ref(105);
   const subtractHeightRefs = ref([]);
 
   // 使用hook
@@ -432,6 +476,26 @@
     // pagination.value.current = page
     onSearch(page);
   }
+
+  /************************** 记录明细 ********************* */
+  const tableRecordForm = ref({
+    viewFlag: false,
+    title: null,
+    amount:null,
+    beforeAmount: null,
+    remainAmount:null,
+    gmtCreate: null,
+  });
+
+  const showTableRecordForm = (record) => {
+    tableRecordForm.value = record;
+    tableRecordForm.value.viewFlag = true;
+  }
+
+  const closeTableRecordForm = (record) => {
+    tableRecordForm.value.viewFlag = false;
+  }
+
 
   /***************************支付************************* */
   const payForm = ref({

@@ -43,7 +43,7 @@
         </div>
         <a-card
           :bordered="true"
-          class="no-padding-header ar-card"
+          class="no-padding-header ar-card no-radius"
           :bodyStyle="{ padding: '0px 0px' }"
           :headStyle="{ padding: '0px' }"
         >

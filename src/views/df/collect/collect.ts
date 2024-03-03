@@ -625,6 +625,7 @@ export function userSettingApi() {
     usePersonNet: false,
     taskRefresh: false,
     cardShow: 'MULTI',
+    showMode: 'fixed'
   });
 
   const setCardShow = (): void => {
@@ -634,6 +635,10 @@ export function userSettingApi() {
       userSetting.value.cardShow = 'MULTI';
     }
   };
+  const setShowMode = (value): void => {
+    userSetting.value.showMode = value;
+  };
+
   const setUseUpImage = (): void => {
     userSetting.value.useUpImage = !userSetting.value.useUpImage;
   };
@@ -647,6 +652,7 @@ export function userSettingApi() {
 
   const api = {
     setCardShow,
+    setShowMode,
     userSetting,
     setUseUpImage,
     setUsePersonNet,

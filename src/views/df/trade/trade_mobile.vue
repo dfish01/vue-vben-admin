@@ -1,7 +1,7 @@
 <template>
   <a-layout class="app" v-loading="loadingRef">
-    <a-card :bodyStyle="{padding: '0'}"> 
-      <a-card :bodyStyle="{ padding: 0, height: '50px' }">
+    <a-card class="no-radius" :bodyStyle="{padding: '0'}"> 
+      <a-card class="no-radius" :bodyStyle="{ padding: 0, height: '50px' }">
         <a-row
           ref="formRef"
           style="
@@ -59,7 +59,7 @@
         :style="{
           height: `calc(${contentHeight}px `,
           overflow: 'auto',
-          padding: '0 8px',
+          padding: '3px 10px 3px 3px'
         }"
       >
         <div v-for="card in cards" :key="card.id" :trigger="['contextmenu']">
@@ -155,7 +155,7 @@
         </div>
       </div>
       <div ref="buttonRef">
-        <a-card class="pagination">
+        <a-card class="pagination no-radius">
           <a-pagination
             size="small"
             :current="pagination.current"

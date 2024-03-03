@@ -535,9 +535,7 @@
     cursor: pointer;
   }
 
-  .item-mouseover {
-    background: rgb(0 0 0 / 6%);
-  }
+ 
 
   .custom-menu p {
     margin: 0; /* 清除段落的默认外边距 */

@@ -1,7 +1,7 @@
 <template>
   <a-layout ref="formRef" >
     <!-- 查询选项卡 -->
-    <a-card :bodyStyle="{ padding: 0, height: '50px' }">
+    <a-card  class="no-radius" :bodyStyle="{ padding: 0, height: '50px' }">
       <a-row
         ref="formRef"
         style="
@@ -22,6 +22,8 @@
 
     <div>
       <a-card
+      class="no-radius" 
+      :bordered="false"
         :bodyStyle="{
           padding: '30px 10px 10px 10px',
           width: '100%',

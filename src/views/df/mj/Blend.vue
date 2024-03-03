@@ -153,7 +153,7 @@
     </div>
     <div>
       <a-button
-        class="bottom-button"
+        class="bottom-button no-radius"
         :loading="textFormLoading"
         type="primary"
         @click="startDrawing"

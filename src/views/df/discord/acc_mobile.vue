@@ -1,9 +1,9 @@
 <template>
   <a-layout class="app" loading-tip="加载中...">
-    <a-card :bodyStyle="{padding: '0'}"> 
+    <a-card class="no-radius" :bodyStyle="{padding: '0'}"> 
       <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
       <!-- 查询选项卡 -->
-      <a-card :bodyStyle="{ padding: 0, height: '50px' }" ref="formRef">
+      <a-card class="no-radius" :bodyStyle="{ padding: 0, height: '50px' }" ref="formRef">
         <a-row
           style="
             display: flex;
@@ -348,7 +348,7 @@
       </div>
 
       <div ref="button">
-        <a-card class="pagination">
+        <a-card class="pagination no-radius">
           <a-pagination
             size="small"
             :current="pagination.current"

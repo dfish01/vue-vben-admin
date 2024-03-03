@@ -24,7 +24,7 @@
         </div>
         <a-card
           :bordered="true"
-          class="no-padding-header ar-card"
+          class="no-padding-header ar-card no-radius"
           :bodyStyle="{ padding: '0px 5px' }"
           :headStyle="{ padding: '0px' }"
         >
@@ -53,7 +53,7 @@
               </div>
             </div>
           </template>
-
+          
           <CollectCategory />
         </a-card>
       </a-col>
@@ -186,5 +186,12 @@
     height: 32px;
     margin-right: 0;
     font-size: 15px;
+  }
+
+  .search-card {
+    height: 50px;
+    padding-right: 10px;
+    padding-left: 10px;
+    
   }
 </style>

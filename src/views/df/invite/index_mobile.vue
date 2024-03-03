@@ -1,14 +1,35 @@
 <template>
-  <a-layout ref="formRef" style="width: 100%; overflow: auto">
+  <a-layout  style="width: 100%; overflow: auto">
     <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
+    <a-card ref="formRef" class="no-radius" :bodyStyle="{ padding: 0, height: '50px' }">
+      <a-row
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          height: 50px;
+          padding: 0 10px;
+        "
+      >
+        <div style="display: flex; align-items: center">
+          <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
+          <span style="margin-left: 5px; font-size: 16px; font-weight: bold">邀请中心</span>
+        </div>
+      </a-row>
+    </a-card>
     <a-card
+    :bordered="false"
+    class="no-radius"
       :style="{  height: `calc(${contentHeight}px)`, overflow: 'auto' }"
       :bodyStyle="{ padding: '0px' }"
     >
-      <a-card title="邀请中心" :bodyStyle="{ padding: '5px' }">
+    
+    
+      <a-card class="no-radius" :bordered="false"  :bodyStyle="{ padding: '5px' }">
         <a-row
           justify="start"
           align="top"
+          
           style="
             padding: 8px;
             border: 1px solid transparent;
@@ -111,18 +132,19 @@
           :loading="tableLoading"
           :row-class-name="(_record, index) => (index % 2 === 1 ? 'table-striped' : null)"
           :pagination="pagination"
+          :scroll="{ x: '100%' }"
         >
-          <a-table-column title="订单号" dataIndex="bizId" key="bizId" align="left" :width="100" />
+          <a-table-column title="订单号" dataIndex="bizId" key="bizId" v-if="false" align="left" :width="100" />
 
           <a-table-column title="事件" dataIndex="title" key="title" align="left" :width="80">
             <template #default="{ record }">
-              <a-tag color="#ff4d4f" v-if="record.eventType === 20">提到账户</a-tag>
-              <a-tag color="#52c41a" v-else-if="record.eventType === 1">用户下单</a-tag>
+              <a-tag color="#ff4d4f" v-if="record.eventType === 20">提现</a-tag>
+              <a-tag color="#52c41a" v-else-if="record.eventType === 1">下单</a-tag>
               <a-tag color="#d9d9d9" v-else>未定义</a-tag>
             </template>
           </a-table-column>
 
-          <a-table-column title="用户ID" dataIndex="buyerId" key="buyerId" align="left" :width="90">
+          <a-table-column title="用户ID" dataIndex="buyerId" key="buyerId" v-if="false"  align="left" :width="90">
             <template #default="{ record }">
               <a-tag v-if="record.buyerId"> 自己</a-tag>
 
@@ -131,20 +153,20 @@
           </a-table-column>
 
           <a-table-column
-            title="金额"
+            title="交易金额"
             dataIndex="orderAmount"
             key="orderAmount"
             align="left"
             :width="120"
           />
-          <a-table-column title="佣金" dataIndex="amount" key="amount" align="left" :width="100" />
+          <a-table-column title="佣金" dataIndex="amount" key="amount" align="left" :width="80" />
 
           <a-table-column
             title="剩余佣金"
             dataIndex="remainAmount"
             key="remainAmount"
             align="left"
-            :width="100"
+            :width="120"
           />
 
           <a-table-column
@@ -154,14 +176,13 @@
             align="left"
             :width="120"
           />
-
-          <!-- <a-table-column title="操作" key="actions" fixed="right" :width="200">
+          <a-table-column title="操作" style="padding:5px" key="actions" fixed="right" :width="75">
             <template #default="{ record }">
               <a-button-group>
-                <a-button @click="showDiscordForm" disabled>查看订单</a-button>
+                <a-button size="small" @click="showTableRecordForm(record)" >明细</a-button>
               </a-button-group>
             </template>
-          </a-table-column> -->
+          </a-table-column>
         </a-table>
       </div>
     </a-card>
@@ -228,6 +249,46 @@
         </a-row>
       </a-form>
     </a-modal>
+
+    <!-- 记录明细 -->
+    <a-modal v-model:open="tableRecordForm.viewFlag" title="明细记录">
+      <template #footer>
+        <a-button
+          @click="closeTableRecordForm"
+        >
+          已知晓
+        </a-button>
+      </template>
+      <div style="margin: 20px 0">
+      <a-descriptions >
+        <a-descriptions-item label="订单号">{{tableRecordForm.bizId}}</a-descriptions-item>
+        <a-descriptions-item label="事件">
+          <span v-if="tableRecordForm.eventType === 20">
+            提现
+          </span>
+          <span v-if="tableRecordForm.eventType === 1">
+            下单
+          </span>
+        </a-descriptions-item>
+        <a-descriptions-item label="用户ID">
+          <span v-if="tableRecordForm.buyerId === 20">
+            {{tableRecordForm.buyerId}}
+          </span>
+          <span v-else>
+            自己
+          </span>
+
+        </a-descriptions-item>
+        <a-descriptions-item label="订单金额">{{tableRecordForm.orderAmount}}</a-descriptions-item>
+        <a-descriptions-item label="佣金">{{tableRecordForm.amount}}</a-descriptions-item>
+        <a-descriptions-item label="剩余佣金">{{tableRecordForm.remainAmount}}</a-descriptions-item>
+        <a-descriptions-item label="创建时间">
+          {{tableRecordForm.gmtCreate}}
+        </a-descriptions-item>
+      </a-descriptions>
+    </div>
+      
+    </a-modal>
   </a-layout>
 </template>
 
@@ -276,7 +337,7 @@
   const substractSpaceRefs = ref([]);
   const upwardSpace = computed(() => 1);
   //移动设备底部导航栏
-  const offsetHeightRef = ref(55);
+  const offsetHeightRef = ref(105);
   const subtractHeightRefs = ref([]);
 
   // 使用hook
@@ -367,6 +428,27 @@
     // pagination.value.current = page
     onSearch(page);
   }
+  /************************** 记录明细 ********************* */
+  const tableRecordForm = ref({
+    viewFlag: false,
+    eventType: null,
+    buyerId:null,
+    eventType: null,
+    bizId:null,
+    orderAmount: null,
+    amount:null,
+    gmtCreate: null,
+  });
+
+  const showTableRecordForm = (record) => {
+    tableRecordForm.value = record;
+    tableRecordForm.value.viewFlag = true;
+  }
+
+  const closeTableRecordForm = (record) => {
+    tableRecordForm.value.viewFlag = false;
+  }
+
 
   /***************************提现************************* */
   const withdrawalFormRef = ref();

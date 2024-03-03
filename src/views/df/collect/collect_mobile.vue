@@ -1,7 +1,7 @@
 <template>
   <a-layout class="app" ref="formRef" v-loading="loadingRef">
-    <a-card :bodyStyle="{padding: '0'}"> 
-      <a-card :bodyStyle="{ padding: 0, height: '50px' }">
+    <a-card  class="no-radius"  :bodyStyle="{padding: '0'}"> 
+      <a-card   class="no-radius"  :bodyStyle="{ padding: 0, height: '50px' }">
         <a-row
           ref="formRef"
           style="
@@ -43,6 +43,20 @@
                           @confirm="setCardShow()"
                         >
                           ✨{{ userSetting.cardShow === 'SINGLE' ? '列表4图模式' : '列表单图模式' }}
+                        </a-popconfirm>
+                      </a-menu-item>
+                      <a-menu-item key="12">
+                        <a-popconfirm
+                          :title="
+                            userSetting.showMode === 'fixed'
+                              ? '开启后，图片按原始比例显示~'
+                              : '开启后，图片按统一比例显示~~'
+                          "
+                          :ok-text="立即开启"
+                          cancel-text="取消"
+                          @confirm="setShowMode(userSetting.showMode === 'full' ?  'fixed' : 'full')"
+                        >
+                          ✨{{ userSetting.showMode === 'full' ?  '固定比例显示' : '原比例显示' }}
                         </a-popconfirm>
                       </a-menu-item>
                       <a-menu-divider />
@@ -131,139 +145,8 @@
       <div v-else class="cards" :style="{ height: `calc(${contentHeight}px) `, overflow: 'auto' }">
         <div v-for="card in cards" :key="card.id">
           <a-card :bodyStyle="{ padding: '0px' }" class="card" hoverable>
-            <div v-if="card.state === 'QUEUED'" class="mask-queued label-front">
-              <div
-                style="
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-                  justify-content: center;
-                "
-              >
-                <span>
-                  <Icon icon="line-md:coffee-loop" size="70" color="#91C8E4" />
-                </span>
-                <span> 正在排队中... </span>
-              </div>
-            </div>
-            <div v-if="card.state === 'RUNNING'" class="mask-queued label-front">
-              <div
-                style="
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-                  justify-content: center;
-                "
-              >
-                <span>
-                  <Icon icon="line-md:coffee-half-empty-twotone-loop" size="70" color="#749BC2" />
-                </span>
-                <span> {{ card.mjExecute === 'N' ? '正在执行中...' : 'MJ正在绘画中...' }} </span>
-              </div>
-            </div>
-            <div v-if="card.state === 'FAILED'" class="mask-queued label-front">
-              <div
-                style="
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-                  justify-content: center;
-                "
-                class="error-text"
-              >
-                <span>
-                  <Icon icon="carbon:face-dizzy-filled" size="60" color="#FF6969" />
-                </span>
-                <span v-if="card.failMsg" style="margin-top: 10px"> {{ card.failMsg }} </span>
-                <span v-else> 执行失败</span>
-              </div>
-            </div>
-            <div v-if="card.state === 'SUCCESS'">
-              <div v-if="userSetting.cardShow === 'MULTI'">
-                <a-card
-                  :bodyStyle="{ padding: '0px' }"
-                  class="my-transparent-card"
-                  style="width: 100%; border: none; background: transparent"
-                  v-if="card.taskImage.infoImageList.length > 1"
-                  :bordered="false"
-                  :hoverable="false"
-                >
-                  <a-card-grid
-                    v-for="infoImage in card.taskImage.infoImageList"
-                    :key="infoImage.url"
-                    style="
-                      position: relative;
-                      width: 49%;
-                      margin: 0;
-                      padding: 0;
-                      border-radius: 8px;
-                      text-align: center;
-                    "
-                  >
-                    <!-- <div
-                      v-show="!infoImage.loaded"
-                      :style="{
-                        width: '100%',
-                        height: '100%',
-                        paddingBottom: `${
-                          (card.taskImage.imageHeight / card.taskImage.imageWidth) * 100
-                        }%`,
-                      }"
-                    >
-                      <SvgIcon
-                        name="loading"
-                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
-                      />
-                    </div> -->
-                    <img
-                      @click="showInfoImage(getImageList(card), infoImage.url)"
-                      v-lazy.container="infoImage.mediaUrl"
-                      style="max-width: 100%; border-radius: 8px"
-                      alt=""
-                      @load="imageLoaded(infoImage)"
-                    />
-                  </a-card-grid>
-                </a-card>
-                <a-card
-                  :bodyStyle="{ padding: '0px' }"
-                  style="width: 100%"
-                  :bordered="false"
-                  :hoverable="false"
-                  class="my-transparent-card"
-                  v-else
-                  ><a-card-grid
-                    v-for="infoImage in card.taskImage.infoImageList"
-                    :key="infoImage.url"
-                    style="width: 100%; padding: 0; border-radius: 8px; text-align: center"
-                  >
-                    <img
-                      @click="showInfoImage(getImageList(card), infoImage.url)"
-                      v-lazy.container="infoImage.mediaUrl"
-                      style="max-width: 100%; border-radius: 8px"
-                      alt=""
-                      @load="imageLoaded(card)"
-                    />
-                  </a-card-grid>
-                </a-card>
-              </div>
-              <div v-else>
-                <a-card
-                  :bodyStyle="{ padding: '0px' }"
-                  class="my-transparent-card"
-                  style="width: 100%; border: none; background: transparent"
-                  :bordered="false"
-                  :hoverable="false"
-                >
-                  <img
-                    @click="showInfoImage([card.taskImage.imageUrl], card.taskImage.imageUrl)"
-                    v-lazy.container="card.taskImage.mediaImageUrl"
-                    fallback=""
-                    alt=""
-                    @load="imageLoaded(card)"
-                  />
-                </a-card>
-              </div>
-            </div>
+            <ViewPicture :card ="card" :userSetting="userSetting" ></ViewPicture>
+          
 
             <div
               v-if="card.state != 'SUCCESS'"
@@ -388,7 +271,7 @@
                       </a-button>
                       <template #overlay>
                         <a-menu>
-                          <a-menu-item key="5" @click="() => goDrawing(card.prompt)"
+                          <a-menu-item key="5" @click="() => setPrompt(card.prompt)"
                             ><Icon icon="streamline-emojis:artist-palette" color="grey" />
                             画同款</a-menu-item
                           >
@@ -398,8 +281,33 @@
                           >
                           <a-menu-item key="4" @click="() => copyText(card.messageHash)"
                             ><Icon icon="fluent-emoji-flat:id-button" color="grey" />
-                            复制任务ID</a-menu-item
+                            复制 Job ID</a-menu-item
                           >
+                          <a-menu-item key="6" @click="() => copyText(card.id)"
+                            ><Icon icon="fluent-emoji-flat:id-button" color="grey" />
+                            复制系统任务ID</a-menu-item
+                          >
+                          <a-menu-item v-if="card.taskImage.infoImageList.length === 1" key="7" @click="() => copyText(card.taskImage.infoImageList[0].url)"
+                            ><Icon icon="fluent-emoji-flat:keycap-1" color="grey" />
+                            复制图片链接</a-menu-item
+                          >
+                          <a-menu-item v-if="card.taskImage.infoImageList.length > 1" key="7" @click="() => copyText(card.taskImage.infoImageList[0].url)"
+                            ><Icon icon="fluent-emoji-flat:keycap-1" color="grey" />
+                            复制图片1链接</a-menu-item
+                          >
+                          <a-menu-item v-if="card.taskImage.infoImageList.length > 1" key="8" @click="() => copyText(card.taskImage.infoImageList[1].url)"
+                            ><Icon icon="fluent-emoji-flat:keycap-2" color="grey" />
+                            复制图片2链接</a-menu-item
+                          >
+                          <a-menu-item v-if="card.taskImage.infoImageList.length > 1" key="9" @click="() => copyText(card.taskImage.infoImageList[2].url)"
+                            ><Icon icon="fluent-emoji-flat:keycap-3" color="grey" />
+                            复制图片3链接</a-menu-item
+                          >
+                          <a-menu-item v-if="card.taskImage.infoImageList.length > 1" key="10" @click="() => copyText(card.taskImage.infoImageList[3].url)"
+                            ><Icon icon="fluent-emoji-flat:keycap-4" color="grey" />
+                            复制图片4链接</a-menu-item
+                          >
+                          
                         </a-menu>
                       </template>
                     </a-dropdown>
@@ -459,401 +367,399 @@
               </div>
               <div class="card-date-actions">
                 <a-button-group>
-                  <div>
-                    <div
-                      v-if="
-                        card.state === 'SUCCESS' &&
-                        (card.commandType === 'IMAGINE' ||
-                          card.commandType === 'BLEND' ||
-                          card.commandType === 'ZOOM' ||
-                          card.commandType === 'PAN' ||
-                          card.commandType === 'VARIATION')
-                      "
-                    >
+                  <a-dropdown v-if="card.state === 'SUCCESS' &&
+                    (card.commandType === 'IMAGINE' ||
+                      card.commandType === 'BLEND' ||
+                      card.commandType === 'ZOOM' ||
+                      card.commandType === 'PAN' ||
+                      card.commandType === 'VARIATION')">
+                    <template #overlay>
+                      <a-menu>
+                        <a-menu-item
+                          @click="handleU(card, 'U1', 'image')"
+                          key="1"
+                          v-if="card.buttonMap['U1']"
+                          ><Icon
+                            icon="fluent:scale-fill-24-regular"
+                            size="14px"
+                            style="margin: 0"
+                          />U1</a-menu-item
+                        >
+                        <a-menu-item
+                          @click="handleU(card, 'U2', 'image')"
+                          key="2"
+                          v-if="card.buttonMap['U2']"
+                          ><Icon
+                            icon="fluent:scale-fill-24-regular"
+                            size="14px"
+                            style="margin: 0"
+                          />U2</a-menu-item
+                        >
+                        <a-menu-item
+                          @click="handleU(card, 'U3', 'image')"
+                          key="3"
+                          v-if="card.buttonMap['U3']"
+                          ><Icon
+                            icon="fluent:scale-fill-24-regular"
+                            size="14px"
+                            style="margin: 0"
+                          />U3</a-menu-item
+                        >
+                        <a-menu-item
+                          @click="handleU(card, 'U4', 'image')"
+                          key="4"
+                          v-if="card.buttonMap['U4']"
+                          ><Icon
+                            icon="fluent:scale-fill-24-regular"
+                            size="14px"
+                            style="margin: 0"
+                          />U4</a-menu-item
+                        >
+                      </a-menu>
+                    </template>
+                    <a-button size="small" class="card-button">
+                      <Icon icon="fluent:scale-fill-24-regular" size="14px" style="margin: 0" />
+                      <span style="margin: 0">提升</span>
+                      <DownOutlined />
+                    </a-button>
+                  </a-dropdown>
+
+                  <a-dropdown v-if="card.state === 'SUCCESS' &&
+                    (card.commandType === 'IMAGINE' ||
+                      card.commandType === 'BLEND' ||
+                      card.commandType === 'ZOOM' ||
+                      card.commandType === 'PAN' ||
+                      card.commandType === 'VARIATION') && card.commandType != 'PAN'">
+                    <template #overlay>
+                      <a-menu>
+                        <a-menu-item
+                          key="V1"
+                          v-if="card.buttonMap['V1']"
+                          @click="($event) => handleV(card, 'variation', 'V1')"
+                          ><Icon
+                            icon="ph:magic-wand-fill"
+                            size="14px"
+                            style="margin: 0"
+                          />V1</a-menu-item
+                        >
+                        <a-menu-item
+                          key="V2"
+                          v-if="card.buttonMap['V2']"
+                          @click="($event) => handleV(card, 'variation', 'V2')"
+                          ><Icon
+                            icon="ph:magic-wand-fill"
+                            size="14px"
+                            style="margin: 0"
+                          />V2</a-menu-item
+                        >
+                        <a-menu-item
+                          key="V3"
+                          v-if="card.buttonMap['V3']"
+                          @click="($event) => handleV(card, 'variation', 'V3')"
+                          ><Icon
+                            icon="ph:magic-wand-fill"
+                            size="14px"
+                            style="margin: 0"
+                          />V3</a-menu-item
+                        >
+                        <a-menu-item
+                          key="V4"
+                          v-if="card.buttonMap['V4']"
+                          @click="($event) => handleV(card, 'variation', 'V4')"
+                          ><Icon
+                            icon="ph:magic-wand-fill"
+                            size="14px"
+                            style="margin: 0"
+                          />V4</a-menu-item
+                        >
+                        <!-- <a-menu-item
+                          key="🔄"
+                          v-if="card.buttonMap['🔄']"
+                          @click="($event) => handleV(card, 'reroll', '🔄')"
+                          >🔄</a-menu-item
+                        > -->
+                      </a-menu>
+                    </template>
+                    <a-button size="small" class="card-button">
+                      <Icon icon="ph:magic-wand-fill" size="14px" style="margin: 0" />
+                      <span style="margin: 0">变化</span>
+                      <DownOutlined />
+                    </a-button>
+                  </a-dropdown>
+              
+                  <a-dropdown
+                    v-if="
+                    (card.state === 'SUCCESS' && card.commandType === 'UPSCALE') &&
+                      (card.buttonMap['⬆️'] ||
+                      card.buttonMap['⬅️'] ||
+                      card.buttonMap['⬇️'] ||
+                      card.buttonMap['➡️'])
+                    "
+                  >
+                    <template #overlay>
+                      <a-menu @click="($event) => handlePan(card, 'PAN', $event)">
+                        <a-menu-item key="up" v-if="card.buttonMap['⬆️']"
+                          ><Icon icon="mdi:pan-up" size="14px" style="margin: 0" />上</a-menu-item
+                        >
+                        <a-menu-item key="down" v-if="card.buttonMap['⬇️']"
+                          ><Icon
+                            icon="mdi:pan-down"
+                            size="14px"
+                            style="margin: 0"
+                          />下</a-menu-item
+                        >
+                        <a-menu-item key="left" v-if="card.buttonMap['⬅️']"
+                          ><Icon
+                            icon="mdi:pan-left"
+                            size="14px"
+                            style="margin: 0"
+                          />左</a-menu-item
+                        >
+                        <a-menu-item key="right" v-if="card.buttonMap['➡️']"
+                          ><Icon
+                            icon="mdi:pan-right"
+                            size="14px"
+                            style="margin: 0"
+                          />右</a-menu-item
+                        >
+                      </a-menu>
+                    </template>
+                    <a-button size="small" class="card-button">
+                      <Icon icon="mdi:pan" size="14px" style="margin: 0" />
+                      <span style="margin: 0">平移</span>
+                      <DownOutlined />
+                    </a-button>
+                  </a-dropdown>
+                  <a-dropdown v-if="(card.state === 'SUCCESS' && card.commandType === 'UPSCALE') && card.buttonMap['Zoom Out 1.5x']">
+                    <template #overlay>
+                      <a-menu @click="($event) => handleZoom(card, 'ZOOM', $event)">
+                        <a-menu-item key="Zoom Out 1.5x" v-if="card.buttonMap['Zoom Out 1.5x']"
+                          ><Icon
+                            icon="fluent:zoom-fit-16-regular"
+                            size="14px"
+                            style="margin: 0"
+                          />1.5倍</a-menu-item
+                        >
+                        <a-menu-item key="Zoom Out 2x" v-if="card.buttonMap['Zoom Out 2x']"
+                          ><Icon
+                            icon="fluent:zoom-fit-16-regular"
+                            size="14px"
+                            style="margin: 0"
+                          />2 倍</a-menu-item
+                        >
+                        <a-menu-item key="Custom Zoom" v-if="card.buttonMap['Custom Zoom']"
+                          ><Icon
+                            icon="material-symbols:pinch-zoom-out-outline-rounded"
+                            size="14px"
+                            style="margin: 0"
+                          />自定义</a-menu-item
+                        >
+                        <a-menu-item key="Make Square" v-if="card.buttonMap['Make Square']"
+                          ><Icon
+                            icon="ph:square"
+                            size="14px"
+                            style="margin: 0"
+                          />转成1:1</a-menu-item
+                        >
+                      </a-menu>
+                    </template>
+                    <a-button size="small" class="card-button">
+                      <Icon icon="fluent:zoom-fit-16-regular" size="14px" style="margin: 0" />
+                      <span style="margin: 0">缩放</span>
+                      <DownOutlined />
+                    </a-button>
+                  </a-dropdown>
+
+                  <a-dropdown
+                    v-if="(card.state === 'SUCCESS' && card.commandType === 'UPSCALE') &&
+                      (card.buttonMap['Vary (Strong)'] ||
+                      card.buttonMap['Vary (Subtle)'] ||
+                      card.buttonMap['Upscale (2x)'] ||
+                      card.buttonMap['Upscale (4x)'] ||
+                      card.buttonMap['Redo Upscale (Subtle)'] ||
+                      card.buttonMap['Redo Upscale (Creative)'] ||
+                      card.buttonMap['Upscale (Subtle)'] ||
+                      card.buttonMap['Upscale (Creative)'])
+                    "
+                  >
+                    <template #overlay>
+                      <a-menu>
+                        <a-menu-item
+                          key="Vary (Strong)"
+                          v-if="card.buttonMap['Vary (Strong)']"
+                          @click="($event) => handleV(card, 'variation', 'Vary (Strong)')"
+                          ><Icon
+                            icon="ph:magic-wand-fill"
+                            size="14px"
+                            style="margin: 0"
+                          />强(Strong)</a-menu-item
+                        >
+                        <a-menu-item
+                          key="Vary (Subtle)"
+                          v-if="card.buttonMap['Vary (Subtle)']"
+                          @click="($event) => handleV(card, 'variation', 'Vary (Subtle)')"
+                          ><Icon
+                            icon="ph:magic-wand-fill"
+                            size="14px"
+                            style="margin: 0"
+                          />微(Subtle)</a-menu-item
+                        >
+                        <a-menu-item
+                          key="Vary (Region)"
+                          v-if="remix.enable_flag && card.buttonMap['Vary (Region)']"
+                          @click="($event) => openVaryRegion(card, 'variation', 'Vary (Region)')"
+                          ><Icon
+                            icon="pepicons-pencil:paint-pallet"
+                            size="14px"
+                            style="margin: 0"
+                          />局部重绘</a-menu-item
+                        >
+                        <a-menu-item
+                          key="Upscale (2x)"
+                          v-if="card.buttonMap['Upscale (2x)']"
+                          @click="($event) => handleU(card, 'Upscale (2x)', 'upscale2')"
+                          ><Icon
+                            icon="ph:caret-up-bold"
+                            size="14px"
+                            style="margin: 0"
+                          />2倍放大</a-menu-item
+                        >
+                        <a-menu-item
+                          key="Upscale (4x)"
+                          v-if="card.buttonMap['Upscale (4x)']"
+                          @click="($event) => handleU(card, 'Upscale (4x)', 'upscale4')"
+                          ><Icon
+                            icon="ph:caret-double-up-bold"
+                            size="14px"
+                            style="margin: 0"
+                          />4倍放大</a-menu-item
+                        >
+                        <a-menu-item
+                          key="Upscale (Creative)"
+                          v-if="card.buttonMap['Upscale (Creative)']"
+                          @click="($event) => handleU(card, 'Upscale (Creative)', 'creative')"
+                          ><Icon
+                            icon="fluent:scale-fill-24-regular"
+                            size="14px"
+                            style="margin: 0"
+                          />创意 (Creative)
+                        </a-menu-item>
+                        <a-menu-item
+                          key="Upscale (Subtle)"
+                          v-if="card.buttonMap['Upscale (Subtle)']"
+                          @click="($event) => handleU(card, 'Upscale (Subtle)', 'subtle')"
+                          ><Icon
+                            icon="fluent:scale-fill-24-regular"
+                            size="14px"
+                            style="margin: 0"
+                          />细致 (Subtle)
+                        </a-menu-item>
+
+                        <a-menu-item
+                          key="Redo Upscale (Creative)"
+                          v-if="card.buttonMap['Redo Upscale (Creative)']"
+                          @click="
+                            ($event) => handleU(card, 'Redo Upscale (Creative)', 'creative')
+                          "
+                          ><Icon
+                            icon="fluent:scale-fill-24-regular"
+                            size="14px"
+                            style="margin: 0"
+                          />
+                          重做-创意 (Creative)
+                        </a-menu-item>
+                        <a-menu-item
+                          key="Redo Upscale (Subtle)"
+                          v-if="card.buttonMap['Redo Upscale (Subtle)']"
+                          @click="($event) => handleU(card, 'Redo Upscale (Subtle)', 'subtle')"
+                          ><Icon
+                            icon="fluent:scale-fill-24-regular"
+                            size="14px"
+                            style="margin: 0"
+                          />重做-细致 (Subtle)
+                        </a-menu-item>
+                      </a-menu>
+                    </template>
+                    <a-button size="small" class="card-button">
+                      <Icon icon="ph:magic-wand-fill" size="14px" style="margin: 0" />
+                      <span style="margin: 0">变化</span>
+                      <DownOutlined />
+                    </a-button>
+                  </a-dropdown>
+                  <a-dropdown
+                    v-if=" (card.state === 'SUCCESS' && card.commandType === 'UPSCALE') && (
+                      card.buttonMap['Redo Upscale (4x)'] || card.buttonMap['Redo Upscale (2x)'])
+                    "
+                  >
+                    <template #overlay>
+                      <a-menu>
+                        <a-menu-item
+                          key="Redo Upscale (2x)"
+                          v-if="card.buttonMap['Redo Upscale (2x)']"
+                          @click="($event) => handleU(card, 'Redo Upscale (2x)', 'upscale2')"
+                          ><Icon
+                            icon="ph:caret-up-bold"
+                            size="14px"
+                            style="margin: 0"
+                          />重做-2倍</a-menu-item
+                        >
+                        <a-menu-item
+                          key="Redo Upscale (4x)"
+                          v-if="card.buttonMap['Redo Upscale (4x)']"
+                          @click="($event) => handleU(card, 'Redo Upscale (4x)', 'upscale4')"
+                          ><Icon icon="ph:caret-double-up-bold" size="14px" style="margin: 0" />
+                          重做-4倍</a-menu-item
+                        >
+                      </a-menu>
+                    </template>
+                    <a-button size="small" class="card-button">
+                      <Icon icon="fluent:scale-fill-24-regular" size="14px" style="margin: 0" />
+                      <span style="margin: 0">提升</span>
+                      <DownOutlined />
+                    </a-button>
+                  </a-dropdown>
+                </a-button-group>
+                <div v-if="card.state === 'SUCCESS' && card.commandType === 'DESCRIBE'">
+                    <a-row>
                       <a-dropdown>
                         <template #overlay>
-                          <a-menu>
-                            <a-menu-item
-                              @click="handleU(card, 'U1', 'image')"
-                              key="1"
-                              v-if="card.buttonMap['U1']"
+                          <a-menu @click="($event) => handleDraw(card, $event)">
+                            <a-menu-item key="0"
                               ><Icon
-                                icon="fluent:scale-fill-24-regular"
+                                icon="tabler:square-number-1"
                                 size="14px"
                                 style="margin: 0"
-                              />U1</a-menu-item
+                              />Prompt</a-menu-item
                             >
-                            <a-menu-item
-                              @click="handleU(card, 'U2', 'image')"
-                              key="2"
-                              v-if="card.buttonMap['U2']"
-                              ><Icon
-                                icon="fluent:scale-fill-24-regular"
-                                size="14px"
-                                style="margin: 0"
-                              />U2</a-menu-item
+                            <a-menu-item key="1"
+                              ><Icon icon="tabler:square-number-2" size="14px" style="margin: 0" />
+                              Prompt</a-menu-item
                             >
-                            <a-menu-item
-                              @click="handleU(card, 'U3', 'image')"
-                              key="3"
-                              v-if="card.buttonMap['U3']"
-                              ><Icon
-                                icon="fluent:scale-fill-24-regular"
-                                size="14px"
-                                style="margin: 0"
-                              />U3</a-menu-item
+                            <a-menu-item key="2"
+                              ><Icon icon="tabler:square-number-3" size="14px" style="margin: 0" />
+                              Prompt</a-menu-item
                             >
-                            <a-menu-item
-                              @click="handleU(card, 'U4', 'image')"
-                              key="4"
-                              v-if="card.buttonMap['U4']"
-                              ><Icon
-                                icon="fluent:scale-fill-24-regular"
-                                size="14px"
-                                style="margin: 0"
-                              />U4</a-menu-item
+                            <a-menu-item key="3"
+                              ><Icon icon="tabler:square-number-4" size="14px" style="margin: 0" />
+                              Prompt</a-menu-item
                             >
+                            <a-menu-item key="4">全部 Prompt</a-menu-item>
                           </a-menu>
                         </template>
                         <a-button size="small" class="card-button">
-                          <Icon icon="fluent:scale-fill-24-regular" size="14px" style="margin: 0" />
-                          <span style="margin: 0">提升</span>
-                          <DownOutlined />
+                          <Icon icon="fluent:slide-text-24-regular" size="14px" style="margin: 0" />
+                          <span style="margin: 0">提示词</span>
                         </a-button>
                       </a-dropdown>
-
-                      <a-dropdown v-if="card.commandType != 'PAN'">
-                        <template #overlay>
-                          <a-menu>
-                            <a-menu-item
-                              key="V1"
-                              v-if="card.buttonMap['V1']"
-                              @click="($event) => handleV(card, 'variation', 'V1')"
-                              ><Icon
-                                icon="ph:magic-wand-fill"
-                                size="14px"
-                                style="margin: 0"
-                              />V1</a-menu-item
-                            >
-                            <a-menu-item
-                              key="V2"
-                              v-if="card.buttonMap['V2']"
-                              @click="($event) => handleV(card, 'variation', 'V2')"
-                              ><Icon
-                                icon="ph:magic-wand-fill"
-                                size="14px"
-                                style="margin: 0"
-                              />V2</a-menu-item
-                            >
-                            <a-menu-item
-                              key="V3"
-                              v-if="card.buttonMap['V3']"
-                              @click="($event) => handleV(card, 'variation', 'V3')"
-                              ><Icon
-                                icon="ph:magic-wand-fill"
-                                size="14px"
-                                style="margin: 0"
-                              />V3</a-menu-item
-                            >
-                            <a-menu-item
-                              key="V4"
-                              v-if="card.buttonMap['V4']"
-                              @click="($event) => handleV(card, 'variation', 'V4')"
-                              ><Icon
-                                icon="ph:magic-wand-fill"
-                                size="14px"
-                                style="margin: 0"
-                              />V4</a-menu-item
-                            >
-                            <!-- <a-menu-item
-                              key="🔄"
-                              v-if="card.buttonMap['🔄']"
-                              @click="($event) => handleV(card, 'reroll', '🔄')"
-                              >🔄</a-menu-item
-                            > -->
-                          </a-menu>
-                        </template>
-                        <a-button size="small" class="card-button">
-                          <Icon icon="ph:magic-wand-fill" size="14px" style="margin: 0" />
-                          <span style="margin: 0">变化</span>
-                          <DownOutlined />
-                        </a-button>
-                      </a-dropdown>
-                    </div>
-                    <div v-if="card.state === 'SUCCESS' && card.commandType === 'UPSCALE'">
-                      <a-dropdown
-                        v-if="
-                          card.buttonMap['⬆️'] ||
-                          card.buttonMap['⬅️'] ||
-                          card.buttonMap['⬇️'] ||
-                          card.buttonMap['➡️']
-                        "
+                      <a-radio
+                        class="check"
+                        v-if="needShow(card)"
+                        style="margin-left: 5px"
+                        v-model:value="describeInfo.autoReferImage"
+                        >垫图</a-radio
                       >
-                        <template #overlay>
-                          <a-menu @click="($event) => handlePan(card, 'PAN', $event)">
-                            <a-menu-item key="up" v-if="card.buttonMap['⬆️']"
-                              ><Icon icon="mdi:pan-up" size="14px" style="margin: 0" />上</a-menu-item
-                            >
-                            <a-menu-item key="down" v-if="card.buttonMap['⬇️']"
-                              ><Icon
-                                icon="mdi:pan-down"
-                                size="14px"
-                                style="margin: 0"
-                              />下</a-menu-item
-                            >
-                            <a-menu-item key="left" v-if="card.buttonMap['⬅️']"
-                              ><Icon
-                                icon="mdi:pan-left"
-                                size="14px"
-                                style="margin: 0"
-                              />左</a-menu-item
-                            >
-                            <a-menu-item key="right" v-if="card.buttonMap['➡️']"
-                              ><Icon
-                                icon="mdi:pan-right"
-                                size="14px"
-                                style="margin: 0"
-                              />右</a-menu-item
-                            >
-                          </a-menu>
-                        </template>
-                        <a-button size="small" class="card-button">
-                          <Icon icon="mdi:pan" size="14px" style="margin: 0" />
-                          <span style="margin: 0">平移</span>
-                          <DownOutlined />
-                        </a-button>
-                      </a-dropdown>
-                      <a-dropdown v-if="card.buttonMap['Zoom Out 1.5x']">
-                        <template #overlay>
-                          <a-menu @click="($event) => handleZoom(card, 'ZOOM', $event)">
-                            <a-menu-item key="Zoom Out 1.5x" v-if="card.buttonMap['Zoom Out 1.5x']"
-                              ><Icon
-                                icon="fluent:zoom-fit-16-regular"
-                                size="14px"
-                                style="margin: 0"
-                              />1.5倍</a-menu-item
-                            >
-                            <a-menu-item key="Zoom Out 2x" v-if="card.buttonMap['Zoom Out 2x']"
-                              ><Icon
-                                icon="fluent:zoom-fit-16-regular"
-                                size="14px"
-                                style="margin: 0"
-                              />2 倍</a-menu-item
-                            >
-                            <a-menu-item key="Custom Zoom" v-if="card.buttonMap['Custom Zoom']"
-                              ><Icon
-                                icon="material-symbols:pinch-zoom-out-outline-rounded"
-                                size="14px"
-                                style="margin: 0"
-                              />自定义</a-menu-item
-                            >
-                            <a-menu-item key="Make Square" v-if="card.buttonMap['Make Square']"
-                              ><Icon
-                                icon="ph:square"
-                                size="14px"
-                                style="margin: 0"
-                              />转成1:1</a-menu-item
-                            >
-                          </a-menu>
-                        </template>
-                        <a-button size="small" class="card-button">
-                          <Icon icon="fluent:zoom-fit-16-regular" size="14px" style="margin: 0" />
-                          <span style="margin: 0">缩放</span>
-                          <DownOutlined />
-                        </a-button>
-                      </a-dropdown>
-
-                      <a-dropdown
-                        v-if="
-                          card.buttonMap['Vary (Strong)'] ||
-                          card.buttonMap['Vary (Subtle)'] ||
-                          card.buttonMap['Upscale (2x)'] ||
-                          card.buttonMap['Upscale (4x)'] ||
-                          card.buttonMap['Redo Upscale (Subtle)'] ||
-                          card.buttonMap['Redo Upscale (Creative)'] ||
-                          card.buttonMap['Upscale (Subtle)'] ||
-                          card.buttonMap['Upscale (Creative)']
-                        "
-                      >
-                        <template #overlay>
-                          <a-menu>
-                            <a-menu-item
-                              key="Vary (Strong)"
-                              v-if="card.buttonMap['Vary (Strong)']"
-                              @click="($event) => handleV(card, 'variation', 'Vary (Strong)')"
-                              ><Icon
-                                icon="ph:magic-wand-fill"
-                                size="14px"
-                                style="margin: 0"
-                              />强(Strong)</a-menu-item
-                            >
-                            <a-menu-item
-                              key="Vary (Subtle)"
-                              v-if="card.buttonMap['Vary (Subtle)']"
-                              @click="($event) => handleV(card, 'variation', 'Vary (Subtle)')"
-                              ><Icon
-                                icon="ph:magic-wand-fill"
-                                size="14px"
-                                style="margin: 0"
-                              />微(Subtle)</a-menu-item
-                            >
-                            <a-menu-item
-                              key="Vary (Region)"
-                              v-if="remix.enable_flag && card.buttonMap['Vary (Region)']"
-                              @click="($event) => openVaryRegion(card, 'variation', 'Vary (Region)')"
-                              ><Icon
-                                icon="pepicons-pencil:paint-pallet"
-                                size="14px"
-                                style="margin: 0"
-                              />局部重绘</a-menu-item
-                            >
-                            <a-menu-item
-                              key="Upscale (2x)"
-                              v-if="card.buttonMap['Upscale (2x)']"
-                              @click="($event) => handleU(card, 'Upscale (2x)', 'upscale2')"
-                              ><Icon
-                                icon="ph:caret-up-bold"
-                                size="14px"
-                                style="margin: 0"
-                              />2倍放大</a-menu-item
-                            >
-                            <a-menu-item
-                              key="Upscale (4x)"
-                              v-if="card.buttonMap['Upscale (4x)']"
-                              @click="($event) => handleU(card, 'Upscale (4x)', 'upscale4')"
-                              ><Icon
-                                icon="ph:caret-double-up-bold"
-                                size="14px"
-                                style="margin: 0"
-                              />4倍放大</a-menu-item
-                            >
-                            <a-menu-item
-                              key="Upscale (Creative)"
-                              v-if="card.buttonMap['Upscale (Creative)']"
-                              @click="($event) => handleU(card, 'Upscale (Creative)', 'creative')"
-                              ><Icon
-                                icon="fluent:scale-fill-24-regular"
-                                size="14px"
-                                style="margin: 0"
-                              />创意 (Creative)
-                            </a-menu-item>
-                            <a-menu-item
-                              key="Upscale (Subtle)"
-                              v-if="card.buttonMap['Upscale (Subtle)']"
-                              @click="($event) => handleU(card, 'Upscale (Subtle)', 'subtle')"
-                              ><Icon
-                                icon="fluent:scale-fill-24-regular"
-                                size="14px"
-                                style="margin: 0"
-                              />细致 (Subtle)
-                            </a-menu-item>
-
-                            <a-menu-item
-                              key="Redo Upscale (Creative)"
-                              v-if="card.buttonMap['Redo Upscale (Creative)']"
-                              @click="
-                                ($event) => handleU(card, 'Redo Upscale (Creative)', 'creative')
-                              "
-                              ><Icon
-                                icon="fluent:scale-fill-24-regular"
-                                size="14px"
-                                style="margin: 0"
-                              />重做-创意 (Creative)
-                            </a-menu-item>
-                            <a-menu-item
-                              key="Redo Upscale (Subtle)"
-                              v-if="card.buttonMap['Redo Upscale (Subtle)']"
-                              @click="($event) => handleU(card, 'Redo Upscale (Subtle)', 'subtle')"
-                              ><Icon
-                                icon="fluent:scale-fill-24-regular"
-                                size="14px"
-                                style="margin: 0"
-                              />重做-细致 (Subtle)
-                            </a-menu-item>
-                          </a-menu>
-                        </template>
-                        <a-button size="small" class="card-button">
-                          <Icon icon="ph:magic-wand-fill" size="14px" style="margin: 0" />
-                          <span style="margin: 0">变化</span>
-                          <DownOutlined />
-                        </a-button>
-                      </a-dropdown>
-                      <a-dropdown
-                        v-if="
-                          card.buttonMap['Redo Upscale (4x)'] || card.buttonMap['Redo Upscale (2x)']
-                        "
-                      >
-                        <template #overlay>
-                          <a-menu>
-                            <a-menu-item
-                              key="Redo Upscale (2x)"
-                              v-if="card.buttonMap['Redo Upscale (2x)']"
-                              @click="($event) => handleU(card, 'Redo Upscale (2x)', 'upscale2')"
-                              ><Icon
-                                icon="ph:caret-up-bold"
-                                size="14px"
-                                style="margin: 0"
-                              />重做-2倍</a-menu-item
-                            >
-                            <a-menu-item
-                              key="Redo Upscale (4x)"
-                              v-if="card.buttonMap['Redo Upscale (4x)']"
-                              @click="($event) => handleU(card, 'Redo Upscale (4x)', 'upscale4')"
-                              ><Icon icon="ph:caret-double-up-bold" size="14px" style="margin: 0" />
-                              重做-4倍</a-menu-item
-                            >
-                          </a-menu>
-                        </template>
-                        <a-button size="small" class="card-button">
-                          <Icon icon="fluent:scale-fill-24-regular" size="14px" style="margin: 0" />
-                          <span style="margin: 0">提升</span>
-                          <DownOutlined />
-                        </a-button>
-                      </a-dropdown>
-                    </div>
-                    <div v-if="card.state === 'SUCCESS' && card.commandType === 'DESCRIBE'">
-                      <a-row>
-                        <a-dropdown>
-                          <template #overlay>
-                            <a-menu @click="($event) => handleDraw(card, $event)">
-                              <a-menu-item key="0"
-                                ><Icon
-                                  icon="tabler:square-number-1"
-                                  size="14px"
-                                  style="margin: 0"
-                                />Prompt</a-menu-item
-                              >
-                              <a-menu-item key="1"
-                                ><Icon icon="tabler:square-number-2" size="14px" style="margin: 0" />
-                                Prompt</a-menu-item
-                              >
-                              <a-menu-item key="2"
-                                ><Icon icon="tabler:square-number-3" size="14px" style="margin: 0" />
-                                Prompt</a-menu-item
-                              >
-                              <a-menu-item key="3"
-                                ><Icon icon="tabler:square-number-4" size="14px" style="margin: 0" />
-                                Prompt</a-menu-item
-                              >
-                              <a-menu-item key="4">全部 Prompt</a-menu-item>
-                            </a-menu>
-                          </template>
-                          <a-button size="small" class="card-button">
-                            <Icon icon="fluent:slide-text-24-regular" size="14px" style="margin: 0" />
-                            <span style="margin: 0">提示词</span>
-                          </a-button>
-                        </a-dropdown>
-                        <a-radio
-                          class="check"
-                          v-if="needShow(card)"
-                          style="margin-left: 5px"
-                          v-model:value="describeInfo.autoReferImage"
-                          >垫图</a-radio
-                        >
-                      </a-row>
-                    </div>
-                  </div>
-                </a-button-group>
+                    </a-row>
+                </div>
               </div>
             </div>
             <!-- 更多卡片内容 -->
@@ -1091,6 +997,7 @@
 
       <div ref="buttonRef">
         <a-card
+
           :bodyStyle="{
             padding: '1px 1px 1px 8px',
             width: '100%',
@@ -1098,7 +1005,7 @@
             'align-items': 'center',
             height: '45px',
           }"
-          class="pagination"
+          class="pagination no-radius"
         >
           <a-pagination
             size="small"
@@ -1177,26 +1084,32 @@
         <template #footer>
           <a-button type="primary" @click="closeAccountConfig">关闭窗口</a-button>
         </template>
-        <a-card>
-          <span style="margin-bottom: 30px; font-size: 11px"
+        <div style="padding: 10px"> 
+          <span style="margin-bottom: 10px; color:red; font-size: 11px"
             >📢这里和绘画工作台的账号和执行模型是联动的！！！</span
           >
-          <a-form layout="vertical" style="margin-top: 10px">
-            <a-form-item label="执行账号">
-              <a-select
+          <a-row style="margin-top: 5PX">
+            <a-input-group compact style="display: flex"> 
+            <a-tag class="line-label tag-no-right-border" color="default"> <span> <Icon icon="streamline-emojis:person-wearing-turban-1"/> 执行账号 </span></a-tag>
+
+            <a-select
                 placeholder="不选的话，随机选取账号，优先默认"
                 @change="handleAccountSetting"
-                style="width: 100%; height: 32px"
+                class="line-input tag-no-right-border"
                 v-model:value="accountForm.useAccountId"
                 v-model="accountForm.useAccountId"
                 :size="accountViewForm.accountSelector.size"
                 :options="accountViewForm.accountSelector.options"
               />
-            </a-form-item>
-            <a-form-item label="执行模式">
-              <a-select
+            </a-input-group>
+          </a-row>
+          <a-row style="margin-top: 5PX">
+            <a-input-group compact style="display: flex"> 
+            <a-tag class="line-label tag-no-right-border" color="default"> <span> <Icon icon="streamline-emojis:dashing-away" size="20" /> 执行模式 </span></a-tag>
+
+            <a-select
                 v-model:value="accountForm.mode"
-                style="width: 100%; height: 32px"
+                class="line-input tag-no-right-border"
                 placeholder="不选的话，默认休闲模式"
               >
                 <!-- <a-select-option value="">不设置</a-select-option> -->
@@ -1204,9 +1117,10 @@
                 <a-select-option value="fast">快速模式</a-select-option>
                 <a-select-option value="turbo">涡轮模式</a-select-option>
               </a-select>
-            </a-form-item>
-          </a-form>
-        </a-card>
+            </a-input-group>
+          </a-row>
+        </div>
+       
       </a-modal>
     </div>
 
@@ -1696,7 +1610,7 @@
   import { accountInfoApi, tagInfoApi, drawCollectCategoryApi } from '../mj/accountInfo';
   import { collectCategoryApi } from './category';
   import { useDrawCard } from '../example/card';
-
+  import ViewPicture from '../common/view_picture.vue';
   const {
     refreshCollectCategory,
     collectCategoryViewForm,
@@ -1821,7 +1735,7 @@
     removeDrawTaskTag,
   } = tagInfoApi();
 
-  const { userSetting, setUseUpImage, setCardShow, setUsePersonNet, setTaskRefresh } =
+  const { userSetting, setUseUpImage, setCardShow, setShowMode, setUsePersonNet, setTaskRefresh } =
     userSettingApi();
 
   const {
@@ -1982,7 +1896,7 @@
 
   .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
     flex: 1;
     align-content: start;
     padding: 5px;
@@ -1991,7 +1905,7 @@
   }
 
   .card {
-    min-width: 185px;
+    min-width: 175px;
     border-radius: 7%;
   }
 
@@ -2181,14 +2095,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 25%;
+    width: 30%;
     height: 32px;
     margin-right: 0;
     font-size: 15px;
   }
 
   .line-input {
-    width: 75%;
+    width: 70%;
     height: 32px;
   }
 
