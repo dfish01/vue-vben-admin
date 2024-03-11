@@ -378,6 +378,7 @@
   import { defineProps, toRefs } from 'vue';
   import VueLazyload from 'vue-lazyload';
   import { api as viewerApi } from 'v-viewer';
+  import Icon from '/@/components/Icon/Icon.vue';
 
   // 定义子组件的props
   const props = defineProps({
