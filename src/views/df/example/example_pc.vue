@@ -1,56 +1,20 @@
 <template>
   <a-layout style="width: 100%; overflow: hidden">
     <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
-    <div>
-      <a-card :bodyStyle="{ padding: '8px' }">
-        <a-row :wrap="false" style="display: flex; align-items: center">
-          <a-button
-            type="text"
-            v-if="categorySetting.showLeftButton"
-            style="
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              width: 25px;
-              height: 32px;
-              font-size: 20px;
-              text-align: center;
-            "
-            @click="scrollToLeft"
-          >
-            <Icon class="vel-icon icon" icon="bytesize:caret-left" size="20" />
-          </a-button>
-          <div
-            class="horizontal-scroll-container"
-            style="flex: 1; overflow: auto"
-            ref="categoryScrollContainer"
-          >
-            <div :key="item.code" v-for="item in categorySetting.categories" class="scroll-item">
-              <a-button
-                :class="drawingSampleForm.categoryCode === item.code ? '' : 'no-border-button'"
-                @click="selectCategory(item.code, drawingSampleForm.key)"
-                >{{ item.name }}</a-button
-              >
-            </div>
-          </div>
-          <a-button
-            type="text"
-            v-if="categorySetting.showRightButton"
-            style="
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              width: 25px;
-              height: 32px;
-              font-size: 20px;
-              text-align: center;
-            "
-            @click="scrollToRight"
-          >
-            <Icon class="vel-icon icon" icon="bytesize:caret-right" size="20" />
-          </a-button>
-        </a-row>
-      </a-card>
+    <div
+      style="
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: left;
+        height: 32px;
+      "
+    >
+      <span class="category"> Random </span>
+      <span class="category category-margin"> Hot </span>
+      <span class="category category-margin"> Top day </span>
+      <span class="category category-margin"> Top week </span>
+      <span class="category category-margin"> Top month </span>
     </div>
 
     <div
@@ -774,5 +738,97 @@
   .lazyImag ::v-deep .lazy__img[lazy='error'] {
     width: 100%;
     padding: 5em 0;
+  }
+
+  .category-margin {
+    margin-left: 15px;
+  }
+
+  .category {
+    --progress-loader-border-color: #e3e4e8;
+    --progress-loader-border-splash-color: rgb(242 51 13 / 10%);
+    --progress-loader-bright-border-color: #aaa;
+    --progress-loader-bright-border-splash-color: #f2330d;
+    --tw-bg-opacity: 1;
+    --tw-border-spacing-x: 0;
+    --tw-border-spacing-y: 0;
+    --tw-translate-x: 0;
+    --tw-translate-y: 0;
+    --tw-rotate: 0;
+    --tw-skew-x: 0;
+    --tw-skew-y: 0;
+    --tw-scale-x: 1;
+    --tw-scale-y: 1;
+    --tw-pan-x: ;
+    --tw-pan-y: ;
+    --tw-pinch-zoom: ;
+    --tw-scroll-snap-strictness: proximity;
+    --tw-gradient-from-position: ;
+    --tw-gradient-via-position: ;
+    --tw-gradient-to-position: ;
+    --tw-ordinal: ;
+    --tw-slashed-zero: ;
+    --tw-numeric-figure: ;
+    --tw-numeric-spacing: ;
+    --tw-numeric-fraction: ;
+    --tw-ring-inset: ;
+    --tw-ring-offset-width: 0px;
+    --tw-ring-offset-color: #fff;
+    --tw-ring-color: rgb(66 153 225 / 50%);
+    --tw-ring-offset-shadow: 0 0 #0000;
+    --tw-ring-shadow: 0 0 #0000;
+    --tw-shadow: 0 0 #0000;
+    --tw-shadow-colored: 0 0 #0000;
+    --tw-blur: ;
+    --tw-brightness: ;
+    --tw-contrast: ;
+    --tw-grayscale: ;
+    --tw-hue-rotate: ;
+    --tw-invert: ;
+    --tw-saturate: ;
+    --tw-sepia: ;
+    --tw-drop-shadow: ;
+    --tw-backdrop-blur: ;
+    --tw-backdrop-brightness: ;
+    --tw-backdrop-contrast: ;
+    --tw-backdrop-grayscale: ;
+    --tw-backdrop-hue-rotate: ;
+    --tw-backdrop-invert: ;
+    --tw-backdrop-opacity: ;
+    --tw-backdrop-saturate: ;
+    --tw-backdrop-sepia: ;
+    --will-be-deleted: ;
+    --tw-text-opacity: 1;
+
+    display: flex;
+    position: relative;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    min-width: fit-content;
+    margin: 0;
+    padding: 0;
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-duration: 0.15s;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    border: 0 solid #e5e7eb;
+    background-color: transparent;
+    background-image: none;
+    color: hsl(225deg 10% 60% / var(--tw-text-opacity));
+    font-family: inherit;
+    font-size: 1rem;
+    -webkit-font-smoothing: antialiased;
+    font-weight: 500;
+    line-height: inherit;
+    text-transform: none;
+    tab-size: 4;
+    cursor: pointer;
+    user-select: none;
+    text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    appearance: button;
+    gap: 2px;
   }
 </style>
