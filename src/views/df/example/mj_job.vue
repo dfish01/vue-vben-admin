@@ -6,8 +6,8 @@
         <a-row :wrap="false" style="display: flex; align-items: center">
           <div :key="item.code" v-for="item in categorySetting.categories" class="scroll-item">
               <a-button
-                :class="drawingSampleForm.categoryCode === item.code ? '' : 'no-border-button'"
-                @click="selectCategory(item.code, drawingSampleForm.key)"
+                :class="feedForm.categoryCode === item.code ? '' : 'no-border-button'"
+                @click="selectCategory(item.code, feedForm.key)"
                 >{{ item.name }}</a-button
               >
             </div>
@@ -195,25 +195,24 @@
   import { exampleApi } from '../mj/jobList.pageQuery';
   import {
     listCategory,
-    queryDrawingSample,
-    moveDrawingSample,
-    delExample,
+    chooseFeedJob,
+    searchJob,
+    collectJob,
+    removeCollectJob,
+    myCollectJobs
   } from '/@/api/df/midjourney';
 
   const { hasPermission } = usePermission();
   const { copyText, goDrawing } = useDrawCard();
     
-  //加载数据
-  const loadMore = async (queryParams) => {
-    if (drawingSampleForm.value.hasMore === 'false') {
-      // message.warning('暂无更多数据！');
-      loadAllData.value = true;
-      doLoading.value = false;
-      return;
-    }
-    const response = await queryDrawingSample(queryParams);
-    return response;
-  };
+  const feedForm = ref({
+    feedStr: 'hot_recent_jobs',
+    page: 1,
+    hasMore: true,
+  });
+
+  const searchPrompt = ref(null);
+
 
   onMounted(async () => {
     categorySetting.value.categories = await listCategory({});
@@ -226,6 +225,7 @@
     await handleLoadMore(500, false);
   });
 
+
   /****************************** 类目相关  ****************************** */
   const doMouseenter = (item) => {
     item.mouseenter = true;
@@ -235,15 +235,6 @@
   };
   const categorySetting = ref({
     categories: [] as { code: string; name: string }[],
-    showLeftButton: false,
-    showRightButton: true,
-  });
-
-  const drawingSampleForm = ref({
-    categoryCode: 'hot_recent_jobs',
-    key: '',
-    page: 1,
-    hasMore: true,
   });
 
   const categoryScrollContainer = ref(null);
@@ -336,10 +327,11 @@
   const selectCategory = async (code, key) => {
     list.value.length = 0;
     scrollbarRef.value.scrollTop = 0;
-    drawingSampleForm.value.categoryCode = code;
-    drawingSampleForm.value.key = key;
-    drawingSampleForm.value.page = 1;
-    drawingSampleForm.value.hasMore = true;
+
+    //初始化数据
+    feedForm.value.feedStr = code;
+    feedForm.value.page = 1;
+    feedForm.value.hasMore = true;
     loadAllData.value = false;
     //执行查询
     await handleLoadMore(500, true);
@@ -349,8 +341,9 @@
 
   // 加载更多
   const loadAllData = ref(false);
+  
   async function handleLoadMore(cacheTime, neededLoading) {
-    if (drawingSampleForm.value.hasMore === 'false') {
+    if (feedForm.value.hasMore === 'false') {
       // message.warning('暂无更多数据！');
       loadAllData.value = true;
       doLoading.value = false;
@@ -359,18 +352,27 @@
 
     try {
       doLoading.value = neededLoading;
-      const more = await loadMore(drawingSampleForm.value);
+      const more = await loadMore(feedForm.value);
       if (more && more.recordList && more.recordList.length > 0) {
         list.value.push(...more.recordList);
       } else {
         message.warning('暂无更多数据！');
+        feedForm.value.hasMore === 'true';
       }
-      drawingSampleForm.value.page = drawingSampleForm.value.page + 1;
+      feedForm.value.page = feedForm.value.page + 1;
     } finally {
       // 延迟 1 秒后执行操作
       doLoading.value = false;
     }
   }
+
+  
+  //加载数据
+  const loadMore = async (queryParams) => {
+    const response = await chooseFeedJob(queryParams);
+    return response;
+  };
+
   /*********************************** 公告 ******************************** */
   const noticeForm = ref({
     content: '',
@@ -568,7 +570,7 @@
   }
 
   .scroll-button {
-    margin: 0 10px;
+    margin: 0 3px;
     font-size: 24px;
     cursor: pointer;
   }
