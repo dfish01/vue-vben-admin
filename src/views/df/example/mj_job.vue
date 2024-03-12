@@ -3,17 +3,19 @@
     <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
     <div>
       <a-card :bodyStyle="{ padding: '8px' }">
-        <a-row :wrap="false" style="display: flex; align-items: center">
-          <div style="display: flex; flex-direction: row; align-items: center">
+        <a-row :wrap="false" style="display: flex; align-items: center;justify-content: space-between;width:100%">
+          <div style=" display: flex; flex-direction: row; align-items: center; ">
             <div :key="item.code" v-for="item in categorySetting.categories" class="scroll-item">
               <a-button
                 :class="feedForm.feedStr === item.code ? '' : 'no-border-button'"
-                style="padding: 0 5px; font-weight: 600"
+                style="padding: 0 10px; font-weight: 600"
                 @click="selectCategory(item.code)"
                 >{{ item.name }}</a-button
               >
             </div>
-            <div>
+            
+          </div>
+          <div>
               <a-input-search
                 v-model:value="searchPrompt"
                 placeholder="Search Prompt"
@@ -21,7 +23,6 @@
                 @search="onSearchPrompt"
               />
             </div>
-          </div>
         </a-row>
       </a-card>
     </div>
@@ -37,8 +38,8 @@
         :row-key="options.rowKey"
         :gutter="options.gutter"
         :has-around-gutter="options.hasAroundGutter"
-        :width="options.width"
-        :breakpoints="options.breakpoints"
+        :width="colWidth"
+        :delay="500"
         :img-selector="options.imgSelector"
         :background-color="options.backgroundColor"
         :animation-effect="options.animationEffect"
@@ -56,13 +57,32 @@
             class="rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-linear hover:shadow-lg hover:shadow-gray-600 group"
           >
             <div class="overflow-hidden">
-              <a-card :bodyStyle="{ padding: '0px' }" class="lazyImag">
-                <LazyImg
+              <a-card :bodyStyle="{ padding: '0px' }" :bordered="true" class="lazyImag" >
+                <div 
+                  :style="{ 'width': colWidth+'px' ,  height: `${(item.height / item.width) * colWidth}px` }"
+                >
+
+                <a-image
+                
+                  :style="{height: `${(item.height / item.width) * 100}%` }"
+                  :src="item.url"
+                >
+                  <template #placeholder>
+                    <a-image
+                      :src="url"
+                      :preview="false"
+                    />
+                  </template>
+                </a-image>
+
+                <!-- <LazyImg
+                v-show="item.isImageLoaded && item.isImageLoaded === true"
                   v-viewer
                   :url="url"
                   class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
-                  @load="imageLoad(url)"
-                />
+                  :success="imageLoad(item)"
+                /> -->
+                </div>
               </a-card>
               <div class="move-in" v-if="item.mouseenter">
                 <!-- 上面的 div，最多显示两行文本 -->
@@ -462,7 +482,7 @@
     breakpoints: {
       3800: {
         // 当屏幕宽度小于等于1200
-        rowPerView: 14,
+        rowPerView: 10,
       },
       1800: {
         // 当屏幕宽度小于等于1200
@@ -528,8 +548,9 @@
     emits('cardClick', item);
   }
 
-  function imageLoad(url: string) {
-    // console.log(`${url}: 加载完成`)
+  function imageLoad(item) {
+    console.log(`${item.mediaUrl}: 加载完成`)
+    item.isImageLoaded = true
   }
 
   /*********************** 案例相关 ********************* */
@@ -559,6 +580,56 @@
     exampleForm.value.drawTaskId = card.id;
     showExampleViewFlag.value = true;
   };
+  //***************************** 列宽定义 ************************ */
+  const colWidth = ref(0);
+
+const updateColWidth = () => {
+  if (window.innerWidth < 500) {
+    colWidth.value = (window.innerWidth - 20) / 2;
+  } else if (window.innerWidth < 640) {
+    colWidth.value = (window.innerWidth - 20) / 2;
+  }else if (window.innerWidth < 900) {
+    colWidth.value = (window.innerWidth - 20) / 3;
+  } else if (window.innerWidth < 1200) {
+    colWidth.value = (window.innerWidth - 20) / 4;
+  } else if (window.innerWidth < 1500) {
+    colWidth.value = (window.innerWidth - 20) / 5;
+  } else if (window.innerWidth < 1800) {
+    colWidth.value = (window.innerWidth - 20) / 6;
+  } else if (window.innerWidth < 3800) {
+    colWidth.value = (window.innerWidth - 20) / 11;
+  } else {
+    colWidth.value = (window.innerWidth - 40) / 9;
+  }
+};
+const updateColWidth2 = () => {
+  if (window.innerWidth < 500) {
+    colWidth.value = window.innerWidth - 20 / 2;
+  } else if (window.innerWidth < 900) {
+    colWidth.value = window.innerWidth - 20 / 3;
+  } else if (window.innerWidth < 1200) {
+    colWidth.value = window.innerWidth - 20 / 4;
+  } else if (window.innerWidth < 1500) {
+    colWidth.value = window.innerWidth - 20 / 5;
+  } else if (window.innerWidth < 1800) {
+    colWidth.value = window.innerWidth - 20 / 6;
+  } else if (window.innerWidth < 3800) {
+    colWidth.value = window.innerWidth - 20 / 11;
+  } else {
+    colWidth.value = window.innerWidth - 20 / 11;
+  }
+};
+onMounted(() => {
+  updateColWidth();
+  window.addEventListener('resize', updateColWidth);
+});
+
+// onUpdated(updateColWidth);
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateColWidth);
+});
+
 </script>
 
 <style scoped>
@@ -746,16 +817,40 @@
   }
 
   .lazyImag ::v-deep .lazy__img[lazy='loading'] {
-    width: 100%;
-    padding: 5em 0;
+    position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   }
 
   .lazyImag ::v-deep .lazy__img[lazy='loaded'] {
-    width: 100%;
+    position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   }
 
   .lazyImag ::v-deep .lazy__img[lazy='error'] {
-    width: 100%;
-    padding: 5em 0;
+    position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   }
+
+.image-placeholder {
+  position: relative;
+  width: 100%;
+  background-color: #f0f0f0; /* 占位符的背景色 */
+}
+
+.image-placeholder img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
 </style>

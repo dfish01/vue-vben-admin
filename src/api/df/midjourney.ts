@@ -1,5 +1,4 @@
 import { defHttp } from '/@/utils/http/axios';
-import { VerifyCodeParams } from './model/UtilModel';
 import { IdReq, StringReq } from '../model/baseModel';
 import { ErrorMessageMode } from '/#/axios';
 
