@@ -4,13 +4,24 @@
     <div>
       <a-card :bodyStyle="{ padding: '8px' }">
         <a-row :wrap="false" style="display: flex; align-items: center">
-          <div :key="item.code" v-for="item in categorySetting.categories" class="scroll-item">
+          <div style="display: flex; flex-direction: row; align-items: center">
+            <div :key="item.code" v-for="item in categorySetting.categories" class="scroll-item">
               <a-button
-                :class="feedForm.categoryCode === item.code ? '' : 'no-border-button'"
-                @click="selectCategory(item.code, feedForm.key)"
+                :class="feedForm.feedStr === item.code ? '' : 'no-border-button'"
+                style="padding: 0 5px; font-weight: 600"
+                @click="selectCategory(item.code)"
                 >{{ item.name }}</a-button
               >
             </div>
+            <div>
+              <a-input-search
+                v-model:value="searchPrompt"
+                placeholder="Search Prompt"
+                style="width: 200px"
+                @search="onSearchPrompt"
+              />
+            </div>
+          </div>
         </a-row>
       </a-card>
     </div>
@@ -66,47 +77,78 @@
                     -webkit-box-orient: vertical;
                   "
                 >
-                  <span style="font-size: 14px">
-                    {{ item.prompt }}
-                  </span>
+                  <!-- <span style="font-size: 14px">
+                    {{ item.fullCommand }}
+                  </span> -->
                 </div>
                 <!-- 下面的 div，按钮靠右 -->
                 <div
                   style="
                     display: flex;
                     flex-direction: row;
-                    justify-content: flex-end;
-                    margin: 5px 5px 5px 8px;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin: 10px 8px;
                   "
                 >
-                  <a-button
-                    v-if="!hasPermission('9999')"
-                    @click.stop="copyText(item.prompt)"
-                    size="small"
-                    style="background-color: #5ba585; color: #fff"
-                    >复制</a-button
+                  <span
+                    style="
+                      display: block; /* 这个样式可能不需要，取决于你想要达到的效果 */
+                      align-items: flex-end;
+                      width: 100px; /* 你需要设置宽度，否则文字不会溢出 */
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
                   >
-                  <a-button
-                    @click.stop="goDrawing(item.prompt)"
-                    style="background-color: #ce6872; color: white"
-                    size="small"
-                    >同款作画</a-button
-                  >
+                    {{ item.username }}
+                  </span>
 
-                  <a-button
-                    v-if="hasPermission('9999')"
-                    @click.stop="showSampleView(item)"
-                    style="background-color: #ce6872; color: white"
-                    size="small"
-                    >分类</a-button
-                  >
-                  <a-button
-                    v-if="hasPermission('9999')"
-                    style="background-color: #b70d1e; color: white"
-                    size="small"
-                    @click.stop="showDeleteConfirm(item.id)"
-                    >删除</a-button
-                  >
+                  <a-button-group>
+                    <a-tooltip title="复制">
+                      <a-button
+                        type="text"
+                        style="color: white"
+                        @click.stop="copyText(item.fullCommand)"
+                        size="small"
+                      >
+                        <Icon class="vel-icon icon" icon="icon-park-outline:text" />
+                      </a-button>
+                    </a-tooltip>
+
+                    <a-tooltip title="画同款">
+                      <a-button
+                        type="text"
+                        style="color: white"
+                        @click.stop="goDrawing(item.fullCommand)"
+                        size="small"
+                      >
+                        <Icon class="vel-icon icon" icon="fluent:image-edit-16-regular" />
+                      </a-button>
+                    </a-tooltip>
+
+                    <a-tooltip title="查询">
+                      <a-button
+                        type="text"
+                        style="color: white"
+                        @click.stop="goDrawing(item.fullCommand)"
+                        size="small"
+                      >
+                        <Icon class="vel-icon icon" icon="mdi:search" />
+                      </a-button>
+                    </a-tooltip>
+
+                    <a-tooltip title="收藏">
+                      <a-button
+                        type="text"
+                        style="color: white"
+                        size="small"
+                        @click.stop="collectJob(item.id)"
+                      >
+                        <Icon class="vel-icon icon" icon="solar:heart-angle-linear" />
+                      </a-button>
+                    </a-tooltip>
+                  </a-button-group>
                 </div>
               </div>
               <div class="move-out" v-else>
@@ -199,12 +241,12 @@
     searchJob,
     collectJob,
     removeCollectJob,
-    myCollectJobs
+    myCollectJobs,
   } from '/@/api/df/midjourney';
 
   const { hasPermission } = usePermission();
   const { copyText, goDrawing } = useDrawCard();
-    
+
   const feedForm = ref({
     feedStr: 'hot_recent_jobs',
     page: 1,
@@ -212,7 +254,6 @@
   });
 
   const searchPrompt = ref(null);
-
 
   onMounted(async () => {
     categorySetting.value.categories = await listCategory({});
@@ -224,7 +265,6 @@
     await handleLoadMore(500, false);
     await handleLoadMore(500, false);
   });
-
 
   /****************************** 类目相关  ****************************** */
   const doMouseenter = (item) => {
@@ -307,24 +347,26 @@
   // }
 
   /************************* 样例相关 ******************** */
-  const showDeleteConfirm = (id) => {
-    Modal.confirm({
-      title: '是否确认删除该样例?',
-      icon: createVNode(ExclamationCircleOutlined),
-      content: 'Some descriptions',
-      okText: 'Yes',
-      okType: 'danger',
-      cancelText: 'No',
-      onOk() {
-        delExample({ id: id });
-      },
-      onCancel() {},
-    });
+
+  const onSearchPrompt = async () => {
+    if (!searchPrompt.value) {
+      return;
+    }
+    doLoading.value = true;
+    try {
+      const more = await searchJob({ content: searchPrompt.value });
+      feedForm.value.hasMore = false;
+      if (more && more.length > 0) {
+        list.value.push(...more);
+      }
+    } finally {
+      doLoading.value = false;
+    }
   };
 
   const waterfallRef = ref(null);
-  
-  const selectCategory = async (code, key) => {
+
+  const selectCategory = async (code) => {
     list.value.length = 0;
     scrollbarRef.value.scrollTop = 0;
 
@@ -341,9 +383,9 @@
 
   // 加载更多
   const loadAllData = ref(false);
-  
+
   async function handleLoadMore(cacheTime, neededLoading) {
-    if (feedForm.value.hasMore === 'false') {
+    if (feedForm.value.hasMore === false) {
       // message.warning('暂无更多数据！');
       loadAllData.value = true;
       doLoading.value = false;
@@ -353,11 +395,11 @@
     try {
       doLoading.value = neededLoading;
       const more = await loadMore(feedForm.value);
-      if (more && more.recordList && more.recordList.length > 0) {
-        list.value.push(...more.recordList);
+      if (more && more.length > 0) {
+        list.value.push(...more);
       } else {
         message.warning('暂无更多数据！');
-        feedForm.value.hasMore === 'true';
+        feedForm.value.hasMore = false;
       }
       feedForm.value.page = feedForm.value.page + 1;
     } finally {
@@ -366,7 +408,6 @@
     }
   }
 
-  
   //加载数据
   const loadMore = async (queryParams) => {
     const response = await chooseFeedJob(queryParams);
@@ -421,15 +462,15 @@
     breakpoints: {
       3800: {
         // 当屏幕宽度小于等于1200
-        rowPerView: 12,
+        rowPerView: 14,
       },
       1800: {
         // 当屏幕宽度小于等于1200
-        rowPerView: 8,
+        rowPerView: 7,
       },
       1600: {
         // 当屏幕宽度小于等于1200
-        rowPerView: 7,
+        rowPerView: 6,
       },
       1200: {
         // 当屏幕宽度小于等于1200
@@ -437,7 +478,7 @@
       },
       800: {
         // 当屏幕宽度小于等于800
-        rowPerView: 4,
+        rowPerView: 3,
       },
       500: {
         // 当屏幕宽度小于等于500
@@ -453,7 +494,7 @@
     // 背景色
     backgroundColor: 'none',
     // imgSelector
-    imgSelector: 'imageUrl',
+    imgSelector: 'mediaUrl',
     // 加载配置
     loadProps: {
       loading,
@@ -541,7 +582,7 @@
     flex-direction: column;
     width: 100%;
     height: 80px;
-    background: rgb(130 124 124 / 70%);
+    background: linear-gradient(to top, rgb(105 101 101 / 70%), rgb(105 101 101 / 0%));
     color: white;
   }
 
@@ -576,9 +617,7 @@
   }
 
   .scroll-item {
-    width: 100px;
     height: 32px;
-    margin: 0 5px;
   }
 
   /* 隐藏滚动条，但保留滚动功能 */
