@@ -63,9 +63,11 @@
                 >
 
                 <a-image
-                
+                v-viewer
+                  :preview="false"
                   :style="{height: `${(item.height / item.width) * 100}%` }"
                   :src="item.url"
+                  class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
                 >
                   <template #placeholder>
                     <a-image
