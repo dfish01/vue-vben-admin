@@ -16,7 +16,7 @@
                 >{{ item.name }}</a-button
               >
             </div> -->
-
+            <a-button-group>
             <a-button
               :class="'no-border-button'"
               style="padding: 0 10px; font-weight: 600"
@@ -56,6 +56,7 @@
               @click="selectCategory('top_month')"
               >Top Month
             </a-button>
+          </a-button-group>
             <a-divider type="vertical" />
             <a-button
               :class="'no-border-button'"
@@ -70,7 +71,7 @@
               v-model:value="searchPrompt"
               placeholder="Search Prompt"
               style="width: 200px"
-              @search="onSearchPrompt"
+              @search="doSearchJob"
             />
           </div>
         </a-row>
@@ -467,22 +468,6 @@
 
   /************************* 样例相关 ******************** */
 
-  const onSearchPrompt = async () => {
-    if (!searchPrompt.value) {
-      return;
-    }
-    doLoading.value = true;
-    try {
-      const more = await searchJob({ content: searchPrompt.value });
-      feedForm.value.hasMore = false;
-      if (more && more.length > 0) {
-        list.value.push(...more);
-      }
-    } finally {
-      doLoading.value = false;
-    }
-  };
-
   const waterfallRef = ref(null);
 
   const selectCategory = async (code) => {
@@ -704,26 +689,36 @@
   };
   //***************************** 列宽定义 && 收藏 ************************ */
   const colWidth = ref(0);
-
+  const container = ref(null);
   const updateColWidth = () => {
-    console.log('updateColWidth');
-    if (window.innerWidth < 310) {
-      colWidth.value = window.innerWidth - 10;
-    } else if (window.innerWidth < 630) {
-      colWidth.value = (window.innerWidth - 20) / 2;
-    } else if (window.innerWidth < 930) {
-      colWidth.value = (window.innerWidth - 20) / 3;
-    } else if (window.innerWidth < 1240) {
-      colWidth.value = (window.innerWidth - 25) / 4;
-    } else if (window.innerWidth < 1550) {
-      colWidth.value = (window.innerWidth - 30) / 5;
-    } else if (window.innerWidth < 1860) {
-      colWidth.value = (window.innerWidth - 35) / 6;
-    } else if (window.innerWidth < 3800) {
-      colWidth.value = (window.innerWidth - 60) / 11;
+    
+    let clientWidth = scrollbarRef.value.offsetWidth;
+    if (clientWidth < 310) {
+      colWidth.value = clientWidth - 10;
+    } else if (clientWidth < 630) {
+      colWidth.value = (clientWidth - 10) / 2;
+    } else if (clientWidth < 930) {
+      colWidth.value = (clientWidth - 10) / 3;
+    } else if (clientWidth < 1240) {
+      colWidth.value = (clientWidth - 15) / 3;
+    } else if (clientWidth < 1340) {
+      colWidth.value = (clientWidth - 15) / 5;
+    } else if (clientWidth < 1550) {
+      colWidth.value = (clientWidth - 25) / 6;
+    } else if (clientWidth < 1860) {
+      colWidth.value = (clientWidth - 25) / 7;
+    } else if (clientWidth < 2170) {
+      colWidth.value = (clientWidth - 30) / 8;
+    } else if (clientWidth < 2480) {
+      colWidth.value = (clientWidth - 30) / 9;
+    } else if (clientWidth < 2780) {
+      colWidth.value = (clientWidth - 30) / 10;
+    } else if (clientWidth < 3800) {
+      colWidth.value = (clientWidth - 20) / 11;
     } else {
-      colWidth.value = (window.innerWidth - 80) / 13;
+      colWidth.value = (clientWidth - 20) / 10;
     }
+    console.log('updateColWidth clientWidth：' + clientWidth + 'colWidth:' + colWidth.value);
   };
 
   const dataMap = new Map();
@@ -735,10 +730,19 @@
   });
 
   const doSearchJob = async () => {
-    doLoading.value = false;
+    doLoading.value = true;
     try { 
+      list.value.length = 0;
+      feedForm.value.feedStr = '';
+      scrollbarRef.value.scrollTop = 0;
+      sleep(150);
+      
+      let more = await searchJob({content: searchPrompt.value});
+      //提取ID set
+      list.value = more;
+      feedForm.value.hasMore = false;
     } finally {
-      doLoading.value = true;
+      doLoading.value = false;
     }
   };
 
