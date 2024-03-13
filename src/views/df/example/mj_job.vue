@@ -704,9 +704,9 @@
     } else if (clientWidth < 1340) {
       colWidth.value = (clientWidth - 15) / 5;
     } else if (clientWidth < 1550) {
-      colWidth.value = (clientWidth - 25) / 6;
+      colWidth.value = (clientWidth - 15) / 6;
     } else if (clientWidth < 1860) {
-      colWidth.value = (clientWidth - 25) / 7;
+      colWidth.value = (clientWidth - 20) / 7;
     } else if (clientWidth < 2170) {
       colWidth.value = (clientWidth - 30) / 8;
     } else if (clientWidth < 2480) {
