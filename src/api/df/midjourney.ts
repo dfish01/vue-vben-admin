@@ -11,7 +11,6 @@ enum Api {
   MyCollectJobs = '/open/mjJob/myCollectJobs',
 }
 
-
 /**
  * 类目列表查询
  * @param params
@@ -36,10 +35,7 @@ export function listCategory(params: {}, mode: ErrorMessageMode = 'message') {
  * @param mode
  * @returns
  */
-export function chooseFeedJob(
-  params: any,
-  mode: ErrorMessageMode = 'message',
-) {
+export function chooseFeedJob(params: any, mode: ErrorMessageMode = 'message') {
   return defHttp.post<any[]>(
     {
       url: Api.ChooseFeedJob,
@@ -57,10 +53,7 @@ export function chooseFeedJob(
  * @param mode
  * @returns
  */
-export function searchJob(
-  params: StringReq,
-  mode: ErrorMessageMode = 'message',
-) {
+export function searchJob(params: StringReq, mode: ErrorMessageMode = 'message') {
   return defHttp.post<any[]>(
     {
       url: Api.SearchJob,
@@ -72,17 +65,13 @@ export function searchJob(
   );
 }
 
-
 /**
  * 添加收藏
  * @param params
  * @param mode
  * @returns
  */
-export function collectJob(
-  params: any,
-  mode: ErrorMessageMode = 'message',
-) {
+export function collectJob(params: any, mode: ErrorMessageMode = 'message') {
   return defHttp.post(
     {
       url: Api.CollectJob,
@@ -100,10 +89,7 @@ export function collectJob(
  * @param mode
  * @returns
  */
-export function removeCollectJob(
-  params: IdReq,
-  mode: ErrorMessageMode = 'message',
-) {
+export function removeCollectJob(params: IdReq, mode: ErrorMessageMode = 'message') {
   return defHttp.post(
     {
       url: Api.RemoveCollectJob,
@@ -114,7 +100,6 @@ export function removeCollectJob(
     },
   );
 }
-
 
 /**
  * 我的收藏任务
@@ -130,8 +115,6 @@ export function myCollectJobs(params: {}, mode: ErrorMessageMode = 'message') {
     },
     {
       errorMessageMode: mode,
-      successMessageMode: mode,
     },
   );
 }
-

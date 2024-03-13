@@ -3,26 +3,76 @@
     <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
     <div>
       <a-card :bodyStyle="{ padding: '8px' }">
-        <a-row :wrap="false" style="display: flex; align-items: center;justify-content: space-between;width:100%">
-          <div style=" display: flex; flex-direction: row; align-items: center; ">
-            <div :key="item.code" v-for="item in categorySetting.categories" class="scroll-item">
+        <a-row
+          :wrap="false"
+          style="display: flex; align-items: center; justify-content: space-between; width: 100%"
+        >
+          <div style="display: flex; flex-direction: row; align-items: center">
+            <!-- <div :key="item.code" v-for="item in categorySetting.categories" class="scroll-item">
               <a-button
                 :class="feedForm.feedStr === item.code ? '' : 'no-border-button'"
                 style="padding: 0 10px; font-weight: 600"
                 @click="selectCategory(item.code)"
                 >{{ item.name }}</a-button
               >
-            </div>
-            
+            </div> -->
+
+            <a-button
+              :class="'no-border-button'"
+              style="padding: 0 10px; font-weight: 600"
+              :style="{ color: feedForm.feedStr === 'random_recent_jobs' ? '#0766AD' : '' }"
+              @click="selectCategory('random_recent_jobs')"
+              >Radom
+            </a-button>
+
+            <a-button
+              :class="'no-border-button'"
+              style="padding: 0 10px; font-weight: 600"
+              :style="{ color: feedForm.feedStr === 'hot_recent_jobs' ? '#0766AD' : '' }"
+              @click="selectCategory('hot_recent_jobs')"
+              >Hot
+            </a-button>
+
+            <a-button
+              :class="'no-border-button'"
+              style="padding: 0 10px; font-weight: 600"
+              :style="{ color: feedForm.feedStr === 'top_day' ? '#0766AD' : '' }"
+              @click="selectCategory('top_day')"
+              >Top Day
+            </a-button>
+
+            <a-button
+              :class="'no-border-button'"
+              style="padding: 0 10px; font-weight: 600"
+              :style="{ color: feedForm.feedStr === 'top_week' ? '#0766AD' : '' }"
+              @click="selectCategory('top_week')"
+              >Top Week
+            </a-button>
+
+            <a-button
+              :class="'no-border-button'"
+              style="padding: 0 10px; font-weight: 600"
+              :style="{ color: feedForm.feedStr === 'top_month' ? '#0766AD' : '' }"
+              @click="selectCategory('top_month')"
+              >Top Month
+            </a-button>
+            <a-divider type="vertical" />
+            <a-button
+              :class="'no-border-button'"
+              style="padding: 0 10px; font-weight: 600"
+              :style="{ color: feedForm.feedStr === 'likes' ? '#0766AD' : '' }"
+              @click="getCollectJobs()"
+              >Likes
+            </a-button>
           </div>
           <div>
-              <a-input-search
-                v-model:value="searchPrompt"
-                placeholder="Search Prompt"
-                style="width: 200px"
-                @search="onSearchPrompt"
-              />
-            </div>
+            <a-input-search
+              v-model:value="searchPrompt"
+              placeholder="Search Prompt"
+              style="width: 200px"
+              @search="onSearchPrompt"
+            />
+          </div>
         </a-row>
       </a-card>
     </div>
@@ -39,7 +89,7 @@
         :gutter="options.gutter"
         :has-around-gutter="options.hasAroundGutter"
         :width="colWidth"
-        :delay="500"
+        :delay="100"
         :img-selector="options.imgSelector"
         :background-color="options.backgroundColor"
         :animation-effect="options.animationEffect"
@@ -47,35 +97,59 @@
         :animation-delay="options.animationDelay"
         :lazyload="options.lazyload"
         :load-props="options.loadProps"
-        :cross-origin="options.crossOrigin"
+        :cross-origin="true"
       >
         <template #item="{ item, url, index }">
           <div
             v-if="url"
             @mouseenter="doMouseenter(item)"
             @mouseleave="doMouseleave(item)"
-            class="rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-linear hover:shadow-lg hover:shadow-gray-600 group"
+            class=""
           >
             <div class="overflow-hidden">
-              <a-card :bodyStyle="{ padding: '0px' }" :bordered="true" class="lazyImag" >
-                <div 
-                  :style="{ 'width': colWidth+'px' ,  height: `${(item.height / item.width) * colWidth}px` }"
-                >
+              <a-card
+                :bodyStyle="{
+                  padding: '0px',
+                  width: colWidth + 'px',
+                  height: `${(item.height / item.width) * colWidth}px`,
+                }"
+                :bordered="true"
+                class="lazyImag"
+              >
+                <!-- <div
+                  :style="{
+                    width: colWidth + 'px',
+                    height: `${(item.height / item.width) * colWidth}px`,
+                  }"
+                > -->
+                <LazyImg
+                  v-viewer
+                  :url="url"
+                  :style="{
+                    width: colWidth + 'px',
+                    height: `${(item.height / item.width) * colWidth}px`,
+                  }"
+                  @load="imageLoad(url)"
+                />
+                <!-- <LazyImg
+                    v-viewer
+                    :url="url"
+                    :style="{ height: `${(item.height / item.width) * 100}%` }"
+                    class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
+                    @load="imageLoad(item)"
+                  /> -->
 
-                <a-image
-                v-viewer
-                  :preview="false"
-                  :style="{height: `${(item.height / item.width) * 100}%` }"
-                  :src="item.url"
-                  class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
-                >
-                  <template #placeholder>
-                    <a-image
-                      :src="url"
-                      :preview="false"
-                    />
-                  </template>
-                </a-image>
+                <!-- <a-image
+                    v-viewer
+                    :class="item.mouseenter ? 'img-hover' : ''"
+                    :preview="false"
+                    :style="{ height: `${(item.height / item.width) * 100}%` }"
+                    :src="url"
+                  >
+                    <template #placeholder>
+                      <a-image :src="url" :preview="false" />
+                    </template>
+                  </a-image> -->
 
                 <!-- <LazyImg
                 v-show="item.isImageLoaded && item.isImageLoaded === true"
@@ -84,7 +158,7 @@
                   class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
                   :success="imageLoad(item)"
                 /> -->
-                </div>
+                <!-- </div> -->
               </a-card>
               <div class="move-in" v-if="item.mouseenter">
                 <!-- 上面的 div，最多显示两行文本 -->
@@ -160,12 +234,23 @@
                       </a-button>
                     </a-tooltip>
 
-                    <a-tooltip title="收藏">
+                    <a-tooltip title="取消收藏" v-if="hasCollect(item)">
                       <a-button
                         type="text"
                         style="color: white"
                         size="small"
-                        @click.stop="collectJob(item.id)"
+                        @click.stop="doRemoveJob(item)"
+                      >
+                        <Icon class="vel-icon icon" icon="ion:heart" color="red" />
+                      </a-button>
+                    </a-tooltip>
+
+                    <a-tooltip title="收藏" v-else>
+                      <a-button
+                        type="text"
+                        style="color: white"
+                        size="small"
+                        @click.stop="doCollectJob(item)"
                       >
                         <Icon class="vel-icon icon" icon="solar:heart-angle-linear" />
                       </a-button>
@@ -173,17 +258,29 @@
                   </a-button-group>
                 </div>
               </div>
-              <div class="move-out" v-else>
+              <!-- <div class="move-out" v-else>
                 <Icon
                   class="vel-icon icon"
                   icon="ant-design:exclamation-circle-twotone"
                   size="15"
                 />
-              </div>
+              </div> -->
             </div>
           </div>
         </template>
       </Waterfall>
+      <a-row style="justify-content: center" v-if="doLoading === false">
+        <div style="width: 300px">
+          <a-divider v-if="feedForm.hasMore === true">
+            <span style="color: rgb(0 0 0 / 50%)">
+              <Icon class="vel-icon icon" icon="eos-icons:bubble-loading" />正在加载中...</span
+            ></a-divider
+          >
+          <a-divider style="width: 400px" v-if="feedForm.hasMore === false">
+            <span style="color: rgb(0 0 0 / 50%)">暂无更多数据 </span></a-divider
+          >
+        </div>
+      </a-row>
     </div>
     <Loading :loading="doLoading" :absolute="false" tip="正在加载中" />
 
@@ -273,6 +370,7 @@
     feedStr: 'hot_recent_jobs',
     page: 1,
     hasMore: true,
+    cacheList: [],
   });
 
   const searchPrompt = ref(null);
@@ -316,8 +414,7 @@
       const tenWayPoint = (scrollHeight - clientHeight) * 0.9;
 
       // 当滚动到一半时触发加载
-      // if(!doLoading.value && !loadAllData.value) {
-      if (!loadAllData.value) {
+      if (feedForm.value.hasMore) {
         if (
           scrollPosition >= thirdWayPoint ||
           scrollPosition >= halfwayPoint ||
@@ -390,43 +487,66 @@
 
   const selectCategory = async (code) => {
     list.value.length = 0;
+    list.value.splice(0, list.value.length);
     scrollbarRef.value.scrollTop = 0;
 
     //初始化数据
     feedForm.value.feedStr = code;
+    await sleep(300);
+    if (dataMap.has(code)) {
+      let cacheData = dataMap.get(code);
+      feedForm.value = cacheData;
+      list.value.push(...cacheData.cacheList);
+      // list.value = Array.from(cacheData.cacheList);
+      return;
+    }
+
     feedForm.value.page = 1;
     feedForm.value.hasMore = true;
-    loadAllData.value = false;
+
     //执行查询
     await handleLoadMore(500, true);
-    await handleLoadMore(500, false);
-    await handleLoadMore(500, false);
+    if (feedForm.value.hasMore === true) {
+      await handleLoadMore(500, false);
+    }
+    if (feedForm.value.hasMore === true) {
+      await handleLoadMore(500, false);
+    }
   };
-
-  // 加载更多
-  const loadAllData = ref(false);
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
 
   async function handleLoadMore(cacheTime, neededLoading) {
     if (feedForm.value.hasMore === false) {
-      // message.warning('暂无更多数据！');
-      loadAllData.value = true;
       doLoading.value = false;
       return;
     }
 
     try {
       doLoading.value = neededLoading;
-      const more = await loadMore(feedForm.value);
+      const more = await loadMore({ feedStr: feedForm.value.feedStr, page: feedForm.value.page });
       if (more && more.length > 0) {
         list.value.push(...more);
       } else {
-        message.warning('暂无更多数据！');
         feedForm.value.hasMore = false;
       }
       feedForm.value.page = feedForm.value.page + 1;
+      console.log('handleMore: value =' + JSON.stringify(feedForm.value));
+      //数据存储
+      let cacheValue = {
+        feedStr: feedForm.value.feedStr,
+        page: feedForm.value.page,
+        hasMore: feedForm.value.hasMore,
+        cacheList: [],
+      };
+      cacheValue.cacheList = Array.from(list.value);
+      dataMap.set(feedForm.value.feedStr, cacheValue);
     } finally {
       // 延迟 1 秒后执行操作
-      doLoading.value = false;
+      setTimeout(() => {
+        doLoading.value = false;
+      }, 2000);
     }
   }
 
@@ -500,7 +620,7 @@
       },
       800: {
         // 当屏幕宽度小于等于800
-        rowPerView: 3,
+        rowPerView: 5,
       },
       500: {
         // 当屏幕宽度小于等于500
@@ -510,7 +630,7 @@
     // 动画效果
     animationEffect: 'fadeIn',
     // 动画时间
-    animationDuration: 1000,
+    animationDuration: 500,
     // 动画延迟
     animationDelay: 300,
     // 背景色
@@ -518,10 +638,10 @@
     // imgSelector
     imgSelector: 'mediaUrl',
     // 加载配置
-    loadProps: {
-      loading,
-      error,
-    },
+    // loadProps: {
+    //   loading,
+    //   error,
+    // },
     // 是否懒加载
     lazyload: true,
   });
@@ -551,8 +671,8 @@
   }
 
   function imageLoad(item) {
-    console.log(`${item.mediaUrl}: 加载完成`)
-    item.isImageLoaded = true
+    // console.log(`${item.mediaUrl}: 加载完成`);
+    // item.isImageLoaded = true;
   }
 
   /*********************** 案例相关 ********************* */
@@ -582,72 +702,108 @@
     exampleForm.value.drawTaskId = card.id;
     showExampleViewFlag.value = true;
   };
-  //***************************** 列宽定义 ************************ */
+  //***************************** 列宽定义 && 收藏 ************************ */
   const colWidth = ref(0);
 
-const updateColWidth = () => {
-  if (window.innerWidth < 500) {
-    colWidth.value = (window.innerWidth - 20) / 2;
-  } else if (window.innerWidth < 640) {
-    colWidth.value = (window.innerWidth - 20) / 2;
-  }else if (window.innerWidth < 900) {
-    colWidth.value = (window.innerWidth - 20) / 3;
-  } else if (window.innerWidth < 1200) {
-    colWidth.value = (window.innerWidth - 20) / 4;
-  } else if (window.innerWidth < 1500) {
-    colWidth.value = (window.innerWidth - 20) / 5;
-  } else if (window.innerWidth < 1800) {
-    colWidth.value = (window.innerWidth - 20) / 6;
-  } else if (window.innerWidth < 3800) {
-    colWidth.value = (window.innerWidth - 20) / 11;
-  } else {
-    colWidth.value = (window.innerWidth - 40) / 9;
-  }
-};
-const updateColWidth2 = () => {
-  if (window.innerWidth < 500) {
-    colWidth.value = window.innerWidth - 20 / 2;
-  } else if (window.innerWidth < 900) {
-    colWidth.value = window.innerWidth - 20 / 3;
-  } else if (window.innerWidth < 1200) {
-    colWidth.value = window.innerWidth - 20 / 4;
-  } else if (window.innerWidth < 1500) {
-    colWidth.value = window.innerWidth - 20 / 5;
-  } else if (window.innerWidth < 1800) {
-    colWidth.value = window.innerWidth - 20 / 6;
-  } else if (window.innerWidth < 3800) {
-    colWidth.value = window.innerWidth - 20 / 11;
-  } else {
-    colWidth.value = window.innerWidth - 20 / 11;
-  }
-};
-onMounted(() => {
-  updateColWidth();
-  window.addEventListener('resize', updateColWidth);
-});
+  const updateColWidth = () => {
+    console.log('updateColWidth');
+    if (window.innerWidth < 310) {
+      colWidth.value = window.innerWidth - 10;
+    } else if (window.innerWidth < 630) {
+      colWidth.value = (window.innerWidth - 20) / 2;
+    } else if (window.innerWidth < 930) {
+      colWidth.value = (window.innerWidth - 20) / 3;
+    } else if (window.innerWidth < 1240) {
+      colWidth.value = (window.innerWidth - 25) / 4;
+    } else if (window.innerWidth < 1550) {
+      colWidth.value = (window.innerWidth - 30) / 5;
+    } else if (window.innerWidth < 1860) {
+      colWidth.value = (window.innerWidth - 35) / 6;
+    } else if (window.innerWidth < 3800) {
+      colWidth.value = (window.innerWidth - 60) / 11;
+    } else {
+      colWidth.value = (window.innerWidth - 80) / 13;
+    }
+  };
 
-// onUpdated(updateColWidth);
+  const dataMap = new Map();
 
-onUnmounted(() => {
-  window.removeEventListener('resize', updateColWidth);
-});
+  const collectJobForm = ref({
+    jobs: [],
+    loaded: false,
+    idSet: new Set(),
+  });
 
+  const doSearchJob = async () => {
+    doLoading.value = false;
+    try { 
+    } finally {
+      doLoading.value = true;
+    }
+  };
+
+  const doCollectJob = (item) => {
+    item.collect = true;
+    let exists = collectJobForm.value.jobs.some((obj) => obj.id === item.id);
+    if (!exists) {
+      collectJob(item);
+      collectJobForm.value.jobs.unshift(item);
+      collectJobForm.value.idSet.add(item.id);
+    }
+    message.success('已收藏');
+  };
+
+  const doRemoveJob = (item) => {
+    collectJobForm.value.jobs = collectJobForm.value.jobs.filter((obj) => obj.id !== item.id);
+    list.value.push(collectJobForm.value.jobs);
+    collectJobForm.value.idSet.delete(item.id);
+    item.collect = false;
+    removeCollectJob({ id: item.id });
+  };
+
+  const getCollectJobs = async () => {
+    list.value.length = 0;
+    feedForm.value.feedStr = 'likes';
+    scrollbarRef.value.scrollTop = 0;
+    sleep(200);
+    console.log('getCollectJobs');
+    if (collectJobForm.value.loaded === true) {
+      list.value.push(...collectJobForm.value.jobs);
+    } else {
+      let more = await myCollectJobs({});
+      //提取ID set
+      collectJobForm.value.idSet = new Set(more.map((item) => item.id));
+      collectJobForm.value.jobs = more;
+      collectJobForm.value.loaded = true;
+      list.value = more;
+    }
+    feedForm.value.hasMore = false;
+  };
+
+  const hasCollect = (item) => {
+    return collectJobForm.value.idSet.has(item.id);
+  };
+
+  onMounted(async () => {
+    updateColWidth();
+    window.addEventListener('resize', updateColWidth);
+
+    //查询收藏
+    let more = await myCollectJobs({});
+    //提取ID set
+    collectJobForm.value.idSet = new Set(more.map((item) => item.id));
+    collectJobForm.value.jobs.push(...more);
+    collectJobForm.value.loaded = true;
+  });
+
+  // onUpdated(updateColWidth);
+
+  onUnmounted(() => {
+    window.removeEventListener('resize', updateColWidth);
+  });
 </script>
 
 <style scoped>
-  /* 增加移动端样式 */
-  @media screen and (max-width: 767px) {
-    .search-row {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-    }
-
-    .search-input {
-      margin-top: 10px;
-    }
-  }
-
   .move-in {
     display: flex;
     position: absolute;
@@ -699,16 +855,6 @@ onUnmounted(() => {
     height: 0 !important;
   }
 
-  /* 
-:deep(.ant-card-body) {
-  padding: 10px; 
-} */
-
-  /* .app {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-} */
-
   .search-bar {
     display: flex;
     align-items: center;
@@ -716,12 +862,6 @@ onUnmounted(() => {
     height: 10vh;
     padding: 20px;
   }
-
-  /* .card-container {
-  width: 100%;
-  column-gap: 10px;
-  column-count: 4;
-} */
 
   .card {
     display: inline-block;
@@ -741,26 +881,14 @@ onUnmounted(() => {
     border-radius: 15%;
   }
 
-  .card img:hover {
-    transform: scale(1.05); /* 鼠标悬停时放大 5% */
-    transition: transform 0.3s ease; /* 添加过渡效果，可根据需要调整持续时间和缓动函数 */
+  .img-hover {
+    transform: scale(1.03); /* 鼠标悬停时放大 5% */
+    transition: transform 0.1s ease; /* 添加过渡效果，可根据需要调整持续时间和缓动函数 */
   }
 
   .card >>> .ant-image-mask {
     border-radius: 15%;
   }
-
-  /* 
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  flex: 1;
-  align-content: start;
-  height: calc(90vh - 80px);
-  padding: 20px;
-  overflow: auto;
-  gap: 20px;
-} */
 
   .card-tags {
     display: flex;
@@ -801,10 +929,10 @@ onUnmounted(() => {
     justify-content: flex-end;
   }
 
-  :deep(.ant-tooltip-inner) {
+  /* :deep(.ant-tooltip-inner) {
     width: auto !important;
-    min-width: 600px; /* 设置你想要的最大宽度 */
-  }
+    min-width: 600px; 
+  } */
 
   .custom-radio-group span.anticon {
     vertical-align: -0.125em !important;
@@ -817,42 +945,4 @@ onUnmounted(() => {
   .no-border-button {
     border: 1px solid transparent !important;
   }
-
-  .lazyImag ::v-deep .lazy__img[lazy='loading'] {
-    position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  }
-
-  .lazyImag ::v-deep .lazy__img[lazy='loaded'] {
-    position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  }
-
-  .lazyImag ::v-deep .lazy__img[lazy='error'] {
-    position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  }
-
-.image-placeholder {
-  position: relative;
-  width: 100%;
-  background-color: #f0f0f0; /* 占位符的背景色 */
-}
-
-.image-placeholder img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
 </style>
