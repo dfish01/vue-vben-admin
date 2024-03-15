@@ -7,21 +7,15 @@
           style="display: flex; align-items: center; justify-content: space-between; width: 100%"
         >
           <div style="display: flex; flex-direction: row; align-items: center">
-            <!-- <div :key="item.code" v-for="item in categorySetting.categories" class="scroll-item">
-              <a-button
-                :class="feedForm.feedStr === item.code ? '' : 'no-border-button'"
-                style="padding: 0 10px; font-weight: 600"
-                @click="selectCategory(item.code)"
-                >{{ item.name }}</a-button
-              >
-            </div> -->
             <a-button-group>
               <a-button
                 :class="'no-border-button'"
                 style="padding: 0 10px; font-weight: 600"
                 :style="{ color: feedForm.feedStr === 'random_recent_jobs' ? '#0766AD' : '' }"
                 @click="selectCategory('random_recent_jobs')"
-                >Radom
+                ><span>
+                  <Icon class="vel-icon icon" icon="noto-v1:shooting-star" />随机推荐
+                </span>
               </a-button>
 
               <a-button
@@ -29,7 +23,9 @@
                 style="padding: 0 10px; font-weight: 600"
                 :style="{ color: feedForm.feedStr === 'hot_recent_jobs' ? '#0766AD' : '' }"
                 @click="selectCategory('hot_recent_jobs')"
-                >Hot
+                ><span>
+                  <Icon class="vel-icon icon" icon="streamline-emojis:fire" />热门
+                </span>
               </a-button>
 
               <a-button
@@ -37,7 +33,9 @@
                 style="padding: 0 10px; font-weight: 600"
                 :style="{ color: feedForm.feedStr === 'top_day' ? '#0766AD' : '' }"
                 @click="selectCategory('top_day')"
-                >Top Day
+                ><span>
+                  <Icon class="vel-icon icon" icon="noto:glowing-star" />每日精选
+                </span>
               </a-button>
 
               <a-button
@@ -45,7 +43,9 @@
                 style="padding: 0 10px; font-weight: 600"
                 :style="{ color: feedForm.feedStr === 'top_week' ? '#0766AD' : '' }"
                 @click="selectCategory('top_week')"
-                >Top Week
+                ><span>
+                  <Icon class="vel-icon icon" icon="noto:glowing-star" />每周精选
+                </span>
               </a-button>
 
               <a-button
@@ -53,7 +53,9 @@
                 style="padding: 0 10px; font-weight: 600"
                 :style="{ color: feedForm.feedStr === 'top_month' ? '#0766AD' : '' }"
                 @click="selectCategory('top_month')"
-                >Top Month
+                ><span>
+                  <Icon class="vel-icon icon" icon="noto:glowing-star" />每月精选
+                </span>
               </a-button>
             </a-button-group>
             <a-divider type="vertical" />
@@ -62,7 +64,9 @@
               style="padding: 0 10px; font-weight: 600"
               :style="{ color: feedForm.feedStr === 'likes' ? '#0766AD' : '' }"
               @click="getCollectJobs()"
-              >Likes
+              ><span>
+                  <Icon class="vel-icon icon" icon="streamline-emojis:heart-suit" />我的喜欢
+                </span>
             </a-button>
           </div>
           <div>
@@ -330,6 +334,7 @@
   import { getRecentNotice } from '/@/api/df/utils';
   import { accountInfoApi } from '../mj/accountInfo';
   import { exampleApi } from '../mj/jobList.pageQuery';
+  import { useGo } from '/@/hooks/web/usePage';
   import {
     listCategory,
     chooseFeedJob,
@@ -719,6 +724,8 @@
   const doSearchJob = async (prompt) => {
     doLoading.value = true;
     if (prompt) {
+      searchPrompt.value = prompt;
+    }else {
       prompt = searchPrompt.value;
     }
     try {
@@ -790,11 +797,14 @@
     collectJobForm.value.loaded = true;
   });
 
-  // onUpdated(updateColWidth);
-
   onUnmounted(() => {
     window.removeEventListener('resize', updateColWidth);
   });
+
+  const go = useGo();
+  const goView = async (routePath) => {
+    go(routePath);
+  };
 </script>
 
 <style scoped>

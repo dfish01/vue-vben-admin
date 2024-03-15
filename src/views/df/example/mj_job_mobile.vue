@@ -13,65 +13,93 @@
       >
         <div style="display: flex; align-items: center">
           <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
-          <span style="margin-left: 5px; font-size: 16px; font-weight: bold"> MJ画廊（分类） </span>
+          <span style="margin-left: 5px; font-size: 16px; font-weight: bold"> MJ画廊 </span>
         </div>
-        <!-- <div style="display: flex; gap: 5px">
-          <a-tooltip title="保存查看进度">
-            <a-button @click="saveProcess" style="padding: 0 5px; border-radius: 5px">
-              <Icon icon="akar-icons:save" size="22" />
-            </a-button>
-          </a-tooltip>
-        </div> -->
+        <div>
+          <a-button-group>
+                <a-button @click="showQueryView" @click.prevent :style="{}" style="padding: 5px">
+                  <SvgIcon name="list_search" size="20" />
+                </a-button>
+                <a-button  @click="getCollectJobs()" @click.prevent :style="{}" style="padding: 5px">
+                  <Icon icon="streamline-emojis:heart-suit" size="20" />
+                </a-button>
+                <a-button @click="goView('/example2/index')" @click.prevent :style="{}" style="padding: 5px">
+                  <Icon icon="quill:sort" size="20" color="#007F73"/>
+                </a-button>
+                
+            </a-button-group>
+          </div>
       </a-row>
     </a-card>
 
     <div>
-      <a-card class="no-radius"  :bodyStyle="{ padding: '1px' }">
+      <a-card class="no-radius" :bodyStyle="{ padding: '1px' }">
         <a-row :wrap="false" style="display: flex; align-items: center">
-          <a-tag
-            v-if="categorySetting.showLeftButton"
-            style="
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              width: 12px;
-              height: 20px;
-              font-size: 10px;
-              text-align: center;
-            "
-            @click="scrollToLeft"
-          >
-            <CaretLeftOutlined />
-          </a-tag>
-          <div
-            class="horizontal-scroll-container"
-            style="flex: 1; overflow: auto"
-            ref="categoryScrollContainer"
-          >
-            <div :key="item.code" v-for="item in categorySetting.categories" class="scroll-item">
+           
+            <a-button-group class="scroll-item" style="width: 100%">
               <a-button
-                :class="drawingSampleForm.categoryCode === item.code ? '' : 'no-border-button'"
-                @click="selectCategory(item.code, drawingSampleForm.key)"
-                style="height: 20px; padding: 0 5px; border-radius: 5px; font-size: 10px"
-                >{{ item.name }}</a-button
-              >
-            </div>
-          </div>
-          <a-tag
-            v-if="categorySetting.showRightButton"
-            style="
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              width: 12px;
-              height: 20px;
-              font-size: 10px;
-              text-align: center;
-            "
-            @click="scrollToRight"
-          >
-            <CaretRightOutlined />
-          </a-tag>
+                :class="'no-border-button'"
+                style="height: 20px; padding: 0 5px;  font-size: 10px"
+                :style="{ color: feedForm.feedStr === 'random_recent_jobs' ? '#0766AD' : '', 'font-weight': feedForm.feedStr === 'random_recent_jobs' ? '600' : '' }"
+                
+                @click="selectCategory('random_recent_jobs')"
+                > 
+                <span>
+                  <Icon class="vel-icon icon" icon="noto-v1:shooting-star" />随机
+                </span>
+              </a-button>
+
+              <a-button
+                :class="'no-border-button'"
+                style="height: 20px; padding: 0 5px;  font-size: 10px"
+                :style="{ color: feedForm.feedStr === 'hot_recent_jobs' ? '#0766AD' : '', 'font-weight': feedForm.feedStr === 'hot_recent_jobs' ? '600' : '' }"
+                @click="selectCategory('hot_recent_jobs')"
+                >
+                <span>
+                  <Icon class="vel-icon icon" icon="streamline-emojis:fire" />热门
+                </span>
+              </a-button>
+
+              <a-button
+                :class="'no-border-button'"
+                style="height: 20px; padding: 0 5px;  font-size: 10px"
+                :style="{ color: feedForm.feedStr === 'top_day' ? '#0766AD' : '', 'font-weight': feedForm.feedStr === 'top_day' ? '600' : '' }"
+                @click="selectCategory('top_day')"
+                >
+                <span>
+                  <Icon class="vel-icon icon" icon="noto:glowing-star" />每天
+                </span>
+              </a-button>
+
+              
+
+              <a-button
+                :class="'no-border-button'"
+                style="height: 20px; padding: 0 5px;  font-size: 10px"
+                :style="{ color: feedForm.feedStr === 'top_week' ? '#0766AD' : '', 'font-weight': feedForm.feedStr === 'top_week' ? '600' : '' }"
+                
+                @click="selectCategory('top_week')"
+                >
+                <span>
+                  <Icon class="vel-icon icon" icon="noto:glowing-star" />每周
+                </span>
+              </a-button>
+
+              <a-button
+                :class="'no-border-button'"
+                style="height: 20px; padding: 0 5px; font-size: 10px"
+                :style="{ color: feedForm.feedStr === 'top_month' ? '#0766AD' : '', 'font-weight': feedForm.feedStr === 'top_month' ? '600' : '' }"
+                
+                @click="selectCategory('top_month')"
+                >
+                <span>
+                  <Icon class="vel-icon icon" icon="noto:glowing-star" />每月
+                </span>
+              </a-button>
+              
+            </a-button-group>
+            
+         
         </a-row>
       </a-card>
     </div>
@@ -106,7 +134,11 @@
             class="rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-linear hover:shadow-lg hover:shadow-gray-600 group"
           >
             <div class="overflow-hidden">
-              <a-card :bodyStyle="{ padding: '0px' }" class="lazyImag">
+              <a-card class="lazyImag" :bodyStyle="{
+                  padding: '0px',
+                  width: colWidth + 'px',
+                  height: `${(item.height / item.width) * colWidth}px`,
+                }">
                 <LazyImg
                   :url="url"
                   class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
@@ -126,52 +158,114 @@
                     -webkit-box-orient: vertical;
                   "
                 >
-                  <span style="font-size: 14px">
-                    {{ item.prompt }}
-                  </span>
+                  <!-- <span style="font-size: 14px">
+                    {{ item.fullCommand }}
+                  </span> -->
                 </div>
                 <!-- 下面的 div，按钮靠右 -->
                 <div
                   style="
                     display: flex;
                     flex-direction: row;
-                    justify-content: flex-end;
-                    margin: 5px 5px 5px 8px;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin: 10px 8px;
                   "
                 >
-                  <a-button
-                    v-if="!hasPermission('9999')"
-                    @click.stop="copyText(item.prompt)"
-                    size="small"
-                    style="background-color: #5ba585; color: #fff"
-                    >复制</a-button
+                  <span
+                    style="
+                      display: block; /* 这个样式可能不需要，取决于你想要达到的效果 */
+                      align-items: flex-end;
+                      width: 100px; /* 你需要设置宽度，否则文字不会溢出 */
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
                   >
-                  <a-button
-                    @click.stop="goDrawing(item.prompt)"
-                    style="background-color: #ce6872; color: white"
-                    size="small"
-                    >同款作画</a-button
-                  >
-                  <a-button
-                    v-if="hasPermission('9999')"
-                    @click.stop="showSampleView(item)"
-                    style="background-color: #ce6872; color: white"
-                    size="small"
-                    >分类</a-button
-                  >
+                    {{ item.username }}
+                  </span>
+
+                  <a-button-group>
+                    <a-tooltip title="复制">
+                      <a-button
+                        type="text"
+                        style="color: white"
+                        @click.stop="copyText(item.fullCommand)"
+                        size="small"
+                      >
+                        <Icon class="vel-icon icon" icon="icon-park-outline:text" />
+                      </a-button>
+                    </a-tooltip>
+
+                    <a-tooltip title="画同款">
+                      <a-button
+                        type="text"
+                        style="color: white"
+                        @click.stop="goDrawing(item.fullCommand)"
+                        size="small"
+                      >
+                        <Icon class="vel-icon icon" icon="fluent:image-edit-16-regular" />
+                      </a-button>
+                    </a-tooltip>
+
+                    <a-tooltip title="查询">
+                      <a-button
+                        type="text"
+                        style="color: white"
+                        @click.stop="doSearchJob(item.url)"
+                        size="small"
+                      >
+                        <Icon class="vel-icon icon" icon="mdi:search" />
+                      </a-button>
+                    </a-tooltip>
+
+                    <a-tooltip title="取消收藏" v-if="hasCollect(item)">
+                      <a-button
+                        type="text"
+                        style="color: white"
+                        size="small"
+                        @click.stop="doRemoveJob(item)"
+                      >
+                        <Icon class="vel-icon icon" icon="ion:heart" color="red" />
+                      </a-button>
+                    </a-tooltip>
+
+                    <a-tooltip title="收藏" v-else>
+                      <a-button
+                        type="text"
+                        style="color: white"
+                        size="small"
+                        @click.stop="doCollectJob(item)"
+                      >
+                        <Icon class="vel-icon icon" icon="solar:heart-angle-linear" />
+                      </a-button>
+                    </a-tooltip>
+                  </a-button-group>
                 </div>
               </div>
-              <div class="move-out" v-else>
+              <!-- <div class="move-out" v-else>
                 <Icon
                   class="vel-icon icon"
                   icon="ant-design:exclamation-circle-twotone"
                   size="15"
                 />
-              </div>
+              </div> -->
             </div>
           </div>
         </template>
       </Waterfall>
+      <a-row style="justify-content: center" v-if="doLoading === false">
+        <div >
+          <a-divider v-if="feedForm.hasMore === true">
+            <span style="color: rgb(0 0 0 / 50%); font-size:12px">
+              <Icon class="vel-icon icon" icon="eos-icons:bubble-loading" size="12"/>正在加载中...</span
+            ></a-divider
+          >
+          <a-divider  v-if="feedForm.hasMore === false">
+            <span style=" color: rgb(0 0 0 / 50%);font-size:12px">暂无更多数据 </span>
+          </a-divider>
+        </div>
+      </a-row>
     </div>
     <Loading :loading="doLoading" :absolute="false" tip="正在加载中" />
     <!-- 公告 -->
@@ -192,6 +286,28 @@
         </div>
       </a-spin>
     </a-modal>
+
+    <!-- 条件查询 -->
+    <a-modal
+      v-model:open="showQueryViewFlag"
+      width="100%"
+      title="Prompt查询"
+      :bodyStyle="{ padding: '7px 10px 7px 10px', width: '100%', 'align-items': 'center' }"
+    >
+      <template #footer>
+        <a-button key="submit" type="primary" @click="doSearchJob()">立即查询</a-button>
+      </template>
+
+        <a-row type="flex" :gutter="[0, 2]" style="margin-top: 3px">
+          <a-input
+            class="line-input "
+              v-model:value="searchPrompt"
+              placeholder="Search Prompt"
+            />
+            <span style="color:red; font-size:10px">注意: 由于资源限制，目前暂时无法支持大批量查询~ 如果查询失败，请稍后再试！</span>
+        </a-row>
+    </a-modal>
+
 
     <!-- 案例添加 -->
     <a-modal
@@ -250,12 +366,15 @@
   import { accountInfoApi } from '../mj/accountInfo';
   import { exampleApi } from '../mj/jobList.pageQuery';
   import { useGo } from '/@/hooks/web/usePage';
+  import { SvgIcon } from '/@/components/Icon';
   import {
     listCategory,
-    queryDrawingSample,
-    moveDrawingSample,
-    delExample,
-  } from '/@/api/df/drawingSample';
+    chooseFeedJob,
+    searchJob,
+    collectJob,
+    removeCollectJob,
+    myCollectJobs,
+  } from '/@/api/df/midjourney';
 
   const userStore = useUserStore();
   const handleSetting = (key, value) => {
@@ -283,21 +402,41 @@
     upwardSpace,
     offsetHeightRef,
   );
+  const showQueryViewFlag = ref(false);
+  const showQueryView = () => {
+    showQueryViewFlag.value = true;
+  };
+  const { copyText} = useDrawCard();
 
-  const { copyText, loadMore, initDrawingSampleCategory } = useDrawCard();
+  const feedForm = ref({
+    feedStr: 'hot_recent_jobs',
+    page: 1,
+    hasMore: true,
+    cacheList: [],
+  });
+
+  const searchPrompt = ref(null);
 
   onMounted(async () => {
-    categorySetting.value.categories = await initDrawingSampleCategory();
+    categorySetting.value.categories = await listCategory({});
     exampleForm.value.drawingSampleCategory = categorySetting.value.categories.map((item) => ({
       label: item.name,
       value: item.code,
     }));
+    await handleLoadMore(500, true);
+    await handleLoadMore(500, false);
+    await handleLoadMore(500, false);
   });
+
 
   //画同款
   const go = useGo();
   const goDrawing = async (queryParams) => {
-    go('/mmj/index?activeTab=TextToImageForm&prompt=' + queryParams);
+    goView('/mmj/index?activeTab=TextToImageForm&prompt=' + queryParams);
+  };
+
+  const goView = async (routePath) => {
+    go(routePath);
   };
   /****************************** 类目相关  ****************************** */
 
@@ -367,6 +506,7 @@
     window.removeEventListener('scroll', throttledScroll);
   });
 
+
   function debounce(func, delay) {
     let timeout;
     return function (...args) {
@@ -380,77 +520,93 @@
   /************************* 放大图片*************************** */
   // const images = ref<{src:string, msrc:string,alt:string}[]>([])
 
-  // const showImage = (imageUrl:string) => {
-  //   images.value = [{src:imageUrl, msrc:imageUrl, alt:'123'}];
-  //   const imageList = [];
-  //   imageList.push(imageUrl);
-  //   viewerApi({
-  //           options: {
-  //             toolbar: true,
-  //             url: 'data-source',
-  //             initialViewIndex: 1
-  //           },
-  //           images: imageList
-  //         })
-  // }
+  const showImage = (item) => {
+    console.log('showImage ......');
+    if (item.mouseenter === null || item.mouseenter === undefined || item.mouseenter === false) {
+      item.mouseenter = true;
+    } else {
+      item.mouseenter = false;
 
-  /************************* 样例相关 ******************** */
-  const waterfallRef = ref(null);
-  const selectCategory = async (code, key) => {
-    // doLoading.value = true;
-    list.value.length = 0;
-    scrollbarRef.value.scrollTop = 0;
-    drawingSampleForm.value.categoryCode = code;
-    drawingSampleForm.value.key = key;
-    drawingSampleForm.value.nextCursorId = '';
-    //执行查询
-    await handleLoadMore(drawingSampleForm.value);
+      const imageList = [];
+      imageList.push(item.imageUrl);
+      console.log(imageList);
+      viewerApi({ images: imageList });
+    }
   };
+  /************************* 样例相关 ******************** */
 
-  // 加载更多
-  async function handleLoadMore(cacheTime) {
-    if (drawingSampleForm.value.nextCursorId === '-1') {
-      message.warning('暂无更多数据！');
+  const waterfallRef = ref(null);
+
+  const selectCategory = async (code) => {
+    list.value.length = 0;
+    list.value.splice(0, list.value.length);
+    scrollbarRef.value.scrollTop = 0;
+
+    //初始化数据
+    feedForm.value.feedStr = code;
+    await sleep(300);
+    if (dataMap.has(code)) {
+      let cacheData = dataMap.get(code);
+      feedForm.value = cacheData;
+      list.value.push(...cacheData.cacheList);
+      // list.value = Array.from(cacheData.cacheList);
+      return;
+    }
+
+    feedForm.value.page = 1;
+    feedForm.value.hasMore = true;
+
+    //执行查询
+    await handleLoadMore(500, true);
+    if (feedForm.value.hasMore === true) {
+      await handleLoadMore(500, false);
+    }
+    if (feedForm.value.hasMore === true) {
+      await handleLoadMore(500, false);
+    }
+  };
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function handleLoadMore(cacheTime, neededLoading) {
+    if (feedForm.value.hasMore === false) {
       doLoading.value = false;
       return;
     }
 
     try {
-      doLoading.value = true;
-      const more = await loadMore(drawingSampleForm.value);
-      if (more && more.recordList && more.recordList.length > 0) {
-        list.value.push(...more.recordList);
+      doLoading.value = neededLoading;
+      const more = await loadMore({ feedStr: feedForm.value.feedStr, page: feedForm.value.page });
+      if (more && more.length > 0) {
+        list.value.push(...more);
       } else {
-        message.warning('暂无更多数据！');
+        feedForm.value.hasMore = false;
       }
-      drawingSampleForm.value.nextCursorId = more.nextCursorId;
+      feedForm.value.page = feedForm.value.page + 1;
+      console.log('handleMore: value =' + JSON.stringify(feedForm.value));
+      //数据存储
+      let cacheValue = {
+        feedStr: feedForm.value.feedStr,
+        page: feedForm.value.page,
+        hasMore: feedForm.value.hasMore,
+        cacheList: [],
+      };
+      cacheValue.cacheList = Array.from(list.value);
+      dataMap.set(feedForm.value.feedStr, cacheValue);
     } finally {
       // 延迟 1 秒后执行操作
-      doLoading.value = false;
-      if (drawingSampleForm.value.nextCursorId != '-1') {
-        setTimeout(function () {
-          doLoading.value = false;
-        }, cacheTime);
-      }
+      setTimeout(() => {
+        doLoading.value = false;
+      }, 2000);
     }
   }
-  /********************  缓存  **************** */
 
-  const saveProcess = (): void => {
-    userSetting.value.useUpImage = !userSetting.value.useUpImage;
-    handleSetting('exampleQuery', drawingSampleForm.value);
-    message.success('查看进度已保存到本地缓存~');
+  //加载数据
+  const loadMore = async (queryParams) => {
+    const response = await chooseFeedJob(queryParams);
+    return response;
   };
-
-  onMounted(() => {
-    console.log(11111);
-    const setting = userStore.getPersonalSetting;
-    if (setting && setting.exampleQuery) {
-      drawingSampleForm.value = setting.exampleQuery;
-      drawingSampleForm.value.nextCursorId = drawingSampleForm.value.preNextCursorId;
-    }
-    handleLoadMore(1500);
-  });
 
   /*********************************** 公告 ******************************** */
   const noticeForm = ref({
@@ -468,12 +624,24 @@
     //   noticeForm.value.content = response;
     // }
   });
-
   /*********************************** 基础配置 ******************************** */
   const userSetting = ref({
     useUpImage: false,
     usePersonNet: false,
   });
+  const setUseUpImage = (): void => {
+    userSetting.value.useUpImage = !userSetting.value.useUpImage;
+  };
+
+  const setUsePersonNet = (): void => {
+    userSetting.value.usePersonNet = !userSetting.value.usePersonNet;
+  };
+
+  const getImageSource = (card) => {
+    const baseImageSource = userSetting.value.usePersonNet ? card.cdnResultImage : card.resultImage;
+
+    return userSetting.value.useUpImage ? baseImageSource : card.mediaImageUrl;
+  };
 
   const options = reactive({
     // 唯一key值
@@ -488,40 +656,48 @@
     breakpoints: {
       3800: {
         // 当屏幕宽度小于等于1200
-        rowPerView: 12,
+        rowPerView: 10,
       },
       1800: {
         // 当屏幕宽度小于等于1200
         rowPerView: 6,
       },
-      1200: {
+      1500: {
         // 当屏幕宽度小于等于1200
         rowPerView: 5,
       },
-      800: {
+      1200: {
+        // 当屏幕宽度小于等于1200
+        rowPerView: 4,
+      },
+      900: {
         // 当屏幕宽度小于等于800
         rowPerView: 3,
       },
-      500: {
+      670: {
         // 当屏幕宽度小于等于500
         rowPerView: 2,
       },
+      350: {
+        // 当屏幕宽度小于等于500
+        rowPerView: 1,
+      },
     },
     // 动画效果
-    animationEffect: 'animate__fadeInUp',
+    animationEffect: 'fadeIn',
     // 动画时间
-    animationDuration: 1000,
+    animationDuration: 500,
     // 动画延迟
     animationDelay: 300,
     // 背景色
     backgroundColor: 'none',
     // imgSelector
-    imgSelector: 'imageUrl',
+    imgSelector: 'mediaUrl',
     // 加载配置
-    loadProps: {
-      loading,
-      error,
-    },
+    // loadProps: {
+    //   loading,
+    //   error,
+    // },
     // 是否懒加载
     lazyload: true,
   });
@@ -550,26 +726,12 @@
     emits('cardClick', item);
   }
 
-  function imageLoad(url: string) {
-    // console.log(`${url}: 加载完成`)
+  function imageLoad(item) {
+    // console.log(`${item.mediaUrl}: 加载完成`);
+    // item.isImageLoaded = true;
   }
 
-  const showImage = (item) => {
-    console.log('showImage ......');
-    if (item.mouseenter === null || item.mouseenter === undefined || item.mouseenter === false) {
-      item.mouseenter = true;
-    } else {
-      item.mouseenter = false;
-
-      const imageList = [];
-      imageList.push(item.imageUrl);
-      console.log(imageList);
-      viewerApi({ images: imageList });
-    }
-  };
-
   /*********************** 案例相关 ********************* */
-
   const exampleForm = ref({
     drawingSampleCategory: [],
     categoryCodes: [],
@@ -580,6 +742,7 @@
   const showExampleViewFlag = ref(false);
   const addSample = async () => {
     exampleForm.value.loading = true;
+    console.log(11231);
     try {
       await moveDrawingSample({
         id: exampleForm.value.drawTaskId,
@@ -595,21 +758,127 @@
     exampleForm.value.drawTaskId = card.id;
     showExampleViewFlag.value = true;
   };
+  //***************************** 列宽定义 && 收藏 ************************ */
+  const colWidth = ref(0);
+  const container = ref(null);
+  const updateColWidth = () => {
+    let clientWidth = scrollbarRef.value.offsetWidth;
+    if (clientWidth < 350) {
+      colWidth.value = clientWidth - 10;
+    } else if (clientWidth < 670) {
+      colWidth.value = (clientWidth - 10) / 2;
+    } else if (clientWidth < 900) {
+      colWidth.value = (clientWidth - 10) / 3;
+    } else if (clientWidth < 1200) {
+      colWidth.value = (clientWidth - 15) / 4;
+    } else if (clientWidth < 1500) {
+      colWidth.value = (clientWidth - 15) / 5;
+    } else if (clientWidth < 1800) {
+      colWidth.value = (clientWidth - 15) / 6;
+    } else {
+      colWidth.value = (clientWidth - 20) / 10;
+    }
+    console.log('updateColWidth clientWidth：' + clientWidth + 'colWidth:' + colWidth.value);
+  };
+
+  const dataMap = new Map();
+
+  const collectJobForm = ref({
+    jobs: [],
+    loaded: false,
+    idSet: new Set(),
+  });
+
+  const doSearchJob = async (prompt) => {
+    console.log("doSearchJob " + prompt)
+    doLoading.value = true;
+    if (prompt) {
+      searchPrompt.value = prompt;
+    }else {
+      prompt = searchPrompt.value;
+    }
+    try {
+      list.value.length = 0;
+      feedForm.value.feedStr = '';
+      scrollbarRef.value.scrollTop = 0;
+      sleep(150);
+
+      let more = await searchJob({ content: prompt });
+      //提取ID set
+      list.value = more;
+      feedForm.value.hasMore = false;
+    } finally {
+      showQueryViewFlag.value = false;
+      doLoading.value = false;
+    }
+  };
+
+  const doCollectJob = (item) => {
+    item.collect = true;
+    let exists = collectJobForm.value.jobs.some((obj) => obj.id === item.id);
+    if (!exists) {
+      collectJob(item);
+      collectJobForm.value.jobs.unshift(item);
+      collectJobForm.value.idSet.add(item.id);
+    }
+    message.success('已收藏');
+  };
+
+  const doRemoveJob = (item) => {
+    collectJobForm.value.jobs = collectJobForm.value.jobs.filter((obj) => obj.id !== item.id);
+    list.value.push(collectJobForm.value.jobs);
+    collectJobForm.value.idSet.delete(item.id);
+    item.collect = false;
+    removeCollectJob({ id: item.id });
+  };
+
+  const getCollectJobs = async () => {
+    list.value.length = 0;
+    feedForm.value.feedStr = 'likes';
+    scrollbarRef.value.scrollTop = 0;
+    sleep(200);
+    console.log('getCollectJobs');
+    if (collectJobForm.value.loaded === true) {
+      list.value.push(...collectJobForm.value.jobs);
+    } else {
+      let more = await myCollectJobs({});
+      //提取ID set
+      collectJobForm.value.idSet = new Set(more.map((item) => item.id));
+      collectJobForm.value.jobs = more;
+      collectJobForm.value.loaded = true;
+      list.value = more;
+    }
+    feedForm.value.hasMore = false;
+  };
+
+  const hasCollect = (item) => {
+    return collectJobForm.value.idSet.has(item.id);
+  };
+
+  onMounted(async () => {
+    updateColWidth();
+    window.addEventListener('resize', updateColWidth);
+
+    //查询收藏
+    let more = await myCollectJobs({});
+    //提取ID set
+    collectJobForm.value.idSet = new Set(more.map((item) => item.id));
+    collectJobForm.value.jobs.push(...more);
+    collectJobForm.value.loaded = true;
+  });
+
+  // onUpdated(updateColWidth);
+
+  onUnmounted(() => {
+    window.removeEventListener('resize', updateColWidth);
+  });
+
+ 
+
 </script>
 
 <style scoped>
-  /* 增加移动端样式 */
-  @media screen and (max-width: 767px) {
-    .search-row {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-    }
-
-    .search-input {
-      margin-top: 10px;
-    }
-  }
+  
 
   .move-in {
     display: flex;
@@ -618,7 +887,7 @@
     flex-direction: column;
     width: 100%;
     height: 80px;
-    background: rgb(130 124 124 / 70%);
+    background: linear-gradient(to top, rgb(105 101 101 / 70%), rgb(105 101 101 / 0%));
     color: white;
   }
 
@@ -653,7 +922,6 @@
   }
 
   .scroll-item {
-    width: 100px;
     height: 24px;
     margin: 0 5px;
   }
@@ -796,5 +1064,4 @@
     width: 100%;
     padding: 5em 0;
   }
-
 </style>

@@ -185,7 +185,7 @@
     {
       value: 'example',
       payload: {
-        icon: 'streamline:ecology-science-alien-extraterristerial-life-form-space-universe-head',
+        icon: 'logos:midjourney',
         url: '/example',
         subTitle: '画廊',
       },

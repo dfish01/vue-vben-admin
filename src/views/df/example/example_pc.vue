@@ -4,14 +4,51 @@
     <div>
       <a-card :bodyStyle="{ padding: '8px' }">
         <a-row :wrap="false" style="display: flex; align-items: center">
-          <div :key="item.code" v-for="item in categorySetting.categories" class="scroll-item">
-            <a-button
-              :class="drawingSampleForm.categoryCode === item.code ? '' : 'no-border-button'"
-              @click="selectCategory(item.code, drawingSampleForm.key)"
-            >
-              {{ item.name }}
-            </a-button>
+          <a-button
+            type="text"
+            v-if="categorySetting.showLeftButton"
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 25px;
+              height: 32px;
+              font-size: 20px;
+              text-align: center;
+            "
+            @click="scrollToLeft"
+          >
+            <Icon class="vel-icon icon" icon="bytesize:caret-left" size="20" />
+          </a-button>
+          <div
+            class="horizontal-scroll-container"
+            style="flex: 1; overflow: auto"
+            ref="categoryScrollContainer"
+          >
+            <div :key="item.code" v-for="item in categorySetting.categories" class="scroll-item">
+              <a-button
+                :class="drawingSampleForm.categoryCode === item.code ? '' : 'no-border-button'"
+                @click="selectCategory(item.code, drawingSampleForm.key)"
+                >{{ item.name }}</a-button
+              >
+            </div>
           </div>
+          <a-button
+            type="text"
+            v-if="categorySetting.showRightButton"
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 25px;
+              height: 32px;
+              font-size: 20px;
+              text-align: center;
+            "
+            @click="scrollToRight"
+          >
+            <Icon class="vel-icon icon" icon="bytesize:caret-right" size="20" />
+          </a-button>
         </a-row>
       </a-card>
     </div>
@@ -19,8 +56,7 @@
     <div
       id="scrollbar"
       ref="scrollbarRef"
-      :style="{ height: `calc(${contentHeight}px ` }"
-      style="flex-wrap: wrap; padding-bottom: 2px; overflow: auto"
+      style="flex-wrap: wrap; height: calc(100vh - 98px); overflow: auto"
     >
       <Waterfall
         ref="waterfallRef"
@@ -42,12 +78,14 @@
         <template #item="{ item, url, index }">
           <div
             v-if="url"
-            @click="showImage(item)"
+            @mouseenter="doMouseenter(item)"
+            @mouseleave="doMouseleave(item)"
             class="rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-linear hover:shadow-lg hover:shadow-gray-600 group"
           >
             <div class="overflow-hidden">
               <a-card :bodyStyle="{ padding: '0px' }" class="lazyImag">
                 <LazyImg
+                  v-viewer
                   :url="url"
                   class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
                   @load="imageLoad(url)"
@@ -92,12 +130,20 @@
                     size="small"
                     >同款作画</a-button
                   >
+
                   <a-button
                     v-if="hasPermission('9999')"
                     @click.stop="showSampleView(item)"
                     style="background-color: #ce6872; color: white"
                     size="small"
                     >分类</a-button
+                  >
+                  <a-button
+                    v-if="hasPermission('9999')"
+                    style="background-color: #b70d1e; color: white"
+                    size="small"
+                    @click.stop="showDeleteConfirm(item.id)"
+                    >删除</a-button
                   >
                 </div>
               </div>
@@ -190,25 +236,14 @@
     queryDrawingSample,
     moveDrawingSample,
     delExample,
-  } from '/@/api/df/midjourney';
+  } from '/@/api/df/drawingSample';
 
   const { hasPermission } = usePermission();
-  const { copyText, goDrawing } = useDrawCard();
-
-  //加载数据
-  const loadMore = async (queryParams) => {
-    if (drawingSampleForm.value.hasMore === 'false') {
-      // message.warning('暂无更多数据！');
-      loadAllData.value = true;
-      doLoading.value = false;
-      return;
-    }
-    const response = await queryDrawingSample(queryParams);
-    return response;
-  };
+  const { copyText, goDrawing, loadMore, initDrawingSampleCategory } = useDrawCard();
 
   onMounted(async () => {
-    categorySetting.value.categories = await listCategory({});
+    categorySetting.value.categories = await initDrawingSampleCategory();
+    //多选类目
     exampleForm.value.drawingSampleCategory = categorySetting.value.categories.map((item) => ({
       label: item.name,
       value: item.code,
@@ -232,13 +267,41 @@
   });
 
   const drawingSampleForm = ref({
-    categoryCode: 'hot_recent_jobs',
+    categoryCode: '',
     key: '',
-    page: 1,
-    hasMore: true,
+    nextCursorId: '',
   });
 
   const categoryScrollContainer = ref(null);
+
+  const scrollToLeft = () => {
+    const element = categoryScrollContainer.value;
+    element.scrollTo({
+      left: element.scrollLeft - 300,
+      behavior: 'smooth', // 添加平滑滚动效果
+    });
+    if (element.scrollLeft === 0) {
+      categorySetting.value.showLeftButton = false;
+    }
+    if (!categorySetting.value.showRightButton) {
+      categorySetting.value.showRightButton = true;
+    }
+  };
+
+  const scrollToRight = () => {
+    const element = categoryScrollContainer.value;
+    element.scrollTo({
+      left: categoryScrollContainer.value.scrollLeft + 300,
+      behavior: 'smooth', // 添加平滑滚动效果
+    });
+
+    if (element.scrollLeft + element.clientWidth >= element.scrollWidth) {
+      categorySetting.value.showRightButton = false;
+    }
+    if (!categorySetting.value.showLeftButton) {
+      categorySetting.value.showLeftButton = true;
+    }
+  };
 
   /***************************滚动相关**************************** */
   const scrollbarRef = ref(null);
@@ -324,14 +387,12 @@
   };
 
   const waterfallRef = ref(null);
-
   const selectCategory = async (code, key) => {
     list.value.length = 0;
     scrollbarRef.value.scrollTop = 0;
     drawingSampleForm.value.categoryCode = code;
     drawingSampleForm.value.key = key;
-    drawingSampleForm.value.page = 1;
-    drawingSampleForm.value.hasMore = true;
+    drawingSampleForm.value.nextCursorId = '';
     loadAllData.value = false;
     //执行查询
     await handleLoadMore(500, true);
@@ -342,7 +403,7 @@
   // 加载更多
   const loadAllData = ref(false);
   async function handleLoadMore(cacheTime, neededLoading) {
-    if (drawingSampleForm.value.hasMore === 'false') {
+    if (drawingSampleForm.value.nextCursorId === '-1') {
       // message.warning('暂无更多数据！');
       loadAllData.value = true;
       doLoading.value = false;
@@ -357,10 +418,15 @@
       } else {
         message.warning('暂无更多数据！');
       }
-      drawingSampleForm.value.page = drawingSampleForm.value.page + 1;
+      drawingSampleForm.value.nextCursorId = more.nextCursorId;
     } finally {
       // 延迟 1 秒后执行操作
       doLoading.value = false;
+      // if (drawingSampleForm.value.nextCursorId != '-1') {
+      //   setTimeout(function () {
+      //     doLoading.value = false;
+      //   }, cacheTime);
+      // }
     }
   }
   /*********************************** 公告 ******************************** */
