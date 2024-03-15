@@ -1,6 +1,5 @@
 <template>
   <a-layout style="width: 100%; overflow: hidden">
-    <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
     <div>
       <a-card :bodyStyle="{ padding: '8px' }">
         <a-row
@@ -17,46 +16,46 @@
               >
             </div> -->
             <a-button-group>
-            <a-button
-              :class="'no-border-button'"
-              style="padding: 0 10px; font-weight: 600"
-              :style="{ color: feedForm.feedStr === 'random_recent_jobs' ? '#0766AD' : '' }"
-              @click="selectCategory('random_recent_jobs')"
-              >Radom
-            </a-button>
+              <a-button
+                :class="'no-border-button'"
+                style="padding: 0 10px; font-weight: 600"
+                :style="{ color: feedForm.feedStr === 'random_recent_jobs' ? '#0766AD' : '' }"
+                @click="selectCategory('random_recent_jobs')"
+                >Radom
+              </a-button>
 
-            <a-button
-              :class="'no-border-button'"
-              style="padding: 0 10px; font-weight: 600"
-              :style="{ color: feedForm.feedStr === 'hot_recent_jobs' ? '#0766AD' : '' }"
-              @click="selectCategory('hot_recent_jobs')"
-              >Hot
-            </a-button>
+              <a-button
+                :class="'no-border-button'"
+                style="padding: 0 10px; font-weight: 600"
+                :style="{ color: feedForm.feedStr === 'hot_recent_jobs' ? '#0766AD' : '' }"
+                @click="selectCategory('hot_recent_jobs')"
+                >Hot
+              </a-button>
 
-            <a-button
-              :class="'no-border-button'"
-              style="padding: 0 10px; font-weight: 600"
-              :style="{ color: feedForm.feedStr === 'top_day' ? '#0766AD' : '' }"
-              @click="selectCategory('top_day')"
-              >Top Day
-            </a-button>
+              <a-button
+                :class="'no-border-button'"
+                style="padding: 0 10px; font-weight: 600"
+                :style="{ color: feedForm.feedStr === 'top_day' ? '#0766AD' : '' }"
+                @click="selectCategory('top_day')"
+                >Top Day
+              </a-button>
 
-            <a-button
-              :class="'no-border-button'"
-              style="padding: 0 10px; font-weight: 600"
-              :style="{ color: feedForm.feedStr === 'top_week' ? '#0766AD' : '' }"
-              @click="selectCategory('top_week')"
-              >Top Week
-            </a-button>
+              <a-button
+                :class="'no-border-button'"
+                style="padding: 0 10px; font-weight: 600"
+                :style="{ color: feedForm.feedStr === 'top_week' ? '#0766AD' : '' }"
+                @click="selectCategory('top_week')"
+                >Top Week
+              </a-button>
 
-            <a-button
-              :class="'no-border-button'"
-              style="padding: 0 10px; font-weight: 600"
-              :style="{ color: feedForm.feedStr === 'top_month' ? '#0766AD' : '' }"
-              @click="selectCategory('top_month')"
-              >Top Month
-            </a-button>
-          </a-button-group>
+              <a-button
+                :class="'no-border-button'"
+                style="padding: 0 10px; font-weight: 600"
+                :style="{ color: feedForm.feedStr === 'top_month' ? '#0766AD' : '' }"
+                @click="selectCategory('top_month')"
+                >Top Month
+              </a-button>
+            </a-button-group>
             <a-divider type="vertical" />
             <a-button
               :class="'no-border-button'"
@@ -89,8 +88,9 @@
         :row-key="options.rowKey"
         :gutter="options.gutter"
         :has-around-gutter="options.hasAroundGutter"
-        :width="colWidth"
         :delay="100"
+        :width="options.width"
+        :breakpoints="options.breakpoints"
         :img-selector="options.imgSelector"
         :background-color="options.backgroundColor"
         :animation-effect="options.animationEffect"
@@ -105,7 +105,7 @@
             v-if="url"
             @mouseenter="doMouseenter(item)"
             @mouseleave="doMouseleave(item)"
-            class=""
+            class="rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-linear hover:shadow-lg hover:shadow-gray-600 group"
           >
             <div class="overflow-hidden">
               <a-card
@@ -117,49 +117,24 @@
                 :bordered="true"
                 class="lazyImag"
               >
-                <!-- <div
-                  :style="{
-                    width: colWidth + 'px',
-                    height: `${(item.height / item.width) * colWidth}px`,
-                  }"
-                > -->
-                <LazyImg
+                <!-- <LazyImg
                   v-viewer
                   :url="url"
                   :style="{
                     width: colWidth + 'px',
                     height: `${(item.height / item.width) * colWidth}px`,
                   }"
+                  class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
                   @load="imageLoad(url)"
-                />
-                <!-- <LazyImg
-                    v-viewer
-                    :url="url"
-                    :style="{ height: `${(item.height / item.width) * 100}%` }"
-                    class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
-                    @load="imageLoad(item)"
-                  /> -->
+                /> -->
 
-                <!-- <a-image
-                    v-viewer
-                    :class="item.mouseenter ? 'img-hover' : ''"
-                    :preview="false"
-                    :style="{ height: `${(item.height / item.width) * 100}%` }"
-                    :src="url"
-                  >
-                    <template #placeholder>
-                      <a-image :src="url" :preview="false" />
-                    </template>
-                  </a-image> -->
-
-                <!-- <LazyImg
-                v-show="item.isImageLoaded && item.isImageLoaded === true"
+                <LazyImg
+                  v-show="item.isImageLoaded && item.isImageLoaded === true"
                   v-viewer
                   :url="url"
                   class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
                   :success="imageLoad(item)"
-                /> -->
-                <!-- </div> -->
+                />
               </a-card>
               <div class="move-in" v-if="item.mouseenter">
                 <!-- 上面的 div，最多显示两行文本 -->
@@ -228,7 +203,7 @@
                       <a-button
                         type="text"
                         style="color: white"
-                        @click.stop="goDrawing(item.fullCommand)"
+                        @click.stop="doSearchJob(item.url)"
                         size="small"
                       >
                         <Icon class="vel-icon icon" icon="mdi:search" />
@@ -466,6 +441,19 @@
   //         })
   // }
 
+  const showImage = (item) => {
+    console.log('showImage ......');
+    if (item.mouseenter === null || item.mouseenter === undefined || item.mouseenter === false) {
+      item.mouseenter = true;
+    } else {
+      item.mouseenter = false;
+
+      const imageList = [];
+      imageList.push(item.imageUrl);
+      console.log(imageList);
+      viewerApi({ images: imageList });
+    }
+  };
   /************************* 样例相关 ******************** */
 
   const waterfallRef = ref(null);
@@ -691,7 +679,6 @@
   const colWidth = ref(0);
   const container = ref(null);
   const updateColWidth = () => {
-    
     let clientWidth = scrollbarRef.value.offsetWidth;
     if (clientWidth < 310) {
       colWidth.value = clientWidth - 10;
@@ -729,15 +716,18 @@
     idSet: new Set(),
   });
 
-  const doSearchJob = async () => {
+  const doSearchJob = async (prompt) => {
     doLoading.value = true;
-    try { 
+    if (prompt) {
+      prompt = searchPrompt.value;
+    }
+    try {
       list.value.length = 0;
       feedForm.value.feedStr = '';
       scrollbarRef.value.scrollTop = 0;
       sleep(150);
-      
-      let more = await searchJob({content: searchPrompt.value});
+
+      let more = await searchJob({ content: prompt });
       //提取ID set
       list.value = more;
       feedForm.value.hasMore = false;

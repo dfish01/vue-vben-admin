@@ -15,18 +15,11 @@
           <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
           <span style="margin-left: 5px; font-size: 16px; font-weight: bold"> Midjourney画廊 </span>
         </div>
-        <!-- <div style="display: flex; gap: 5px">
-          <a-tooltip title="保存查看进度">
-            <a-button @click="saveProcess" style="padding: 0 5px; border-radius: 5px">
-              <Icon icon="akar-icons:save" size="22" />
-            </a-button>
-          </a-tooltip>
-        </div> -->
       </a-row>
     </a-card>
 
     <div>
-      <a-card class="no-radius"  :bodyStyle="{ padding: '1px' }">
+      <a-card class="no-radius" :bodyStyle="{ padding: '1px' }">
         <a-row :wrap="false" style="display: flex; align-items: center">
           <a-tag
             v-if="categorySetting.showLeftButton"
@@ -796,5 +789,4 @@
     width: 100%;
     padding: 5em 0;
   }
-
 </style>

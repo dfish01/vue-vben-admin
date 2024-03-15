@@ -5,12 +5,13 @@
       <a-card :bodyStyle="{ padding: '8px' }">
         <a-row :wrap="false" style="display: flex; align-items: center">
           <div :key="item.code" v-for="item in categorySetting.categories" class="scroll-item">
-              <a-button
-                :class="drawingSampleForm.categoryCode === item.code ? '' : 'no-border-button'"
-                @click="selectCategory(item.code, drawingSampleForm.key)"
-                >{{ item.name }}</a-button
-              >
-            </div>
+            <a-button
+              :class="drawingSampleForm.categoryCode === item.code ? '' : 'no-border-button'"
+              @click="selectCategory(item.code, drawingSampleForm.key)"
+            >
+              {{ item.name }}
+            </a-button>
+          </div>
         </a-row>
       </a-card>
     </div>
@@ -18,7 +19,8 @@
     <div
       id="scrollbar"
       ref="scrollbarRef"
-      style="flex-wrap: wrap; height: calc(100vh - 98px); overflow: auto"
+      :style="{ height: `calc(${contentHeight}px ` }"
+      style="flex-wrap: wrap; padding-bottom: 2px; overflow: auto"
     >
       <Waterfall
         ref="waterfallRef"
@@ -40,14 +42,12 @@
         <template #item="{ item, url, index }">
           <div
             v-if="url"
-            @mouseenter="doMouseenter(item)"
-            @mouseleave="doMouseleave(item)"
+            @click="showImage(item)"
             class="rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-linear hover:shadow-lg hover:shadow-gray-600 group"
           >
             <div class="overflow-hidden">
               <a-card :bodyStyle="{ padding: '0px' }" class="lazyImag">
                 <LazyImg
-                  v-viewer
                   :url="url"
                   class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
                   @load="imageLoad(url)"
@@ -92,20 +92,12 @@
                     size="small"
                     >同款作画</a-button
                   >
-
                   <a-button
                     v-if="hasPermission('9999')"
                     @click.stop="showSampleView(item)"
                     style="background-color: #ce6872; color: white"
                     size="small"
                     >分类</a-button
-                  >
-                  <a-button
-                    v-if="hasPermission('9999')"
-                    style="background-color: #b70d1e; color: white"
-                    size="small"
-                    @click.stop="showDeleteConfirm(item.id)"
-                    >删除</a-button
                   >
                 </div>
               </div>
@@ -202,7 +194,7 @@
 
   const { hasPermission } = usePermission();
   const { copyText, goDrawing } = useDrawCard();
-    
+
   //加载数据
   const loadMore = async (queryParams) => {
     if (drawingSampleForm.value.hasMore === 'false') {
@@ -332,7 +324,7 @@
   };
 
   const waterfallRef = ref(null);
-  
+
   const selectCategory = async (code, key) => {
     list.value.length = 0;
     scrollbarRef.value.scrollTop = 0;
