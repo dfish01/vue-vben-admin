@@ -1,8 +1,30 @@
 <template>
-  <a-layout ref="formRef"  >
-    <a-card :style="{  height: `calc(${contentHeight}px)`, overflow: 'auto' }" >
+  <a-layout  >
+    
+    <a-card :bodyStyle="{padding: 0}">
+      <a-card   class="no-radius"  :bodyStyle="{ padding: 0, height: '50px' }">
+      <a-row
+      ref="formRef"
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          height: 50px;
+          padding: 0 10px;
+        "
+      >
+        <div style="display: flex; align-items: center">
+          <a-image src="/logo.png" :width="38" :height="38" :preview="false" />
+          <span style="margin-left: 5px; font-size: 16px; font-weight: bold"> AI对话 </span>
+        </div>
+        <div style="display: flex; gap: 5px"> </div>
+      </a-row>
+    </a-card>
+
+    <div :style="{  height: `calc(${contentHeight}px)`, overflow: 'auto' }">
+   
       <div style="margin-bottom: 64px" class="container" >
-        <a-card :bodyStyle="{padding: '10px', display:'flex', }">
+        <a-card style="margin:10px" :bodyStyle="{padding: '10px', display:'flex', }">
           <p> <Icon icon="flat-color-icons:idea" />  收集一些常用的白嫖资源，让大家能更低门槛的接触到AI，提高做事效率。资源内可能有部分链接带有收费事项，白嫖点到为止就好。如果好用就快点个收藏吧~</p>
 
         </a-card>
@@ -38,6 +60,7 @@
           </div>
         </div>
       </div>
+    </div>
     </a-card>
     <Loading :loading="loadingRef" :absolute="true" tip="数加载中..." />
   </a-layout>
@@ -60,7 +83,7 @@
   const substractSpaceRefs = ref([]);
   const upwardSpace = computed(() => 51);
   //移动设备底部导航栏
-  const offsetHeightRef = ref(55);
+  const offsetHeightRef = ref(105);
   const subtractHeightRefs = ref([]);
 
   // 使用hook
@@ -198,7 +221,7 @@
 
   .details {
     flex-grow: 1;
-    height: 48px;
+    height: 60px;
     padding-top: 8px;
     color: var(--vp-c-text-2);
     font-size: 14px;
@@ -216,11 +239,11 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding: 24px;
+    padding: 18px;
   }
 
   .box .VPImage {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
   }
 
   .VPFeature {
