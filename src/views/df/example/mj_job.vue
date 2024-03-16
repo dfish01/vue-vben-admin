@@ -121,7 +121,7 @@
                 :bordered="true"
                 class="lazyImag"
               >
-                <!-- <LazyImg
+                <LazyImg
                   v-viewer
                   :url="url"
                   :style="{
@@ -129,16 +129,16 @@
                     height: `${(item.height / item.width) * colWidth}px`,
                   }"
                   class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
-                  @load="imageLoad(url)"
-                /> -->
+                  @load="imageLoad(item)"
+                />
 
-                <LazyImg
+                <!-- <LazyImg
                   v-show="item.isImageLoaded && item.isImageLoaded === true"
                   v-viewer
                   :url="url"
                   class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
                   :success="imageLoad(item)"
-                />
+                /> -->
               </a-card>
               <div class="move-in" v-if="item.mouseenter">
                 <!-- 上面的 div，最多显示两行文本 -->
