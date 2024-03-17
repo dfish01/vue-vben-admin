@@ -122,12 +122,12 @@
                 class="lazyImag"
               >
                 <LazyImg
-                  v-viewer
                   :url="url"
                   :style="{
                     width: colWidth + 'px',
                     height: `${(item.height / item.width) * colWidth}px`,
                   }"
+                  @click="showDetail(item)"
                   class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
                   @load="imageLoad(item)"
                 />
@@ -308,6 +308,90 @@
         </a-row>
       </a-card>
     </a-modal>
+
+    <!-- 明细弹窗 -->
+    <a-modal
+      v-model:open="jobDetailForm.viewFlag"
+      style="min-width: none;"
+      wrap-class-name="full-modal"
+      :width="320"
+    >
+      <template #footer>
+        <a-button-group>
+          <a-tooltip title="复制">
+            <a-button
+              type="text"
+              @click.stop="copyText(jobDetailForm.item.fullCommand)"
+              size="small"
+            >
+              <Icon class="vel-icon icon" icon="icon-park-outline:text" />
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="画同款">
+            <a-button
+              type="text"
+              @click.stop="goDrawing(jobDetailForm.item.fullCommand)"
+              size="small"
+            >
+              <Icon class="vel-icon icon" icon="fluent:image-edit-16-regular" />
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="查询">
+            <a-button
+              type="text"
+              @click.stop="doSearchJob(jobDetailForm.item.url)"
+              size="small"
+            >
+              <Icon class="vel-icon icon" icon="mdi:search" />
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="取消收藏" v-if="hasCollect(jobDetailForm.item)">
+            <a-button
+              type="text"
+              size="small"
+              @click.stop="doRemoveJob(jobDetailForm.item)"
+            >
+              <Icon class="vel-icon icon" icon="ion:heart" color="red" />
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="收藏" v-else>
+            <a-button
+              type="text"
+              size="small"
+              @click.stop="doCollectJob(jobDetailForm.item)"
+            >
+              <Icon class="vel-icon icon" icon="solar:heart-angle-linear" />
+            </a-button>
+          </a-tooltip>
+        </a-button-group>
+        
+      </template>
+      <a-row :gutter="[0, 2]" type="flex" :style="{height: `${(jobDetailForm.item.height / jobDetailForm.item.width) * 320}px`,}">
+        <a-image
+          :src="jobDetailForm.item.url"
+          :width="320"
+        
+        >
+          <template #placeholder>
+            <a-image
+              :width="320"
+              :src="jobDetailForm.item.mediaUrl"
+              :preview="false"
+            />
+          </template>
+        </a-image>
+      </a-row>
+      <a-row>
+        
+        <span style=" padding: 5px 10px; font-size:12px">
+          {{jobDetailForm.item.fullCommand}}
+        </span>
+      </a-row>
+    </a-modal>
   </a-layout>
 </template>
 
@@ -345,7 +429,7 @@
   } from '/@/api/df/midjourney';
 
   const { hasPermission } = usePermission();
-  const { copyText, goDrawing } = useDrawCard();
+  const { copyText } = useDrawCard();
 
   const feedForm = ref({
     feedStr: 'hot_recent_jobs',
@@ -366,6 +450,22 @@
     await handleLoadMore(500, false);
     await handleLoadMore(500, false);
   });
+
+  /********************************* 明细 ********************************* */
+  const jobDetailForm = ref({
+    viewFlag: false,
+    item: null,
+  })
+
+  const showDetail = (item) => {
+    jobDetailForm.value.item = item;
+    jobDetailForm.value.viewFlag = true;
+  };
+
+  const closedDetail = () => {
+    jobDetailForm.value.viewFlag = false;
+    jobDetailForm.value.item = null;
+  };
 
   /****************************** 类目相关  ****************************** */
   const doMouseenter = (item) => {
@@ -582,27 +682,47 @@
     breakpoints: {
       3800: {
         // 当屏幕宽度小于等于1200
+        rowPerView: 11,
+      },
+      2780: {
+        // 当屏幕宽度小于等于1200
         rowPerView: 10,
       },
-      1800: {
+      2480: {
+        // 当屏幕宽度小于等于1200
+        rowPerView: 9,
+      },
+      2170: {
+        // 当屏幕宽度小于等于1200
+        rowPerView: 8,
+      },
+      1860: {
         // 当屏幕宽度小于等于1200
         rowPerView: 7,
       },
-      1600: {
+      1550: {
         // 当屏幕宽度小于等于1200
         rowPerView: 6,
       },
-      1200: {
+      1340: {
         // 当屏幕宽度小于等于1200
         rowPerView: 5,
       },
-      800: {
-        // 当屏幕宽度小于等于800
-        rowPerView: 5,
+      1240: {
+        // 当屏幕宽度小于等于1200
+        rowPerView: 4,
       },
-      500: {
+      930: {
+        // 当屏幕宽度小于等于800
+        rowPerView: 3,
+      },
+      630: {
         // 当屏幕宽度小于等于500
         rowPerView: 2,
+      },
+      310: {
+        // 当屏幕宽度小于等于500
+        rowPerView: 1,
       },
     },
     // 动画效果
@@ -682,6 +802,7 @@
   };
   //***************************** 列宽定义 && 收藏 ************************ */
   const colWidth = ref(0);
+  const colHeight = window.innerHeight;
   const container = ref(null);
   const updateColWidth = () => {
     let clientWidth = scrollbarRef.value.offsetWidth;
@@ -692,7 +813,7 @@
     } else if (clientWidth < 930) {
       colWidth.value = (clientWidth - 10) / 3;
     } else if (clientWidth < 1240) {
-      colWidth.value = (clientWidth - 15) / 3;
+      colWidth.value = (clientWidth - 15) / 4;
     } else if (clientWidth < 1340) {
       colWidth.value = (clientWidth - 15) / 5;
     } else if (clientWidth < 1550) {
@@ -728,6 +849,7 @@
     }else {
       prompt = searchPrompt.value;
     }
+    jobDetailForm.value.viewFlag = false;
     try {
       list.value.length = 0;
       feedForm.value.feedStr = '';
@@ -740,6 +862,7 @@
       feedForm.value.hasMore = false;
     } finally {
       doLoading.value = false;
+      
     }
   };
 
@@ -803,7 +926,12 @@
 
   const go = useGo();
   const goView = async (routePath) => {
+    showExampleViewFlag.value = true;
     go(routePath);
+  };
+  const goDrawing = async (queryParams) => {
+    showExampleViewFlag.value = false;
+    goView('/mmj/index?activeTab=TextToImageForm&prompt=' + queryParams);
   };
 </script>
 
@@ -949,4 +1077,24 @@
   .no-border-button {
     border: 1px solid transparent !important;
   }
+</style>
+
+<style lang="less">
+.full-modal {
+  .ant-modal {
+    top: 0;
+    max-width: 100%;
+    margin-top: 10vh;
+    padding-bottom: 0;
+  }
+
+  .ant-modal-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ant-modal-body {
+    flex: 1;
+  }
+}
 </style>

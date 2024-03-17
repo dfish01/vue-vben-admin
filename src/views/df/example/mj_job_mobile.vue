@@ -142,6 +142,7 @@
                 <LazyImg
                   :url="url"
                   class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
+                  @click="showDetail(item)"
                   @load="imageLoad(url)"
                 />
               </a-card>
@@ -339,6 +340,89 @@
         </a-row>
       </a-card>
     </a-modal>
+
+    <!-- 明细弹窗 -->
+    <a-modal
+      v-model:open="jobDetailForm.viewFlag"
+      style="min-width: none;"
+      
+      :width="320"
+    >
+      <template #footer>
+        <a-button-group>
+          <a-tooltip title="复制">
+            <a-button
+              type="text"
+              @click.stop="copyText(jobDetailForm.item.fullCommand)"
+              size="small"
+            >
+              <Icon class="vel-icon icon" icon="icon-park-outline:text" />
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="画同款">
+            <a-button
+              type="text"
+              @click.stop="goDrawing(jobDetailForm.item.fullCommand)"
+              size="small"
+            >
+              <Icon class="vel-icon icon" icon="fluent:image-edit-16-regular" />
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="查询">
+            <a-button
+              type="text"
+              @click.stop="doSearchJob(jobDetailForm.item.url)"
+              size="small"
+            >
+              <Icon class="vel-icon icon" icon="mdi:search" />
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="取消收藏" v-if="hasCollect(jobDetailForm.item)">
+            <a-button
+              type="text"
+              size="small"
+              @click.stop="doRemoveJob(jobDetailForm.item)"
+            >
+              <Icon class="vel-icon icon" icon="ion:heart" color="red" />
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="收藏" v-else>
+            <a-button
+              type="text"
+              size="small"
+              @click.stop="doCollectJob(jobDetailForm.item)"
+            >
+              <Icon class="vel-icon icon" icon="solar:heart-angle-linear" />
+            </a-button>
+          </a-tooltip>
+        </a-button-group>
+        
+      </template>
+      <a-row :gutter="[0, 2]" type="flex" :style="{height: `${(jobDetailForm.item.height / jobDetailForm.item.width) * 320}px`,}">
+        <a-image
+          :src="jobDetailForm.item.url"
+          :width="320"
+        >
+          <template #placeholder>
+            <a-image
+              :width="320"
+              :src="jobDetailForm.item.mediaUrl"
+              :preview="false"
+            />
+          </template>
+        </a-image>
+      </a-row>
+      <a-row>
+        
+        <span style=" padding: 5px 10px; font-size:12px">
+          {{jobDetailForm.item.fullCommand}}
+        </span>
+      </a-row>
+    </a-modal>
   </a-layout>
 </template>
 
@@ -432,12 +516,31 @@
   //画同款
   const go = useGo();
   const goDrawing = async (queryParams) => {
+    showExampleViewFlag.value = false;
     goView('/mmj/index?activeTab=TextToImageForm&prompt=' + queryParams);
   };
 
   const goView = async (routePath) => {
     go(routePath);
   };
+  /********************************* 明细 ********************************* */
+  const jobDetailForm = ref({
+    viewFlag: false,
+    item: null,
+  })
+
+  const showDetail = (item) => {
+    
+    jobDetailForm.value.item = item;
+    jobDetailForm.value.viewFlag = true;
+  };
+
+  const closedDetail = () => {
+    jobDetailForm.value.viewFlag = false;
+    jobDetailForm.value.item = null;
+  };
+
+
   /****************************** 类目相关  ****************************** */
 
   const categorySetting = ref({
@@ -797,6 +900,7 @@
     }else {
       prompt = searchPrompt.value;
     }
+    jobDetailForm.value.viewFlag = false;
     try {
       list.value.length = 0;
       feedForm.value.feedStr = '';

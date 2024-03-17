@@ -26,7 +26,7 @@
               <span>
                 <Icon icon="line-md:coffee-half-empty-twotone-loop" size="70" color="#749BC2" />
               </span>
-              <span> {{ card.mjExecute === 'N' ? '正在执行中...' : card.process ? 'MJ正在绘画中(' + card.process + ')...' : 'MJ正在绘画中...'  }}  </span>
+              <span> {{ card.mjExecute === 'N' ? '正在执行中...' : card.process ? 'MJ正在绘画中(' + card.process + ')' : 'MJ正在绘画中...'  }}  </span>
             </div>
           </div>
           <div v-if="card.state === 'FAILED'" class="mask-queued label-front">
@@ -210,7 +210,7 @@
   justify-content: center;
   width: 100%;
   height: 250px;
-  border-radius: 7%;
+  border-radius: 2%;
   font-size: 12px; /* 保留被使用到的字体大小 */
 }
 
@@ -224,7 +224,7 @@
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 7%;
+  border-radius: 2%;
 }
 
 .card-image-square {
