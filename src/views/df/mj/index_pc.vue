@@ -440,7 +440,7 @@
       :open="indexStep.open"
       :steps="indexStep.steps"
       @change="changeStep"
-      @close="indexStepOpen(false)"
+      @close="indexStepClose(false)"
     />
   </a-layout>
 </template>
@@ -709,6 +709,9 @@
     ],
   });
 
+  const indexStepClose = async (val: boolean): void => {
+    indexStep.value.open = val;
+  };
   const indexStepOpen = async (val: boolean): void => {
     // if (val === true) {
     //   const needShow = getCustomLocalCache(MJ_DRAW_TOUR);

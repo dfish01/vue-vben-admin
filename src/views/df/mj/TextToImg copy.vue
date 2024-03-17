@@ -8,11 +8,11 @@
     :model="textToImgForm"
     :rules="rules"
   >
-    <div :style="{ height: `calc(${contentHeight}px `, overflow: 'auto', padding: '3px' }">
+    <div :style="{ height: `calc(${contentHeight}px - 1px`, overflow: 'auto', padding: '0px 5px' }">
       <a-card
         size="small"
         :bordered="true"
-        :bodyStyle="{ padding: '0px' }"
+        :bodyStyle="{ padding: '5px' }"
         class="ar-card2"
         style="margin-top: 0"
       >
@@ -27,18 +27,17 @@
             ></span>
           </div>
         </template>
-
+        <!-- <a-form-item name="command" style="margin-bottom: 1px; resize: none"> -->
         <a-textarea
+          ref="promptStep"
           style="width: 99%"
-          :rows="10"
           v-model:value="textToImgForm.command"
           placeholder="请输入你的提示词~"
           allow-clear
-          :maxlength="2000"
-          :auto-size="{ minRows: 10, maxRows: 10 }"
+          :auto-size="{ minRows: 5, maxRows: 10 }"
         />
+        <!-- </a-form-item> -->
       </a-card>
-
       <!-- 提示词 B-->
       <a-card
         size="small"
@@ -128,23 +127,173 @@
           </div>
         </template>
         <a-row>
-          <a-button-group style="width: 100%">
-            <a-button style="width: 33%; border-radius: 0;" size="small" @click="openTranslate"
+          <a-col span="8">
+            <a-button style="width: 100%" size="small" @click="openTranslate"
               ><SvgIcon name="translate" />中英翻译</a-button
             >
-            <a-button style="width: 33%;border-radius: 0;" size="small" @click="openAiPrompt"
+          </a-col>
+          <a-col span="8">
+            <a-button style="width: 100%" size="small" @click="openAiPrompt"
               ><SvgIcon name="gpt" />AI生成</a-button
             >
-
-            <a-button style="width: 33%;border-radius: 0;" size="small" @click="openDrawerInC">
+          </a-col>
+          <a-col span="8">
+            <a-button style="width: 100%" size="small" @click="openDrawerInC">
               <SvgIcon name="book" /> Prompt宝典</a-button
             >
-          </a-button-group>
+          </a-col>
         </a-row>
       </a-card>
       <!-- 辅助工具 E-->
-      <!-- 垫图 B-->
+
+      
+      <!-- 任务标签 B-->
       <a-card
+        size="small"
+        ref="accountStep"
+        :bordered="true"
+        :bodyStyle="{ padding: '5px' }"
+        class="ar-card2"
+      >
+        <template #title>
+          <div class="ar-card-title-be">
+            <div>
+              <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
+                ><Icon icon="streamline-emojis:blossom" /> 账户配置
+                <a-tooltip
+                  title="这里的账号配置针对任务列表以及个人收藏是通用的！每个账号的最大重复次数是有限制的，具体看主账号的配置。标签的话，主要用于对批次任务的标记，方便管理图片。多个标签'空格'隔开,最多5个标签。每个标签长度不超过16个字。~"
+                >
+                  <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
+              ></span>
+            </div>
+            <a-switch size="small" v-model:checked="viewForm.accountFlag" />
+          </div>
+        </template>
+        <div v-if="viewForm.accountFlag">
+          <a-row style="margin-top: 5px">
+            <a-input-group compact style="display: flex">
+              <a-tooltip title="这个是解放你双手和时间的参数">
+                <a-tag class="line-label tag-no-right-border" color="default">重复次数</a-tag>
+              </a-tooltip>
+
+              <a-input
+                class="line-input"
+                v-model:value="textToImgForm.invokeTimes"
+                type="text"
+                @input="checkInteger"
+                pattern="\d*"
+              />
+            </a-input-group>
+          </a-row>
+          <a-row style="margin-top: 5px">
+            <a-input-group compact style="display: flex">
+              <a-tooltip
+                title="不指定账号的话，随机根据账号现有负载情况选择资源最空的一个账号，优先默认账号。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
+              >
+                <a-tag class="line-label tag-no-right-border" color="default">执行账号</a-tag>
+              </a-tooltip>
+
+              <a-select
+                class="line-input tag-no-right-border"
+                @change="handleAccountSetting"
+                placeholder="随机选取账号，优先默认"
+                v-model:value="accountForm.useAccountId"
+                :size="accountViewForm.accountSelector.size"
+                :options="accountViewForm.accountSelector.options"
+              />
+            </a-input-group>
+          </a-row>
+
+          <a-row style="margin-top: 5px" v-if="accountForm.useAccountId">
+            <a-input-group compact style="display: flex">
+              <a-tooltip
+                title="不指定频道的话，默认账户组中的频道。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
+              >
+                <a-tag class="line-label tag-no-right-border" color="default">执行频道</a-tag>
+              </a-tooltip>
+
+              <a-select
+                class="line-input tag-no-right-border"
+                @change="handleChannelSetting"
+                placeholder="请选择ChannelId"
+                v-model:value="accountForm.useChannelId"
+                :size="accountViewForm.accountSelector.size"
+                :options="accountViewForm.channelSelector.options"
+              />
+            </a-input-group>
+          </a-row>
+          <!-- <a-row :gutter="2" class="row-wapper">
+          <a-col span="6" style="display: flex; align-items: center; justify-content: center">
+            <a-tooltip title="'公开任务的话，大家在广场都能看到'">
+              <a-tag class="quality-tag tag-keep-right-border" color="default">是否公开</a-tag>
+            </a-tooltip>
+          </a-col>
+          <a-col :span="18" style="display: flex; align-items: center; justify-content: right">
+            <a-switch v-model:checked="textToImgForm.isPublic" />
+          </a-col>
+        </a-row> -->
+          <a-row style="margin-top: 5px">
+            <a-input-group compact style="display: flex">
+              <a-tooltip
+                title="休闲模式->快速模式->涡轮模式 速度依次递增。这里的模式是会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
+              >
+                <a-tag class="line-label tag-no-right-border" color="default"
+                  >执行模式
+                </a-tag></a-tooltip
+              >
+
+              <a-select
+                class="line-input tag-no-right-border"
+                placeholder="默认休闲模式"
+                v-model:value="accountForm.mode"
+              >
+                <!-- <a-select-option>不设置</a-select-option> -->
+                <a-select-option value="relax">休闲模式</a-select-option>
+                <a-select-option value="fast">快速模式</a-select-option>
+                <a-select-option value="turbo">涡轮模式</a-select-option>
+              </a-select>
+            </a-input-group>
+          </a-row>
+          <a-row style="margin-top: 5px">
+            <a-input-group compact style="display: flex">
+              <a-tooltip title="可以给你的任务打上标签，便于分类查找">
+                <a-tag class="line-label tag-no-right-border" style="height: 74px" color="default"
+                  >任务标签</a-tag
+                >
+              </a-tooltip>
+
+              <a-mentions
+                class="line-input"
+                style="height: 74px"
+                v-model:value="textToImgForm.tagName"
+                rows="3"
+                placeholder="标签配置：用@可触发最近的标签！多个标签'空格符'隔开,最多5个。每个长度不超过16个字。~"
+                :options="drawTagForm.tagNameOptions"
+                @select="onChangeLabel"
+              />
+            </a-input-group>
+          </a-row>
+          <a-row class="row-wapper">
+            <a-col span="9" style="display: flex; align-items: center; justify-content: center">
+              <span class="quality-tag"
+                >翻译Prompt
+                <a-tooltip
+                  title="启用后，执行时将使用翻译后的英文prompt。niji 5支持中文解析，其他建议英文，否则出图有点偏离！"
+                >
+                  <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
+              ></span>
+            </a-col>
+            <a-col :span="15" style="display: flex; align-items: center; justify-content: right">
+              <a-switch size="small" v-model:checked="textToImgForm.enableTranslate" />
+            </a-col>
+          </a-row>
+        </div>
+      </a-card>
+      <!-- 任务标签 E-->
+
+
+       <!-- 一致性 B-->
+       <a-card
         size="small"
         ref="blendStep"
         :bordered="true"
@@ -155,7 +304,7 @@
           <div class="ar-card-title-be">
             <div>
               <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
-                ><Icon icon="streamline-emojis:tent" /> 绘画垫图
+                ><Icon icon="streamline-emojis:tent" /> 一致性
                 <a-tooltip
                   title="（非必须）这里上传图片，让MJ在绘画的时候以其内容作为基本，根据配合iw可以自己调整相似度~"
                 >
@@ -166,7 +315,12 @@
           </div>
         </template>
         <div v-if="viewForm.blendFlag">
-          <a-row>
+          <div>
+          <a-row style="margin-top:10px">
+            <span style=" display:flex; align-items:center;height:32px; margin-left:10px;font-weight:600">绘画垫图</span>
+          </a-row>
+          <a-divider style="margin: 0;"></a-divider>
+          <a-row style="margin-top:5px">
             <a-col span="24">
               <a-upload
                 v-model:file-list="fileList"
@@ -204,106 +358,13 @@
             </a-col>
           </a-row>
         </div>
-      </a-card>
-      <!-- 垫图 E-->
-
-      <!-- 人物一致性 B-->
-      <a-card
-        size="small"
-        ref="blendStep"
-        :bordered="true"
-        :bodyStyle="{ padding: '5px' }"
-        class="ar-card2"
-      >
-        <template #title>
-          <div class="ar-card-title-be">
-            <div>
-              <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
-                ><Icon icon="streamline-emojis:ferris-wheel" /> 人物一致性
-                </span>
-            </div>
-            <span
-                style="font-size: 10px"
-                v-if="!(paramDataValue.version === 'v 6' || paramDataValue.version === 'niji 6')"
-              >
-                仅niji6 和 v6 模型可用
-                
-            </span>
-            <a-switch size="small" v-else v-model:checked="viewForm.crefFlag" />
-          </div>
-        </template>
-        <div v-if="viewForm.crefFlag">
-          <a-row>
-            <a-col span="24">
-              <a-upload
-                v-model:file-list="crefFileList"
-                :action="uploadInfo.url"
-                :multiple="false"
-                :maxCount="5"
-                :headers="{ Authorization: uploadInfo.token }"
-                list-type="picture-card"
-                :before-upload="beforeSrefUpload"
-                @preview="handlePreview"
-                @change="handleCrefChange"
-                :withCredentials="true"
-                style="display: flex; align-items: flex-start; justify-content: flex-start"
-              >
-              
-                <div v-if="fileList.length < 5">
-                  <plus-outlined />
-                  <div style="margin-top: 8px"> 上传图片</div>
-                </div>
-              </a-upload>
-            </a-col>
+        <!-- 人物一致性 -->
+        <div>
+          <a-row style="margin-top:10px">
+            <span style=" display:flex; align-items:center;height:32px; margin-left:10px;font-weight:600">人物一致性（cref）</span>
           </a-row>
-          <a-row class="row-wapper">
-            <a-col span="6" style="display: flex; align-items: center; justify-content: start">
-              <span class="quality-tag"
-                >强度
-                <a-tooltip title="--cw 100是默认值，它使用面部、头发和衣服保持原样。强度为0（--cw 0）时，它只会专注于面部（适合换装/换发等）">
-                  <ExclamationCircleOutlined class="icon-hint" />
-                </a-tooltip>
-              </span>
-            </a-col>
-            <a-col :span="18">
-              <a-slider
-                @change="onChangeIw"
-                style="margin-left: 3px"
-                v-model:value="paramDataValue.cw"
-                :min="0"
-                :step="1"
-                :max="100"
-              />
-            </a-col>
-          </a-row>
-        </div>
-      </a-card>
-      <!-- 人物一致性 E-->
-
-      <!-- 风格参考 B-->
-      <a-card size="small" :bordered="true" :bodyStyle="{ padding: '5px' }" class="ar-card2">
-        <template #title>
-          <div class="ar-card-title-be">
-            <div>
-              <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
-                ><Icon icon="streamline-emojis:rainbow" /> 风格参考
-                <a-tooltip title="让MJ按参考图的风格进行绘制。仅niji6 和 v6 适用">
-                  <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
-              ></span>
-            </div>
-            <div>
-              <span
-                style="font-size: 10px"
-                v-if="!(paramDataValue.version === 'v 6' || paramDataValue.version === 'niji 6')"
-              >
-                仅niji6 和 v6 模型可用</span
-              >
-              <a-switch size="small" v-else v-model:checked="viewForm.srefFlag" />
-            </div>
-          </div>
-        </template>
-        <div v-if="viewForm.srefFlag">
-          <a-row style="margin-top: 3px">
+          <a-divider style="margin: 0;"></a-divider>
+            <a-row style="margin-top: 3px">
             <a-col span="24" ref="blendStep">
               <a-upload
                 v-model:file-list="srefFileList"
@@ -316,19 +377,15 @@
                 @preview="handlePreview"
                 @change="handleSrefChange"
                 :withCredentials="true"
-                style="display: flex; left: 10px; flex-direction: column; justify-content: start"
               >
-                <a-row style="display: flex; justify-content: start">
-                  <a-button size="small" style="margin-bottom: 5px">
-                    <Icon
-                      icon="mdi:upload-box"
-                      v-if="srefFileList === null || srefFileList.size <= 5"
-                      class="vel-icon icon"
-                      aria-hidden="true"
-                    />上传图片
-                  </a-button>
-                </a-row>
-
+                <a-button  style=" height:32px;margin-top: 5px">
+                  <Icon
+                    icon="mdi:upload-box"
+                    v-if="srefFileList === null || srefFileList.size <= 5"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                  />上传图片
+                </a-button>
                 <template #itemRender="{ file, actions }">
                   <a-row style="align-items: center; margin-top: 3px; border-radius: 4px">
                     <a-col flex="70px">
@@ -362,7 +419,152 @@
                           />
                         </a-col>
                         <a-col
-                          flex="30px"
+                          flex="50px"
+                          style="display: flex; align-items: center; justify-content: center"
+                        >
+                          <a href="javascript:;" @click="actions.remove">
+                            <Icon color="red" icon="fluent:delete-32-filled"
+                          /></a>
+                        </a-col>
+                      </a-row>
+                      <a-row style="padding: 5px" v-if="file.status === 'error'">
+                        <a-col flex="auto" style="align-items: center">
+                          <span
+                            style="
+                              display: flex;
+                              align-items: center;
+                              justify-content: start;
+                              margin-right: 0;
+                              font-size: 14px;
+                            "
+                          >
+                            抱歉、文件上传失败咯~
+                          </span>
+                        </a-col>
+                        <a-col
+                          flex="50px"
+                          style="display: flex; align-items: center; justify-content: center"
+                        >
+                          <a href="javascript:;" @click="actions.remove">
+                            <Icon color="red" icon="fluent:delete-32-filled"
+                          /></a>
+                        </a-col>
+                      </a-row>
+                      <a-row style="padding: 5px" v-if="file.status === 'uploading'">
+                        <a-col flex="auto" style="align-items: center">
+                          <span
+                            style="
+                              display: flex;
+                              align-items: center;
+                              justify-content: start;
+                              margin-left: 25px;
+                              font-size: 14px;
+                            "
+                          >
+                            正在上传中...
+                          </span>
+                        </a-col>
+                        <a-col
+                          flex="50px"
+                          style="display: flex; align-items: center; justify-content: center"
+                        >
+                          <a href="javascript:;" @click="actions.remove">
+                            <Icon color="red" icon="fluent:delete-32-filled"
+                          /></a>
+                        </a-col>
+                      </a-row>
+                    </a-col>
+                  </a-row>
+                </template>
+              </a-upload>
+            </a-col>
+          </a-row>
+          <a-row
+            class="row-wapper"
+            style="margin-bottom: 5px"
+            v-if="paramDataValue.version === 'v 6' || paramDataValue.version === 'niji 6'"
+          >
+            <a-col span="7" style="display: flex; align-items: center; justify-content: start">
+              <span class="quality-tag"
+                >人物相似度
+                <a-tooltip title="--cw 值越高,一致性越高~">
+                  <ExclamationCircleOutlined class="icon-hint" />
+                </a-tooltip>
+              </span>
+            </a-col>
+            <a-col :span="17">
+              <a-slider
+                style="margin-left: 8px"
+                v-model:value="paramDataValue.sw"
+                :min="0"
+                :step="1"
+                :max="1000"
+              />
+            </a-col>
+          </a-row>
+        </div>
+        <!-- 风格参考 -->
+        <div>
+          <a-row style="margin-top:10px">
+            <span style=" display:flex; align-items:center;height:32px; margin-left:10px;font-weight:600">风格参考（sref）</span>
+          </a-row>
+          <a-divider style="margin: 0;"></a-divider>
+            <a-row style="margin-top: 3px">
+            <a-col span="24" ref="blendStep">
+              <a-upload
+                v-model:file-list="srefFileList"
+                :action="uploadInfo.url"
+                :multiple="false"
+                :maxCount="5"
+                :headers="{ Authorization: uploadInfo.token }"
+                list-type="picture"
+                :before-upload="beforeSrefUpload"
+                @preview="handlePreview"
+                @change="handleSrefChange"
+                :withCredentials="true"
+              >
+                <a-button  style=" height:32px;margin-top: 5px">
+                  <Icon
+                    icon="mdi:upload-box"
+                    v-if="srefFileList === null || srefFileList.size <= 5"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                  />上传图片
+                </a-button>
+                <template #itemRender="{ file, actions }">
+                  <a-row style="align-items: center; margin-top: 3px; border-radius: 4px">
+                    <a-col flex="70px">
+                      <a-card :bodyStyle="{ padding: '2px' }">
+                        <a-image :width="60" :height="60" :src="file.thumbUrl" />
+                      </a-card>
+                    </a-col>
+
+                    <a-col flex="auto">
+                      <a-row style="padding: 5px" v-if="file.status === 'done'">
+                        <a-col flex="auto" style="align-items: center">
+                          <span
+                            style="
+                              display: flex;
+                              align-items: center;
+                              justify-content: start;
+                              margin-right: 0;
+                              font-size: 14px;
+                            "
+                            >权重
+                            <a-tooltip title="--iw 值越高，上传的图像对最终效果的影响就越大">
+                              <ExclamationCircleOutlined class="icon-hint" />
+                            </a-tooltip>
+                          </span>
+                          <a-slider
+                            @change="onChangeUploadIw(file, $event)"
+                            style="margin-left: 3px"
+                            :min="0.25"
+                            :step="0.05"
+                            :max="2"
+                          />
+                        </a-col>
+                        <a-col
+                          flex="50px"
                           style="display: flex; align-items: center; justify-content: center"
                         >
                           <a href="javascript:;" @click="actions.remove">
@@ -446,155 +648,34 @@
             </a-col>
           </a-row>
         </div>
-      </a-card>
-      <!-- 风格参考 E-->
-
-      <!-- 任务标签 B-->
-      <a-card
-        size="small"
-        ref="accountStep"
-        :bordered="true"
-        :bodyStyle="{ padding: '5px' }"
-        class="ar-card2"
-      >
-        <template #title>
-          <div class="ar-card-title-be">
-            <div>
-              <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
-                ><Icon icon="streamline-emojis:blossom" /> 账户配置
-                <a-tooltip
-                  title="这里的账号配置针对任务列表以及个人收藏是通用的！每个账号的最大重复次数是有限制的，具体看主账号的配置。标签的话，主要用于对批次任务的标记，方便管理图片。多个标签'空格'隔开,最多5个标签。每个标签长度不超过16个字。~"
-                >
-                  <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
-              ></span>
-            </div>
-            <a-switch size="small" v-model:checked="viewForm.accountFlag" />
-          </div>
-        </template>
-        <div v-if="viewForm.accountFlag">
-          <a-row style="margin-top: 5px">
+        <!-- 其他参数 -->
+        <div>
+          <a-row style="margin-top:10px">
+            <span style=" display:flex; align-items:center;height:32px; margin-left:10px;font-weight:600">其他参数</span>
+          </a-row>
+          <a-divider style="margin: 0;"></a-divider>
+          <a-row>
             <a-input-group compact style="display: flex">
-              <a-tooltip title="这个是解放你双手和时间的参数">
-                <a-tag class="line-label tag-no-right-border" color="default">重复次数</a-tag>
+              <a-tooltip
+                title="Midjourney机器人使用种子数字来创建一个视觉噪声字段，如电视静态，作为生成初始图像网格的起点。每个图像随机生成种子数字，但可以使用--seed或--sameseed参数指定。使用相同的种子数字和提示将产生相似的结束图像。"
+              >
+                <a-tag class="line-label tag-no-right-border" color="default">seed种子</a-tag>
               </a-tooltip>
 
-              <a-input
+              <a-input-number
+                v-model:value="paramDataValue.seed"
                 class="line-input"
-                v-model:value="textToImgForm.invokeTimes"
-                type="text"
-                @input="checkInteger"
-                pattern="\d*"
+                :min="0"
+                :max="4294967295"
               />
             </a-input-group>
-          </a-row>
-          <a-row style="margin-top: 5px">
-            <a-input-group compact style="display: flex">
-              <a-tooltip
-                title="不指定账号的话，随机根据账号现有负载情况选择资源最空的一个账号，优先默认账号。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
-              >
-                <a-tag class="line-label tag-no-right-border" color="default">执行账号</a-tag>
-              </a-tooltip>
-
-              <a-select
-                class="line-input tag-no-right-border"
-                @change="handleAccountSetting"
-                placeholder="随机选取账号，优先默认"
-                v-model:value="accountForm.useAccountId"
-                :size="accountViewForm.accountSelector.size"
-                :options="accountViewForm.accountSelector.options"
-              />
-            </a-input-group>
-          </a-row>
-
-          <a-row style="margin-top: 5px" v-if="accountForm.useAccountId">
-            <a-input-group compact style="display: flex">
-              <a-tooltip
-                title="不指定频道的话，默认账户组中的频道。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
-              >
-                <a-tag class="line-label tag-no-right-border" color="default">执行频道</a-tag>
-              </a-tooltip>
-
-              <a-select
-                class="line-input tag-no-right-border"
-                @change="handleChannelSetting"
-                placeholder="请选择ChannelId"
-                v-model:value="accountForm.useChannelId"
-                :size="accountViewForm.accountSelector.size"
-                :options="accountViewForm.channelSelector.options"
-              />
-            </a-input-group>
-          </a-row>
-          <!-- <a-row :gutter="2" class="row-wapper">
-          <a-col span="6" style="display: flex; align-items: center; justify-content: center">
-            <a-tooltip title="'公开任务的话，大家在广场都能看到'">
-              <a-tag class="quality-tag tag-keep-right-border" color="default">是否公开</a-tag>
-            </a-tooltip>
-          </a-col>
-          <a-col :span="18" style="display: flex; align-items: center; justify-content: right">
-            <a-switch size="small"  v-model:checked="textToImgForm.isPublic" />
-          </a-col>
-        </a-row> -->
-          <a-row style="margin-top: 5px">
-            <a-input-group compact style="display: flex">
-              <a-tooltip
-                title="休闲模式->快速模式->涡轮模式 速度依次递增。这里的模式是会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
-              >
-                <a-tag class="line-label tag-no-right-border" color="default"
-                  >执行模式
-                </a-tag></a-tooltip
-              >
-
-              <a-select
-                class="line-input tag-no-right-border"
-                placeholder="默认休闲模式"
-                v-model:value="accountForm.mode"
-              >
-                <!-- <a-select-option>不设置</a-select-option> -->
-                <a-select-option value="relax">休闲模式</a-select-option>
-                <a-select-option value="fast">快速模式</a-select-option>
-                <a-select-option value="turbo">涡轮模式</a-select-option>
-              </a-select>
-            </a-input-group>
-          </a-row>
-          <a-row style="margin-top: 5px">
-            <a-input-group compact style="display: flex">
-              <a-tooltip title="可以给你的任务打上标签，便于分类查找">
-                <a-tag class="line-label tag-no-right-border" style="height: 74px" color="default"
-                  >任务标签</a-tag
-                >
-              </a-tooltip>
-
-              <a-mentions
-                class="line-input"
-                style="height: 74px"
-                v-model:value="textToImgForm.tagName"
-                rows="3"
-                placeholder="标签配置：用@可触发最近的标签！多个标签'空格符'隔开,最多5个。每个长度不超过16个字。~"
-                :options="drawTagForm.tagNameOptions"
-                @select="onChangeLabel"
-              />
-            </a-input-group>
-          </a-row>
-          <a-row class="row-wapper">
-            <a-col span="9" style="display: flex; align-items: center; justify-content: center">
-              <span class="quality-tag"
-                >翻译Prompt
-                <a-tooltip
-                  title="启用后，执行时将使用翻译后的英文prompt。niji 5支持中文解析，其他建议英文，否则出图有点偏离！"
-                >
-                  <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
-              ></span>
-            </a-col>
-            <a-col
-              :span="15"
-              style="display: flex; align-items: center; justify-content: right; padding-right: 7px"
-            >
-              <a-switch size="small" v-model:checked="textToImgForm.enableTranslate" />
-            </a-col>
           </a-row>
         </div>
+
+        </div>
       </a-card>
-      <!-- 任务标签 E-->
+      <!-- 一致性 E-->
+
 
       <!-- 项列表 -->
       <!-- 图片比例 B-->
@@ -603,7 +684,7 @@
           <div class="ar-card-title-be">
             <div>
               <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
-                ><Icon icon="streamline-emojis:bouquet" /> 画图比例
+                ><Icon icon="streamline-emojis:bouquet" /> 模型与画面
                 <a-tooltip title="这个参数用于设置最终生成的图片比例">
                   <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
               ></span>
@@ -611,81 +692,158 @@
             <a-switch size="small" v-model:checked="viewForm.arFlag" />
           </div>
         </template>
-        <a-row v-if="viewForm.arFlag">
-          <a-card-grid
-            v-for="option in options"
-            :key="option.id"
-            :span="option.span"
-            class="ar-item"
-            :style="{
-              width: isEditing && option.id === 90 ? '50%' : '25%',
-              'text-align': 'center',
-              'border-radius': '4px',
-            }"
-          >
+         <!-- 画面模型 -->
+         <div v-if="viewForm.arFlag" >
+
+
+         <div>
+          <a-row style="margin-top:0">
+              <span style=" display:flex; align-items:center;height:32px; margin-left:10px;font-weight:500">模型</span>
+          </a-row>
+          <a-divider style="margin: 0;"></a-divider>
+          <a-row :gutter="2"  style="margin-top: 10px">
             <div
-              v-if="isEditing && option.id === 90"
-              class="border-wapper"
-              style="
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                padding: 6px;
-              "
+              style="width: 100%; margin: 0 0 3px"
+              :bordered="false"
+              :bodyStyle="{ padding: '0px' }"
             >
-              <a-input-group size="small">
-                <a-row style="justify-content: center">
-                  <a-col :span="9">
-                    <a-input
-                      v-model:value="option.X"
-                      @input="
-                        option.X =
-                          option.X.replace(/\D/g, '') === '' || +option.X <= 1
-                            ? '1'
-                            : parseInt(option.X.replace(/\D/g, ''), 10) || 1
-                      "
-                    />
-                  </a-col>
-                  <a-col :span="2">
-                    <span>:</span>
-                  </a-col>
-                  <a-col :span="9">
-                    <a-input
-                      v-model:value="option.Y"
-                      @input="
-                        option.Y =
-                          option.Y.replace(/\D/g, '') === '' || +option.Y <= 1
-                            ? '1'
-                            : parseInt(option.Y.replace(/\D/g, ''), 10) || 1
-                      "
-                    />
+              <a-segmented
+                block
+                v-model:value="activeKey"
+                :options="tabOptions"
+                style="width: 100%"
+                @change="chooseVersion"
+              >
+                <template #label="{ payload }">
+                  <div style="padding: 4px">
+                    <div>
+                      {{ payload.subTitle }}
+                    </div>
+                  </div>
+                </template>
+              </a-segmented>
+            </div>
+            <div class="card-container" style="width: 100%">
+              <div v-if="activeKey === 'niji5'">
+                <a-row style="justify-content: left">
+                  <a-col span="24" class="style-radio">
+                    <a-radio-group style="height: 32px" v-model:value="paramDataValue.style">
+                      <a-tooltip title="默认的风格，效果很不错">
+                        <a-radio-button value="">默认</a-radio-button>
+                      </a-tooltip>
+
+                      <a-tooltip title=" 表现力风格，更精致的插图艺术风格">
+                        <a-radio-button value="expressive">表现</a-radio-button>
+                      </a-tooltip>
+                      <a-tooltip title="可爱风格，能创造出迷人可爱的角色、道具和场景">
+                        <a-radio-button value="cute">可爱</a-radio-button>
+                      </a-tooltip>
+
+                      <a-tooltip title="景色风格，在奇幻环境下作出美丽的背景和电影般的角色时刻">
+                        <a-radio-button value="scenic">风景</a-radio-button>
+                      </a-tooltip>
+                      <a-tooltip title="原始风格，在2023.5.26日之前的默认Niji5的风格">
+                        <a-radio-button value="original">原始</a-radio-button>
+                      </a-tooltip>
+                    </a-radio-group>
                   </a-col>
                 </a-row>
-              </a-input-group>
-
-              <a-row style="justify-content: center; width: 100%">
-                <a-col :span="21">
-                  <a-button style="width: 100%" @click="onCustomerOption(option)" size="small"
-                    >确认比例</a-button
-                  >
-                </a-col>
-              </a-row>
+              
+              </div>
+              <div v-else>
+                <a-row style="justify-content: left; margin-top:5px">
+                  <a-radio-group style="height: 32px" v-model:value="paramDataValue.style">
+                    <a-radio-button value="">默认风格</a-radio-button>
+                    <a-radio-button value="raw">原始风格</a-radio-button>
+                  </a-radio-group>
+                </a-row>
+              </div>
             </div>
-
-            <div
-              v-else
-              @click="selectOption(option)"
-              :color="selectedOption === option.id ? 'blue' : 'default'"
-              class="ar-item-tag"
-              style="display: flex; align-items: center; justify-content: center"
+          </a-row>
+        </div>
+        <!-- 画面比例 -->
+        <div>
+          <a-row style="margin-top:10px">
+              <span style=" display:flex; align-items:center;height:32px; margin-left:10px;font-weight:500">画面比例（ar）</span>
+          </a-row>
+          <a-divider style="margin: 0;"></a-divider>
+          <a-row style="margin-top:10px">
+            <a-card-grid
+              v-for="option in options"
+              :key="option.id"
+              :span="option.span"
+              class="ar-item"
+              :style="{
+                width: isEditing && option.id === 90 ? '50%' : '25%',
+                'text-align': 'center',
+                'border-radius': '4px',
+              }"
             >
-              <span style="font-size: 12px">
-                {{ option.X }}:{{ option.Y }}<br />{{ option.label }}
-              </span>
-            </div>
-          </a-card-grid>
-        </a-row>
+              <div
+                v-if="isEditing && option.id === 90"
+                class="border-wapper"
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  padding: 6px;
+                "
+              >
+                <a-input-group size="small">
+                  <a-row style="justify-content: center">
+                    <a-col :span="9">
+                      <a-input
+                        v-model:value="option.X"
+                        @input="
+                          option.X =
+                            option.X.replace(/\D/g, '') === '' || +option.X <= 1
+                              ? '1'
+                              : parseInt(option.X.replace(/\D/g, ''), 10) || 1
+                        "
+                      />
+                    </a-col>
+                    <a-col :span="2">
+                      <span>:</span>
+                    </a-col>
+                    <a-col :span="9">
+                      <a-input
+                        v-model:value="option.Y"
+                        @input="
+                          option.Y =
+                            option.Y.replace(/\D/g, '') === '' || +option.Y <= 1
+                              ? '1'
+                              : parseInt(option.Y.replace(/\D/g, ''), 10) || 1
+                        "
+                      />
+                    </a-col>
+                  </a-row>
+                </a-input-group>
+
+                <a-row style="justify-content: center; width: 100%">
+                  <a-col :span="21">
+                    <a-button style="width: 100%" @click="onCustomerOption(option)" size="small"
+                      >确认比例</a-button
+                    >
+                  </a-col>
+                </a-row>
+              </div>
+
+              <div
+                v-else
+                @click="selectOption(option)"
+                :color="selectedOption === option.id ? 'blue' : 'default'"
+                class="ar-item-tag"
+                style="display: flex; align-items: center; justify-content: center"
+              >
+                <span style="font-size: 12px">
+                  {{ option.X }}:{{ option.Y }}<br />{{ option.label }}
+                </span>
+              </div>
+            </a-card-grid>
+          </a-row>
+        </div>
+      </div>
       </a-card>
       <!-- 图片比例 E-->
 
@@ -705,637 +863,127 @@
                 <a-tooltip
                   title="不一样的模型会有不一样的出图效果以及不一样的参数支持。Niji模型在动漫风格这块有很好的效果~"
                 >
-                  <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
+                  <ExclamationCircleOutlined style="margin-left: 5px; cursor: pointer" /></a-tooltip
               ></span>
             </div>
             <a-switch size="small" v-model:checked="viewForm.modeFlag" />
           </div>
         </template>
 
-        <a-row :gutter="2" v-if="viewForm.modeFlag" style="margin-top: 3px">
-          <div
-            style="width: 100%; margin: 0 0 3px"
-            :bordered="false"
-            :bodyStyle="{ padding: '0px' }"
-          >
-            <a-segmented
-              block
-              v-model:value="activeKey"
-              :options="tabOptions"
-              style="width: 100%"
-              @change="chooseVersion"
-            >
-              <template #label="{ payload }">
-                <div style="padding: 4px">
-                  <div>
-                    {{ payload.subTitle }}
-                  </div>
-                </div>
-              </template>
-            </a-segmented>
-          </div>
-          <div class="card-container" style="width: 100%">
-            <div v-if="activeKey === 'niji5'">
-              <a-row style="justify-content: left">
-                <a-col span="24" class="style-radio">
-                  <a-radio-group style="height: 32px" v-model:value="versionParam.niji5.style">
-                    <a-tooltip title="默认的风格，效果很不错">
-                      <a-radio-button value="">默认</a-radio-button>
-                    </a-tooltip>
-
-                    <a-tooltip title=" 表现力风格，更精致的插图艺术风格">
-                      <a-radio-button value="expressive">表现</a-radio-button>
-                    </a-tooltip>
-                    <a-tooltip title="可爱风格，能创造出迷人可爱的角色、道具和场景">
-                      <a-radio-button value="cute">可爱</a-radio-button>
-                    </a-tooltip>
-
-                    <a-tooltip title="景色风格，在奇幻环境下作出美丽的背景和电影般的角色时刻">
-                      <a-radio-button value="scenic">风景</a-radio-button>
-                    </a-tooltip>
-                    <a-tooltip title="原始风格，在2023.5.26日之前的默认Niji5的风格">
-                      <a-radio-button value="original">原始</a-radio-button>
-                    </a-tooltip>
-                  </a-radio-group>
-                </a-col>
-              </a-row>
-              <a-row style="margin-top: 5px">
-                <a-input-group compact style="display: flex">
-                  <a-tooltip
-                    title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
-                  >
-                    <a-tag class="line-label tag-no-right-border" color="default"
-                      >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
-                  ></a-tooltip>
-
-                  <a-select
-                    v-model:value="versionParam.niji5.quality"
-                    class="line-input tag-no-right-border"
-                  >
-                    <a-select-option value="0.25">0.25x</a-select-option>
-                    <a-select-option value="0.5">0.5x</a-select-option>
-                    <a-select-option value="1">1x</a-select-option>
-                  </a-select>
-                </a-input-group>
-              </a-row>
-              <a-row class="row-wapper">
-                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
-                  <span class="quality-tag"
-                    >风格化
-
-                    <a-tooltip
-                      title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
-                    >
-                      <ExclamationCircleOutlined class="icon-hint" />
-                    </a-tooltip>
-                  </span>
-                </a-col>
-                <a-col :span="18">
-                  <a-slider
-                    style="margin-left: 3px"
-                    v-model:value="versionParam.niji5.s"
-                    :min="1"
-                    :step="1"
-                    :max="1000"
-                  />
-                </a-col>
-              </a-row>
-              <a-row class="row-wapper">
-                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
-                  <span class="quality-tag"
-                    >多样性
-
-                    <a-tooltip
-                      title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
-                    >
-                      <ExclamationCircleOutlined class="icon-hint" />
-                    </a-tooltip>
-                  </span>
-                </a-col>
-                <a-col :span="18">
-                  <a-slider
-                    style="margin-left: 3px"
-                    v-model:value="versionParam.niji5.chaos"
-                    :min="1"
-                    :step="1"
-                    :max="100"
-                  />
-                </a-col>
-              </a-row>
-              <a-row class="row-wapper">
-                <a-col span="8" style="display: flex; align-items: center; justify-content: center">
-                  <span class="quality-tag"
-                    >无缝图案
-                    <a-tooltip
-                      title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
-                    >
-                      <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
-                  ></span>
-                </a-col>
-                <a-col
-                  :span="16"
-                  style="
-                    display: flex;
-                    align-items: center;
-                    justify-content: right;
-                    padding-right: 7px;
-                  "
-                >
-                  <a-switch size="small" v-model:checked="versionParam.niji5.tile" disabled />
-                </a-col>
-              </a-row>
-            </div>
-            <div v-if="activeKey === 'niji6'">
-              <a-row style="justify-content: left">
-                <a-radio-group style="height: 32px" v-model:value="versionParam.niji6.style">
-                  <a-radio-button value="">默认风格</a-radio-button>
-                  <a-radio-button value="raw">原始风格</a-radio-button>
-                </a-radio-group>
-              </a-row>
-              <a-row style="margin-top: 5px">
-                <a-input-group compact style="display: flex">
-                  <a-tooltip
-                    title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
-                  >
-                    <a-tag class="line-label tag-no-right-border" color="default"
-                      >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
-                  ></a-tooltip>
-
-                  <a-select
-                    v-model:value="versionParam.niji6.quality"
-                    class="line-input tag-no-right-border"
-                  >
-                    <a-select-option value="0.25">0.25x</a-select-option>
-                    <a-select-option value="0.5">0.5x</a-select-option>
-                    <a-select-option value="1">1x</a-select-option>
-                  </a-select>
-                </a-input-group>
-              </a-row>
-              <a-row class="row-wapper">
-                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
-                  <span class="quality-tag"
-                    >风格化
-
-                    <a-tooltip
-                      title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
-                    >
-                      <ExclamationCircleOutlined class="icon-hint" />
-                    </a-tooltip>
-                  </span>
-                </a-col>
-                <a-col :span="18">
-                  <a-slider
-                    style="margin-left: 3px"
-                    v-model:value="versionParam.niji5.s"
-                    :min="1"
-                    :step="1"
-                    :max="1000"
-                  />
-                </a-col>
-              </a-row>
-              <a-row class="row-wapper">
-                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
-                  <span class="quality-tag"
-                    >多样性
-
-                    <a-tooltip
-                      title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
-                    >
-                      <ExclamationCircleOutlined class="icon-hint" />
-                    </a-tooltip>
-                  </span>
-                </a-col>
-                <a-col :span="18">
-                  <a-slider
-                    style="margin-left: 3px"
-                    v-model:value="versionParam.niji5.chaos"
-                    :min="1"
-                    :step="1"
-                    :max="100"
-                  />
-                </a-col>
-              </a-row>
-              <a-row class="row-wapper">
-                <a-col span="8" style="display: flex; align-items: center; justify-content: center">
-                  <span class="quality-tag"
-                    >无缝图案
-                    <a-tooltip
-                      title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
-                    >
-                      <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
-                  ></span>
-                </a-col>
-                <a-col
-                  :span="16"
-                  style="
-                    display: flex;
-                    align-items: center;
-                    justify-content: right;
-                    padding-right: 7px;
-                  "
-                >
-                  <a-switch size="small" v-model:checked="versionParam.niji5.tile" disabled />
-                </a-col>
-              </a-row>
-            </div>
-            <div v-if="activeKey === 'v5'">
-              <a-row style="justify-content: left">
-                <a-col span="24" class="style-radio">
-                  <a-radio-group style="height: 32px" v-model:value="versionParam.v5.style">
-                    <a-tooltip title="默认风格">
-                      <a-radio-button value="">默认风格</a-radio-button>
-                    </a-tooltip>
-                  </a-radio-group>
-                </a-col>
-              </a-row>
-              <a-row style="margin-top: 5px">
-                <a-input-group compact style="display: flex">
-                  <a-tooltip
-                    title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
-                  >
-                    <a-tag class="line-label tag-no-right-border" color="default"
-                      >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
-                  ></a-tooltip>
-
-                  <a-select
-                    v-model:value="versionParam.v5.quality"
-                    class="line-input tag-no-right-border"
-                  >
-                    <a-select-option value="0.25">0.25x</a-select-option>
-                    <a-select-option value="0.5">0.5x</a-select-option>
-                    <a-select-option value="1">1x</a-select-option>
-                  </a-select>
-                </a-input-group>
-              </a-row>
-              <a-row class="row-wapper">
-                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
-                  <span class="quality-tag"
-                    >风格化
-
-                    <a-tooltip
-                      title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
-                    >
-                      <ExclamationCircleOutlined class="icon-hint" />
-                    </a-tooltip>
-                  </span>
-                </a-col>
-                <a-col :span="18">
-                  <a-slider
-                    style="margin-left: 3px"
-                    v-model:value="versionParam.v5.s"
-                    :min="1"
-                    :step="1"
-                    :max="1000"
-                  />
-                </a-col>
-              </a-row>
-              <a-row class="row-wapper">
-                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
-                  <span class="quality-tag"
-                    >多样性
-
-                    <a-tooltip
-                      title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
-                    >
-                      <ExclamationCircleOutlined class="icon-hint" />
-                    </a-tooltip>
-                  </span>
-                </a-col>
-                <a-col :span="18">
-                  <a-slider
-                    style="margin-left: 3px"
-                    v-model:value="versionParam.v5.chaos"
-                    :min="1"
-                    :step="1"
-                    :max="100"
-                  />
-                </a-col>
-              </a-row>
-              <a-row class="row-wapper">
-                <a-col span="8" style="display: flex; align-items: center; justify-content: center">
-                  <span class="quality-tag"
-                    >无缝图案
-                    <a-tooltip
-                      title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
-                    >
-                      <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
-                  ></span>
-                </a-col>
-                <a-col
-                  :span="16"
-                  style="
-                    display: flex;
-                    align-items: center;
-                    justify-content: right;
-                    padding-right: 7px;
-                  "
-                >
-                  <a-switch size="small" v-model:checked="versionParam.v5.tile" disabled />
-                </a-col>
-              </a-row>
-            </div>
-            <div v-if="activeKey === 'v51'">
-              <a-row style="justify-content: left">
-                <a-col span="24" class="style-radio">
-                  <a-radio-group style="height: 32px" v-model:value="versionParam.v51.style">
-                    <a-tooltip title="默认风格">
-                      <a-radio-button value="">默认风格</a-radio-button>
-                    </a-tooltip>
-                    <a-tooltip title="原始风格，多实用于摄影，更写实的风格">
-                      <a-radio-button value="raw">原始风格</a-radio-button>
-                    </a-tooltip>
-                  </a-radio-group>
-                </a-col>
-              </a-row>
-              <a-row style="margin-top: 5px">
-                <a-input-group compact style="display: flex">
-                  <a-tooltip
-                    title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
-                  >
-                    <a-tag class="line-label tag-no-right-border" color="default"
-                      >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
-                  ></a-tooltip>
-
-                  <a-select
-                    v-model:value="versionParam.v51.quality"
-                    class="line-input tag-no-right-border"
-                  >
-                    <a-select-option value="0.25">0.25x</a-select-option>
-                    <a-select-option value="0.5">0.5x</a-select-option>
-                    <a-select-option value="1">1x</a-select-option>
-                  </a-select>
-                </a-input-group>
-              </a-row>
-              <a-row class="row-wapper">
-                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
-                  <span class="quality-tag"
-                    >风格化
-
-                    <a-tooltip
-                      title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
-                    >
-                      <ExclamationCircleOutlined class="icon-hint" />
-                    </a-tooltip>
-                  </span>
-                </a-col>
-                <a-col :span="18">
-                  <a-slider
-                    style="margin-left: 3px"
-                    v-model:value="versionParam.v51.s"
-                    :min="1"
-                    :step="1"
-                    :max="1000"
-                  />
-                </a-col>
-              </a-row>
-              <a-row class="row-wapper">
-                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
-                  <span class="quality-tag"
-                    >多样性
-
-                    <a-tooltip
-                      title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
-                    >
-                      <ExclamationCircleOutlined class="icon-hint" />
-                    </a-tooltip>
-                  </span>
-                </a-col>
-                <a-col :span="18">
-                  <a-slider
-                    style="margin-left: 3px"
-                    v-model:value="versionParam.v51.chaos"
-                    :min="1"
-                    :step="1"
-                    :max="100"
-                  />
-                </a-col>
-              </a-row>
-              <a-row class="row-wapper">
-                <a-col span="8" style="display: flex; align-items: center; justify-content: center">
-                  <span class="quality-tag"
-                    >无缝图案
-                    <a-tooltip
-                      title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
-                    >
-                      <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
-                  ></span>
-                </a-col>
-                <a-col
-                  :span="16"
-                  style="
-                    display: flex;
-                    align-items: center;
-                    justify-content: right;
-                    padding-right: 7px;
-                  "
-                >
-                  <a-switch size="small" v-model:checked="versionParam.v51.tile" disabled />
-                </a-col>
-              </a-row>
-            </div>
-            <div v-if="activeKey === 'v52'">
-              <a-row style="justify-content: left">
-                <a-col span="24" class="style-radio">
-                  <a-radio-group style="height: 32px" v-model:value="versionParam.v52.style">
-                    <a-tooltip title="默认风格">
-                      <a-radio-button value="">默认风格</a-radio-button>
-                    </a-tooltip>
-                    <a-tooltip title="原始风格，多实用于摄影，更写实的风格">
-                      <a-radio-button value="raw">原始风格</a-radio-button>
-                    </a-tooltip>
-                  </a-radio-group>
-                </a-col>
-              </a-row>
-              <a-row style="margin-top: 5px">
-                <a-input-group compact style="display: flex">
-                  <a-tooltip
-                    title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
-                  >
-                    <a-tag class="line-label tag-no-right-border" color="default"
-                      >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
-                  ></a-tooltip>
-
-                  <a-select
-                    v-model:value="versionParam.v52.quality"
-                    class="line-input tag-no-right-border"
-                  >
-                    <a-select-option value="0.25">0.25x</a-select-option>
-                    <a-select-option value="0.5">0.5x</a-select-option>
-                    <a-select-option value="1">1x</a-select-option>
-                  </a-select>
-                </a-input-group>
-              </a-row>
-              <a-row class="row-wapper">
-                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
-                  <span class="quality-tag"
-                    >风格化
-
-                    <a-tooltip
-                      title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
-                    >
-                      <ExclamationCircleOutlined class="icon-hint" />
-                    </a-tooltip>
-                  </span>
-                </a-col>
-                <a-col :span="18">
-                  <a-slider
-                    style="margin-left: 3px"
-                    v-model:value="versionParam.v52.s"
-                    :min="1"
-                    :step="1"
-                    :max="1000"
-                  />
-                </a-col>
-              </a-row>
-              <a-row class="row-wapper">
-                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
-                  <span class="quality-tag"
-                    >多样性
-
-                    <a-tooltip
-                      title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
-                    >
-                      <ExclamationCircleOutlined class="icon-hint" />
-                    </a-tooltip>
-                  </span>
-                </a-col>
-                <a-col :span="18">
-                  <a-slider
-                    style="margin-left: 3px"
-                    v-model:value="versionParam.v52.chaos"
-                    :min="1"
-                    :step="1"
-                    :max="100"
-                  />
-                </a-col>
-              </a-row>
-
-              <a-row class="row-wapper">
-                <a-col span="8" style="display: flex; align-items: center; justify-content: center">
-                  <span class="quality-tag"
-                    >无缝图案
-                    <a-tooltip
-                      title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
-                    >
-                      <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
-                  ></span>
-                </a-col>
-                <a-col
-                  :span="16"
-                  style="
-                    display: flex;
-                    align-items: center;
-                    justify-content: right;
-                    padding-right: 7px;
-                  "
-                >
-                  <a-switch size="small" v-model:checked="versionParam.v52.tile" disabled />
-                </a-col>
-              </a-row>
-            </div>
-            <div v-if="activeKey === 'v6'">
-              <a-row style="justify-content: left">
-                <a-col span="24" class="style-radio">
-                  <a-radio-group style="height: 32px" v-model:value="versionParam.v6.style">
-                    <a-tooltip title="默认风格">
-                      <a-radio-button value="">默认风格</a-radio-button>
-                    </a-tooltip>
-                    <a-tooltip title="原始风格，多实用于摄影，更写实的风格">
-                      <a-radio-button value="raw">原始风格</a-radio-button>
-                    </a-tooltip>
-                  </a-radio-group>
-                </a-col>
-              </a-row>
-              <a-row style="margin-top: 5px">
-                <a-input-group compact style="display: flex">
-                  <a-tooltip
-                    title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
-                  >
-                    <a-tag class="line-label tag-no-right-border" color="default"
-                      >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
-                  ></a-tooltip>
-
-                  <a-select
-                    v-model:value="versionParam.v6.quality"
-                    class="line-input tag-no-right-border"
-                  >
-                    <a-select-option value="0.25">0.25x</a-select-option>
-                    <a-select-option value="0.5">0.5x</a-select-option>
-                    <a-select-option value="1">1x</a-select-option>
-                  </a-select>
-                </a-input-group>
-              </a-row>
-              <a-row class="row-wapper">
-                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
-                  <span class="quality-tag"
-                    >风格化
-
-                    <a-tooltip
-                      title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
-                    >
-                      <ExclamationCircleOutlined class="icon-hint" />
-                    </a-tooltip>
-                  </span>
-                </a-col>
-                <a-col :span="18">
-                  <a-slider
-                    style="margin-left: 3px"
-                    v-model:value="versionParam.v6.s"
-                    :min="1"
-                    :step="1"
-                    :max="1000"
-                  />
-                </a-col>
-              </a-row>
-              <a-row class="row-wapper">
-                <a-col span="6" style="display: flex; align-items: center; justify-content: start">
-                  <span class="quality-tag"
-                    >多样性
-
-                    <a-tooltip
-                      title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
-                    >
-                      <ExclamationCircleOutlined class="icon-hint" />
-                    </a-tooltip>
-                  </span>
-                </a-col>
-                <a-col :span="18">
-                  <a-slider
-                    style="margin-left: 3px"
-                    v-model:value="versionParam.v6.chaos"
-                    :min="1"
-                    :step="1"
-                    :max="100"
-                  />
-                </a-col>
-              </a-row>
-              <a-row class="row-wapper">
-                <a-col span="8" style="display: flex; align-items: center; justify-content: center">
-                  <span class="quality-tag"
-                    >无缝图案
-                    <a-tooltip
-                      title="'--tile'参数,该参数生成的图像可用作重复磁贴，为织物、壁纸和纹理创建无缝图案"
-                    >
-                      <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
-                  ></span>
-                </a-col>
-                <a-col
-                  :span="16"
-                  style="
-                    display: flex;
-                    align-items: center;
-                    justify-content: right;
-                    padding-right: 7px;
-                  "
-                >
-                  <a-switch size="small" v-model:checked="versionParam.v6.tile" disabled />
-                </a-col>
-              </a-row>
-            </div>
-          </div>
-        </a-row>
+     
       </a-card>
       <!-- 模型选择 E-->
+
+      <!-- 美学 B-->
+      <a-card
+        size="small"
+        :bordered="true"
+        :bodyStyle="{ padding: '5px', width: '100%' }"
+        class="ar-card2"
+        ref="modeStep"
+      >
+        <template #title>
+          <div class="ar-card-title-be">
+            <div>
+              <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
+                ><Icon icon="streamline-emojis:fuel-pump" /> 美学参数
+                
+              </span>
+            </div>
+            <a-switch size="small" v-model:checked="viewForm.modeFlag" />
+          </div>
+        </template>
+        
+        <a-row style="margin-top: 5px">
+          <a-input-group compact style="display: flex">
+            <a-tooltip
+              title=" '--quality'或'--q'参数，更改生成图像所花费的时间。更高质量的设置需要更长的来处理和生成更多细节。较高的值还意味着每个作业使用的 GPU 分钟数更多。质量设置不会影响分辨率"
+            >
+              <a-tag class="line-label tag-no-right-border" color="default"
+                >质量 <ExclamationCircleOutlined class="icon-hint" /> </a-tag
+            ></a-tooltip>
+
+            <a-select
+              v-model:value="paramDataValue.quality"
+              class="line-input tag-no-right-border"
+            >
+              <a-select-option value="0.25">0.25x</a-select-option>
+              <a-select-option value="0.5">0.5x</a-select-option>
+              <a-select-option value="1">1x</a-select-option>
+            </a-select>
+          </a-input-group>
+        </a-row>
+        <a-row class="row-wapper">
+          <a-col span="6" style="display: flex; align-items: center; justify-content: start">
+            <span class="quality-tag"
+              >风格化
+
+              <a-tooltip
+                title="'--stylize 或者 --s, 这个值越低会更符合 prompt 的描述，数值越高艺术性就会越强，但跟 prompt 关联性就会比较弱"
+              >
+                <ExclamationCircleOutlined class="icon-hint" />
+              </a-tooltip>
+            </span>
+          </a-col>
+          <a-col :span="18">
+            <a-slider
+              style="margin-left: 3px"
+              v-model:value="paramDataValue.s"
+              :min="1"
+              :step="1"
+              :max="1000"
+            />
+          </a-col>
+        </a-row>
+        <a-row class="row-wapper">
+          <a-col span="6" style="display: flex; align-items: center; justify-content: start">
+            <span class="quality-tag"
+              >多样性
+
+              <a-tooltip
+                title="'--chaos' 或者'--c' 参数, 会影响初始图像网格的变化程度。较高的值将产生更多不寻常和意外的结果和组合。值越低，结果越可靠、可重复"
+              >
+                <ExclamationCircleOutlined class="icon-hint" />
+              </a-tooltip>
+            </span>
+          </a-col>
+          <a-col :span="18">
+            <a-slider
+              style="margin-left: 3px"
+              v-model:value="paramDataValue.chaos"
+              :min="1"
+              :step="1"
+              :max="100"
+              
+            />
+          </a-col>
+        </a-row>
+        <a-row :gutter="2" class="row-wapper">
+          <a-col span="6" style="display: flex; align-items: center; justify-content: start">
+            <span class="quality-tag"
+              >奇妙
+
+              <a-tooltip
+                title="'--weird'参数，使生成的图像引入奇特和离奇的特质，从而产生独特而意想不到的结果。"
+              >
+                <ExclamationCircleOutlined class="icon-hint" />
+              </a-tooltip>
+            </span>
+          </a-col>
+          <a-col :span="18">
+            <a-slider
+              style="margin-left: 3px"
+              v-model:value="paramDataValue.weird"
+              :min="1"
+              :step="1"
+              :max="3000"
+        
+            />
+          </a-col>
+        </a-row>
+      </a-card>
+      <!-- 美学 E-->
+
 
       <!-- 不想出现的参数  B-->
       <a-card size="small" :bordered="true" :bodyStyle="{ padding: '5px' }" class="ar-card2">
@@ -1372,7 +1020,6 @@
         :bordered="true"
         :bodyStyle="{ padding: '5px', width: '100%', 'margin-bottom': '3px' }"
         class="ar-card2"
-        ref="modeStep"
       >
         <template #title>
           <div class="ar-card-title-be">
@@ -1462,10 +1109,7 @@
                   <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
               ></span>
             </a-col>
-            <a-col
-              :span="16"
-              style="display: flex; align-items: center; justify-content: right; padding-right: 7px"
-            >
+            <a-col :span="16" style="display: flex; align-items: center; justify-content: right">
               <a-switch size="small" disabled v-model:checked="paramDataValue.test" />
             </a-col>
           </a-row>
@@ -1499,11 +1143,8 @@
                   <ExclamationCircleOutlined class="icon-hint" /> </a-tooltip
               ></span>
             </a-col>
-            <a-col
-              :span="15"
-              style="display: flex; align-items: center; justify-content: right; padding-right: 7px"
-            >
-              <!-- <a-switch size="small"  v-model:checked="paramDataValue.uplight" /> -->
+            <a-col :span="15" style="display: flex; align-items: center; justify-content: right">
+              <!-- <a-switch v-model:checked="paramDataValue.uplight" /> -->
               <a-switch
                 size="small"
                 v-model:checked="paramDataValue.uplight"
@@ -1525,11 +1166,11 @@
 
     <div>
       <a-button
-        class="bottom-button"
+        class="bottom-button no-radius"
+        :loading="textFormLoading"
         ref="button"
         type="primary"
-        :loading="globalLoading"
-        @click.prevent="onSubmit"
+        @click="onSubmit"
         >提交绘画任务</a-button
       >
     </div>
@@ -1543,8 +1184,7 @@
       <a-modal
         v-model:open="modelData.isOpenTranslate"
         title="内容翻译"
-        width="100%"
-        wrap-class-name="full-modal"
+        width="90%"
         @cancel="cancelModal('translate')"
       >
         <template #footer>
@@ -1568,8 +1208,8 @@
           >
         </template>
         <a-spin :spinning="modelData.promptSpinning">
-          <a-row style="padding: 15px">
-            <a-col span="24">
+          <a-row style="padding: 15px" justify="space-between">
+            <a-col span="11">
               <a-card
                 size="small"
                 title="输入内容"
@@ -1582,12 +1222,15 @@
                   placeholder="请输入你要翻译的内容~"
                   allow-clear
                   :maxlength="2000"
-                  :auto-size="{ minRows: 7, maxRows: 7 }"
+                  :auto-size="{ minRows: 12, maxRows: 12 }"
                 />
               </a-card>
             </a-col>
+            <a-col span="2" style="display: flex; align-items: center; justify-content: center">
+              <DoubleRightOutlined />
+            </a-col>
 
-            <a-col span="24">
+            <a-col span="11">
               <a-card
                 size="small"
                 title="翻译结果（应用Prompt使用的文本）"
@@ -1600,7 +1243,7 @@
                   placeholder="这里是翻译成功后的结果哟~"
                   allow-clear
                   :maxlength="2000"
-                  :auto-size="{ minRows: 7, maxRows: 7 }"
+                  :auto-size="{ minRows: 12, maxRows: 12 }"
                 />
               </a-card>
             </a-col>
@@ -1614,8 +1257,8 @@
       <a-modal
         v-model:open="modelData.isOpenAiPrompt"
         title="AI生成Prompt"
-        width="100%"
-        wrap-class-name="full-modal"
+        :style="{ top: modelData.aiOutputText ? '50px' : '200px' }"
+        :width="modelData.aiOutputText ? '70%' : ''"
         @cancel="cancelModal('aiPrompt')"
       >
         <template #footer>
@@ -1654,7 +1297,7 @@
                 placeholder="预设内容。比如：你将扮演一个漫画师。你将在一行中写下描述，不使用换行符。首先是图片概念描绘什么画面内容，流畅的附加这些关键字：绘画风格、绘画工具、构图、布局、色调等。控制在2-6行文字以内。然后内容后附加：“--ar ”画面比例整数用冒号隔开“ --niji 5 ” 如果觉得风格偏美式在内容结尾继续添加“ --style expressive ”。注意：返回英文结果。"
                 allow-clear
                 :maxlength="120"
-                :auto-size="{ minRows: 3, maxRows: 3 }"
+                :auto-size="{ minRows: 1, maxRows: 2 }"
               />
             </a-col>
             <a-col span="24" style="margin-top: 10px">
@@ -1664,7 +1307,7 @@
                 placeholder="请输入你要生成的关键词~"
                 allow-clear
                 :maxlength="2000"
-                :auto-size="{ minRows: 5, maxRows: 5 }"
+                :auto-size="{ minRows: 3, maxRows: 3 }"
               />
             </a-col>
 
@@ -1679,7 +1322,7 @@
               >
                 <a-textarea
                   v-model:value="modelData.aiOutputText"
-                  placeholder="AI生成的关键词~"
+                  placeholder="请输入你要生成的关键词~"
                   allow-clear
                   :maxlength="2000"
                   :auto-size="{ minRows: 5, maxRows: 5 }"
@@ -1713,13 +1356,13 @@
     <a-modal :open="previewVisible" :title="previewTitle" :footer="null" @cancel="handleCancel">
       <img alt="example" style="width: 100%" :src="previewImage" />
     </a-modal>
-
-    <a-tour
-      :open="textToImageStep.open"
-      :steps="textToImageStep.steps"
-      @close="textToImageStepOpen(false)"
-    />
   </a-form>
+
+  <a-tour
+    :open="textToImageStep.open"
+    :steps="textToImageStep.steps"
+    @close="textToImageStepOpen(false)"
+  />
 </template>
 <script lang="ts" setup>
   import {
@@ -1732,11 +1375,12 @@
     defineProps,
     toRefs,
     nextTick,
-    inject,
   } from 'vue';
   import type { Rule } from 'ant-design-vue/es/form';
   import { addDrawTask, aiPrompt, translate } from '/@/api/df/drawTask';
   import { genPromptList, genTagList } from '/@/api/df/dataCache';
+  import { upload } from '/@/api/df/system';
+
   import {
     AddDrawTaskParams,
     DrawTaskToolsPromptListResp,
@@ -1744,28 +1388,31 @@
   } from '/@/api/df/model/drawTaskModel';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
+  import Icon from '@/components/Icon/Icon.vue';
   import {
     ExclamationCircleOutlined,
     DoubleRightOutlined,
     PlusOutlined,
   } from '@ant-design/icons-vue';
   import Prompt from './Prompt.vue';
-  import { availableList } from '/@/api/df/account';
+  import { ListQueryParams, ListResultModel, AccountListItem } from '/@/api/df/model/accountModel';
+  import { availableList, getChannelsByGroup } from '/@/api/df/account';
   import { SvgIcon } from '/@/components/Icon';
   import type { UploadFile } from 'ant-design-vue/es/upload/interface';
   import { message, UploadProps, Upload } from 'ant-design-vue';
   import { useRoute } from 'vue-router';
-  import { useUserStore, useUserStoreWithOut } from '/@/store/modules/user';
-  import { textFormApi } from '../jobList.pageQuery';
-  import { userStep } from '/@/api/df/user';
+  import { AxiosProgressEvent } from 'axios';
+  import { textFormApi } from './jobList.pageQuery';
   import { getAppEnvConfig } from '/@/utils/env';
-  import Icon from '@/components/Icon/Icon.vue';
-  import { accountInfoApi, tagInfoApi, drawCollectCategoryApi } from '../accountInfo';
+  import { useUserStoreWithOut } from '/@/store/modules/user';
+  import { accountInfoApi, tagInfoApi, drawCollectCategoryApi } from './accountInfo';
   const {
     // 响应式引用
     initTag,
     drawTagForm,
+
   } = tagInfoApi();
+
 
   const userStore = useUserStoreWithOut();
   const token = userStore.getToken;
@@ -1773,6 +1420,7 @@
     getAppEnvConfig();
 
   const { textToImgForm } = textFormApi();
+
   const {
     accountForm,
     accountViewForm,
@@ -1784,23 +1432,22 @@
     handleSetting,
   } = accountInfoApi();
 
+  const route = useRoute();
   //初始化数据
   onMounted(async () => {
     //查询可用账户
-    // await initAccountList();
+    await initAccountList();
     //初始化偏好
-    await initAccountInfo();
+    // initAccountInfo();
 
     //查询最近使用的tag
     initTag();
+    
   });
-
-  const route = useRoute();
 
   /** prompt 页面数据传递 */
   const isDrawerVisibleInC = ref(false); // 控制 C 页面的 Drawer 是否打开
   const isOpenTranslate = ref(false);
-  // const isOpenAiPrompt = ref(false);
 
   const modelData = reactive({
     isOpenTranslate: false,
@@ -1810,7 +1457,8 @@
     promptSpinning: false,
     aiInputText: null,
     aiOutputText: null,
-    promptCategory: 'NIJI',
+    promptCategory: 'NIJI_ANIME',
+    promptMask: null,
     tip: '加载中...',
   });
 
@@ -1845,11 +1493,28 @@
     }
   };
   const genPrompt = async () => {
+    if (modelData.promptCategory === null || modelData.promptCategory === '') {
+      message.error('请选择生成的预设类别！');
+      return;
+    }
+    if (
+      modelData.promptCategory === 'CUSTOM' &&
+      (modelData.promptMask === '' || modelData.promptMask === null)
+    ) {
+      message.error('请选输入预设内容！');
+      return;
+    }
+    if (modelData.aiInputText === null || modelData.aiInputText === '') {
+      message.error('Prompt关键词不能为空！');
+      return;
+    }
+
     modelData.promptSpinning = true;
     modelData.tip = '正在生成Prompt...';
     try {
       const response = await aiPrompt({
         prompt: modelData.aiInputText,
+        promptMask: modelData.promptMask,
         promptCategory: modelData.promptCategory,
         translateTo: null,
       });
@@ -1861,7 +1526,6 @@
   };
   const usePrompt = (text) => {
     textToImgForm.command = text;
-    modelData.aiOutputText = null;
     if (modelData.promptCategory === 'NIJI') {
       activeKey.value = 'niji5';
       chooseVersion('niji5');
@@ -1869,9 +1533,9 @@
       activeKey.value = 'v52';
       chooseVersion('v52');
     }
+    modelData.aiOutputText = null;
     modelData.isOpenTranslate = false;
     modelData.translateText = null;
-
     modelData.isOpenAiPrompt = false;
   };
 
@@ -1896,13 +1560,12 @@
   //页面高度处理
   const button = ref(null);
   const substractSpaceRefs = ref([card]);
-  const upwardSpace = computed(() => 1);
-  //移动设备底部导航栏
-  const offsetHeightRef = ref(55);
+  const upwardSpace = computed(() => 0);
+  const offsetHeightRef = ref(0);
   const subtractHeightRefs = ref([button]);
 
   // 使用hook
-  const { contentHeight, redoHeight } = useContentHeight(
+  const { contentHeight } = useContentHeight(
     computed(() => true),
     formRef,
     unref(subtractHeightRefs), // 使用 unref 获取数组值
@@ -1910,16 +1573,11 @@
     upwardSpace,
     offsetHeightRef,
   );
-
-  //加次监听
-  window.addEventListener('resize', function () {
-    // 检查视图大小变化，确定键盘是否隐藏
-    setTimeout(redoHeight, 800);
-  });
-
+  /** 页面高度计算结束 */
   const emit = defineEmits(['startLoading', 'endLoading']);
 
   const { createMessage } = useMessage();
+  const textFormLoading = ref(false);
 
   const onChangeLabel = (selectedOption) => {
     console.log(selectedOption);
@@ -1948,13 +1606,19 @@
     command: [{ required: true, message: '请输入绘图指令', trigger: 'blur' }],
   };
 
-  const globalLoading = ref(false);
+  //提交任务
   const onSubmit = async () => {
-    console.log(textToImgForm);
-    if (!textToImgForm.command) {
-      message.warning('请先输入关键词！');
+    const srefUrls = getSuccessFileUrls(srefFileList.value);
+    console.log(srefUrls);
+    if (
+      textToImgForm.command === null ||
+      textToImgForm.command === '' ||
+      textToImgForm.command === undefined
+    ) {
+      message.warning('请输入关键词~');
       return false;
     }
+
     const addTaskParam: AddDrawTaskParams = {
       spaceId: accountForm.currentSpaceId,
       refAccountId: accountForm.useAccountId,
@@ -1975,14 +1639,23 @@
         paramsStr: concatenatedTags.value,
         mode: accountForm.mode,
         enableTranslate: textToImgForm.enableTranslate,
+        sref: srefUrls,
       },
     };
-    globalLoading.value = true;
+
+    textFormLoading.value = true;
+    const key = 'submitTask';
+    message.loading({ content: '正在提交任务...', key, duration: 0 });
     try {
       await addDrawTask(addTaskParam);
-      createMessage.success('任务已添加~~~');
+      message.success({ content: '任务提交成功!', key, duration: 2 });
+      emit('startLoading');
+    } catch (error) {
+      console.log(error);
+      message.error({ content: error.message, key, duration: 3 });
     } finally {
-      globalLoading.value = false;
+      textFormLoading.value = false;
+      // emit('endLoading');
     }
   };
 
@@ -2006,11 +1679,9 @@
     test: false,
     upbeta: false,
     uplight: false,
-    version: 'niji 6',
+    version: 'niji 5',
     sref: null,
     sw: null,
-    cref: null,
-    cw: null,
   });
 
   // AR 选项
@@ -2088,14 +1759,14 @@
       .join(' ');
   });
   //========================模型选择=========================
-  const activeKey = ref('niji6');
+  const activeKey = ref('niji5');
 
   const versionParam = ref({
     niji5: {
       style: '',
       quality: '1',
       chaos: 0,
-      s: 300,
+      s: 100,
       iw: 1,
       version: 'niji 5',
       tile: false,
@@ -2111,9 +1782,9 @@
     },
     v4: {
       style: null,
-      quality: '1',
+      quality: '0.25',
       chaos: 0,
-      s: 300,
+      s: 100,
       version: 'v 4',
       iw: null,
       tile: null,
@@ -2122,7 +1793,7 @@
       style: null,
       quality: '1',
       chaos: 0,
-      s: 300,
+      s: 100,
       version: 'v 5',
       iw: 1,
       tile: false,
@@ -2131,7 +1802,7 @@
       style: 'raw',
       quality: '1',
       chaos: 0,
-      s: 300,
+      s: 100,
       version: 'v 5.1',
       iw: 1,
       tile: false,
@@ -2140,7 +1811,7 @@
       style: 'raw',
       quality: '1',
       chaos: 0,
-      s: 300,
+      s: 100,
       iw: 1,
       version: 'v 5.2',
       tile: false,
@@ -2234,17 +1905,11 @@
     //风格参考
     if (activeKey === 'v6' || activeKey === 'niji6') {
       paramDataValue.value.sref = getSuccessFileUrlStr(srefFileList.value);
-      paramDataValue.value.cref = getSuccessFileUrlStr(crefFileList.value);
     } else {
       paramDataValue.value.sw = null;
       paramDataValue.value.sref = null;
       viewForm.value.srefFlag = false;
-
-      paramDataValue.value.cw = null;
-      paramDataValue.value.cref = null;
-      viewForm.value.crefFlag = false;
     }
-    
   };
 
   const onChangeIw = () => {
@@ -2270,14 +1935,15 @@
     //   }
     // });
   };
+
   //初始化数据
   onMounted(async () => {
     console.log(route.query.prompt);
     textToImgForm.command = route.query.prompt;
   });
-  const userPromptList = () => {};
 
   /** ************************************上传图片******************************* */
+
   const previewVisible = ref(false);
   const previewImage = ref('');
   const previewTitle = ref('');
@@ -2294,7 +1960,7 @@
     previewTitle.value = file.name || file.url.substring(file.url.lastIndexOf('/') + 1);
   };
 
-  const fileList = ref<UploadProps['fileList']>([]);
+  const fileList = ref([]);
   const base64Images = ref<{ base64Content: string; height: number; width: number; uid: string }[]>(
     [],
   );
@@ -2314,7 +1980,6 @@
   }
   function getBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
-      console.log('-----------------');
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => {
@@ -2373,7 +2038,6 @@
   /** ************************************上传风格参考图片******************************* */
   const viewForm = ref({
     srefFlag: false,
-    crefFlag: false,
     blendFlag: false,
     accountFlag: false,
     modeFlag: true,
@@ -2404,19 +2068,7 @@
   // };
 
   const srefFileList = ref([]);
-  const crefFileList = ref([]);
-  const handleCrefChange = async (info: { file: UploadFile; fileList: UploadFile[] }) => {
-    console.log('handleChange'); // 日志输出
-    if (info.file.status === 'done') {
-      if (info.file.response.result === null) {
-        info.file.status = 'error';
-      } else {
-        paramDataValue.value.cref = getSuccessFileUrlStr(crefFileList.value);
-      }
-    } else if (info.file.status === 'removed') {
-      paramDataValue.value.cref = getSuccessFileUrlStr(crefFileList.value);
-    }
-  };
+
   const handleSrefChange = async (info: { file: UploadFile; fileList: UploadFile[] }) => {
     console.log('handleChange'); // 日志输出
     if (info.file.status === 'done') {
@@ -2425,6 +2077,8 @@
       } else {
         paramDataValue.value.sref = getSuccessFileUrlStr(srefFileList.value);
       }
+    } else if (info.file.status === 'removed') {
+      paramDataValue.value.sref = getSuccessFileUrlStr(srefFileList.value);
     }
   };
 
@@ -2489,56 +2143,55 @@
         title: '关键词',
         description:
           '在这里输入你们想要的描述，如果写入--相关的参数，将以输入的为主，UI选择的属性将不再生效！',
-        placement: 'bottom',
+        placement: 'right',
         target: () => promptStep.value && promptStep.value.$el,
       },
       {
         title: '垫图',
         description: '你可以上传一些图片作为参考图，以保证出图的相似性。',
-        placement: 'bottom',
+        placement: 'right',
         target: () => blendStep.value && blendStep.value.$el,
       },
       {
         title: '辅助工具',
         description: '内嵌了翻译、AI联想、3600+风格，无需再单独查找了，尽情使用吧。',
-        placement: 'top',
+        placement: 'right',
         target: () => toolsStep.value && toolsStep.value.$el,
       },
       {
         title: '运行账户',
         description:
           '选择相关的执行账户、频道以及执行模式，这里的配置会使用到全局，包括收藏页面。如果未配置账户，请到账户菜单查看哦~',
-        placement: 'top',
+        placement: 'right',
         target: () => accountStep.value && accountStep.value.$el,
       },
       {
         title: '提示词属性',
         description:
           '这里时系统附带的属性，包括你选择的相关风格都会显示在这里。注意：想要使用这里的属性，请勿在Prompt内填写相关的--属性',
-        placement: 'top',
+        placement: 'right',
         target: () => attrStep.value && attrStep.value.$el,
       },
       {
         title: '模型选择',
         description:
           '这里留下了最流行的模型，比如v4之类的当前版本已经隐藏。niji是动漫风格，V5、V6写实效果优秀。大家多试试看！',
-        placement: 'top',
+        placement: 'right',
         target: () => modeStep.value && modeStep.value.$el,
       },
-      // {
-      //   title: '其他属性',
-      //   description: '还有一些其他属性，大家自己看描述尝试下吧！',
-      //   placement: 'center',
-      // },
+      {
+        title: '其他属性',
+        description: '还有一些其他属性，大家自己看描述尝试下吧！',
+        placement: 'center',
+      },
       {
         title: '提交任务',
         description: '点击提交，即可开始你的第一次绘画！',
-        placement: 'top',
+        placement: 'right',
         target: () => button.value && button.value.$el,
       },
     ],
   });
-
   const textToImageStepOpen = (val: boolean): void => {
     textToImageStep.value.open = val;
   };
@@ -2547,8 +2200,8 @@
   defineExpose({ textToImageStepOpen });
 
   const truncateText = (text) => {
-    if (text.length > 50) {
-      return text.slice(0, 50) + '...';
+    if (text.length > 60) {
+      return text.slice(0, 40) + '...';
     }
     return text;
   };
@@ -2581,20 +2234,6 @@
     /* 这里可以添加样式来改变操作说明的外观 */
   }
 
-  .no-preview-icon >>> .ant-upload-list-item-actions .anticon-eye {
-    display: none;
-  }
-
-  .no-preview-icon >>> .ant-upload-list-picture-card-container {
-    width: 90px;
-    height: 90px;
-  }
-
-  .no-preview-icon >>> .ant-upload.ant-upload-select-picture-card {
-    width: 90px;
-    height: 90px;
-  }
-
   .fixed-bottom-button {
     position: fixed;
     right: 5px;
@@ -2608,8 +2247,14 @@
     justify-content: flex-start; /* 使内容左对齐 */
   }
 
+  .ar-card-title-be {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* 使内容左对齐 */
+  }
+
   .ar-card2 {
-    margin-top: 3px;
+    margin-top: 5px;
   }
 
   .ar-card2 >>> .ant-card-head {
@@ -2621,7 +2266,7 @@
     width: 100%;
 
     /* background: #f0f0f0; */
-    height: 50px;
+    height: 53px;
   }
 
   .ar-item {
@@ -2671,7 +2316,22 @@
     width: 100%;
     height: 32px;
     margin-right: 0;
-    font-size: 14px;
+    font-size: 15px;
+  }
+
+  .line-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 25%;
+    height: 32px;
+    margin-right: 0;
+    font-size: 15px;
+  }
+
+  .line-input {
+    width: 75%;
+    height: 32px;
   }
 
   .tag-no-right-border {
@@ -2686,6 +2346,7 @@
 
   .style-radio {
     flex: none;
+    margin-top: 5px;
   }
 
   .input-group {
@@ -2723,6 +2384,22 @@
     padding: 5px;
   }
 
+  .ant-collapse-content-box {
+    padding: 5px !important;
+  }
+
+  .ant-collapse .ant-collapse-content >>> .ant-collapse-content-box {
+    padding: 0;
+  }
+
+  .a-collapse-panel {
+    padding: 0 !important;
+  }
+
+  ::v-deep .collapse-body >>> ant-collapse-content-box {
+    padding: 5px;
+  }
+
   .tags-container {
     display: flex;
     flex-wrap: wrap; /* 允许标签在容器宽度超出时换行 */
@@ -2730,46 +2407,13 @@
     padding: 2px;
   }
 
-  .ar-card-title-be {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* 使内容左对齐 */
+  .ant-upload-select-picture-card i {
+    color: #999;
+    font-size: 32px;
   }
 
-  .line-label {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 25%;
-    height: 32px;
-    margin-right: 0;
-    font-size: 15px;
-  }
-
-  .line-input {
-    width: 75%;
-    height: 32px;
-  }
-</style>
-<style lang="less">
-  .full-modal {
-    .ant-modal {
-      top: 0;
-      max-width: 100%;
-      margin: 0;
-      padding: 0;
-      padding-bottom: 0;
-    }
-
-    .ant-modal-content {
-      display: flex;
-      flex-direction: column;
-      height: calc(100vh);
-    }
-
-    .ant-modal-body {
-      flex: 1;
-      padding: 0;
-    }
+  .ant-upload-select-picture-card .ant-upload-text {
+    margin-top: 8px;
+    color: #666;
   }
 </style>

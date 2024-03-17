@@ -263,7 +263,7 @@
         :open="indexStep.open"
         :steps="indexStep.steps"
         @change="changeStep"
-        @close="indexStepOpen(false)"
+        @close="indexStepClose(false)"
         :width="100"
       />
     </div>
@@ -428,6 +428,9 @@
   });
 
   const textToImageRef = ref();
+  const indexStepClose =  async(val: boolean): void => {
+    indexStep.value.open = val;
+  };
   const indexStepOpen =  async(val: boolean): void => {
     // if (val === true) {
     //   const needShow = getCustomCache(MJ_DRAW_MOBILE_TOUR);

@@ -127,21 +127,19 @@
           </div>
         </template>
         <a-row>
-          <a-col span="8">
-            <a-button style="width: 100%" size="small" @click="openTranslate"
+          <a-button-group style="width:100%">
+            <a-button style="width: 33%" size="small" @click="openTranslate"
               ><SvgIcon name="translate" />中英翻译</a-button
             >
-          </a-col>
-          <a-col span="8">
-            <a-button style="width: 100%" size="small" @click="openAiPrompt"
+        
+            <a-button style="width: 34%" size="small" @click="openAiPrompt"
               ><SvgIcon name="gpt" />AI生成</a-button
             >
-          </a-col>
-          <a-col span="8">
-            <a-button style="width: 100%" size="small" @click="openDrawerInC">
+          
+            <a-button style="width: 33%" size="small" @click="openDrawerInC">
               <SvgIcon name="book" /> Prompt宝典</a-button
             >
-          </a-col>
+          </a-button-group>
         </a-row>
       </a-card>
       <!-- 辅助工具 E-->
@@ -209,7 +207,81 @@
         </div>
       </a-card>
       <!-- 垫图 E-->
-
+      <!-- 人物一致性 B-->
+      <a-card
+        size="small"
+        ref="blendStep"
+        :bordered="true"
+        :bodyStyle="{ padding: '5px' }"
+        class="ar-card2"
+      >
+        <template #title>
+          <div class="ar-card-title-be">
+            <div>
+              <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
+                ><Icon icon="streamline-emojis:ferris-wheel" /> 人物一致性
+                <a-tooltip title="可以保证脸、头发、衣服等一致。仅niji6 和 v6 适用" trigger="click">
+                <ExclamationCircleOutlined style="margin-left: 5px; cursor: pointer" />
+              </a-tooltip>
+                </span>
+            </div>
+            <span
+                style="font-size: 10px"
+                v-if="!(paramDataValue.version === 'v 6' || paramDataValue.version === 'niji 6')"
+              >
+                仅niji6 和 v6 模型可用
+                
+            </span>
+            <a-switch size="small" v-else v-model:checked="viewForm.crefFlag" />
+          </div>
+        </template>
+        <div v-if="viewForm.crefFlag">
+          <a-row>
+            <a-col span="24">
+              <a-upload
+                v-model:file-list="crefFileList"
+                :action="uploadInfo.url"
+                :multiple="false"
+                :maxCount="5"
+                :headers="{ Authorization: uploadInfo.token }"
+                list-type="picture-card"
+                :before-upload="beforeSrefUpload"
+                @preview="handlePreview"
+                @change="handleCrefChange"
+                :withCredentials="true"
+                style="display: flex; align-items: flex-start; justify-content: flex-start"
+              >
+              
+                <div v-if="fileList.length < 5">
+                  <plus-outlined />
+                  <div style="margin-top: 8px"> 上传图片</div>
+                </div>
+              </a-upload>
+            </a-col>
+          </a-row>
+          <a-row class="row-wapper">
+            <a-col span="6" style="display: flex; align-items: center; justify-content: start">
+              <span class="quality-tag"
+                >强度
+                <a-tooltip title="--cw 100是默认值，它使用面部、头发和衣服保持原样。强度为0（--cw 0）时，它只会专注于面部（适合换装/换发等）">
+                  <ExclamationCircleOutlined class="icon-hint" />
+                </a-tooltip>
+              </span>
+            </a-col>
+            <a-col :span="18">
+              <a-slider
+                @change="onChangeIw"
+                style="margin-left: 3px"
+                v-model:value="paramDataValue.cw"
+                :min="0"
+                :step="1"
+                :max="100"
+              />
+            </a-col>
+          </a-row>
+        </div>
+      </a-card>
+      <!-- 人物一致性 E-->
       <!-- 风格参考 B-->
       <a-card size="small" :bordered="true" :bodyStyle="{ padding: '5px' }" class="ar-card2">
         <template #title>
@@ -263,7 +335,7 @@
                       </a-card>
                     </a-col>
 
-                    <a-col flex="auto">
+                    <a-col flex="auto" style="margin-left: 5px">
                       <a-row style="padding: 5px" v-if="file.status === 'done'">
                         <a-col flex="auto" style="align-items: center">
                           <span
@@ -288,7 +360,7 @@
                           />
                         </a-col>
                         <a-col
-                          flex="50px"
+                          flex="30px"
                           style="display: flex; align-items: center; justify-content: center"
                         >
                           <a href="javascript:;" @click="actions.remove">
@@ -1954,9 +2026,11 @@
     test: false,
     upbeta: false,
     uplight: false,
-    version: 'niji 5',
+    version: 'niji 6',
     sref: null,
     sw: null,
+    cw: null,
+    cref: null,
   });
 
   // AR 选项
@@ -2034,7 +2108,7 @@
       .join(' ');
   });
   //========================模型选择=========================
-  const activeKey = ref('niji5');
+  const activeKey = ref('niji6');
 
   const versionParam = ref({
     niji5: {
@@ -2180,10 +2254,15 @@
     //风格参考
     if (activeKey === 'v6' || activeKey === 'niji6') {
       paramDataValue.value.sref = getSuccessFileUrlStr(srefFileList.value);
+      paramDataValue.value.cref = getSuccessFileUrlStr(crefFileList.value);
     } else {
       paramDataValue.value.sw = null;
       paramDataValue.value.sref = null;
       viewForm.value.srefFlag = false;
+
+      paramDataValue.value.cw = null;
+      paramDataValue.value.cref = null;
+      viewForm.value.crefFlag = false;
     }
   };
 
@@ -2319,6 +2398,7 @@
     highFlag: false,
     arFlag: false,
     noParamFlag: false,
+    crefFlag:false,
   });
 
   const changeViewForm = (key) => {
@@ -2343,6 +2423,19 @@
   // };
 
   const srefFileList = ref([]);
+  const crefFileList = ref([]);
+  const handleCrefChange = async (info: { file: UploadFile; fileList: UploadFile[] }) => {
+    console.log('handleChange'); // 日志输出
+    if (info.file.status === 'done') {
+      if (info.file.response.result === null) {
+        info.file.status = 'error';
+      } else {
+        paramDataValue.value.cref = getSuccessFileUrlStr(crefFileList.value);
+      }
+    } else if (info.file.status === 'removed') {
+      paramDataValue.value.cref = getSuccessFileUrlStr(crefFileList.value);
+    }
+  };
 
   const handleSrefChange = async (info: { file: UploadFile; fileList: UploadFile[] }) => {
     console.log('handleChange'); // 日志输出

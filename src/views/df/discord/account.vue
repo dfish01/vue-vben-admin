@@ -1351,7 +1351,7 @@
       @update-visible="updateModalVisible"
     />
 
-    <a-tour :open="accountStep.open" :steps="accountStep.steps" @close="accountStepOpen(false)" />
+    <a-tour :open="accountStep.open" :steps="accountStep.steps" @close="accountStepClosed(false)" />
   </div>
 </template>
 
@@ -1988,6 +1988,10 @@
       },
     ],
   });
+
+  const accountStepClosed = async (val) => {
+    accountStep.value.open = val;
+  };
 
   const accountStepOpen = async (val) => {
     // if (val === true) {

@@ -26,7 +26,7 @@
               <span>
                 <Icon icon="line-md:coffee-half-empty-twotone-loop" size="70" color="#749BC2" />
               </span>
-              <span> {{ card.mjExecute === 'N' ? '正在执行中...' : 'MJ正在绘画中...' }} </span>
+              <span> {{ card.mjExecute === 'N' ? '正在执行中...' : card.process ? 'MJ正在绘画中(' + card.process + ')...' : 'MJ正在绘画中...'  }}  </span>
             </div>
           </div>
           <div v-if="card.state === 'FAILED'" class="mask-queued label-front">
