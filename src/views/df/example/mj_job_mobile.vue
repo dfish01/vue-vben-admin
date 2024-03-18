@@ -345,7 +345,7 @@
     <a-modal
       v-model:open="jobDetailForm.viewFlag"
       style="min-width: none;"
-      
+
       :width="320"
     >
       <template #footer>
@@ -400,7 +400,7 @@
             </a-button>
           </a-tooltip>
         </a-button-group>
-        
+
       </template>
       <a-row :gutter="[0, 2]" type="flex" :style="{height: `${(jobDetailForm.item.height / jobDetailForm.item.width) * 320}px`,}">
         <a-image
@@ -417,7 +417,7 @@
         </a-image>
       </a-row>
       <a-row>
-        
+
         <span style=" padding: 5px 10px; font-size:12px">
           {{jobDetailForm.item.fullCommand}}
         </span>
@@ -530,7 +530,7 @@
   })
 
   const showDetail = (item) => {
-    
+
     jobDetailForm.value.item = item;
     jobDetailForm.value.viewFlag = true;
   };
