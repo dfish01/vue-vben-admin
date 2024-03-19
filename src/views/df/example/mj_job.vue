@@ -13,9 +13,7 @@
                 style="padding: 0 10px; font-weight: 600"
                 :style="{ color: feedForm.feedStr === 'random_recent_jobs' ? '#0766AD' : '' }"
                 @click="selectCategory('random_recent_jobs')"
-                ><span>
-                  <Icon class="vel-icon icon" icon="noto-v1:shooting-star" />随机推荐
-                </span>
+                ><span> <Icon class="vel-icon icon" icon="noto-v1:shooting-star" />随机推荐 </span>
               </a-button>
 
               <a-button
@@ -23,9 +21,7 @@
                 style="padding: 0 10px; font-weight: 600"
                 :style="{ color: feedForm.feedStr === 'hot_recent_jobs' ? '#0766AD' : '' }"
                 @click="selectCategory('hot_recent_jobs')"
-                ><span>
-                  <Icon class="vel-icon icon" icon="streamline-emojis:fire" />热门
-                </span>
+                ><span> <Icon class="vel-icon icon" icon="streamline-emojis:fire" />热门 </span>
               </a-button>
 
               <a-button
@@ -33,9 +29,7 @@
                 style="padding: 0 10px; font-weight: 600"
                 :style="{ color: feedForm.feedStr === 'top_day' ? '#0766AD' : '' }"
                 @click="selectCategory('top_day')"
-                ><span>
-                  <Icon class="vel-icon icon" icon="noto:glowing-star" />每日精选
-                </span>
+                ><span> <Icon class="vel-icon icon" icon="noto:glowing-star" />每日精选 </span>
               </a-button>
 
               <a-button
@@ -43,9 +37,7 @@
                 style="padding: 0 10px; font-weight: 600"
                 :style="{ color: feedForm.feedStr === 'top_week' ? '#0766AD' : '' }"
                 @click="selectCategory('top_week')"
-                ><span>
-                  <Icon class="vel-icon icon" icon="noto:glowing-star" />每周精选
-                </span>
+                ><span> <Icon class="vel-icon icon" icon="noto:glowing-star" />每周精选 </span>
               </a-button>
 
               <a-button
@@ -53,9 +45,7 @@
                 style="padding: 0 10px; font-weight: 600"
                 :style="{ color: feedForm.feedStr === 'top_month' ? '#0766AD' : '' }"
                 @click="selectCategory('top_month')"
-                ><span>
-                  <Icon class="vel-icon icon" icon="noto:glowing-star" />每月精选
-                </span>
+                ><span> <Icon class="vel-icon icon" icon="noto:glowing-star" />每月精选 </span>
               </a-button>
             </a-button-group>
             <a-divider type="vertical" />
@@ -65,8 +55,8 @@
               :style="{ color: feedForm.feedStr === 'likes' ? '#0766AD' : '' }"
               @click="getCollectJobs()"
               ><span>
-                  <Icon class="vel-icon icon" icon="streamline-emojis:heart-suit" />我的喜欢
-                </span>
+                <Icon class="vel-icon icon" icon="streamline-emojis:heart-suit" />我的喜欢
+              </span>
             </a-button>
           </div>
           <div>
@@ -311,9 +301,9 @@
 
     <!-- 明细弹窗 -->
     <a-modal
+      class="custom-modal"
       v-model:open="jobDetailForm.viewFlag"
-      style="min-width: none;"
-      wrap-class-name="full-modal"
+      style="min-width: none"
       :width="320"
     >
       <template #footer>
@@ -339,56 +329,38 @@
           </a-tooltip>
 
           <a-tooltip title="查询">
-            <a-button
-              type="text"
-              @click.stop="doSearchJob(jobDetailForm.item.url)"
-              size="small"
-            >
+            <a-button type="text" @click.stop="doSearchJob(jobDetailForm.item.url)" size="small">
               <Icon class="vel-icon icon" icon="mdi:search" />
             </a-button>
           </a-tooltip>
 
           <a-tooltip title="取消收藏" v-if="hasCollect(jobDetailForm.item)">
-            <a-button
-              type="text"
-              size="small"
-              @click.stop="doRemoveJob(jobDetailForm.item)"
-            >
+            <a-button type="text" size="small" @click.stop="doRemoveJob(jobDetailForm.item)">
               <Icon class="vel-icon icon" icon="ion:heart" color="red" />
             </a-button>
           </a-tooltip>
 
           <a-tooltip title="收藏" v-else>
-            <a-button
-              type="text"
-              size="small"
-              @click.stop="doCollectJob(jobDetailForm.item)"
-            >
+            <a-button type="text" size="small" @click.stop="doCollectJob(jobDetailForm.item)">
               <Icon class="vel-icon icon" icon="solar:heart-angle-linear" />
             </a-button>
           </a-tooltip>
         </a-button-group>
-        
       </template>
-      <a-row :gutter="[0, 2]" type="flex" :style="{height: `${(jobDetailForm.item.height / jobDetailForm.item.width) * 320}px`,}">
-        <a-image
-          :src="jobDetailForm.item.url"
-          :width="320"
-        
-        >
+      <a-row
+        :gutter="[0, 2]"
+        type="flex"
+        :style="{ height: `${(jobDetailForm.item.height / jobDetailForm.item.width) * 320}px` }"
+      >
+        <a-image :src="jobDetailForm.item.url" :width="320">
           <template #placeholder>
-            <a-image
-              :width="320"
-              :src="jobDetailForm.item.mediaUrl"
-              :preview="false"
-            />
+            <a-image :width="320" :src="jobDetailForm.item.mediaUrl" :preview="false" />
           </template>
         </a-image>
       </a-row>
       <a-row>
-        
-        <span style=" padding: 5px 10px; font-size:12px">
-          {{jobDetailForm.item.fullCommand}}
+        <span style="padding: 5px 10px; font-size: 12px">
+          {{ jobDetailForm.item.fullCommand }}
         </span>
       </a-row>
     </a-modal>
@@ -455,7 +427,7 @@
   const jobDetailForm = ref({
     viewFlag: false,
     item: null,
-  })
+  });
 
   const showDetail = (item) => {
     jobDetailForm.value.item = item;
@@ -846,7 +818,7 @@
     doLoading.value = true;
     if (prompt) {
       searchPrompt.value = prompt;
-    }else {
+    } else {
       prompt = searchPrompt.value;
     }
     jobDetailForm.value.viewFlag = false;
@@ -862,7 +834,6 @@
       feedForm.value.hasMore = false;
     } finally {
       doLoading.value = false;
-      
     }
   };
 
@@ -926,12 +897,11 @@
 
   const go = useGo();
   const goView = async (routePath) => {
-    showExampleViewFlag.value = true;
     go(routePath);
   };
   const goDrawing = async (queryParams) => {
-    showExampleViewFlag.value = false;
-    goView('/mmj/index?activeTab=TextToImageForm&prompt=' + queryParams);
+    jobDetailForm.value.viewFlag = false;
+    goView('/mj/index?activeTab=TextToImageForm&prompt=' + queryParams);
   };
 </script>
 
@@ -1078,23 +1048,16 @@
     border: 1px solid transparent !important;
   }
 </style>
-
 <style lang="less">
-.full-modal {
-  .ant-modal {
-    top: 0;
-    max-width: 100%;
-    margin-top: 10vh;
-    padding-bottom: 0;
-  }
+  .custom-modal {
+    .ant-modal {
+    }
 
-  .ant-modal-content {
-    display: flex;
-    flex-direction: column;
-  }
+    .ant-modal-content {
+      bottom: 30px;
+    }
 
-  .ant-modal-body {
-    flex: 1;
+    .ant-modal-body {
+    }
   }
-}
 </style>

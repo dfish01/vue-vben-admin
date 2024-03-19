@@ -17,89 +17,89 @@
         </div>
         <div>
           <a-button-group>
-                <a-button @click="showQueryView" @click.prevent :style="{}" style="padding: 5px">
-                  <SvgIcon name="list_search" size="20" />
-                </a-button>
-                <a-button  @click="getCollectJobs()" @click.prevent :style="{}" style="padding: 5px">
-                  <Icon icon="streamline-emojis:heart-suit" size="20" />
-                </a-button>
-                <a-button @click="goView('/example2/index')" @click.prevent :style="{}" style="padding: 5px">
-                  <Icon icon="quill:sort" size="20" color="#007F73"/>
-                </a-button>
-                
-            </a-button-group>
-          </div>
+            <a-button @click="showQueryView" @click.prevent :style="{}" style="padding: 5px">
+              <SvgIcon name="list_search" size="20" />
+            </a-button>
+            <a-button @click="getCollectJobs()" @click.prevent :style="{}" style="padding: 5px">
+              <Icon icon="streamline-emojis:heart-suit" size="20" />
+            </a-button>
+            <a-button
+              @click="goView('/example2/index')"
+              @click.prevent
+              :style="{}"
+              style="padding: 5px"
+            >
+              <Icon icon="quill:sort" size="20" color="#007F73" />
+            </a-button>
+          </a-button-group>
+        </div>
       </a-row>
     </a-card>
 
     <div>
       <a-card class="no-radius" :bodyStyle="{ padding: '1px' }">
         <a-row :wrap="false" style="display: flex; align-items: center">
-           
-            <a-button-group class="scroll-item" style="width: 100%">
-              <a-button
-                :class="'no-border-button'"
-                style="height: 20px; padding: 0 5px;  font-size: 10px"
-                :style="{ color: feedForm.feedStr === 'random_recent_jobs' ? '#0766AD' : '', 'font-weight': feedForm.feedStr === 'random_recent_jobs' ? '600' : '' }"
-                
-                @click="selectCategory('random_recent_jobs')"
-                > 
-                <span>
-                  <Icon class="vel-icon icon" icon="noto-v1:shooting-star" />随机
-                </span>
-              </a-button>
+          <a-button-group class="scroll-item" style="width: 100%">
+            <a-button
+              :class="'no-border-button'"
+              style="height: 20px; padding: 0 5px; font-size: 10px"
+              :style="{
+                color: feedForm.feedStr === 'random_recent_jobs' ? '#0766AD' : '',
+                'font-weight': feedForm.feedStr === 'random_recent_jobs' ? '600' : '',
+              }"
+              @click="selectCategory('random_recent_jobs')"
+            >
+              <span> <Icon class="vel-icon icon" icon="noto-v1:shooting-star" />随机 </span>
+            </a-button>
 
-              <a-button
-                :class="'no-border-button'"
-                style="height: 20px; padding: 0 5px;  font-size: 10px"
-                :style="{ color: feedForm.feedStr === 'hot_recent_jobs' ? '#0766AD' : '', 'font-weight': feedForm.feedStr === 'hot_recent_jobs' ? '600' : '' }"
-                @click="selectCategory('hot_recent_jobs')"
-                >
-                <span>
-                  <Icon class="vel-icon icon" icon="streamline-emojis:fire" />热门
-                </span>
-              </a-button>
+            <a-button
+              :class="'no-border-button'"
+              style="height: 20px; padding: 0 5px; font-size: 10px"
+              :style="{
+                color: feedForm.feedStr === 'hot_recent_jobs' ? '#0766AD' : '',
+                'font-weight': feedForm.feedStr === 'hot_recent_jobs' ? '600' : '',
+              }"
+              @click="selectCategory('hot_recent_jobs')"
+            >
+              <span> <Icon class="vel-icon icon" icon="streamline-emojis:fire" />热门 </span>
+            </a-button>
 
-              <a-button
-                :class="'no-border-button'"
-                style="height: 20px; padding: 0 5px;  font-size: 10px"
-                :style="{ color: feedForm.feedStr === 'top_day' ? '#0766AD' : '', 'font-weight': feedForm.feedStr === 'top_day' ? '600' : '' }"
-                @click="selectCategory('top_day')"
-                >
-                <span>
-                  <Icon class="vel-icon icon" icon="noto:glowing-star" />每天
-                </span>
-              </a-button>
+            <a-button
+              :class="'no-border-button'"
+              style="height: 20px; padding: 0 5px; font-size: 10px"
+              :style="{
+                color: feedForm.feedStr === 'top_day' ? '#0766AD' : '',
+                'font-weight': feedForm.feedStr === 'top_day' ? '600' : '',
+              }"
+              @click="selectCategory('top_day')"
+            >
+              <span> <Icon class="vel-icon icon" icon="noto:glowing-star" />每天 </span>
+            </a-button>
 
-              
+            <a-button
+              :class="'no-border-button'"
+              style="height: 20px; padding: 0 5px; font-size: 10px"
+              :style="{
+                color: feedForm.feedStr === 'top_week' ? '#0766AD' : '',
+                'font-weight': feedForm.feedStr === 'top_week' ? '600' : '',
+              }"
+              @click="selectCategory('top_week')"
+            >
+              <span> <Icon class="vel-icon icon" icon="noto:glowing-star" />每周 </span>
+            </a-button>
 
-              <a-button
-                :class="'no-border-button'"
-                style="height: 20px; padding: 0 5px;  font-size: 10px"
-                :style="{ color: feedForm.feedStr === 'top_week' ? '#0766AD' : '', 'font-weight': feedForm.feedStr === 'top_week' ? '600' : '' }"
-                
-                @click="selectCategory('top_week')"
-                >
-                <span>
-                  <Icon class="vel-icon icon" icon="noto:glowing-star" />每周
-                </span>
-              </a-button>
-
-              <a-button
-                :class="'no-border-button'"
-                style="height: 20px; padding: 0 5px; font-size: 10px"
-                :style="{ color: feedForm.feedStr === 'top_month' ? '#0766AD' : '', 'font-weight': feedForm.feedStr === 'top_month' ? '600' : '' }"
-                
-                @click="selectCategory('top_month')"
-                >
-                <span>
-                  <Icon class="vel-icon icon" icon="noto:glowing-star" />每月
-                </span>
-              </a-button>
-              
-            </a-button-group>
-            
-         
+            <a-button
+              :class="'no-border-button'"
+              style="height: 20px; padding: 0 5px; font-size: 10px"
+              :style="{
+                color: feedForm.feedStr === 'top_month' ? '#0766AD' : '',
+                'font-weight': feedForm.feedStr === 'top_month' ? '600' : '',
+              }"
+              @click="selectCategory('top_month')"
+            >
+              <span> <Icon class="vel-icon icon" icon="noto:glowing-star" />每月 </span>
+            </a-button>
+          </a-button-group>
         </a-row>
       </a-card>
     </div>
@@ -134,11 +134,14 @@
             class="rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-linear hover:shadow-lg hover:shadow-gray-600 group"
           >
             <div class="overflow-hidden">
-              <a-card class="lazyImag" :bodyStyle="{
+              <a-card
+                class="lazyImag"
+                :bodyStyle="{
                   padding: '0px',
                   width: colWidth + 'px',
                   height: `${(item.height / item.width) * colWidth}px`,
-                }">
+                }"
+              >
                 <LazyImg
                   :url="url"
                   class="cursor-pointer transition-all duration-300 ease-linear group-hover:scale-105"
@@ -256,14 +259,18 @@
         </template>
       </Waterfall>
       <a-row style="justify-content: center" v-if="doLoading === false">
-        <div >
+        <div>
           <a-divider v-if="feedForm.hasMore === true">
-            <span style="color: rgb(0 0 0 / 50%); font-size:12px">
-              <Icon class="vel-icon icon" icon="eos-icons:bubble-loading" size="12"/>正在加载中...</span
+            <span style="color: rgb(0 0 0 / 50%); font-size: 12px">
+              <Icon
+                class="vel-icon icon"
+                icon="eos-icons:bubble-loading"
+                size="12"
+              />正在加载中...</span
             ></a-divider
           >
-          <a-divider  v-if="feedForm.hasMore === false">
-            <span style=" color: rgb(0 0 0 / 50%);font-size:12px">暂无更多数据 </span>
+          <a-divider v-if="feedForm.hasMore === false">
+            <span style="color: rgb(0 0 0 / 50%); font-size: 12px">暂无更多数据 </span>
           </a-divider>
         </div>
       </a-row>
@@ -299,16 +306,13 @@
         <a-button key="submit" type="primary" @click="doSearchJob()">立即查询</a-button>
       </template>
 
-        <a-row type="flex" :gutter="[0, 2]" style="margin-top: 3px">
-          <a-input
-            class="line-input "
-              v-model:value="searchPrompt"
-              placeholder="Search Prompt"
-            />
-            <span style="color:red; font-size:10px">注意: 由于资源限制，目前暂时无法支持大批量查询~ 如果查询失败，请稍后再试！</span>
-        </a-row>
+      <a-row type="flex" :gutter="[0, 2]" style="margin-top: 3px">
+        <a-input class="line-input" v-model:value="searchPrompt" placeholder="Search Prompt" />
+        <span style="color: red; font-size: 10px"
+          >注意: 由于资源限制，目前暂时无法支持大批量查询~ 如果查询失败，请稍后再试！</span
+        >
+      </a-row>
     </a-modal>
-
 
     <!-- 案例添加 -->
     <a-modal
@@ -344,9 +348,9 @@
     <!-- 明细弹窗 -->
     <a-modal
       v-model:open="jobDetailForm.viewFlag"
-      style="min-width: none;"
-
+      style="bottom: 30px; min-width: none"
       :width="320"
+      class="custom-modal"
     >
       <template #footer>
         <a-button-group>
@@ -371,55 +375,38 @@
           </a-tooltip>
 
           <a-tooltip title="查询">
-            <a-button
-              type="text"
-              @click.stop="doSearchJob(jobDetailForm.item.url)"
-              size="small"
-            >
+            <a-button type="text" @click.stop="doSearchJob(jobDetailForm.item.url)" size="small">
               <Icon class="vel-icon icon" icon="mdi:search" />
             </a-button>
           </a-tooltip>
 
           <a-tooltip title="取消收藏" v-if="hasCollect(jobDetailForm.item)">
-            <a-button
-              type="text"
-              size="small"
-              @click.stop="doRemoveJob(jobDetailForm.item)"
-            >
+            <a-button type="text" size="small" @click.stop="doRemoveJob(jobDetailForm.item)">
               <Icon class="vel-icon icon" icon="ion:heart" color="red" />
             </a-button>
           </a-tooltip>
 
           <a-tooltip title="收藏" v-else>
-            <a-button
-              type="text"
-              size="small"
-              @click.stop="doCollectJob(jobDetailForm.item)"
-            >
+            <a-button type="text" size="small" @click.stop="doCollectJob(jobDetailForm.item)">
               <Icon class="vel-icon icon" icon="solar:heart-angle-linear" />
             </a-button>
           </a-tooltip>
         </a-button-group>
-
       </template>
-      <a-row :gutter="[0, 2]" type="flex" :style="{height: `${(jobDetailForm.item.height / jobDetailForm.item.width) * 320}px`,}">
-        <a-image
-          :src="jobDetailForm.item.url"
-          :width="320"
-        >
+      <a-row
+        :gutter="[0, 2]"
+        type="flex"
+        :style="{ height: `${(jobDetailForm.item.height / jobDetailForm.item.width) * 320}px` }"
+      >
+        <a-image :src="jobDetailForm.item.url" :width="320">
           <template #placeholder>
-            <a-image
-              :width="320"
-              :src="jobDetailForm.item.mediaUrl"
-              :preview="false"
-            />
+            <a-image :width="320" :src="jobDetailForm.item.mediaUrl" :preview="false" />
           </template>
         </a-image>
       </a-row>
       <a-row>
-
-        <span style=" padding: 5px 10px; font-size:12px">
-          {{jobDetailForm.item.fullCommand}}
+        <span style="padding: 5px 10px; font-size: 12px">
+          {{ jobDetailForm.item.fullCommand }}
         </span>
       </a-row>
     </a-modal>
@@ -490,7 +477,7 @@
   const showQueryView = () => {
     showQueryViewFlag.value = true;
   };
-  const { copyText} = useDrawCard();
+  const { copyText } = useDrawCard();
 
   const feedForm = ref({
     feedStr: 'hot_recent_jobs',
@@ -512,11 +499,10 @@
     await handleLoadMore(500, false);
   });
 
-
   //画同款
   const go = useGo();
   const goDrawing = async (queryParams) => {
-    showExampleViewFlag.value = false;
+    jobDetailForm.value.viewFlag = false;
     goView('/mmj/index?activeTab=TextToImageForm&prompt=' + queryParams);
   };
 
@@ -527,10 +513,9 @@
   const jobDetailForm = ref({
     viewFlag: false,
     item: null,
-  })
+  });
 
   const showDetail = (item) => {
-
     jobDetailForm.value.item = item;
     jobDetailForm.value.viewFlag = true;
   };
@@ -539,7 +524,6 @@
     jobDetailForm.value.viewFlag = false;
     jobDetailForm.value.item = null;
   };
-
 
   /****************************** 类目相关  ****************************** */
 
@@ -608,7 +592,6 @@
   onUnmounted(() => {
     window.removeEventListener('scroll', throttledScroll);
   });
-
 
   function debounce(func, delay) {
     let timeout;
@@ -893,11 +876,11 @@
   });
 
   const doSearchJob = async (prompt) => {
-    console.log("doSearchJob " + prompt)
+    console.log('doSearchJob ' + prompt);
     doLoading.value = true;
     if (prompt) {
       searchPrompt.value = prompt;
-    }else {
+    } else {
       prompt = searchPrompt.value;
     }
     jobDetailForm.value.viewFlag = false;
@@ -976,14 +959,9 @@
   onUnmounted(() => {
     window.removeEventListener('resize', updateColWidth);
   });
-
- 
-
 </script>
 
 <style scoped>
-  
-
   .move-in {
     display: flex;
     position: absolute;
@@ -1167,5 +1145,18 @@
   .lazyImag ::v-deep .lazy__img[lazy='error'] {
     width: 100%;
     padding: 5em 0;
+  }
+</style>
+<style lang="less">
+  .custom-modal {
+    .ant-modal {
+    }
+
+    .ant-modal-content {
+      bottom: 30px;
+    }
+
+    .ant-modal-body {
+    }
   }
 </style>
