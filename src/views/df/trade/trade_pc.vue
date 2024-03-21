@@ -42,6 +42,7 @@
         "
       >
         <span style="padding: 3px 20px; color: rgb(0 0 0 / 70%)">
+          <Icon icon="flat-color-icons:idea" color="#91C8E4" />
           大多数商品会执行自动发货，你可以关注下邮件或则在系统上查看下发货信息。另外有些产品是自动激活的，请刷新下页面即可！
         </span>
       </a-row>
@@ -134,9 +135,12 @@
                   </a-button-group>
                 </a-col>
                 <a-col :span="24" v-if="card.state === 'CANCEL'">
-                  <a-button type="primary" @click="reBuyGoods(card)" style="width: 100%"
-                    >重新购买</a-button
-                  >
+                  <a-button-group style="width: 100%">
+                    <a-button type="primary" @click="reBuyGoods(card)" style="width: 50%"
+                      >重新购买</a-button
+                    >
+                    <a-button @click="delOrder(card)" style="width: 50%" danger>删除记录</a-button>
+                  </a-button-group>
                 </a-col>
                 <a-col :span="24" v-if="card.state === 'FINISHED' || card.state === 'CLOSED'">
                   <a-button-group style="width: 100%">
@@ -234,7 +238,13 @@
   } from '/@/api/df/model/tradeModel';
   import Icon from '/@/components/Icon/Icon.vue';
   import { addGoods, goodsList, deleteGoods } from '/@/api/df/goods';
-  import { createTradeApi, tradeListApi, fetchPayResultApi, cancelTradeApi } from '/@/api/df/trade';
+  import {
+    createTradeApi,
+    tradeListApi,
+    fetchPayResultApi,
+    cancelTradeApi,
+    delTradeApi,
+  } from '/@/api/df/trade';
   import { IdReq } from '/@/api/model/baseModel';
   import { listCollects, removeCollect, createCollect } from '/@/api/df/drawCollect';
   import {
@@ -417,6 +427,16 @@
       loadingRef.value = false;
     }
   };
+  const delOrder = async (card) => {
+    loadingRef.value = true;
+    try {
+      await delTradeApi({ id: card.id });
+      onSearch(1);
+      message.success('删除成功');
+    } finally {
+      loadingRef.value = false;
+    }
+  };
   const closeView = async () => {
     if (payForm.value.intervalId) {
       clearInterval(payForm.value.intervalId);
@@ -452,7 +472,7 @@
    */
   const openAfterSaleView = async () => {
     systemConfigViewForm.value.title = '售后客服';
-    systemConfigViewForm.value.content = await afterSaleInfo();
+    systemConfigViewForm.value.content = await afterSaleInfo({});
     systemConfigViewForm.value.viewFlag = true;
   };
   const closeAfterSaleView = async () => {

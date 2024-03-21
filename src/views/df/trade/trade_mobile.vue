@@ -1,6 +1,6 @@
 <template>
   <a-layout class="app" v-loading="loadingRef">
-    <a-card class="no-radius" :bodyStyle="{padding: '0'}"> 
+    <a-card class="no-radius" :bodyStyle="{ padding: '0' }">
       <a-card class="no-radius" :bodyStyle="{ padding: 0, height: '50px' }">
         <a-row
           ref="formRef"
@@ -24,14 +24,11 @@
                 </a-button>
               </a-tooltip>
               <a-dropdown :trigger="['click']">
-                <a-button style="padding: 5px" 
-                  > <SvgIcon size="20" name="shopping" /></a-button>
+                <a-button style="padding: 5px"> <SvgIcon size="20" name="shopping" /></a-button>
                 <template #overlay>
                   <a-menu>
-                    <a-menu-item key="4" @click="goView('/goods/index')">商品市场
-                    </a-menu-item>
-                    <a-menu-item key="5" @click="goView('/sec_goods/index')">转售市场
-                    </a-menu-item>
+                    <a-menu-item key="4" @click="goView('/goods/index')">商品市场 </a-menu-item>
+                    <a-menu-item key="5" @click="goView('/sec_goods/index')">转售市场 </a-menu-item>
                   </a-menu>
                 </template>
               </a-dropdown>
@@ -59,7 +56,7 @@
         :style="{
           height: `calc(${contentHeight}px `,
           overflow: 'auto',
-          padding: '3px 10px 3px 3px'
+          padding: '3px 10px 3px 3px',
         }"
       >
         <div v-for="card in cards" :key="card.id" :trigger="['contextmenu']">
@@ -135,16 +132,24 @@
                     </a-button-group>
                   </a-col>
                   <a-col :span="24" v-if="card.state === 'CANCEL'">
-                    <a-button type="primary" @click="reBuyGoods(card)" style="width: 100%"
-                      >重新购买</a-button
-                    >
+                    <a-button-group style="width: 100%">
+                      <a-button type="primary" @click="reBuyGoods(card)" style="width: 50%"
+                        >重新购买</a-button
+                      >
+
+                      <a-button @click="delOrder(card)" style="width: 50%" danger
+                        >删除记录</a-button
+                      >
+                    </a-button-group>
                   </a-col>
                   <a-col :span="24" v-if="card.state === 'FINISHED' || card.state === 'CLOSED'">
                     <a-button-group style="width: 100%">
                       <a-button type="primary" @click="reBuyGoods(card)" style="width: 50%"
                         >再来一单</a-button
                       >
-                      <a-button @click="openDeliverInfo(card)" style="width: 50%">发货信息</a-button>
+                      <a-button @click="openDeliverInfo(card)" style="width: 50%"
+                        >发货信息</a-button
+                      >
                     </a-button-group>
                   </a-col>
                 </a-row>
@@ -196,36 +201,36 @@
       <template #footer>
         <a-button key="submit" type="primary" @click="doSearch()">立即查询</a-button>
       </template>
-     
-        <a-row :gutter="[0, 2]" type="flex">
-          <a-input-group compact style="display: flex">
-            <a-tag class="line-label tag-no-right-border" color="default">🍺订单状态 </a-tag>
-            <a-select
-              placeholder="订单状态"
-              v-model:value="tradeForm.state"
-              class="line-input tag-no-right-border"
-            >
-              <a-select-option value="">全部</a-select-option>
-              <a-select-option value="WAIT_PAY">待支付</a-select-option>
-              <a-select-option value="WAIT_SEND">正在发货</a-select-option>
-              <a-select-option value="CANCEL">取消</a-select-option>
-              <a-select-option value="CLOSED">关闭</a-select-option>
-            </a-select>
-            
-          </a-input-group>
-        </a-row>
-        <a-row type="flex" :gutter="[0, 2]" style="margin-top: 3px">
-          <a-input-group compact style="display: flex">
-            <a-tag class="line-label tag-no-right-border" color="default"><Icon icon="fluent-emoji-flat:label" size="20" /> 商品名称 </a-tag>
-            <a-input
-              v-model:value="tradeForm.goodsTitle"
-              autofocus
-              placeholder="商品名称模糊查询~"
-              class="line-input "
-            />
-          </a-input-group>
-        </a-row>
-      
+
+      <a-row :gutter="[0, 2]" type="flex">
+        <a-input-group compact style="display: flex">
+          <a-tag class="line-label tag-no-right-border" color="default">🍺订单状态 </a-tag>
+          <a-select
+            placeholder="订单状态"
+            v-model:value="tradeForm.state"
+            class="line-input tag-no-right-border"
+          >
+            <a-select-option value="">全部</a-select-option>
+            <a-select-option value="WAIT_PAY">待支付</a-select-option>
+            <a-select-option value="WAIT_SEND">正在发货</a-select-option>
+            <a-select-option value="CANCEL">取消</a-select-option>
+            <a-select-option value="CLOSED">关闭</a-select-option>
+          </a-select>
+        </a-input-group>
+      </a-row>
+      <a-row type="flex" :gutter="[0, 2]" style="margin-top: 3px">
+        <a-input-group compact style="display: flex">
+          <a-tag class="line-label tag-no-right-border" color="default"
+            ><Icon icon="fluent-emoji-flat:label" size="20" /> 商品名称
+          </a-tag>
+          <a-input
+            v-model:value="tradeForm.goodsTitle"
+            autofocus
+            placeholder="商品名称模糊查询~"
+            class="line-input"
+          />
+        </a-input-group>
+      </a-row>
     </a-modal>
     <!-- 联系客服 -->
     <a-modal v-model:open="systemConfigViewForm.viewFlag">
@@ -278,7 +283,13 @@
     TradeListResp,
   } from '/@/api/df/model/tradeModel';
   import { addGoods, goodsList, deleteGoods } from '/@/api/df/goods';
-  import { createTradeApi, tradeListApi, fetchPayResultApi, cancelTradeApi } from '/@/api/df/trade';
+  import {
+    createTradeApi,
+    tradeListApi,
+    fetchPayResultApi,
+    cancelTradeApi,
+    delTradeApi,
+  } from '/@/api/df/trade';
   import { IdReq } from '/@/api/model/baseModel';
   import { listCollects, removeCollect, createCollect } from '/@/api/df/drawCollect';
   import {
@@ -496,6 +507,16 @@
       await cancelTradeApi({ id: card.id });
       onSearch(1);
       message.success('取消成功');
+    } finally {
+      loadingRef.value = false;
+    }
+  };
+  const delOrder = async (card) => {
+    loadingRef.value = true;
+    try {
+      await delTradeApi({ id: card.id });
+      onSearch(1);
+      message.success('删除成功');
     } finally {
       loadingRef.value = false;
     }

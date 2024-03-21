@@ -17,6 +17,7 @@ enum Api {
   SaleTradeList = '/open/trade/saleTradeList',
   CancelTrade = '/open/trade/cancelTrade',
   FetchPayResult = '/open/trade/fetchPayResult',
+  Del = '/open/trade/del',
 }
 
 /**
@@ -141,6 +142,24 @@ export function cancelTradeApi(params: IdReq, mode: ErrorMessageMode = 'message'
   return defHttp.post<void>(
     {
       url: Api.CancelTrade,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
+}
+
+/**
+ * 删除订单
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function delTradeApi(params: IdReq, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<void>(
+    {
+      url: Api.Del,
       params,
     },
     {

@@ -1,5 +1,5 @@
 <template>
-  <a-layout  style="width: 100%; overflow: auto">
+  <a-layout style="width: 100%; overflow: auto">
     <Loading :loading="globalLoading" :absolute="false" tip="正在加载中..." />
     <a-card ref="formRef" class="no-radius" :bodyStyle="{ padding: 0, height: '50px' }">
       <a-row
@@ -18,18 +18,15 @@
       </a-row>
     </a-card>
     <a-card
-    :bordered="false"
-    class="no-radius"
-      :style="{  height: `calc(${contentHeight}px)`, overflow: 'auto' }"
+      :bordered="false"
+      class="no-radius"
+      :style="{ height: `calc(${contentHeight}px)`, overflow: 'auto' }"
       :bodyStyle="{ padding: '0px' }"
     >
-    
-    
-      <a-card class="no-radius" :bordered="false"  :bodyStyle="{ padding: '5px' }">
+      <a-card class="no-radius" :bordered="false" :bodyStyle="{ padding: '5px' }">
         <a-row
           justify="start"
           align="top"
-          
           style="
             padding: 8px;
             border: 1px solid transparent;
@@ -37,8 +34,9 @@
             background-color: #fff7e8;
           "
         >
-          <span style="padding: 3px 10px; color: rgb(0 0 0 / 70%)"
-            >您可以通过分享邀请链接，邀请用户进行购买官方套餐您获得10%的佣金奖励，该用户续费您可获得5%的佣金奖励，快邀请好友来使用吧！</span
+          <span style="padding: 3px 10px; color: rgb(0 0 0 / 70%)">
+            <Icon icon="flat-color-icons:idea" color="#91C8E4" />
+            您可以通过分享邀请链接，邀请用户进行购买官方套餐您获得10%的佣金奖励，快邀请好友来使用吧！</span
           >
         </a-row>
         <a-row justify="space-between" style="margin-top: 20px; padding: 0 20px">
@@ -134,7 +132,14 @@
           :pagination="pagination"
           :scroll="{ x: '100%' }"
         >
-          <a-table-column title="订单号" dataIndex="bizId" key="bizId" v-if="false" align="left" :width="100" />
+          <a-table-column
+            title="订单号"
+            dataIndex="bizId"
+            key="bizId"
+            v-if="false"
+            align="left"
+            :width="100"
+          />
 
           <a-table-column title="事件" dataIndex="title" key="title" align="left" :width="80">
             <template #default="{ record }">
@@ -144,7 +149,14 @@
             </template>
           </a-table-column>
 
-          <a-table-column title="用户ID" dataIndex="buyerId" key="buyerId" v-if="false"  align="left" :width="90">
+          <a-table-column
+            title="用户ID"
+            dataIndex="buyerId"
+            key="buyerId"
+            v-if="false"
+            align="left"
+            :width="90"
+          >
             <template #default="{ record }">
               <a-tag v-if="record.buyerId"> 自己</a-tag>
 
@@ -176,10 +188,10 @@
             align="left"
             :width="120"
           />
-          <a-table-column title="操作" style="padding:5px" key="actions" fixed="right" :width="75">
+          <a-table-column title="操作" style="padding: 5px" key="actions" fixed="right" :width="75">
             <template #default="{ record }">
               <a-button-group>
-                <a-button size="small" @click="showTableRecordForm(record)" >明细</a-button>
+                <a-button size="small" @click="showTableRecordForm(record)">明细</a-button>
               </a-button-group>
             </template>
           </a-table-column>
@@ -253,47 +265,39 @@
     <!-- 记录明细 -->
     <a-modal v-model:open="tableRecordForm.viewFlag" title="明细记录">
       <template #footer>
-        <a-button
-          @click="closeTableRecordForm"
-        >
-          已知晓
-        </a-button>
+        <a-button @click="closeTableRecordForm"> 已知晓 </a-button>
       </template>
       <div style="margin: 20px 0">
-      <a-descriptions >
-        <a-descriptions-item label="订单号">{{tableRecordForm.bizId}}</a-descriptions-item>
-        <a-descriptions-item label="事件">
-          <span v-if="tableRecordForm.eventType === 20">
-            提现
-          </span>
-          <span v-if="tableRecordForm.eventType === 1">
-            下单
-          </span>
-        </a-descriptions-item>
-        <a-descriptions-item label="用户ID">
-          <span v-if="tableRecordForm.buyerId === 20">
-            {{tableRecordForm.buyerId}}
-          </span>
-          <span v-else>
-            自己
-          </span>
-
-        </a-descriptions-item>
-        <a-descriptions-item label="订单金额">{{tableRecordForm.orderAmount}}</a-descriptions-item>
-        <a-descriptions-item label="佣金">{{tableRecordForm.amount}}</a-descriptions-item>
-        <a-descriptions-item label="剩余佣金">{{tableRecordForm.remainAmount}}</a-descriptions-item>
-        <a-descriptions-item label="创建时间">
-          {{tableRecordForm.gmtCreate}}
-        </a-descriptions-item>
-      </a-descriptions>
-    </div>
-      
+        <a-descriptions>
+          <a-descriptions-item label="订单号">{{ tableRecordForm.bizId }}</a-descriptions-item>
+          <a-descriptions-item label="事件">
+            <span v-if="tableRecordForm.eventType === 20"> 提现 </span>
+            <span v-if="tableRecordForm.eventType === 1"> 下单 </span>
+          </a-descriptions-item>
+          <a-descriptions-item label="用户ID">
+            <span v-if="tableRecordForm.buyerId === 20">
+              {{ tableRecordForm.buyerId }}
+            </span>
+            <span v-else> 自己 </span>
+          </a-descriptions-item>
+          <a-descriptions-item label="订单金额">{{
+            tableRecordForm.orderAmount
+          }}</a-descriptions-item>
+          <a-descriptions-item label="佣金">{{ tableRecordForm.amount }}</a-descriptions-item>
+          <a-descriptions-item label="剩余佣金">{{
+            tableRecordForm.remainAmount
+          }}</a-descriptions-item>
+          <a-descriptions-item label="创建时间">
+            {{ tableRecordForm.gmtCreate }}
+          </a-descriptions-item>
+        </a-descriptions>
+      </div>
     </a-modal>
   </a-layout>
 </template>
 
 <script setup lang="ts">
-  import { onMounted, onUnmounted, ref,  reactive, computed, unref , createVNode } from 'vue';
+  import { onMounted, onUnmounted, ref, reactive, computed, unref, createVNode } from 'vue';
   import { MarkdownViewer } from '/@/components/Markdown';
   import { LazyImg, Waterfall } from 'vue-waterfall-plugin-next';
   import 'vue-waterfall-plugin-next/dist/style.css';
@@ -331,8 +335,8 @@
 
   const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
 
-   /** 页面高度计算开始 */
-   const formRef = ref();
+  /** 页面高度计算开始 */
+  const formRef = ref();
   //页面高度处理
   const substractSpaceRefs = ref([]);
   const upwardSpace = computed(() => 1);
@@ -432,23 +436,22 @@
   const tableRecordForm = ref({
     viewFlag: false,
     eventType: null,
-    buyerId:null,
+    buyerId: null,
     eventType: null,
-    bizId:null,
+    bizId: null,
     orderAmount: null,
-    amount:null,
+    amount: null,
     gmtCreate: null,
   });
 
   const showTableRecordForm = (record) => {
     tableRecordForm.value = record;
     tableRecordForm.value.viewFlag = true;
-  }
+  };
 
   const closeTableRecordForm = (record) => {
     tableRecordForm.value.viewFlag = false;
-  }
-
+  };
 
   /***************************提现************************* */
   const withdrawalFormRef = ref();

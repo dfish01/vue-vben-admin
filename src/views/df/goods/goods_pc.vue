@@ -38,7 +38,7 @@
               <a-button type="primary" v-if="hasPermission('9999')" @click="showDeployGoods"
                 >添加商品</a-button
               >
-              <a-button @click="goView('/trade')">订单记录</a-button>
+              <a-button @click="goView('/trade/index')">订单记录</a-button>
             </a-button-group>
           </a-space>
         </a-card>
@@ -288,9 +288,7 @@
                 </div>
 
                 <div style="display: flex; flex: 1; justify-content: flex-end">
-                  <a-button type="primary" @click="buyGoods(card)"
-                    >立即购买
-                  </a-button>
+                  <a-button type="primary" @click="buyGoods(card)">立即购买 </a-button>
                 </div>
               </a-row>
             </div>
@@ -500,7 +498,8 @@
                   v-model:value="deployGoodsForm.goodsRemark"
                   placeholder="请输入商品说明"
                   :rows="3"
-                  show-count :maxlength="60"
+                  show-count
+                  :maxlength="60"
                 />
               </a-form-item>
             </a-col>

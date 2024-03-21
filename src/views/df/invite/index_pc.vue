@@ -13,8 +13,9 @@
             background-color: #fff7e8;
           "
         >
-          <span style="padding: 3px 10px; color: rgb(0 0 0 / 70%)"
-            >您可以通过分享邀请链接，邀请用户进行购买官方套餐您获得10%的佣金奖励，该用户续费您可获得5%的佣金奖励，快邀请好友来使用吧！</span
+          <span style="padding: 3px 10px; color: rgb(0 0 0 / 70%)">
+            <Icon icon="flat-color-icons:idea" color="#91C8E4" />
+            您可以通过分享邀请链接，邀请用户进行购买官方套餐您获得10%的佣金奖励，快邀请好友来使用吧！</span
           >
         </a-row>
         <a-row justify="space-between" style="margin-top: 20px">

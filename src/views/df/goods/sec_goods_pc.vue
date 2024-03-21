@@ -35,7 +35,7 @@
               <a-button type="primary" v-if="hasPermission('9999')" @click="showDeployGoods"
                 >添加商品</a-button
               >
-              <a-button @click="goView('/trade')">订单记录</a-button>
+              <a-button @click="goView('/trade/index')">订单记录</a-button>
             </a-button-group>
           </a-space>
         </a-card>
@@ -93,20 +93,17 @@
             "
           >
             <div>
-              <a-row  style="height: 48px; margin: 0 5px">
-                  
-                  <span style="font-size:12px; line-height: 1.3;">
-                    {{ card.infoBody.goodsRemark }}
-                  </span>
-               
+              <a-row style="height: 48px; margin: 0 5px">
+                <span style="font-size: 12px; line-height: 1.3">
+                  {{ card.infoBody.goodsRemark }}
+                </span>
               </a-row>
               <div v-if="card.infoBody.billingMethod === 'INTEGRAL'" style="height: 68px">
-               
-
                 <a-row class="card-tags">
                   <a-col flex="90px">
                     <span style="font-weight: bolder">
-                      <Icon icon="material-symbols:money-outline-rounded" color="#A94438" /> 剩余积分
+                      <Icon icon="material-symbols:money-outline-rounded" color="#A94438" />
+                      剩余积分
                     </span>
                   </a-col>
                   <a-col flex="auto">
@@ -134,14 +131,12 @@
                 <a-row class="card-tags">
                   <a-col flex="90px">
                     <span style="font-weight: bolder">
-                      <Icon icon="material-symbols:money-outline-rounded" color="#A94438" /> 历史积分
+                      <Icon icon="material-symbols:money-outline-rounded" color="#A94438" />
+                      历史积分
                     </span>
                   </a-col>
                   <a-col flex="auto">
-                    <span>
-                      {{card.infoBody.totalScore}}积分
-                      
-                    </span>
+                    <span> {{ card.infoBody.totalScore }}积分 </span>
                   </a-col>
                 </a-row>
                 <a-row class="card-tags" v-if="card.infoBody.remark">
@@ -169,7 +164,12 @@
                       可用<span>{{
                         card.infoBody.turboTimes !== null ? card.infoBody.turboTimes : '无限'
                       }}</span
-                      >次 {{card.infoBody.turboTimes !== null ? '（原' + card.infoBody.totalTurboTimes + '次' :''}}
+                      >次
+                      {{
+                        card.infoBody.turboTimes !== null
+                          ? '（原' + card.infoBody.totalTurboTimes + '次'
+                          : ''
+                      }}
                     </span>
                   </a-col>
                 </a-row>
@@ -181,7 +181,11 @@
                     <span>
                       可用{{
                         card.infoBody.fastTimes !== null ? card.infoBody.fastTimes : '无限'
-                      }}次{{card.infoBody.fastTimes !== null ? '（原' + card.infoBody.totalFastTimes + '次' :''}}
+                      }}次{{
+                        card.infoBody.fastTimes !== null
+                          ? '（原' + card.infoBody.totalFastTimes + '次'
+                          : ''
+                      }}
                     </span>
                   </a-col>
                 </a-row>
@@ -195,7 +199,12 @@
                     <span>
                       可用{{
                         card.infoBody.relaxTimes !== null ? card.infoBody.relaxTimes : '无限'
-                      }}次 {{card.infoBody.relaxTimes !== null ? '（原' + card.infoBody.totalRelaxTimes + '次' :''}}
+                      }}次
+                      {{
+                        card.infoBody.relaxTimes !== null
+                          ? '（原' + card.infoBody.totalRelaxTimes + '次'
+                          : ''
+                      }}
                     </span>
                   </a-col>
                 </a-row>
@@ -253,9 +262,7 @@
                 </div>
 
                 <div style="display: flex; flex: 1; justify-content: flex-end">
-                  <a-button type="primary" @click="buyGoods(card)" 
-                    >立即购买
-                  </a-button>
+                  <a-button type="primary" @click="buyGoods(card)">立即购买 </a-button>
                 </div>
               </a-row>
             </div>
@@ -266,17 +273,13 @@
             style="margin-bottom: 10px"
           >
             <a-col :span="24">
-              
               <a-popconfirm
-                    title="是否撤回该商品的二次售出？"
-                    ok-text="确定"
-                    cancel-text="取消"
-                    @confirm="doCancelSecondHandGoods(card)"
-                  >
-                <a-button type="primary" style="width: 100%" >
-                    取消出售
-                </a-button>
-         
+                title="是否撤回该商品的二次售出？"
+                ok-text="确定"
+                cancel-text="取消"
+                @confirm="doCancelSecondHandGoods(card)"
+              >
+                <a-button type="primary" style="width: 100%"> 取消出售 </a-button>
               </a-popconfirm>
             </a-col>
           </a-row>
@@ -353,7 +356,12 @@
                 name="goodsTitle"
                 :rules="[{ required: true, message: '请输入商品标题!' }]"
               >
-                <a-input show-count :maxlength="15" v-model:value="deployGoodsForm.goodsTitle" placeholder="请输入商品标题" />
+                <a-input
+                  show-count
+                  :maxlength="15"
+                  v-model:value="deployGoodsForm.goodsTitle"
+                  placeholder="请输入商品标题"
+                />
               </a-form-item>
             </a-col>
             <a-col :span="24">
@@ -366,7 +374,8 @@
                   v-model:value="deployGoodsForm.goodsRemark"
                   placeholder="请输入商品说明"
                   :rows="3"
-                  show-count :maxlength="60"
+                  show-count
+                  :maxlength="60"
                 />
               </a-form-item>
             </a-col>
@@ -1074,12 +1083,11 @@
     loadingRef.value = true;
     try {
       const state = await cancelSecondHandGoods({ id: card.refId });
-      cards.value = cards.value.filter(record => record.id !== card.id);
+      cards.value = cards.value.filter((record) => record.id !== card.id);
     } finally {
       loadingRef.value = false;
     }
   };
-
 
   /************************************发布商品********************************* */
   const deployGoodsFormRef = ref();

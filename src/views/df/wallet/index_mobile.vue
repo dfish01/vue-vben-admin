@@ -20,10 +20,10 @@
     <a-card
       :bordered="false"
       class="no-radius"
-      :style="{  height: `calc(${contentHeight}px)`, overflow: 'auto' }"
+      :style="{ height: `calc(${contentHeight}px)`, overflow: 'auto' }"
       :bodyStyle="{ padding: '0px' }"
     >
-      <a-card  :bordered="false" class="no-radius" :bodyStyle="{ padding: '7px' }">
+      <a-card :bordered="false" class="no-radius" :bodyStyle="{ padding: '7px' }">
         <a-row
           justify="start"
           align="top"
@@ -36,7 +36,8 @@
           "
         >
           <span style="padding: 3px 10px; color: rgb(0 0 0 / 70%)">
-            您可以将账户内的余额提现，但是该操作将收取10%的手续费。因为工作时间的问题，提现金额将在
+            <Icon icon="flat-color-icons:idea" color="#91C8E4" />
+             您可以将账户内的余额提现，但是该操作将收取10%的手续费。因为工作时间的问题，提现金额将在
             48 小时内到账，请耐心等候！有任何问题可联系客服咨询~
           </span>
         </a-row>
@@ -122,7 +123,14 @@
           :pagination="pagination"
           :scroll="{ x: 'calc(80% - 50px)' }"
         >
-          <a-table-column title="账单名称" dataIndex="title" fixed="left" key="title" align="left" :width="150">
+          <a-table-column
+            title="账单名称"
+            dataIndex="title"
+            fixed="left"
+            key="title"
+            align="left"
+            :width="150"
+          >
             <template #default="{ record }">
               <div>
                 <div>
@@ -157,10 +165,10 @@
             :width="180"
           />
 
-          <a-table-column title="操作" style="padding:5px" key="actions" fixed="right" :width="75">
+          <a-table-column title="操作" style="padding: 5px" key="actions" fixed="right" :width="75">
             <template #default="{ record }">
               <a-button-group>
-                <a-button size="small" @click="showTableRecordForm(record)" >明细</a-button>
+                <a-button size="small" @click="showTableRecordForm(record)">明细</a-button>
               </a-button-group>
             </template>
           </a-table-column>
@@ -326,33 +334,31 @@
     <!-- 记录明细 -->
     <a-modal v-model:open="tableRecordForm.viewFlag" title="明细记录">
       <template #footer>
-        <a-button
-          @click="closeTableRecordForm"
-        >
-          已知晓
-        </a-button>
+        <a-button @click="closeTableRecordForm"> 已知晓 </a-button>
       </template>
       <div style="margin: 10px">
         <a-descriptions bordered>
-          <a-descriptions-item label="账单名称">{{tableRecordForm.title}}</a-descriptions-item>
-          <a-descriptions-item label="业务ID">{{tableRecordForm.bizId}}</a-descriptions-item>
-          
-          <a-descriptions-item label="金额">{{tableRecordForm.amount}}</a-descriptions-item>
-          <a-descriptions-item label="变更前金额">{{tableRecordForm.beforeAmount}}</a-descriptions-item>
-          <a-descriptions-item label="变更后金额">{{tableRecordForm.remainAmount}}</a-descriptions-item>
-          <a-descriptions-item label="创建时间">
-            {{tableRecordForm.gmtCreate}}
-          </a-descriptions-item>
+          <a-descriptions-item label="账单名称">{{ tableRecordForm.title }}</a-descriptions-item>
+          <a-descriptions-item label="业务ID">{{ tableRecordForm.bizId }}</a-descriptions-item>
 
+          <a-descriptions-item label="金额">{{ tableRecordForm.amount }}</a-descriptions-item>
+          <a-descriptions-item label="变更前金额">{{
+            tableRecordForm.beforeAmount
+          }}</a-descriptions-item>
+          <a-descriptions-item label="变更后金额">{{
+            tableRecordForm.remainAmount
+          }}</a-descriptions-item>
+          <a-descriptions-item label="创建时间">
+            {{ tableRecordForm.gmtCreate }}
+          </a-descriptions-item>
         </a-descriptions>
       </div>
     </a-modal>
-
   </a-layout>
 </template>
 
 <script setup lang="ts">
-  import { onMounted, onUnmounted, ref, reactive, computed, unref , createVNode } from 'vue';
+  import { onMounted, onUnmounted, ref, reactive, computed, unref, createVNode } from 'vue';
   import { MarkdownViewer } from '/@/components/Markdown';
   import { LazyImg, Waterfall } from 'vue-waterfall-plugin-next';
   import 'vue-waterfall-plugin-next/dist/style.css';
@@ -391,9 +397,8 @@
 
   const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
 
-
-   /** 页面高度计算开始 */
-   const formRef = ref();
+  /** 页面高度计算开始 */
+  const formRef = ref();
   //页面高度处理
   const substractSpaceRefs = ref([]);
   const upwardSpace = computed(() => 1);
@@ -481,21 +486,20 @@
   const tableRecordForm = ref({
     viewFlag: false,
     title: null,
-    amount:null,
+    amount: null,
     beforeAmount: null,
-    remainAmount:null,
+    remainAmount: null,
     gmtCreate: null,
   });
 
   const showTableRecordForm = (record) => {
     tableRecordForm.value = record;
     tableRecordForm.value.viewFlag = true;
-  }
+  };
 
   const closeTableRecordForm = (record) => {
     tableRecordForm.value.viewFlag = false;
-  }
-
+  };
 
   /***************************支付************************* */
   const payForm = ref({

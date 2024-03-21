@@ -15,6 +15,7 @@
           "
         >
           <span style="padding: 3px 10px; color: rgb(0 0 0 / 70%)">
+            <Icon icon="flat-color-icons:idea" color="#91C8E4" />
             您可以将账户内的余额提现，但是该操作将收取10%的手续费。因为工作时间的问题，提现金额将在
             48 小时内到账，请耐心等候！有任何问题可联系客服咨询~
           </span>

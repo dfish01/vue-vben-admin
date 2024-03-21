@@ -33,6 +33,17 @@
                 : 'MJ正在绘画中' + (card.process ? '(' + card.process + ')' : '...')
             }}
           </span>
+          <div style="padding: 15px">
+            <span style="text-align: center">
+              <Icon icon="flat-color-icons:idea" color="#91C8E4" />
+              <span v-if="card.process">
+                {{ '正同步绘画任务到MJ' }}
+              </span>
+              <span v-else>
+                {{ '画廊每天会同步40000+ MJ图片' }}
+              </span>
+            </span>
+          </div>
         </div>
         <div v-if="card.process">
           <span>
@@ -262,6 +273,17 @@
               : 'MJ正在绘画中...'
           }}
         </span>
+        <div style="padding: 15px">
+          <span style="text-align: center">
+            <Icon icon="flat-color-icons:idea" color="#91C8E4" />
+            <span v-if="card.process">
+              {{ '正同步绘画任务到MJ' }}
+            </span>
+            <span v-else>
+              {{ '画廊每天会同步40000+ MJ图片' }}
+            </span>
+          </span>
+        </div>
       </div>
     </div>
     <div v-if="card.state === 'FAILED'" class="mask-queued label-front">

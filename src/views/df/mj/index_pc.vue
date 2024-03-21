@@ -489,7 +489,7 @@
   import { MJ_DRAW_TOUR } from '/@/enums/cacheEnum';
 
   const userStore = useUserStore();
-  
+
   const {
     accountForm,
     accountViewForm,
@@ -643,7 +643,6 @@
       accountForm.currentSpaceId = item.id;
       accountForm.currentSpaceTitle = item.title;
     }
-    
   });
 
   /************************漫游引导********************** */
@@ -724,14 +723,13 @@
     // }
     const userInfo = userStore.getUserInfo; // 直接赋值
 
-    if(userInfo.coursePop === 1 || userInfo.coursePop == 3) {
+    if (userInfo.coursePop === 1 || userInfo.coursePop == 3) {
       return;
     }
     indexStep.value.open = val;
     const resp = await userStep({ content: 'MJ_DRAW_TOUR' });
     userInfo.coursePop = resp;
     userStore.setUserInfo(userInfo);
-    
   };
 
   const changeStep = (current: number): void => {
