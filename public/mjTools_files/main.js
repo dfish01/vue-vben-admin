@@ -18371,7 +18371,9 @@ var ur = class {
       this.input_job_id = 1,
       this.input_index = 1,
       this.has_prompt_enabled = true,
-      this.imageURL = regionObj.card.taskImage.imageUrl,
+      //infoImageList
+      // this.imageURL = regionObj.card.taskImage.imageUrl,
+      this.imageURL = regionObj.card.taskImage.infoImageList[0].url,
       // this.imageURL = 'https://image.gfish.top/midpaint/images/15c12980-2a94-4ba4-8cde-a4194a65ddf9/0_3.webp';
       this.refTaskId = regionObj.card.id,
       this.refAccountId = regionObj.refAccountId,

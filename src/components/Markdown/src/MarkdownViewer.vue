@@ -32,7 +32,7 @@
         // 设置代码块主题
         style: getTheme(getDarkMode.value, 'code'),
       },
-      cdn: 'https://vdcdn.gfish.top',
+      cdn: 'https://vditor-cdn.midjourneyers.cn',
       after: () => {
         markDownloading.value = false;
       },
