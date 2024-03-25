@@ -292,7 +292,7 @@
                       </a-button>
                       <template #overlay>
                         <a-menu>
-                          <a-menu-item key="5" @click="() => setPrompt(card.prompt)"
+                          <a-menu-item key="5" @click="() => goDrawing(card.prompt)"
                             ><Icon icon="streamline-emojis:artist-palette" color="grey" />
                             画同款</a-menu-item
                           >
@@ -1340,8 +1340,8 @@
       v-model:open="infoData.viewFlag"
       width="100%"
       wrap-class-name="full-modal "
-      :bodyStyle="{ padding: '0px' }"
-      zIndex="999"
+      :bodyStyle="{ padding: '0px', 'scrollbar-width': 'none' }"
+      zIndex="9999"
     >
       <template #footer>
         <a-button key="submit" type="primary" :loading="loadingRef" @click="closeTaskInfo"
@@ -1722,7 +1722,10 @@
   } from '../tools';
   import { useRoute } from 'vue-router';
   import { useDrawCard } from '/@/views/df/example/card';
+  import { getAppEnvConfig } from '/@/utils/env';
 
+  const { VITE_GLOB_APP_TITLE, VITE_GLOB_API_URL, VITE_GLOB_API_URL_PREFIX, VITE_GLOB_UPLOAD_URL } =
+    getAppEnvConfig();
   const { setPrompt } = textFormApi();
   const {
     refreshCollectCategory,
@@ -1802,6 +1805,7 @@
 
   const {
     // 方法
+    getSeed,
     deleteCard,
     deleteBatchHandle,
     toggleVisibility,
@@ -1858,8 +1862,19 @@
 
   // 使用 ref 包装，以确保 computed 可以正确监听变化
 
-  onMounted(async () => {
+  onMounted(() => {
+    if (VITE_GLOB_API_URL.startsWith('http')) {
+      varyRegionForm.value.subUrl = VITE_GLOB_API_URL + varyRegionForm.value.subUrl;
+    } else {
+      const currentDomain = window.location.origin;
+      varyRegionForm.value.subUrl = currentDomain + VITE_GLOB_API_URL + varyRegionForm.value.subUrl;
+    }
+    console.log('onMounted subUrl ' + varyRegionForm.value.subUrl);
     (window as any).varyRegionForm = varyRegionForm;
+    //标签在textToImage 初始化了
+  });
+
+  onMounted(async () => {
     initTag();
     await initAccountInfo();
   });
@@ -2386,6 +2401,8 @@
   .full-modal {
     .ant-modal {
       top: 0;
+      right: 0;
+      left: 0;
       max-width: 100%;
       margin: 0;
       padding-bottom: 0;
@@ -2400,6 +2417,10 @@
 
     .ant-modal-body {
       flex: 1;
+    }
+
+    ::-webkit-scrollbar {
+      display: none;
     }
   }
 </style>
