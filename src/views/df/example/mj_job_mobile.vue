@@ -404,10 +404,34 @@
           </template>
         </a-image>
       </a-row>
+
       <a-row>
         <span style="padding: 5px 10px; font-size: 12px">
-          {{ jobDetailForm.item.fullCommand }}
+          {{ jobDetailForm.dealPrompt.cleanPrompt }}
         </span>
+      </a-row>
+      <a-row v-if="jobDetailForm.item.fullCommandCn">
+        <span style="padding: 5px 10px; font-size: 12px">
+          {{ jobDetailForm.item.fullCommandCn }}
+        </span>
+      </a-row>
+      <a-row v-else style="align-items: center; height: 50px; padding: 2px 10px">
+        <span v-if="jobDetailForm.translateError !== ''">
+          <Icon class="vel-icon icon" icon=" codicon:error" color="#c93131" />
+          {{ jobDetailForm.translateError }}
+        </span>
+        <span v-else style="font-size: 13px">
+          正在翻译，请稍候 <Icon class="vel-icon icon" icon="eos-icons:three-dots-loading" />
+        </span>
+      </a-row>
+      <a-row style="align-items: center; padding: 2px 10px">
+        <a-tag
+          style="margin-right: 3px"
+          v-for="param in jobDetailForm.dealPrompt.params"
+          :key="param"
+        >
+          {{ param }}</a-tag
+        >
       </a-row>
     </a-modal>
   </a-layout>
@@ -439,6 +463,7 @@
   import { useGo } from '/@/hooks/web/usePage';
   import { SvgIcon } from '/@/components/Icon';
   import {
+    jobInfo,
     listCategory,
     chooseFeedJob,
     searchJob,
@@ -513,12 +538,42 @@
   const jobDetailForm = ref({
     viewFlag: false,
     item: null,
+    translateError: '',
+
+    dealPrompt: {},
   });
 
-  const showDetail = (item) => {
+  const showDetail = async (item) => {
     jobDetailForm.value.item = item;
+    jobDetailForm.value.translateError = '';
+    jobDetailForm.value.dealPrompt = extractContentBeforeAndAfterDashDash(item.fullCommand);
     jobDetailForm.value.viewFlag = true;
+    if (
+      item.fullCommandCn === null ||
+      item.fullCommandCn === undefined ||
+      item.fullCommandCn === ''
+    ) {
+      try {
+        const response = await jobInfo(item);
+        jobDetailForm.value.item = response;
+        item.fullCommandCn = response.fullCommandCn;
+      } finally {
+        jobDetailForm.value.translateError = '抱歉，翻译加载失败！';
+      }
+    }
   };
+
+  function extractContentBeforeAndAfterDashDash(str) {
+    // 分割字符串，使用 '--' 作为分隔符
+    const parts = str.split('--');
+    // 第一个元素是在 '--' 之前的内容
+    const contentBefore = parts.shift();
+    // 返回一个对象，包含 '--' 之前的内容和 '--' 之后的参数数组
+    return {
+      cleanPrompt: contentBefore,
+      params: parts,
+    };
+  }
 
   const closedDetail = () => {
     jobDetailForm.value.viewFlag = false;
@@ -959,6 +1014,18 @@
   onUnmounted(() => {
     window.removeEventListener('resize', updateColWidth);
   });
+
+  const doTranslate = async (text, translateTo) => {
+    modelData.promptSpinning = true;
+    modelData.tip = '正在翻译中...';
+    try {
+      const response = await translate({ prompt: text, translateTo: translateTo });
+      modelData.translateText = response;
+      modelData.promptSpinning = false;
+    } finally {
+      modelData.promptSpinning = false;
+    }
+  };
 </script>
 
 <style scoped>

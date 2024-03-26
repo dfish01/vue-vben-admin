@@ -9,6 +9,8 @@ enum Api {
   CollectJob = '/open/mjJob/collectJob',
   RemoveCollectJob = '/open/mjJob/removeCollectJob',
   MyCollectJobs = '/open/mjJob/myCollectJobs',
+
+  Info = '/open/mjJob/info',
 }
 
 /**
@@ -57,6 +59,24 @@ export function searchJob(params: StringReq, mode: ErrorMessageMode = 'message')
   return defHttp.post<any[]>(
     {
       url: Api.SearchJob,
+      params,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
+}
+
+/**
+ * 查询详情，按需翻译
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function jobInfo(params: any, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<any>(
+    {
+      url: Api.Info,
       params,
     },
     {
