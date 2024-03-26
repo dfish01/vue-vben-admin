@@ -1014,18 +1014,6 @@
   onUnmounted(() => {
     window.removeEventListener('resize', updateColWidth);
   });
-
-  const doTranslate = async (text, translateTo) => {
-    modelData.promptSpinning = true;
-    modelData.tip = '正在翻译中...';
-    try {
-      const response = await translate({ prompt: text, translateTo: translateTo });
-      modelData.translateText = response;
-      modelData.promptSpinning = false;
-    } finally {
-      modelData.promptSpinning = false;
-    }
-  };
 </script>
 
 <style scoped>

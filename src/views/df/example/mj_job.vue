@@ -302,9 +302,10 @@
     <!-- 明细弹窗 -->
     <a-modal
       class="custom-modal"
+      ref="detailModel"
       v-model:open="jobDetailForm.viewFlag"
       style="min-width: none"
-      :width="320"
+      :width="520"
     >
       <template #footer>
         <a-button-group>
@@ -347,44 +348,84 @@
           </a-tooltip>
         </a-button-group>
       </template>
-      <a-row
-        :gutter="[0, 2]"
-        type="flex"
-        :style="{ height: `${(jobDetailForm.item.height / jobDetailForm.item.width) * 320}px` }"
-      >
-        <a-image :src="jobDetailForm.item.url" :width="320">
-          <template #placeholder>
-            <a-image :width="320" :src="jobDetailForm.item.mediaUrl" :preview="false" />
-          </template>
-        </a-image>
-      </a-row>
-      <a-row>
-        <span style="padding: 5px 10px; font-size: 12px">
-          {{ jobDetailForm.dealPrompt.cleanPrompt }}
-        </span>
-      </a-row>
-      <a-row v-if="jobDetailForm.item.fullCommandCn">
-        <span style="padding: 5px 10px; font-size: 12px">
-          {{ jobDetailForm.item.fullCommandCn }}
-        </span>
-      </a-row>
-      <a-row v-else style="align-items: center; height: 50px; padding: 2px 10px">
-        <span v-if="jobDetailForm.translateError !== ''">
-          <Icon class="vel-icon icon" icon=" codicon:error" color="#c93131" />
-          {{ jobDetailForm.translateError }}
-        </span>
-        <span v-else style="font-size: 13px">
-          正在翻译，请稍候 <Icon class="vel-icon icon" icon="eos-icons:three-dots-loading" />
-        </span>
-      </a-row>
-      <a-row style="align-items: center; padding: 2px 10px">
-        <a-tag
-          style="margin-right: 3px"
-          v-for="param in jobDetailForm.dealPrompt.params"
-          :key="param"
+
+      <a-row :gutter="[0, 2]" type="flex">
+        <div
+          :style="{
+            height: `${(jobDetailForm.item.height / jobDetailForm.item.width) * detailWidth}px`,
+          }"
         >
-          {{ param }}</a-tag
-        >
+          <a-image :src="jobDetailForm.item.url" :width="detailWidth">
+            <template #placeholder>
+              <a-image :width="320" :src="jobDetailForm.item.mediaUrl" :preview="false" />
+            </template>
+          </a-image>
+        </div>
+
+        <div style="width: 520px">
+          <div v-if="jobDetailForm.dealPrompt && jobDetailForm.dealPrompt.promptENList">
+            <a-row style="display: flex; flex-wrap: wrap; align-items: center; padding: 2px 10px">
+              <div
+                class="div-prompt hover-class"
+                v-for="(param, index) in jobDetailForm.dealPrompt.promptENList"
+                :key="index"
+              >
+                <div>
+                  {{ param }}
+                </div>
+                <a-divider style="height: 1px; margin: 0" />
+                <div>
+                  {{ getParamZh(index) }}
+                </div>
+              </div>
+            </a-row>
+            <a-row style="align-items: center; padding: 2px 10px">
+              <a-tag
+                style="margin-right: 2px"
+                v-for="(param, index) in jobDetailForm.dealPrompt.promptZHList"
+                :key="index"
+              >
+                {{ param }}
+              </a-tag>
+            </a-row>
+
+            <a-row style="align-items: center; padding: 2px 10px">
+              <a-tag
+                style="margin-right: 3px"
+                v-for="param in jobDetailForm.dealPrompt.params"
+                :key="param"
+              >
+                {{ param }}</a-tag
+              >
+            </a-row>
+          </div>
+          <div v-else>
+            <a-row>
+              <span style="padding: 5px 10px; font-size: 12px">
+                {{ jobDetailForm.dealPrompt?.cleanPrompt }}
+              </span>
+            </a-row>
+            <a-row style="align-items: center; height: 50px; padding: 2px 10px">
+              <span v-if="jobDetailForm.translateError !== ''">
+                <Icon class="vel-icon icon" icon=" codicon:error" color="#c93131" />
+                {{ jobDetailForm.translateError }}
+              </span>
+              <span v-else style="font-size: 13px">
+                正在翻译，请稍候 <Icon class="vel-icon icon" icon="eos-icons:three-dots-loading" />
+              </span>
+            </a-row>
+
+            <a-row style="align-items: center; padding: 2px 10px">
+              <a-tag
+                style="margin-right: 3px"
+                v-for="param in jobDetailForm.dealPrompt.params"
+                :key="param"
+              >
+                {{ param }}
+              </a-tag>
+            </a-row>
+          </div>
+        </div>
       </a-row>
     </a-modal>
   </a-layout>
@@ -449,32 +490,66 @@
   });
 
   /********************************* 明细 ********************************* */
+  const detailModel = ref(null);
+
+  const getDetailWidth = () => {
+    // 确保 detailModel.value 是一个 DOM 元素
+    if (detailModel.value && detailModel.value.offsetWidth) {
+      return detailModel.value.offsetWidth;
+    }
+    // 如果 detailModel.value 不是一个 DOM 元素或未定义，返回一个合理的默认值或者null
+    return null;
+  };
+
+  const getParamZh = (index) => {
+    return jobDetailForm.value.dealPrompt.promptZHList[index];
+  };
+
   const jobDetailForm = ref({
     viewFlag: false,
     item: null,
     translateError: '',
 
-    dealPrompt: {},
+    dealPrompt: {
+      params: [],
+
+      cleanPrompt: '',
+      useImageList: null,
+      promptENList: null,
+      promptZHList: null,
+    },
   });
 
   const showDetail = async (item) => {
     jobDetailForm.value.item = item;
     jobDetailForm.value.translateError = '';
+    //这里是为了体验好点，先出prompt
     jobDetailForm.value.dealPrompt = extractContentBeforeAndAfterDashDash(item.fullCommand);
     jobDetailForm.value.viewFlag = true;
-    if (
-      item.fullCommandCn === null ||
-      item.fullCommandCn === undefined ||
-      item.fullCommandCn === ''
-    ) {
+    if (item.dealPrompt === null || item.dealPrompt === undefined || item.dealPrompt === '') {
       try {
         const response = await jobInfo(item);
         jobDetailForm.value.item = response;
         item.fullCommandCn = response.fullCommandCn;
+        item.dealPrompt = response.dealPrompt;
+        jobDetailForm.value.dealPrompt = response.dealPrompt;
       } finally {
         jobDetailForm.value.translateError = '抱歉，翻译加载失败！';
       }
     }
+    // if (
+    //   item.fullCommandCn === null ||
+    //   item.fullCommandCn === undefined ||
+    //   item.fullCommandCn === ''
+    // ) {
+    //   try {
+    //     const response = await jobInfo(item);
+    //     jobDetailForm.value.item = response;
+    //     item.fullCommandCn = response.fullCommandCn;
+    //   } finally {
+    //     jobDetailForm.value.translateError = '抱歉，翻译加载失败！';
+    //   }
+    // }
   };
 
   function extractContentBeforeAndAfterDashDash(str) {
@@ -483,10 +558,19 @@
     // 第一个元素是在 '--' 之前的内容
     const contentBefore = parts.shift();
     // 返回一个对象，包含 '--' 之前的内容和 '--' 之后的参数数组
+    // 使用中英文的逗号、句号作为分隔符来分割字符串
+    // const contentDs = contentBefore.split(/, |，|\. |。/).filter(Boolean);
+
     return {
       cleanPrompt: contentBefore,
+      // promptENList: contentDs,
       params: parts,
     };
+  }
+
+  function extractCnContent(str) {
+    const contentDs = str.split(/, |，|\. |。/).filter(Boolean);
+    return contentDs;
   }
 
   const closedDetail = () => {
@@ -959,18 +1043,6 @@
     jobDetailForm.value.viewFlag = false;
     goView('/mj/index?activeTab=TextToImageForm&prompt=' + queryParams);
   };
-
-  const doTranslate = async (text, translateTo) => {
-    modelData.promptSpinning = true;
-    modelData.tip = '正在翻译中...';
-    try {
-      const response = await translate({ prompt: text, translateTo: translateTo });
-      modelData.translateText = response;
-      modelData.promptSpinning = false;
-    } finally {
-      modelData.promptSpinning = false;
-    }
-  };
 </script>
 
 <style scoped>
@@ -1114,6 +1186,20 @@
 
   .no-border-button {
     border: 1px solid transparent !important;
+  }
+
+  .hover-class {
+  }
+
+  .div-prompt {
+    display: flex;
+    flex-flow: column wrap;
+    max-width: 500px;
+    margin: 2px;
+    padding: 2px 5px;
+    border: 1px solid #dcd9d9;
+    border-radius: 4px;
+    font-size: 13px;
   }
 </style>
 <style lang="less">
