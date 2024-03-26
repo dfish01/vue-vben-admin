@@ -299,6 +299,19 @@
       </a-card>
     </a-modal>
 
+    <!-- 修改prompt -->
+    <a-modal
+    v-model:open="promptForm.viewFlag"
+      :bodyStyle="{ padding: '7px 20px', 'align-items': 'center' }"
+    >
+      <template #footer>
+        <!-- <a-button key="submit" type="primary" @click="changePrompt()" :loading="exampleForm.loading"
+          >立即修改</a-button
+        > -->
+      </template>
+      <a-input v-model:value="promptForm.prompt" />
+    </a-modal>
+
     <!-- 明细弹窗 -->
     <a-modal
       class="custom-modal"
@@ -367,28 +380,92 @@
             <a-row style="display: flex; flex-wrap: wrap; align-items: center; padding: 2px 10px">
               <div
                 class="div-prompt hover-class"
-                v-for="(param, index) in jobDetailForm.dealPrompt.promptENList"
+                v-for="(param, index) in jobDetailForm.dealPrompt.useImageList"
                 :key="index"
               >
                 <div>
                   {{ param }}
                 </div>
-                <a-divider style="height: 1px; margin: 0" />
-                <div>
-                  {{ getParamZh(index) }}
-                </div>
+                
               </div>
             </a-row>
-            <a-row style="align-items: center; padding: 2px 10px">
-              <a-tag
-                style="margin-right: 2px"
-                v-for="(param, index) in jobDetailForm.dealPrompt.promptZHList"
+            <a-divider style="height: 1px; margin: 10px" />
+            <a-row style="display: flex; flex-wrap: wrap; align-items: center; padding: 2px 10px">
+              
+              <div
+                class="div-prompt hover-class"
+                v-for="(promptInfo, index) in jobDetailForm.dealPrompt.infoList"
                 :key="index"
               >
-                {{ param }}
-              </a-tag>
-            </a-row>
+              <a-popover :overlayInnerStyle="{width:'250px'}"  v-model:open="promptInfo.enViewFlag" trigger="click" @openChange="openChange(view)">
+                  <template #Title>
+                   
+                  </template>
+                <template #content>
+                  <!-- <a-input v-model:value="promptForm.prompt" /> -->
+                  <a-input-search
+                    style="width: 100%"
+                    :bordered="true"
+                    v-model:value="promptForm.prompt"
+                    placeholder=""
+                    @search="doTranslate(promptInfo, 'en')"
+                  >
+                    <template #enterButton>
+                      <a-button><Icon class="vel-icon icon" icon=" fluent:text-bullet-list-square-edit-24-filled" color="#c93131" /></a-button>
+                    </template>
+                  </a-input-search>
+                </template>
+                
 
+                  <div v-if="promptInfo.zhLoading">
+                    翻译中 <Icon class="vel-icon icon" icon="eos-icons:three-dots-loading" />
+                  </div>   
+                  <div v-else @click="showPromptEdit(index, promptInfo, 'en')">
+                    {{ promptInfo.promptEN }}
+                  </div>
+              </a-popover>
+
+               
+                <a-divider style="height: 1px; margin: 0" />
+                <a-popover v-model:open="promptInfo.zhViewFlag" trigger="click">
+                  <template #Title>
+                   
+                  </template>
+
+                  <template #content>
+                    <!-- <a-input v-model:value="promptForm.prompt" /> -->
+                    <a-input-search
+                    style="width: 100%"
+                    :bordered="true"
+                    v-model:value="promptForm.prompt"
+                    placeholder=""
+                    @search="doTranslate(promptInfo, 'zh')"
+                  >
+                    <template #enterButton>
+                      <a-button><Icon class="vel-icon icon" icon=" fluent:text-bullet-list-square-edit-24-filled" color="#c93131" /></a-button>
+                    </template>
+                  </a-input-search>
+                  </template>
+
+                  <div v-if="promptInfo.enLoading">
+                    翻译中 <Icon class="vel-icon icon" icon="eos-icons:three-dots-loading" />
+                  </div>   
+                  <div v-else @click="showPromptEdit(index, promptInfo, 'zh')">
+                    {{ promptInfo.promptZH }}
+                  </div>
+
+                     
+                            
+                </a-popover>
+
+                 
+
+
+              </div>
+
+            </a-row>
+            
+            <a-divider style="height: 1px; margin: 10px" />
             <a-row style="align-items: center; padding: 2px 10px">
               <a-tag
                 style="margin-right: 3px"
@@ -505,6 +582,85 @@
     return jobDetailForm.value.dealPrompt.promptZHList[index];
   };
 
+  
+  //执行翻译
+  const doTranslate = async (promptInfo, lang) => {
+    if(promptForm.value.prompt.trim() === '') {
+      //移除prompt
+      jobDetailForm.value.dealPrompt.infoList.splice(promptForm.value.clickIndex, 1);
+      return;
+    }
+
+    //可视状态
+    if(lang === 'zh') {
+      if(promptInfo.promptZH.trim() === promptForm.value.prompt.trim()) {
+        return;
+      }
+      promptInfo.zhLoading = true;
+      promptInfo.zhViewFlag = false;
+    }else {
+      if(promptInfo.promptEN.trim() === promptForm.value.prompt.trim()) {
+        return;
+      }
+      promptInfo.enLoading = true;
+      promptInfo.enViewFlag = false;
+    }
+
+    try{
+      const resp = await translate({
+        prompt: promptForm.value.prompt,
+        translateTo: promptForm.value.lang === 'zh' ? 'en' : 'zh',
+      })
+      promptInfo.promptZH = promptForm.value.prompt;
+      if(lang === 'zh') {
+        promptInfo.promptZH = promptForm.value.prompt;
+        promptInfo.promptEN = resp;
+      }else {
+        promptInfo.promptEN = promptForm.value.prompt;
+        promptInfo.promptZH = resp;
+      }
+
+    }finally{
+      //可视状态
+      if(lang === 'zh') {
+        promptInfo.zhLoading = false;
+      }else {
+        promptInfo.enLoading = false;
+      }
+    }
+  };
+
+  const promptForm = ref({
+    clickIndex: null,
+    prompt: null,
+    lang:'',
+  });
+
+
+  //展示prompt修改
+  const showPromptEdit = (index, promptInfo, lang) => {
+    promptForm.value.prompt = promptInfo.promptEN;
+    promptForm.value.clickIndex = index;
+    if(lang === 'zh') {
+      promptForm.value.prompt = promptInfo.promptZH;
+      promptInfo.zhViewFlag = true
+    }else {
+      promptInfo.enViewFlag = true
+    }
+    promptForm.value.lang = lang;
+    
+  };
+
+  //关闭prompt修改
+  const closePromptEdit = (index, prompt, zh) => {
+    promptForm.value.clickIndex = index;
+    promptForm.value.prompt = null;
+    promptForm.value.zh = false;
+    promptForm.value.viewFlag = false;
+  };
+
+  
+
   const jobDetailForm = ref({
     viewFlag: false,
     item: null,
@@ -512,7 +668,7 @@
 
     dealPrompt: {
       params: [],
-
+      infoList:[],
       cleanPrompt: '',
       useImageList: null,
       promptENList: null,

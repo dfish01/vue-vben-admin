@@ -1,6 +1,10 @@
 <template>
-  <ChatgptMobile v-if="getIsMobile" />
-  <ChatgptPc v-else />
+<iframe
+      src="http://192.168.3.10:1002/"
+      :style="{ height: 'calc(100vh - 53px)', width: '100%' }"
+      sandbox="allow-same-origin allow-scripts"
+    >
+    </iframe>
 </template>
 
 <script lang="ts" setup>
