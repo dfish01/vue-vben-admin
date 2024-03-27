@@ -168,29 +168,32 @@
         </a-form-item>
       </a-card>
 
-      <a-card title="百度翻译配置" style="margin-top: 10px">
+      <a-card title="翻译配置" style="margin-top: 10px">
         <a-form-item
-          label="appid"
-          :name="['translateConfig', 'appid']"
-          :rules="[{ required: true, message: '请输入appId' }]"
+          label="腾讯翻译"
+          :name="['translateConfig', 'tencentConfig']"
+          :rules="[{ required: false, message: '请输入腾讯翻译配置信息' }]"
         >
-          <a-input
-            v-model:value="extendConfigForm.translateConfig.appid"
-            placeholder="请输入appId"
+          <a-textarea
+            v-model:value="extendConfigForm.translateConfig.tencentConfig"
+            placeholder="请输入腾讯翻译相关配置信息，json模式"
+            :rows="8"
           />
         </a-form-item>
         <a-form-item
-          label="appSecret"
-          :name="['translateConfig', 'appSecret']"
-          :rules="[{ required: true, message: '请输入appSecret' }]"
+          label="百度翻译"
+          :name="['translateConfig', 'baiduConfig']"
+          :rules="[{ required: false, message: '请输入百度翻译配置信息' }]"
         >
-          <a-input
-            v-model:value="extendConfigForm.translateConfig.appSecret"
-            placeholder="请输入appSecret"
+          <a-textarea
+            v-model:value="extendConfigForm.translateConfig.baiduConfig"
+            placeholder="请输入百度翻译相关配置信息，json模式"
+            :rows="8"
           />
         </a-form-item>
       </a-card>
-      <a-card title="OPENAI配置" style="margin-top: 10px">
+
+      <a-card title="AI配置" style="margin-top: 10px">
         <a-form-item
           label="HOST地址"
           :name="['pandoraConfig', 'host']"
@@ -216,6 +219,17 @@
           <a-textarea
             v-model:value="extendConfigForm.pandoraConfig.poolToken"
             placeholder="请输入PoolToken"
+            :rows="3"
+          />
+        </a-form-item>
+        <a-form-item
+          label="运行MODE"
+          :name="['pandoraConfig', 'mode']"
+          :rules="[{ required: true, message: '请输入mode' }]"
+        >
+          <a-textarea
+            v-model:value="extendConfigForm.pandoraConfig.mode"
+            placeholder="请输入执行MODE，默认3.5"
             :rows="3"
           />
         </a-form-item>
@@ -291,8 +305,8 @@
       alias: null,
     },
     translateConfig: {
-      appid: '',
-      appSecret: '',
+      baiduConfig: '',
+      tencentConfig: '',
     },
     rolePermission: {
       content: '',
@@ -314,6 +328,7 @@
       apiPrefix: '',
       autoRefresh: false,
       expireTime: '',
+      mode: 'SparkDesk-v3.5', //讯飞星火
     },
   });
   onMounted(async () => {

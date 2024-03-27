@@ -1553,48 +1553,63 @@
             >英->汉翻译</a-button
           >
         </template>
-        <a-spin :spinning="modelData.promptSpinning">
-          <a-row style="padding: 15px" justify="space-between">
-            <a-col span="11">
-              <a-card
-                size="small"
-                title="输入内容"
-                :bordered="true"
-                :bodyStyle="{ padding: '0px' }"
-                class="ar-card2"
-              >
-                <a-textarea
-                  v-model:value="modelData.aiInputText"
-                  placeholder="请输入你要翻译的内容~"
-                  allow-clear
-                  :maxlength="2000"
-                  :auto-size="{ minRows: 12, maxRows: 12 }"
-                />
-              </a-card>
-            </a-col>
-            <a-col span="2" style="display: flex; align-items: center; justify-content: center">
-              <DoubleRightOutlined />
-            </a-col>
+        <!-- <a-spin :spinning="modelData.promptSpinning"> -->
+        <a-row style="padding: 15px" justify="space-between">
+          <a-col span="11">
+            <a-card
+              size="small"
+              title="输入内容"
+              :bordered="true"
+              :bodyStyle="{ padding: '0px' }"
+              class="ar-card2"
+            >
+              <a-textarea
+                v-model:value="modelData.aiInputText"
+                placeholder="请输入你要翻译的内容~"
+                allow-clear
+                :maxlength="2000"
+                :auto-size="{ minRows: 12, maxRows: 12 }"
+              />
+            </a-card>
+          </a-col>
+          <a-col span="2" style="display: flex; align-items: center; justify-content: center">
+            <DoubleRightOutlined />
+          </a-col>
 
-            <a-col span="11">
-              <a-card
-                size="small"
-                title="翻译结果（应用Prompt使用的文本）"
-                :bordered="true"
-                :bodyStyle="{ padding: '0px' }"
-                class="ar-card2"
+          <a-col span="11">
+            <a-card
+              size="small"
+              title="翻译结果（应用Prompt使用的文本）"
+              :bordered="true"
+              :bodyStyle="{ padding: '0px' }"
+              class="ar-card2"
+            >
+              <div
+                v-if="modelData.promptSpinning"
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  width: 100%;
+                  height: 274px;
+                "
               >
-                <a-textarea
-                  v-model:value="modelData.translateText"
-                  placeholder="这里是翻译成功后的结果哟~"
-                  allow-clear
-                  :maxlength="2000"
-                  :auto-size="{ minRows: 12, maxRows: 12 }"
-                />
-              </a-card>
-            </a-col>
-          </a-row>
-        </a-spin>
+                <Icon icon="svg-spinners:bars-fade" size="40" />
+              </div>
+
+              <a-textarea
+                :bordered="false"
+                v-else
+                v-model:value="modelData.translateText"
+                placeholder="这里是翻译成功后的结果哟~"
+                allow-clear
+                :maxlength="2000"
+                :auto-size="{ minRows: 12, maxRows: 12 }"
+              />
+            </a-card>
+          </a-col>
+        </a-row>
+        <!-- </a-spin> -->
       </a-modal>
     </div>
 
@@ -1642,7 +1657,7 @@
           style="height: 76px; margin-top: 20px; padding: 0 15px"
         >
           <a-textarea
-            style="width: 99%"
+            style="width: 100%"
             v-model:value="modelData.promptMask"
             placeholder="预设内容。比如：你将扮演一个漫画师。你将在一行中写下描述，不使用换行符。首先是图片概念描绘什么画面内容，流畅的附加这些关键字：绘画风格、绘画工具、构图、布局、色调等。控制在2-6行文字以内。然后内容后附加：“--ar ”画面比例整数用冒号隔开“ --niji 5 ” 如果觉得风格偏美式在内容结尾继续添加“ --style expressive ”。注意：返回英文结果。"
             allow-clear
@@ -1924,13 +1939,31 @@
         promptCategory: modelData.promptCategory,
         translateTo: null,
       });
+
       modelData.aiOutputText = response;
+      modelData.aiPromptLoading = false;
+      // modelData.aiOutputText = '';
+      // typeWriter(response);
+
       modelData.translateText = null;
     } finally {
       modelData.aiPromptLoading = false;
       // modelData.promptSpinning = false;
     }
   };
+
+  /**
+   * 打字机效果
+   */
+  function typeWriter(content) {
+    console.log(111);
+
+    if (modelData.aiOutputText.length < content.length) {
+      modelData.aiOutputText += content.charAt(modelData.aiOutputText.length);
+      setTimeout(typeWriter(content), 1000);
+    }
+  }
+
   const usePrompt = (text) => {
     textToImgForm.command = text;
     if (modelData.promptCategory === 'NIJI') {
