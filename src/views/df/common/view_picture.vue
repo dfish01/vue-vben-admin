@@ -37,7 +37,7 @@
             <span style="text-align: center">
               <Icon icon="flat-color-icons:idea" color="#91C8E4" />
               <span v-if="card.process">
-                {{ '正同步绘画任务到MJ' }}
+                {{ '正等待MJ绘画完成' }}
               </span>
               <span v-else>
                 {{ '画廊每天会同步40000+ MJ图片' }}
@@ -277,7 +277,7 @@
           <span style="text-align: center">
             <Icon icon="flat-color-icons:idea" color="#91C8E4" />
             <span v-if="card.process">
-              {{ '正同步绘画任务到MJ' }}
+              {{ '正等待MJ绘画完成' }}
             </span>
             <span v-else>
               {{ '画廊每天会同步40000+ MJ图片' }}
