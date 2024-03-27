@@ -349,27 +349,20 @@
     <a-modal
       v-model:open="jobDetailForm.viewFlag"
       style="bottom: 30px; min-width: none"
-      :width="320"
+      :width="detailWidth"
       class="custom-modal"
+      :bodyStyle="{ width: detailWidth }"
     >
       <template #footer>
         <a-button-group>
           <a-tooltip title="复制">
-            <a-button
-              type="text"
-              @click.stop="copyText(jobDetailForm.item.fullCommand)"
-              size="small"
-            >
+            <a-button type="text" @click.stop="copyText(getEditPrompt())" size="small">
               <Icon class="vel-icon icon" icon="icon-park-outline:text" />
             </a-button>
           </a-tooltip>
 
           <a-tooltip title="画同款">
-            <a-button
-              type="text"
-              @click.stop="goDrawing(jobDetailForm.item.fullCommand)"
-              size="small"
-            >
+            <a-button type="text" @click.stop="goDrawing(getEditPrompt())" size="small">
               <Icon class="vel-icon icon" icon="fluent:image-edit-16-regular" />
             </a-button>
           </a-tooltip>
@@ -393,45 +386,176 @@
           </a-tooltip>
         </a-button-group>
       </template>
-      <a-row
-        :gutter="[0, 2]"
-        type="flex"
-        :style="{ height: `${(jobDetailForm.item.height / jobDetailForm.item.width) * 320}px` }"
-      >
-        <a-image :src="jobDetailForm.item.url" :width="320">
-          <template #placeholder>
-            <a-image :width="320" :src="jobDetailForm.item.mediaUrl" :preview="false" />
-          </template>
-        </a-image>
-      </a-row>
 
-      <a-row>
-        <span style="padding: 5px 10px; font-size: 12px">
-          {{ jobDetailForm.dealPrompt.cleanPrompt }}
-        </span>
-      </a-row>
-      <a-row v-if="jobDetailForm.item.fullCommandCn">
-        <span style="padding: 5px 10px; font-size: 12px">
-          {{ jobDetailForm.item.fullCommandCn }}
-        </span>
-      </a-row>
-      <a-row v-else style="align-items: center; height: 50px; padding: 2px 10px">
-        <span v-if="jobDetailForm.translateError !== ''">
-          <Icon class="vel-icon icon" icon=" codicon:error" color="#c93131" />
-          {{ jobDetailForm.translateError }}
-        </span>
-        <span v-else style="font-size: 13px">
-          正在翻译，请稍候 <Icon class="vel-icon icon" icon="eos-icons:three-dots-loading" />
-        </span>
-      </a-row>
-      <a-row style="align-items: center; padding: 2px 10px">
-        <a-tag
-          style="margin-right: 3px"
-          v-for="param in jobDetailForm.dealPrompt.params"
-          :key="param"
+      <a-row type="flex">
+        <!-- 这里是图片  -->
+        <div
+          :style="{
+            height: `${(jobDetailForm.item.height / jobDetailForm.item.width) * detailWidth}px`,
+          }"
         >
-          {{ param }}</a-tag
+          <a-image :src="jobDetailForm.item.url" :width="detailWidth">
+            <template #placeholder>
+              <a-image :width="detailWidth" :src="jobDetailForm.item.mediaUrl" :preview="false" />
+            </template>
+          </a-image>
+        </div>
+      </a-row>
+      <a-row
+        type="flex"
+        :style="{ width: `calc(${detailWidth}px)` }"
+        style="flex-direction: column; margin-top: 10px; padding: 0 5px"
+      >
+        <!-- 按钮 -->
+        <a-row>
+          <a-radio-group size="small" v-model:value="jobDetailForm.viewChoose">
+            <a-radio-button value="INFO"
+              ><Icon class="vel-icon icon" icon="solar:info-square-linear"
+            /></a-radio-button>
+            <a-radio-button value="EDIT"
+              ><Icon class="vel-icon icon" icon="fluent:text-bullet-list-square-edit-20-regular"
+            /></a-radio-button>
+          </a-radio-group>
+          <a-divider style="height: 1px; margin: 10px 0" />
+        </a-row>
+
+        <!-- 垫图 -->
+        <a-row
+          v-if="jobDetailForm.item && jobDetailForm.item.dealPrompt?.useImageList?.length > 0"
+          style="align-items: center; padding: 2px 5px"
         >
+          <div
+            class="div-prompt hover-class"
+            v-for="(param, index) in jobDetailForm.item.dealPrompt.useImageList"
+            :key="index"
+          >
+            {{ param }}
+          </div>
+          <a-divider style="height: 1px; margin: 10px 0" />
+        </a-row>
+        <!-- prompt -->
+        <a-row
+          v-if="jobDetailForm.viewChoose === 'INFO'"
+          style="display: flex; flex-direction: column; padding: 0 5px"
+        >
+          <!-- 英文 -->
+          <div>
+            <span style="font-size: 12px">
+              {{ jobDetailForm.item?.dealPrompt?.cleanPrompt }}
+            </span>
+          </div>
+
+          <!-- 中文 -->
+          <div
+            style="margin-top: 10px"
+            v-if="
+              jobDetailForm.item &&
+              jobDetailForm.item.dealPrompt &&
+              jobDetailForm.item.dealPrompt.cleanPromptZH
+            "
+          >
+            <span style="font-size: 12px">
+              {{ jobDetailForm.item.dealPrompt?.cleanPromptZH }}
+            </span>
+          </div>
+          <div style="margin-top: 10px" v-else>
+            <span v-if="jobDetailForm.translateError !== ''">
+              <Icon class="vel-icon icon" icon=" codicon:error" color="#c93131" />
+              {{ jobDetailForm.translateError }}
+            </span>
+            <span v-else style="font-size: 13px">
+              正在翻译，请稍候 <Icon class="vel-icon icon" icon="eos-icons:three-dots-loading" />
+            </span>
+          </div>
+        </a-row>
+        <a-row v-if="jobDetailForm.viewChoose === 'EDIT'">
+          <div
+            v-if="
+              jobDetailForm.item &&
+              jobDetailForm.item.dealPrompt &&
+              jobDetailForm.item.dealPrompt.infoList
+            "
+          >
+            <a-row style="display: flex; flex-wrap: wrap; align-items: center; padding: 2px 5px">
+              <div
+                class="div-prompt hover-class"
+                v-for="(promptInfo, index) in jobDetailForm.item.dealPrompt.infoList"
+                :key="index"
+              >
+                <a-popover
+                  :overlayInnerStyle="{ width: '250px' }"
+                  v-model:open="promptInfo.enViewFlag"
+                  trigger="click"
+                >
+                  <template #Title> </template>
+                  <template #content>
+                    <a-input-group compact>
+                      <a-input
+                        :maxlength="500"
+                        v-model:value="promptForm.prompt"
+                        style="width: calc(100% - 50px); height: 32px"
+                      />
+                      <a-button type="primary" @click="doTranslate(promptInfo, 'en')"
+                        ><Icon class="vel-icon icon" icon="bi:translate"
+                      /></a-button>
+                    </a-input-group>
+                  </template>
+
+                  <div v-if="promptInfo.zhLoading">
+                    翻译中 <Icon class="vel-icon icon" icon="eos-icons:three-dots-loading" />
+                  </div>
+                  <div v-else @click="showPromptEdit(index, promptInfo, 'en')">
+                    {{ promptInfo.promptEN }}
+                  </div>
+                </a-popover>
+
+                <a-divider style="height: 1px; margin: 0" />
+                <a-popover
+                  :overlayInnerStyle="{ width: '250px' }"
+                  v-model:open="promptInfo.zhViewFlag"
+                  trigger="click"
+                >
+                  <template #Title> </template>
+
+                  <template #content>
+                    <!-- <a-input v-model:value="promptForm.prompt" /> -->
+                    <a-input-group compact>
+                      <a-input
+                        :maxlength="500"
+                        v-model:value="promptForm.prompt"
+                        style="width: calc(100% - 50px); height: 32px"
+                      />
+                      <a-button type="primary" @click="doTranslate(promptInfo, 'zh')"
+                        ><Icon class="vel-icon icon" icon="bi:translate"
+                      /></a-button>
+                    </a-input-group>
+                  </template>
+
+                  <div v-if="promptInfo.enLoading">
+                    翻译中 <Icon class="vel-icon icon" icon="eos-icons:three-dots-loading" />
+                  </div>
+                  <div v-else @click="showPromptEdit(index, promptInfo, 'zh')">
+                    {{ promptInfo.promptZH }}
+                  </div>
+                </a-popover>
+              </div>
+            </a-row>
+          </div>
+        </a-row>
+        <!-- 参数 -->
+        <a-row
+          style="align-items: center; padding: 2px 5px"
+          v-if="jobDetailForm.item?.dealPrompt?.params"
+        >
+          <a-divider style="height: 1px; margin: 10px 0" />
+          <a-tag
+            style="margin-right: 3px"
+            v-for="param in jobDetailForm.item.dealPrompt.params"
+            :key="param"
+          >
+            {{ param }}
+          </a-tag>
+        </a-row>
       </a-row>
     </a-modal>
   </a-layout>
@@ -471,6 +595,7 @@
     removeCollectJob,
     myCollectJobs,
   } from '/@/api/df/midjourney';
+  import { translate } from '/@/api/df/drawTask';
 
   const userStore = useUserStore();
   const handleSetting = (key, value) => {
@@ -535,49 +660,168 @@
     go(routePath);
   };
   /********************************* 明细 ********************************* */
+  const detailModel = ref(null);
+
+  //执行翻译
+  const doTranslate = async (promptInfo, lang) => {
+    if (promptForm.value.prompt.trim() === '') {
+      //移除prompt
+      jobDetailForm.value.item.dealPrompt.infoList.splice(promptForm.value.clickIndex, 1);
+      return;
+    }
+
+    //可视状态
+    if (lang === 'zh') {
+      if (promptInfo.promptZH.trim() === promptForm.value.prompt.trim()) {
+        promptInfo.zhViewFlag = false;
+        return;
+      }
+      promptInfo.zhLoading = true;
+      promptInfo.zhViewFlag = false;
+    } else {
+      if (promptInfo.promptEN.trim() === promptForm.value.prompt.trim()) {
+        promptInfo.enViewFlag = false;
+        return;
+      }
+      promptInfo.enLoading = true;
+      promptInfo.enViewFlag = false;
+    }
+
+    try {
+      const resp = await translate({
+        prompt: promptForm.value.prompt,
+        translateTo: promptForm.value.lang === 'zh' ? 'en' : 'zh',
+      });
+      promptInfo.promptZH = promptForm.value.prompt;
+      if (lang === 'zh') {
+        promptInfo.promptZH = promptForm.value.prompt;
+        promptInfo.promptEN = resp;
+      } else {
+        promptInfo.promptEN = promptForm.value.prompt;
+        promptInfo.promptZH = resp;
+      }
+    } finally {
+      //可视状态
+      if (lang === 'zh') {
+        promptInfo.zhLoading = false;
+      } else {
+        promptInfo.enLoading = false;
+      }
+    }
+  };
+
+  const promptForm = ref({
+    clickIndex: null,
+    prompt: null,
+    lang: '',
+  });
+
+  //展示prompt修改
+  const showPromptEdit = (index, promptInfo, lang) => {
+    promptForm.value.prompt = promptInfo.promptEN;
+    promptForm.value.clickIndex = index;
+
+    if (lang === 'zh') {
+      promptForm.value.prompt = promptInfo.promptZH;
+      promptInfo.zhViewFlag = true;
+    } else {
+      promptInfo.enViewFlag = true;
+    }
+    promptForm.value.lang = lang;
+  };
+
+  //关闭prompt修改
+  const closePromptEdit = (index, prompt, zh) => {
+    promptForm.value.clickIndex = index;
+    promptForm.value.prompt = null;
+    promptForm.value.zh = false;
+    promptForm.value.viewFlag = false;
+  };
+
+  const getEditPrompt = () => {
+    if (jobDetailForm.value.viewChoose === 'INFO') {
+      return jobDetailForm.value.item.fullCommand;
+    }
+    console.log(1111);
+    let dealPrompt = jobDetailForm.value.item.dealPrompt;
+
+    let imageStr = joinArrayWithSeparator(dealPrompt.useImageList, ' ');
+    if (imageStr !== '') {
+      imageStr = imageStr + ' ';
+    }
+    let editPromptStr = joinObjectArrayWithSeparator(dealPrompt.infoList, ', ', 'promptEN');
+    let paramStr = joinArrayWithSeparator(dealPrompt.params, ' --');
+    if (paramStr !== '') {
+      paramStr = ' --' + paramStr;
+    }
+    return imageStr + editPromptStr + paramStr;
+  };
+
+  function joinArrayWithSeparator(array, separator) {
+    // 检查数组是否为空或未定义
+    if (!Array.isArray(array) || array.length === 0) {
+      return ''; // 如果数组为空，返回空字符串
+    }
+    // 使用指定的分隔符拼接数组元素
+    return array.join(separator);
+  }
+
+  function joinObjectArrayWithSeparator(array, separator, key) {
+    // 检查数组是否为空或未定义
+    if (!Array.isArray(array) || array.length === 0) {
+      return ''; // 如果数组为空，返回空字符串
+    }
+    // 使用 map 方法提取指定属性，并使用 join 方法拼接
+    return array.map((item) => item[key]).join(separator);
+  }
+
   const jobDetailForm = ref({
     viewFlag: false,
     item: null,
     translateError: '',
 
-    dealPrompt: {},
+    viewChoose: 'INFO', // EDIT
   });
 
   const showDetail = async (item) => {
+    console.log('show detail...');
     jobDetailForm.value.item = item;
     jobDetailForm.value.translateError = '';
-    jobDetailForm.value.dealPrompt = extractContentBeforeAndAfterDashDash(item.fullCommand);
+    //这里是为了体验好点，先出prompt
+
     jobDetailForm.value.viewFlag = true;
-    if (
-      item.fullCommandCn === null ||
-      item.fullCommandCn === undefined ||
-      item.fullCommandCn === ''
-    ) {
+    if (item.dealPrompt === null || item.dealPrompt === undefined || item.dealPrompt === '') {
       try {
         const response = await jobInfo(item);
+        console.log('do jobInfo...');
         jobDetailForm.value.item = response;
         item.fullCommandCn = response.fullCommandCn;
+        item.dealPrompt = response.dealPrompt;
+        jobDetailForm.value.item = response;
       } finally {
         jobDetailForm.value.translateError = '抱歉，翻译加载失败！';
       }
     }
+    // if (
+    //   item.fullCommandCn === null ||
+    //   item.fullCommandCn === undefined ||
+    //   item.fullCommandCn === ''
+    // ) {
+    //   try {
+    //     const response = await jobInfo(item);
+    //     jobDetailForm.value.item = response;
+    //     item.fullCommandCn = response.fullCommandCn;
+    //   } finally {
+    //     jobDetailForm.value.translateError = '抱歉，翻译加载失败！';
+    //   }
+    // }
   };
-
-  function extractContentBeforeAndAfterDashDash(str) {
-    // 分割字符串，使用 '--' 作为分隔符
-    const parts = str.split('--');
-    // 第一个元素是在 '--' 之前的内容
-    const contentBefore = parts.shift();
-    // 返回一个对象，包含 '--' 之前的内容和 '--' 之后的参数数组
-    return {
-      cleanPrompt: contentBefore,
-      params: parts,
-    };
-  }
 
   const closedDetail = () => {
     jobDetailForm.value.viewFlag = false;
-    jobDetailForm.value.item = null;
+    // jobDetailForm.value.item = null;
+    jobDetailForm.value.translateError = '';
+    jobDetailForm.value.viewChoose = 'INFO';
   };
 
   /****************************** 类目相关  ****************************** */
@@ -921,6 +1165,18 @@
     }
     console.log('updateColWidth clientWidth：' + clientWidth + 'colWidth:' + colWidth.value);
   };
+  const detailWidth = ref(0);
+  const updateDetailWidth = () => {
+    let clientWidth = scrollbarRef.value.offsetWidth;
+    if (clientWidth < 300) {
+      detailWidth.value = clientWidth - 25;
+    } else if (clientWidth < 550) {
+      detailWidth.value = clientWidth - 35;
+    } else {
+      detailWidth.value = 520;
+    }
+    console.log('updateColWidth clientWidth：' + clientWidth + 'colWidth:' + colWidth.value);
+  };
 
   const dataMap = new Map();
 
@@ -999,7 +1255,9 @@
 
   onMounted(async () => {
     updateColWidth();
+    updateDetailWidth();
     window.addEventListener('resize', updateColWidth);
+    window.addEventListener('resize', updateDetailWidth);
 
     //查询收藏
     let more = await myCollectJobs({});
@@ -1013,6 +1271,7 @@
 
   onUnmounted(() => {
     window.removeEventListener('resize', updateColWidth);
+    window.removeEventListener('resize', updateDetailWidth);
   });
 </script>
 
@@ -1201,17 +1460,16 @@
     width: 100%;
     padding: 5em 0;
   }
-</style>
-<style lang="less">
-  .custom-modal {
-    .ant-modal {
-    }
 
-    .ant-modal-content {
-      bottom: 30px;
-    }
-
-    .ant-modal-body {
-    }
+  .div-prompt {
+    display: flex;
+    flex-flow: column wrap;
+    max-width: 300px;
+    margin: 2px;
+    padding: 2px 5px;
+    border: 1px solid #dcd9d9;
+    border-radius: 4px;
+    font-size: 13px;
   }
 </style>
+<style lang="less"></style>

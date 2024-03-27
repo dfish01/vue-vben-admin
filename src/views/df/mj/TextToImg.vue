@@ -127,15 +127,15 @@
           </div>
         </template>
         <a-row>
-          <a-button-group style="width:100%">
+          <a-button-group style="width: 100%">
             <a-button style="width: 33%" size="small" @click="openTranslate"
               ><SvgIcon name="translate" />中英翻译</a-button
             >
-        
+
             <a-button style="width: 34%" size="small" @click="openAiPrompt"
               ><SvgIcon name="gpt" />AI生成</a-button
             >
-          
+
             <a-button style="width: 33%" size="small" @click="openDrawerInC">
               <SvgIcon name="book" /> Prompt宝典</a-button
             >
@@ -221,16 +221,15 @@
               <span style="justify-content: flex-start; font-weight: bold" class="quality-tag"
                 ><Icon icon="streamline-emojis:ferris-wheel" /> 人物一致性
                 <a-tooltip title="可以保证脸、头发、衣服等一致。仅niji6 和 v6 适用" trigger="click">
-                <ExclamationCircleOutlined style="margin-left: 5px; cursor: pointer" />
-              </a-tooltip>
-                </span>
+                  <ExclamationCircleOutlined style="margin-left: 5px; cursor: pointer" />
+                </a-tooltip>
+              </span>
             </div>
             <span
-                style="font-size: 10px"
-                v-if="!(paramDataValue.version === 'v 6' || paramDataValue.version === 'niji 6')"
-              >
-                仅niji6 和 v6 模型可用
-                
+              style="font-size: 10px"
+              v-if="!(paramDataValue.version === 'v 6' || paramDataValue.version === 'niji 6')"
+            >
+              仅niji6 和 v6 模型可用
             </span>
             <a-switch size="small" v-else v-model:checked="viewForm.crefFlag" />
           </div>
@@ -251,7 +250,6 @@
                 :withCredentials="true"
                 style="display: flex; align-items: flex-start; justify-content: flex-start"
               >
-              
                 <div v-if="fileList.length < 5">
                   <plus-outlined />
                   <div style="margin-top: 8px"> 上传图片</div>
@@ -263,7 +261,9 @@
             <a-col span="6" style="display: flex; align-items: center; justify-content: start">
               <span class="quality-tag"
                 >强度
-                <a-tooltip title="--cw 100是默认值，它使用面部、头发和衣服保持原样。强度为0（--cw 0）时，它只会专注于面部（适合换装/换发等）">
+                <a-tooltip
+                  title="--cw 100是默认值，它使用面部、头发和衣服保持原样。强度为0（--cw 0）时，它只会专注于面部（适合换装/换发等）"
+                >
                   <ExclamationCircleOutlined class="icon-hint" />
                 </a-tooltip>
               </span>
@@ -295,11 +295,10 @@
               </a-tooltip>
             </div>
             <span
-                style="font-size: 10px"
-                v-if="!(paramDataValue.version === 'v 6' || paramDataValue.version === 'niji 6')"
-              >
-                仅niji6 和 v6 模型可用
-                
+              style="font-size: 10px"
+              v-if="!(paramDataValue.version === 'v 6' || paramDataValue.version === 'niji 6')"
+            >
+              仅niji6 和 v6 模型可用
             </span>
             <a-switch size="small" v-else v-model:checked="viewForm.srefFlag" />
           </div>
@@ -1603,7 +1602,7 @@
     <div>
       <a-modal
         v-model:open="modelData.isOpenAiPrompt"
-        title="AI生成Prompt"
+        title="AI联想"
         :style="{ top: modelData.aiOutputText ? '50px' : '200px' }"
         :width="modelData.aiOutputText ? '70%' : ''"
         @cancel="cancelModal('aiPrompt')"
@@ -1618,84 +1617,130 @@
           <a-button
             v-if="modelData.aiOutputText"
             type="default"
-            @click="doTranslate(modelData.aiOutputText, 'zh')"
-            :loading="modelData.promptSpinning"
+            @click="doAiPromptTranslate(modelData.aiOutputText, 'zh')"
+            :loading="modelData.aiTransLoading"
             >翻译Prompt</a-button
           >
-          <a-button type="primary" @click="genPrompt()" :loading="modelData.promptSpinning"
-            >生成Prompt</a-button
+          <a-button type="primary" @click="genPrompt()" :loading="modelData.aiPromptLoading"
+            >联想Prompt</a-button
           >
         </template>
 
-        <a-spin :spinning="modelData.promptSpinning" :tip="modelData.tip">
-          <a-row style="padding: 15px">
-            <a-col span="24">
-              <a-radio-group v-model:value="modelData.promptCategory" button-style="solid">
-                <a-radio-button value="NIJI_ANIME">动漫</a-radio-button>
-                <a-radio-button value="NIJI_COMIC">漫画</a-radio-button>
-                <a-radio-button value="MIDJOURNEY">摄影师</a-radio-button>
-                <a-radio-button value="CUSTOM">自定义</a-radio-button>
-              </a-radio-group>
-            </a-col>
-            <a-col span="24" v-if="modelData.promptCategory === 'CUSTOM'">
-              <a-textarea
-                style="width: 99%"
-                v-model:value="modelData.promptMask"
-                placeholder="预设内容。比如：你将扮演一个漫画师。你将在一行中写下描述，不使用换行符。首先是图片概念描绘什么画面内容，流畅的附加这些关键字：绘画风格、绘画工具、构图、布局、色调等。控制在2-6行文字以内。然后内容后附加：“--ar ”画面比例整数用冒号隔开“ --niji 5 ” 如果觉得风格偏美式在内容结尾继续添加“ --style expressive ”。注意：返回英文结果。"
-                allow-clear
-                :maxlength="120"
-                :auto-size="{ minRows: 1, maxRows: 2 }"
-              />
-            </a-col>
-            <a-col span="24" style="margin-top: 10px">
-              <a-textarea
-                style="width: 99%"
-                v-model:value="modelData.aiInputText"
-                placeholder="请输入你要生成的关键词~"
-                allow-clear
-                :maxlength="2000"
-                :auto-size="{ minRows: 3, maxRows: 3 }"
-              />
-            </a-col>
+        <!-- <a-spin :spinning="modelData.promptSpinning" :tip="modelData.tip"> -->
+        <a-row style="height: 32px; padding: 15px">
+          <a-col span="24">
+            <a-radio-group v-model:value="modelData.promptCategory" button-style="solid">
+              <a-radio-button value="NIJI_ANIME">动漫</a-radio-button>
+              <a-radio-button value="NIJI_COMIC">漫画</a-radio-button>
+              <a-radio-button value="MIDJOURNEY">摄影师</a-radio-button>
+              <a-radio-button value="CUSTOM">自定义</a-radio-button>
+            </a-radio-group>
+          </a-col>
+        </a-row>
+        <a-row
+          v-if="modelData.promptCategory === 'CUSTOM'"
+          style="height: 76px; margin-top: 20px; padding: 0 15px"
+        >
+          <a-textarea
+            style="width: 99%"
+            v-model:value="modelData.promptMask"
+            placeholder="预设内容。比如：你将扮演一个漫画师。你将在一行中写下描述，不使用换行符。首先是图片概念描绘什么画面内容，流畅的附加这些关键字：绘画风格、绘画工具、构图、布局、色调等。控制在2-6行文字以内。然后内容后附加：“--ar ”画面比例整数用冒号隔开“ --niji 5 ” 如果觉得风格偏美式在内容结尾继续添加“ --style expressive ”。注意：返回英文结果。"
+            allow-clear
+            :maxlength="120"
+            :auto-size="{ minRows: 3, maxRows: 3 }"
+          />
+        </a-row>
+        <a-row style="height: 76px; margin-top: 10px; padding: 10px 15px">
+          <div
+            v-if="modelData.aiPromptLoading && modelData.aiOutputText === null"
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 100%;
+              height: 120px;
+            "
+          >
+            <Icon icon="svg-spinners:bars-fade" size="40" />
+          </div>
+          <div v-else style="width: 100%">
+            <a-textarea
+              style="width: 99%"
+              v-model:value="modelData.aiInputText"
+              placeholder="请输入你要生成的关键词~"
+              allow-clear
+              :maxlength="500"
+              :auto-size="{ minRows: 3, maxRows: 3 }"
+            />
+          </div>
+        </a-row>
 
-            <a-col span="24">
-              <a-card
-                v-if="modelData.aiOutputText"
-                size="small"
-                title="生成的关键词"
-                :bordered="true"
-                :bodyStyle="{ padding: '0px' }"
-                class="ar-card2"
-              >
-                <a-textarea
-                  v-model:value="modelData.aiOutputText"
-                  placeholder="请输入你要生成的关键词~"
-                  allow-clear
-                  :maxlength="2000"
-                  :auto-size="{ minRows: 5, maxRows: 5 }"
-                />
-              </a-card>
-            </a-col>
-            <a-col span="24">
-              <a-card
-                v-if="modelData.aiOutputText"
-                size="small"
-                title="翻译"
-                :bordered="true"
-                :bodyStyle="{ padding: '0px' }"
-                class="ar-card2"
-              >
-                <a-textarea
-                  v-model:value="modelData.translateText"
-                  placeholder="这里是你的翻译结果~"
-                  allow-clear
-                  :maxlength="2000"
-                  :auto-size="{ minRows: 5, maxRows: 5 }"
-                />
-              </a-card>
-            </a-col>
-          </a-row>
-        </a-spin>
+        <a-row style="margin-top: 10px; padding: 10px 15px">
+          <a-card
+            v-if="modelData.aiOutputText"
+            size="small"
+            title="联想结果"
+            style="width: 100%"
+            :bordered="true"
+            :bodyStyle="{ padding: '0px' }"
+            class="ar-card2"
+          >
+            <div
+              v-if="modelData.aiPromptLoading"
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 120px;
+              "
+            >
+              <Icon icon="svg-spinners:bars-fade" size="40" />
+            </div>
+
+            <a-textarea
+              v-else
+              v-model:value="modelData.aiOutputText"
+              placeholder="请输入你要生成的关键词~"
+              allow-clear
+              :maxlength="500"
+              :auto-size="{ minRows: 5, maxRows: 5 }"
+            />
+          </a-card>
+        </a-row>
+        <a-row style="padding: 10px 15px">
+          <a-card
+            v-if="modelData.aiOutputText"
+            size="small"
+            title="翻译"
+            style="width: 100%"
+            :bordered="true"
+            :bodyStyle="{ padding: '0px' }"
+            class="ar-card2"
+          >
+            <div
+              v-if="modelData.aiTransLoading"
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 120px;
+              "
+            >
+              <Icon icon="svg-spinners:bars-fade" size="40" />
+            </div>
+            <a-textarea
+              v-else
+              v-model:value="modelData.translateText"
+              placeholder="这里是你的翻译结果~"
+              allow-clear
+              :maxlength="2000"
+              :auto-size="{ minRows: 5, maxRows: 5 }"
+            />
+          </a-card>
+        </a-row>
+        <!-- </a-spin> -->
       </a-modal>
     </div>
 
@@ -1753,13 +1798,12 @@
   import { getAppEnvConfig } from '/@/utils/env';
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { accountInfoApi, tagInfoApi, drawCollectCategoryApi } from './accountInfo';
+
   const {
     // 响应式引用
     initTag,
     drawTagForm,
-
   } = tagInfoApi();
-
 
   const userStore = useUserStoreWithOut();
   const token = userStore.getToken;
@@ -1789,7 +1833,6 @@
 
     //查询最近使用的tag
     initTag();
-    
   });
 
   /** prompt 页面数据传递 */
@@ -1807,6 +1850,8 @@
     promptCategory: 'NIJI_ANIME',
     promptMask: null,
     tip: '加载中...',
+    aiTransLoading: false,
+    aiPromptLoading: false,
   });
 
   const openTranslate = () => {
@@ -1823,6 +1868,8 @@
       modelData.translateText = null;
       modelData.promptCategory = 'NIJI';
       modelData.promptSpinning = false;
+      modelData.aiTransLoading = false;
+      modelData.aiPromptLoading = false;
     } else if (name === 'translate') {
       (modelData.translateText = null), (modelData.promptSpinning = false);
     }
@@ -1839,6 +1886,18 @@
       modelData.promptSpinning = false;
     }
   };
+
+  const doAiPromptTranslate = async (text, translateTo) => {
+    modelData.aiTransLoading = true;
+    // modelData.tip = '正在翻译中...';
+    try {
+      const response = await translate({ prompt: text, translateTo: translateTo });
+      modelData.translateText = response;
+    } finally {
+      modelData.aiTransLoading = false;
+    }
+  };
+
   const genPrompt = async () => {
     if (modelData.promptCategory === null || modelData.promptCategory === '') {
       message.error('请选择生成的预设类别！');
@@ -1855,9 +1914,9 @@
       message.error('Prompt关键词不能为空！');
       return;
     }
-
-    modelData.promptSpinning = true;
-    modelData.tip = '正在生成Prompt...';
+    modelData.aiPromptLoading = true;
+    // modelData.promptSpinning = true;
+    // modelData.tip = '正在生成Prompt...';
     try {
       const response = await aiPrompt({
         prompt: modelData.aiInputText,
@@ -1868,7 +1927,8 @@
       modelData.aiOutputText = response;
       modelData.translateText = null;
     } finally {
-      modelData.promptSpinning = false;
+      modelData.aiPromptLoading = false;
+      // modelData.promptSpinning = false;
     }
   };
   const usePrompt = (text) => {
@@ -2398,7 +2458,7 @@
     highFlag: false,
     arFlag: false,
     noParamFlag: false,
-    crefFlag:false,
+    crefFlag: false,
   });
 
   const changeViewForm = (key) => {
