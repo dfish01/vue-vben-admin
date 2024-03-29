@@ -50,27 +50,27 @@
                   > -->
                 </a-button-group>
                 <a-button-group>
-                  <a-button @click="goThirdShop('/goods/index')" ref="goodsStep">
-                    <Icon
-                      icon="simple-icons:shopee"
-                      class="vel-icon icon"
-                      aria-hidden="true"
-                      color="#86A789"
-                      size="17"
-                    />
-                    购买账号
-                  </a-button>
-                  <a-button @click="goThirdShop('/sec_goods/index')">
-                    <Icon
-                      icon="simple-icons:shopee"
-                      class="vel-icon icon"
-                      aria-hidden="true"
-                      color="#EE4266"
-                      size="17"
-                    />
-                    转售市场
-                  </a-button>
-                </a-button-group>
+                <a-button @click="goThirdShop('/goods/index')" ref="goodsStep">
+                  <Icon
+                    icon="simple-icons:shopee"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                    color="#86A789"
+                    size="17"
+                  />
+                  购买账号
+                </a-button>
+                <a-button @click="goThirdShop('/sec_goods/index')">
+                  <Icon
+                    icon="simple-icons:shopee"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                    color="#EE4266"
+                    size="17"
+                  />
+                  转售市场
+                </a-button>
+              </a-button-group>
               </a-space>
             </a-form-item>
           </a-form>
@@ -94,36 +94,266 @@
         padding: '0px 10px',
       }"
     >
-      <a-table :columns="roleColumns" :data-source="roleDataSource" bordered>
-        <template #bodyCell="{ column, text, record }">
-          <template v-if="['roleName', 'description', 'imageUrl'].includes(column.dataIndex)">
-            <div>
-              <a-input
-                v-if="editableData[record.key]"
-                v-model:value="editableData[record.key][column.dataIndex]"
-                style="margin: -5px 0"
-              />
-              <template v-else>
-                {{ text }}
-              </template>
+      <div v-for="card in tableData" :key="card.id" :trigger="['contextmenu']">
+        <a-badge-ribbon
+          :text="card.ownerFlag == 'Y' ? '主账号' : '授权'"
+          :color="card.ownerFlag == 'Y' ? 'red' : ''"
+        >
+          <a-card :bodyStyle="{ padding: '0px' }" class="card account-card" hoverable>
+            <template #extra>
+              <div
+                style="
+                  display: flex;
+                  flex-direction: row;
+                  justify-content: space-between;
+                  width: 250px;
+                "
+              >
+                <div style="justify-content: left">
+                  <span style="font-weight: bold"> {{ card.accountName }}</span>
+                </div>
+              </div>
+            </template>
+            <div style="display: flex; flex-direction: column; padding: 10px">
+              <a-row class="card-tags">
+                <span>
+                  <Icon icon="uil:server" class="vel-icon icon" aria-hidden="true" size="14" />
+                  服务器： <span style="font-size: 13px">{{ card.guildTitle }}</span></span
+                >
+              </a-row>
+              <a-row class="card-tags">
+                <span>
+                  <Icon icon="uil:server" class="vel-icon icon" aria-hidden="true" size="14" />
+                  频道： <span style="font-size: 13px">{{ card.channelTitle }}</span></span
+                >
+                <!-- <span v-if="card.state === 'normal' && card.canSale !== 'Y'">
+                  <a-popconfirm
+                    v-if="card.ownerFlag === 'N'"
+                    title="发布商品到交易市场，将停止账号的使用。是否确认？"
+                    ok-text="立即发布"
+                    cancel-text="取消"
+                    @confirm="showDeployGoods(card)"
+                  >
+                    <a-button size="small" style="font-size: 12px" @click="showDeployGoods(card)">
+                      <span
+                        ><Icon
+                          icon="material-symbols:deployed-code"
+                          class="vel-icon icon"
+                          aria-hidden="true"
+                          size="14"
+                        />
+                        出售商品</span
+                      ></a-button
+                    >
+                  </a-popconfirm>
+                </span> -->
+
+                <span v-if="card.state === 'sale'">
+                  <a-popconfirm
+                    v-if="card.ownerFlag === 'N'"
+                    title="是否撤回该商品的二次售出？"
+                    ok-text="确定"
+                    cancel-text="取消"
+                    @confirm="doCancelSecondHandGoods(card)"
+                  >
+                    <a-button size="small" style="font-size: 12px">
+                      <span>
+                        <Icon
+                          icon="mingcute:sale-line"
+                          class="vel-icon icon"
+                          aria-hidden="true"
+                          size="14"
+                        />
+                        取消出售
+                      </span>
+                    </a-button>
+                  </a-popconfirm>
+                </span>
+                <span v-if="card.state === 'normal' && card.canSale === 'Y'">
+                  <a-button size="small" style="font-size: 12px" @click="showRedeploy(card)">
+                    <span>
+                      <Icon
+                        icon="mingcute:sale-line"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                        size="14"
+                      />
+                      出售商品
+                    </span>
+                  </a-button>
+                </span>
+              </a-row>
+
+              <a-row class="card-tags">
+                <span style="font-size: 13px">
+                  <Icon
+                    icon="streamline:computer-battery-medium-1-phone-mobile-charge-medium-device-electricity-power-battery"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                    size="17"
+                  />
+                  状态：<a-badge
+                    v-if="card.ownerFlag === 'Y'"
+                    style="font-size: 13px"
+                    :status="card.numAvailableDiscordAccount > 0 ? 'processing' : 'default'"
+                    :text="
+                      (card.numAvailableDiscordAccount > 0 ? '正常' : '无效') +
+                      '（账号：' +
+                      card.numAvailableDiscordAccount +
+                      ' / ' +
+                      card.numTotalDiscordAccount +
+                      '）'
+                    "
+                  /><a-badge
+                    v-else
+                    style="font-size: 13px"
+                    :status="getStateContent(card.state).status"
+                    :text="
+                      getStateContent(card.state).text +
+                      '(账号：' +
+                      card.numAvailableDiscordAccount +
+                      '/' +
+                      card.numTotalDiscordAccount +
+                      ')'
+                    "
+                  />
+                </span>
+                <span>
+                  <a-button size="small" style="font-size: 12px" @click="showDetails(card.id)">
+                    <span
+                      ><Icon
+                        icon="basil:info-rect-outline"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                        size="14"
+                      />
+                      使用概况</span
+                    >
+                  </a-button>
+                </span>
+              </a-row>
+              <a-row class="card-tags">
+                <span>
+                  <Icon icon="subway:time-4" class="vel-icon icon" aria-hidden="true" size="17" />
+                  <span style="font-size: 12px">{{ card.gmtCreate }}</span></span
+                >
+                <a-button
+                  :disabled="card.defaultFlag === 'Y'"
+                  size="small"
+                  style="font-size: 12px"
+                  @click="doSetDefault(card.id)"
+                >
+                  <span
+                    ><Icon
+                      icon="fluent:tap-double-20-filled"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                      size="14"
+                    />
+                    {{ card.defaultFlag === 'Y' ? '默认账号' : '设置默认' }}</span
+                  >
+                </a-button>
+                <a-col :span="24">
+                  <a-divider
+                    style="width: 100%; margin-top: 8px; margin-bottom: 1px; margin-left: 0"
+                  />
+                </a-col>
+              </a-row>
+
+              <a-row class="card-tags" style="margin-top: 5px" v-if="card.ownerFlag === 'Y'">
+                <a-col
+                  :span="24"
+                  style="display: flex; align-items: center; justify-content: center"
+                >
+                  <a-button-group type="text" style="width: 100%">
+                    <a-popconfirm
+                      title="是否确认删除账户？"
+                      ok-text="Yes"
+                      cancel-text="No"
+                      @confirm="deleteAccount(card.id)"
+                    >
+                      <a-tooltip title="删除账号">
+                        <a-button type="text" style="width: 100%">
+                          <Icon
+                            icon="material-symbols:delete-outline"
+                            class="vel-icon icon"
+                            aria-hidden="true"
+                            size="17"
+                          />
+                        </a-button>
+                      </a-tooltip>
+                    </a-popconfirm>
+                    <a-tooltip title="授权列表">
+                      <a-button
+                        type="text"
+                        @click="showAuthorizationList(card.id)"
+                        style="width: 100%"
+                      >
+                        <Icon
+                          icon="ph:user-list-bold"
+                          class="vel-icon icon"
+                          aria-hidden="true"
+                          size="17"
+                        />
+                      </a-button>
+                    </a-tooltip>
+                    <a-popconfirm
+                      title="是否确认生成授权？目前生成授权后账户禁止删除！"
+                      ok-text="立即生成"
+                      cancel-text="下次吧"
+                      @confirm="showCreateAuth(card)"
+                    >
+                      <a-tooltip title="生成授权">
+                        <a-button type="text" style="width: 100%">
+                          <Icon
+                            icon="mdi:genie-lamp"
+                            class="vel-icon icon"
+                            aria-hidden="true"
+                            size="17"
+                          />
+                        </a-button>
+                      </a-tooltip>
+                    </a-popconfirm>
+
+                    <a-tooltip title="追加账号">
+                      <a-button type="text" @click="showAccountModified(card)" style="width: 100%">
+                        <Icon
+                          icon="clarity:update-line"
+                          class="vel-icon icon"
+                          aria-hidden="true"
+                          size="17"
+                        />
+                      </a-button>
+                    </a-tooltip>
+                  </a-button-group>
+                </a-col>
+              </a-row>
+              <a-row class="card-tags" v-else>
+                <a-col :span="24">
+                  <a-popconfirm
+                    title="是否确认删除账户？"
+                    ok-text="Yes"
+                    cancel-text="No"
+                    @confirm="deleteAccount(card.id)"
+                  >
+                    <a-tooltip title="删除账号">
+                      <a-button type="text" style="width: 100%">
+                        <Icon
+                          icon="material-symbols:delete-outline"
+                          class="vel-icon icon"
+                          aria-hidden="true"
+                          size="17"
+                        />
+                      </a-button>
+                    </a-tooltip>
+                  </a-popconfirm>
+                </a-col>
+              </a-row>
             </div>
-          </template>
-          <template v-else-if="column.dataIndex === 'operation'">
-            <div class="editable-row-operations">
-              <span v-if="editableData[record.key]">
-                <a-typography-link @click="save(record.key)">保存</a-typography-link>
-                <a-popconfirm title="Sure to cancel?" @confirm="cancel(record.key)">
-                  <a style="margin-left: 5px">取消</a>
-                </a-popconfirm>
-              </span>
-              <span v-else>
-                <a @click="edit(record.key)">编辑</a>
-                <a style="margin-left: 5px">选择图片</a>
-              </span>
-            </div>
-          </template>
-        </template>
-      </a-table>
+            <!-- 更多卡片内容 -->
+          </a-card>
+        </a-badge-ribbon>
+      </div>
     </div>
     <div ref="button">
       <a-card class="pagination">
@@ -799,8 +1029,7 @@
                   v-model:value="deployGoodsForm.goodsRemark"
                   placeholder="请输入商品说明"
                   :rows="3"
-                  show-count
-                  :maxlength="60"
+                  show-count :maxlength="60"
                 />
               </a-form-item>
             </a-col>
@@ -955,7 +1184,9 @@
         授权列表
       </template>
       <template #footer>
-        <a-button key="submit" type="primary" @click="closeAuthModal">已知晓</a-button>
+        <a-button key="submit" type="primary" @click="closeAuthModal"
+          >已知晓</a-button
+        >
       </template>
       <Loading :loading="authListForm.loading" :absolute="true" tip="数加载中..." />
 
@@ -1078,12 +1309,7 @@
                 name="goodsTitle"
                 :rules="[{ required: true, message: '请输入商品标题!' }]"
               >
-                <a-input
-                  show-count
-                  :maxlength="15"
-                  v-model:value="redeployForm.goodsTitle"
-                  placeholder="请输入商品标题"
-                />
+                <a-input show-count :maxlength="15" v-model:value="redeployForm.goodsTitle" placeholder="请输入商品标题" />
               </a-form-item>
             </a-col>
 
@@ -1097,8 +1323,8 @@
                   v-model:value="redeployForm.goodsRemark"
                   placeholder="请输入商品说明"
                   :rows="3"
-                  show-count
-                  :maxlength="60"
+
+                  show-count :maxlength="60"
                 />
               </a-form-item>
             </a-col>
@@ -1589,7 +1815,7 @@
     try {
       await redeployFormRef.value.validate();
       await deploySecondHandGoods(redeployForm.value);
-      const foundItem = tableData.value.find((item) => item.id === redeployForm.value.accountId);
+      const foundItem = tableData.value.find(item => item.id === redeployForm.value.accountId);
       foundItem.state = 'sale';
 
       redeployForm.value.isActiveVisible = false;
@@ -1778,7 +2004,7 @@
 
     const userInfo = userStore.getUserInfo; // 直接赋值
 
-    if (userInfo.coursePop === 2 || userInfo.coursePop == 3) {
+    if(userInfo.coursePop === 2 || userInfo.coursePop == 3) {
       return;
     }
     accountStep.value.open = val;
@@ -1975,3 +2201,4 @@
     padding: 0 10px;
   }
 </style>
+
