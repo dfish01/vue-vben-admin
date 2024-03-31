@@ -41,7 +41,7 @@
                 </a-button-group>
                 <a-button-group>
                   <!-- <a-button @click="showDiscordForm">配置Discord账号</a-button> -->
-                  <a-button type="primary" @click="onAdd" ref="accountGroupStep">新增账户</a-button>
+                  <a-button type="primary" @click="showStoryForm" ref="accountGroupStep">新增账户</a-button>
                   <a-button @click="onShowActive" ref="activeStep">授权激活</a-button>
                   <!-- <a-button type="success" @click="openGoodsShop">授权市场</a-button> -->
 
@@ -77,52 +77,57 @@
         </a-card>
       </a-col>
     </a-row>
-    <div
-      v-if="tableData.length === 0"
-      style="display: flex; align-items: center; justify-content: center"
-      :style="{ height: `calc(${contentHeight}px - 77px)`, overflow: 'auto' }"
-    >
-      <a-empty :image="simpleImage" />
-    </div>
 
+    
     <div
-      class="cards"
-      v-else
+     
       :style="{
         height: `calc(${contentHeight}px  - 77px)`,
-        overflow: 'auto',
+        width: '100%',
         padding: '0px 10px',
       }"
     >
-      <a-table :columns="roleColumns" :data-source="roleDataSource" bordered>
-        <template #bodyCell="{ column, text, record }">
-          <template v-if="['roleName', 'description', 'imageUrl'].includes(column.dataIndex)">
-            <div>
-              <a-input
-                v-if="editableData[record.key]"
-                v-model:value="editableData[record.key][column.dataIndex]"
-                style="margin: -5px 0"
-              />
-              <template v-else>
-                {{ text }}
-              </template>
-            </div>
-          </template>
-          <template v-else-if="column.dataIndex === 'operation'">
-            <div class="editable-row-operations">
-              <span v-if="editableData[record.key]">
-                <a-typography-link @click="save(record.key)">保存</a-typography-link>
-                <a-popconfirm title="Sure to cancel?" @confirm="cancel(record.key)">
-                  <a style="margin-left: 5px">取消</a>
-                </a-popconfirm>
-              </span>
-              <span v-else>
-                <a @click="edit(record.key)">编辑</a>
-                <a style="margin-left: 5px">选择图片</a>
-              </span>
-            </div>
-          </template>
+      <a-table 
+      :dataSource="tableData"
+      rowKey="id"
+      :loading="globalLoading"
+     >
+        
+      <a-table-column title="记录id" dataIndex="id" key="id" v-if="false" align="center" />
+      <a-table-column
+        title="标题"
+        dataIndex="title"
+        key="title"
+        align="center"
+        width="250px"
+      />
+      <a-table-column title="描述" dataIndex="description" key="description" align="center" />
+
+      <a-table-column title="账号状态" dataIndex="state" key="state" align="center">
+        <template #default="{ text }">
+          <a-tag color="#d9d9d9" v-if="text === 'unvalid'">待验证</a-tag>
+          <a-tag color="#52c41a" v-else-if="text === 'normal'">正常</a-tag>
+          <a-tag color="#ff4d4f" v-else-if="text === 'error'">异常</a-tag>
+          <a-tag color="#d9d9d9" v-else>过期</a-tag>
         </template>
+      </a-table-column>
+      <a-table-column title="创建时间" dataIndex="gmtCreate" key="gmtCreate" align="center" />
+      
+      <a-table-column title="联想内容" key="actions" width="150px">
+        <template #default="{ record }">
+          <a-button @click="showDetails(record.id)">查看</a-button>
+        </template>
+      </a-table-column>
+      <a-table-column title="操作" key="actions" fixed="right" width="200">
+        <template #default="{ record }">
+         
+          <a-button-group v-if="record.ownerFlag === 'Y'">
+            <a-button type="primary" @click="showAuthorizationList(record.id)">查看</a-button>
+            <a-button type="danger" @click="deleteAccount(record.id)">删除</a-button>
+          </a-button-group>
+        </template>
+      </a-table-column>
+      
       </a-table>
     </div>
     <div ref="button">
@@ -142,990 +147,521 @@
       </a-card>
     </div>
 
-    <!-- 使用情况 -->
+    <!-- AI故事生成 -->
     <a-modal
-      v-model:open="statisticsForm.viewFlag"
-      title="🔋账户使用情况"
-      style="width: 80%"
-      :style="statisticsForm.formData.ownerFlag === 'Y' ? 'top: 5px;' : ''"
-      @ok="closeDetail"
-      :confirmLoading="statisticsForm.loading"
-    >
-      <template #footer>
-        <a-button key="submit" type="primary" :loading="statisticsForm.loading" @click="closeDetail"
-          >已知晓</a-button
-        >
-      </template>
-      <a-card :bordered="false">
-        <Loading :loading="statisticsForm.loading" :absolute="true" tip="数据加载中..." />
-        <a-descriptions title="" bordered>
-          <a-descriptions-item label="账户名">{{
-            statisticsForm.formData.accountName
-          }}</a-descriptions-item>
-          <a-descriptions-item label="账号模式">{{
-            statisticsForm.formData.accMode === 'GROUP' ? '账号组' : '单账号'
-          }}</a-descriptions-item>
-          <a-descriptions-item label="账号权限">{{
-            statisticsForm.formData.ownerFlag === 'N' ? '授权' : '主账号'
-          }}</a-descriptions-item>
-          <a-descriptions-item :span="3" label="负载信息" v-if="statisticsForm.formData.loadInfo">
-            <span>
-              Discord账号数:
-              {{
-                statisticsForm.formData.loadInfo ? statisticsForm.formData.loadInfo.numDiscord : 0
-              }}
-              <br />
-              队列数上限:
-              {{
-                statisticsForm.formData.loadInfo ? statisticsForm.formData.loadInfo.maxSubmit : 0
-              }}
-              <br />
-              并发执行线程:
-              {{
-                statisticsForm.formData.loadInfo
-                  ? statisticsForm.formData.loadInfo.userConExecute
-                    ? statisticsForm.formData.loadInfo.userConExecute
-                    : '主账号的上限数【' + statisticsForm.formData.loadInfo.maxConcurrency + '】'
-                  : 0
-              }}
-              <br />
-              <span v-if="statisticsForm.formData.loadInfo.userConExecute">
-                已使用线程:
-                {{
-                  statisticsForm.formData.loadInfo
-                    ? statisticsForm.formData.loadInfo.useConExecute
-                    : 0
-                }}
-              </span>
-              <br />
-              <span v-if="statisticsForm.formData.ownerFlag === 'Y'">
-                主账号已用并发数:
-                {{
-                  statisticsForm.formData.loadInfo
-                    ? statisticsForm.formData.loadInfo.useConcurrency
-                    : 0
-                }}
-                <br />
-                主账号最大并发数:
-                {{
-                  statisticsForm.formData.loadInfo
-                    ? statisticsForm.formData.loadInfo.maxConcurrency
-                    : 0
-                }}
-              </span>
-            </span>
-          </a-descriptions-item>
-          <a-descriptions-item
-            :span="3"
-            label="授权使用情况"
-            v-if="statisticsForm.formData.ownerFlag === 'N'"
-          >
-            <span v-if="statisticsForm.billingMethod === 'TIMES'">
-              turbo次数:
-              {{ statisticsForm.formData.authUseInfo.turboTimes }}
-              /
-              {{
-                statisticsForm.formData.authUseInfo.totalTurboTimes === null
-                  ? ' 不限制'
-                  : statisticsForm.formData.authUseInfo.totalTurboTimes
-              }}
-              <br />
-              fast次数:
-              {{ statisticsForm.formData.authUseInfo.fastTimes }}
-              /
-
-              {{
-                statisticsForm.formData.authUseInfo.totalFastTimes === null
-                  ? ' 不限制'
-                  : statisticsForm.formData.authUseInfo.totalFastTimes
-              }}
-              <br />
-              relax次数:
-              {{ statisticsForm.formData.authUseInfo.relaxTimes }}
-              /{{
-                statisticsForm.formData.authUseInfo.totalRelaxTimes === null
-                  ? ' 不限制'
-                  : statisticsForm.formData.authUseInfo.totalRelaxTimes
-              }}
-              <br />
-              <!-- 成功次数:{{ statisticsForm.formData.authUseInfo.numSuccess }} -->
-              <br />
-              到期时间:{{ statisticsForm.formData.authUseInfo.expireTime }}
-            </span>
-            <span v-else>
-              总积分:
-              {{
-                statisticsForm.ownerFlag === 'Y'
-                  ? '不限制'
-                  : statisticsForm.formData.authUseInfo.totalScore
-              }}
-
-              <br />
-              已用积分:
-              {{
-                statisticsForm.ownerFlag === 'Y'
-                  ? '-'
-                  : statisticsForm.formData.authUseInfo.usedScore
-              }}
-              <br />
-              剩余积分:
-              {{
-                statisticsForm.ownerFlag === 'Y'
-                  ? '不限制'
-                  : statisticsForm.formData.authUseInfo.remainScore
-              }}
-            </span>
-          </a-descriptions-item>
-          <a-descriptions-item
-            :span="3"
-            label="授权账号概况"
-            v-if="statisticsForm.formData.ownerFlag === 'Y'"
-          >
-            <span v-if="statisticsForm.formData.ownerInfo">
-              总账号个数: {{ statisticsForm.formData.ownerInfo.countAccounts }}
-              <br />
-              总可用账号数:{{ statisticsForm.formData.ownerInfo.countNormalAccounts }}
-              <br />
-              总异常账号数:{{ statisticsForm.formData.ownerInfo.countErrorAccounts }}
-              <br />
-              到期账号数: {{ statisticsForm.formData.ownerInfo.countStopAccounts }}
-            </span>
-          </a-descriptions-item>
-          <a-descriptions-item
-            label="Discord账号情况"
-            :span="3"
-            v-if="statisticsForm.formData.ownerFlag === 'Y'"
-          >
-            <a-table :data-source="statisticsForm.formData.discordList" rowKey="email">
-              <a-table-column
-                title="账号名"
-                align="center"
-                dataIndex="globalName"
-                key="globalName"
-                :width="200"
-              />
-              <a-table-column title="邮箱" align="center" dataIndex="email" key="email" />
-              <a-table-column
-                title="Discord状态"
-                dataIndex="discordState"
-                key="discordState"
-                align="center"
-                :width="120"
-              >
-                <template #default="{ text }">
-                  <a-badge
-                    :status="getDiscordStateContent(text).status"
-                    :text="getDiscordStateContent(text).text"
-                  />
-                </template>
-              </a-table-column>
-              <a-table-column
-                title="MJ状态"
-                align="center"
-                dataIndex="mjState"
-                key="mjState"
-                :width="100"
-              >
-                <template #default="{ text }">
-                  <a-badge
-                    :status="getMjStateContent(text).status"
-                    :text="getMjStateContent(text).text"
-                  />
-                </template>
-              </a-table-column>
-            </a-table>
-          </a-descriptions-item>
-        </a-descriptions>
-      </a-card>
-    </a-modal>
-
-    <!-- 新增用户 -->
-    <a-modal
-      v-model:open="accountForm.viewFlag"
-      ok-text="立即创建"
-      @ok="onSubmitAdd"
-      :confirmLoading="accountForm.loading"
-    >
-      <template #title>
-        <span
-          ><Icon
-            icon="fluent:guest-add-24-filled"
-            class="vel-icon icon"
-            aria-hidden="true"
-          />新建账户</span
-        >
-      </template>
-
-      <a-card>
-        <Loading :loading="accountForm.loading" :absolute="true" tip="正在提交..." />
-        <a-form :model="accountForm" layout="vertical" ref="accountFormRef">
-          <a-row gutter="24">
-            <a-col :span="24">
-              <a-form-item
-                :rules="[
-                  {
-                    required: true,
-                    message: '账号名名称是必填项',
-                  },
-                ]"
-                name="accountName"
-              >
-                <template #label>
-                  <span
-                    ><Icon
-                      icon="ic:sharp-account-box"
-                      class="vel-icon icon"
-                      aria-hidden="true"
-                    />账号名（账号多的时候方便记）
-                  </span>
-                </template>
-                <a-input v-model:value="accountForm.accountName" placeholder="输入账号名" />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item
-                :rules="[
-                  {
-                    required: true,
-                    message: 'discord账号是必填项',
-                  },
-                ]"
-                name="discordUserId"
-              >
-                <template #label>
-                  <span
-                    ><Icon
-                      icon="ic:round-account-tree"
-                      class="vel-icon icon"
-                      aria-hidden="true"
-                    />分配Discord账号
-                  </span>
-                </template>
-                <a-select
-                  @change="onSelectDiscordUser"
-                  style="width: 100%; height: 32px"
-                  v-model:value="accountForm.discordUserId"
-                  :options="accountForm.discordUserOptions"
-                  placeholder="请选择Discord账号"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item
-                :rules="[
-                  {
-                    required: true,
-                    message: '执行服务器是必填项',
-                  },
-                ]"
-                name="guildId"
-              >
-                <template #label>
-                  <span
-                    ><Icon icon="uil:server" class="vel-icon icon" aria-hidden="true" />执行服务器
-                  </span>
-                </template>
-                <a-select
-                  @change="onSelectGuild"
-                  style="width: 100%; height: 32px"
-                  v-model:value="accountForm.guildId"
-                  :options="accountForm.guildOptions"
-                  placeholder="请选择执行的服务器"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item
-                :rules="[
-                  {
-                    required: true,
-                    message: '默认频道是必填项',
-                  },
-                ]"
-                name="channelId"
-              >
-                <template #label>
-                  <span
-                    ><Icon
-                      icon="ri:wechat-channels-line"
-                      class="vel-icon icon"
-                      aria-hidden="true"
-                    />默认频道
-                  </span>
-                </template>
-                <a-select
-                  v-model:value="accountForm.channelId"
-                  style="width: 100%"
-                  placeholder="请选择默认频道"
-                  :options="accountForm.channelOptions"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item
-                :rules="[
-                  {
-                    required: false,
-                    message: '请选择任务分配策略',
-                  },
-                ]"
-                name="allocateStrategy"
-              >
-                <template #label>
-                  <span
-                    ><Icon
-                      icon="clarity:display-solid-alerted"
-                      class="vel-icon icon"
-                      aria-hidden="true"
-                    />分配策略
-                  </span>
-                </template>
-
-                <a-select
-                  style="width: 100%"
-                  v-model:value="accountForm.allocateStrategy"
-                  placeholder="分配策略"
-                >
-                  <a-select-option value="FCFS">先到先运行</a-select-option>
-                  <a-select-option value="MLQ">按人运行</a-select-option>
-                </a-select>
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item
-                :rules="[
-                  {
-                    required: false,
-                    message: '最大并发数是必填项',
-                  },
-                ]"
-                name="conExecute"
-              >
-                <template #label>
-                  <span
-                    ><Icon
-                      icon="tabler:needle-thread"
-                      class="vel-icon icon"
-                      aria-hidden="true"
-                    />最大并发数
-                  </span>
-                </template>
-                <a-input
-                  disabled
-                  v-model:value="accountForm.conExecute"
-                  placeholder="输入最大并发数"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item
-                :rules="[
-                  {
-                    required: false,
-                    message: '提交任务数是必填项',
-                  },
-                ]"
-                name="maxSubmit"
-              >
-                <template #label>
-                  <span
-                    ><Icon
-                      icon="tabler:needle-thread"
-                      class="vel-icon icon"
-                      aria-hidden="true"
-                    />最大提交任务数
-                  </span>
-                </template>
-                <a-input-number
-                  v-model:value="accountForm.maxSubmit"
-                  placeholder="请输入最大提交任务数~"
-                  min="1"
-                  max="300"
-                />
-              </a-form-item>
-            </a-col>
-          </a-row>
-        </a-form>
-      </a-card>
-    </a-modal>
-
-    <!-- 追加账户 -->
-    <a-modal
-      v-model:open="accountModifiedForm.viewFlag"
-      title="🍏追加账户组账户"
-      ok-text="立即保存"
-      @ok="onAppendDiscordAccount"
-      :confirmLoading="accountModifiedForm.loading"
-    >
-      <a-card>
-        <Loading :loading="accountModifiedForm.loading" :absolute="true" tip="正在提交..." />
-        <a-form :model="accountModifiedForm" layout="vertical" ref="accountModifiedFormRef">
-          <a-row gutter="24">
-            <a-col :span="24">
-              <a-form-item label="🐵账号名" name="accountName">
-                <a-input
-                  v-model:value="accountModifiedForm.accountName"
-                  disabled
-                  placeholder="输入账号名"
-                />
-              </a-form-item>
-            </a-col>
-
-            <a-col :span="24">
-              <a-form-item label="账户组账号">
-                <a-select
-                  v-model:value="accountModifiedForm.discordUserIds"
-                  mode="multiple"
-                  style="width: 100%"
-                  placeholder="请勾选账号组账号"
-                  :options="accountModifiedForm.discordFilterUserOptions"
-                />
-              </a-form-item>
-            </a-col>
-          </a-row>
-        </a-form>
-      </a-card>
-    </a-modal>
-
-    <!-- 生成授权码 -->
-    <a-modal
-      v-model:open="createAuthForm.isActiveVisible"
-      :style="{ top: '50px' }"
-      title="生成授权码"
+      v-model:open="storyForm.viewFlag"
+      title="AI创作"
       ok-text="提交"
-      @ok="onCreateAuth"
-      :confirmLoading="createAuthForm.loading"
+      @cancel="closeStoryForm"
+      :bodyStyle="{padding : 0}"
     >
-      <a-card>
-        <Loading :loading="createAuthForm.loading" :absolute="true" tip="正在生成中..." />
-        <a-form layout="vertical" :model="createAuthForm" ref="createAuthFormRef">
-          <a-row gutter="24">
-            <a-col :span="24">
-              <a-form-item
-                label="生成授权数量(1~50)"
-                name="num"
-                :rules="[{ required: true, message: '请输入生成授权码的数量!' }]"
-              >
-                <a-input-number
-                  v-model:value="createAuthForm.num"
-                  placeholder="请输入生成授权码的数量~"
-                  min="1"
-                  max="50"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item
-                label="授权类型"
-                name="authWay"
-                :rules="[{ required: true, message: '请输入生成授权码的数量!' }]"
-              >
-                <a-select
-                  v-model:value="createAuthForm.authWay"
-                  @change="changeAuthWay"
-                  placeholder="授权方式"
-                >
-                  <a-select-option value="DAY">按天计算</a-select-option>
-                  <a-select-option value="TIME">指定到期时间</a-select-option>
-                </a-select>
-              </a-form-item>
-            </a-col>
-
-            <a-col :span="24" v-if="createAuthForm.authWay === 'DAY'">
-              <a-form-item label="授权天数（0~365）" name="authDays">
-                <a-input-number
-                  v-model:value="createAuthForm.authDays"
-                  placeholder="请输入授权天数，为空则是永久~"
-                  min="0"
-                  max="365"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24" v-if="createAuthForm.authWay === 'TIME'">
-              <a-form-item label="到期时间">
-                <a-date-picker
-                  show-time
-                  style="width: 100%"
-                  width="100%"
-                  v-model:value="createAuthForm.authExpireTimes"
-                  placeholder="到期时间，为空则是永久~"
-                  @change="onChangePicker"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item label="提交任务数" name="maxSubmit">
-                <a-input-number
-                  v-model:value="createAuthForm.otherInfo.maxSubmit"
-                  placeholder="请输入提交任务数，为空则上限为主账号上限~"
-                  min="1"
-                  :max="createAuthForm.maxNumExecute"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item label="并发线程数" name="maxSubmit">
-                <a-input-number
-                  v-model:value="createAuthForm.otherInfo.conExecute"
-                  placeholder="请输入并发线程数，为空则上限为主账号上限~"
-                  min="1"
-                  :max="createAuthForm.conExecute"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item
-                :rules="[
-                  {
-                    required: true,
-                    message: '请选择计费方式',
-                  },
-                ]"
-                name="billingMethod"
-              >
-                <template #label>
-                  <span
-                    ><Icon
-                      icon="clarity:display-solid-alerted"
-                      class="vel-icon icon"
-                      aria-hidden="true"
-                    />计费方式{{ createAuthForm.billingMethod }}
-                  </span>
-                </template>
-
-                <a-select
-                  style="width: 100%"
-                  v-model:value="createAuthForm.billingMethod"
-                  placeholder="计费方式"
-                >
-                  <a-select-option value="TIMES">按次数</a-select-option>
-                  <a-select-option value="INTEGRAL">按积分</a-select-option>
-                </a-select>
-              </a-form-item>
-            </a-col>
-          </a-row>
-          <a-row v-if="createAuthForm.billingMethod === 'TIMES'">
-            <a-col :span="24">
-              <a-form-item label="TURBO模式次数（0~9999）" name="turboTimes">
-                <a-input-number
-                  v-model:value="createAuthForm.otherInfo.turboTimes"
-                  placeholder="请输入TURBO次数，为空则是永久~"
-                  min="0"
-                  max="9999"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item label="FAST模式次数（0~9999）" name="fastTimes">
-                <a-input-number
-                  v-model:value="createAuthForm.otherInfo.fastTimes"
-                  placeholder="请输入Fast次数，为空则是永久~"
-                  min="0"
-                  max="365"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item label="Relax模式次数（0~9999）" name="relaxTimes">
-                <a-input
-                  v-model:value="createAuthForm.otherInfo.relaxTimes"
-                  placeholder="请输入Relax次数，为空则是永久~"
-                  min="0"
-                  max="9999"
-                />
-              </a-form-item>
-            </a-col>
-          </a-row>
-          <a-row v-else>
-            <a-col :span="24">
-              <a-form-item label="积分" name="score">
-                <a-input
-                  v-model:value="createAuthForm.otherInfo.score"
-                  placeholder="请输入积分"
-                  min="0"
-                  max="999999"
-                  style="width: 100%"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <span style="color: red; font-size: 10px"
-                >每个任务都会按照不同的类型操作消耗相对应的积分，具体看说明~</span
-              >
-            </a-col>
-          </a-row>
-        </a-form>
-      </a-card>
-    </a-modal>
-
-    <!-- 发布商品 -->
-    <a-modal
-      v-model:open="deployGoodsForm.isActiveVisible"
-      :style="{ top: '50px' }"
-      ok-text="提交"
-      @ok="onDeployGoods"
-      :confirmLoading="deployGoodsForm.loading"
-    >
-      <template #title>
-        <span
-          ><Icon
-            icon="fluent:drawer-add-24-filled"
-            class="vel-icon icon"
-            aria-hidden="true"
-          />发布商品</span
+    <template #footer>
+      <a-button  @click="closeStoryForm"
+          >取消</a-button
         >
+        <a-button  :loading="storyForm.storyLoading || globalLoading" @click="doGenStory"
+          >AI故事生成</a-button
+        >
+        <a-button type="primary" v-if="storyForm.aiStory && storyForm.aiStory.length > 0 && storyForm.storyLoading === false"  :loading="storyForm.storyLoading || globalLoading" @click="doGenStorySplit"
+          >AI故事分镜</a-button
+        >
+       
       </template>
-      <a-card>
-        <Loading :loading="deployGoodsForm.loading" :absolute="true" tip="正在生成中..." />
-        <a-form layout="vertical" :model="deployGoodsForm" ref="deployGoodsFormRef">
-          <a-row gutter="24">
-            <a-col :span="24">
-              <a-form-item
-                label="商品标题"
-                name="goodsTitle"
-                :rules="[{ required: true, message: '请输入商品标题!' }]"
-              >
-                <a-input v-model:value="deployGoodsForm.goodsTitle" placeholder="请输入商品标题" />
-              </a-form-item>
-            </a-col>
-
-            <a-col :span="24">
-              <a-form-item
-                label="商品说明"
-                name="goodsRemark"
-                :rules="[{ required: false, message: '请输入商品说明!' }]"
-              >
-                <a-textarea
-                  v-model:value="deployGoodsForm.goodsRemark"
-                  placeholder="请输入商品说明"
-                  :rows="3"
-                  show-count
-                  :maxlength="60"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item
-                label="库存"
-                name="stock"
-                :rules="[{ required: true, message: '请输入出售的库存!' }]"
-              >
-                <a-input-number
-                  v-model:value="deployGoodsForm.stock"
-                  placeholder="请输入出售的库存~"
-                  min="1"
-                  max="50"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item
-                label="商品售价"
-                name="goodsPrice"
-                :rules="[{ required: true, message: '请输入出售价格!' }]"
-              >
-                <a-input v-model:value="deployGoodsForm.goodsPrice" placeholder="请输入出售价格~" />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item
-                label="商品原价"
-                name="oriGoodsPrice"
-                :rules="[{ required: true, message: '请输入商品原价格!' }]"
-              >
-                <a-input
-                  v-model:value="deployGoodsForm.oriGoodsPrice"
-                  placeholder="请输入商品原价格~"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item
-                label="授权类型"
-                :name="['otherInfo', 'authWay']"
-                :rules="[{ required: true, message: '请选择授权类型' }]"
-              >
-                <a-select
-                  v-model:value="deployGoodsForm.otherInfo.authWay"
-                  @change="changeAuthWay"
-                  placeholder="授权方式"
-                >
-                  <a-select-option value="DAY">按天计算</a-select-option>
-                  <a-select-option value="TIME">指定到期时间</a-select-option>
-                </a-select>
-              </a-form-item>
-            </a-col>
-
-            <a-col :span="24" v-if="deployGoodsForm.otherInfo.authWay === 'DAY'">
-              <a-form-item label="授权天数（0~365）" :name="['otherInfo', 'authDays']">
-                <a-input-number
-                  v-model:value="deployGoodsForm.otherInfo.authDays"
-                  placeholder="请输入授权天数，为空则是永久~"
-                  min="0"
-                  max="365"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24" v-if="deployGoodsForm.otherInfo.authWay === 'TIME'">
-              <a-form-item label="到期时间" :name="['otherInfo', 'authExpireTimes']">
-                <a-date-picker
-                  show-time
-                  style="width: 100%"
-                  width="100%"
-                  v-model:value="deployGoodsForm.otherInfo.authExpireTimes"
-                  placeholder="到期时间，为空则是永久~"
-                  @change="onChangePicker"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item label="TURBO模式次数（0~9999）" :name="['otherInfo', 'turboTimes']">
-                <a-input-number
-                  v-model:value="deployGoodsForm.otherInfo.turboTimes"
-                  placeholder="请输入TURBO次数，为空则是永久~"
-                  min="0"
-                  max="9999"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item label="FAST模式次数（0~9999）" :name="['otherInfo', 'fastTimes']">
-                <a-input-number
-                  v-model:value="deployGoodsForm.otherInfo.fastTimes"
-                  placeholder="请输入Fast次数，为空则是永久~"
-                  min="0"
-                  max="365"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item label="Relax模式次数（0~9999）" :name="['otherInfo', 'relaxTimes']">
-                <a-input
-                  v-model:value="deployGoodsForm.otherInfo.relaxTimes"
-                  placeholder="请输入Relax次数，为空则是永久~"
-                  min="0"
-                  max="9999"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col :span="24">
-              <a-form-item label="提交任务数" :name="['otherInfo', 'maxSubmit']">
-                <a-input-number
-                  v-model:value="deployGoodsForm.otherInfo.maxSubmit"
-                  placeholder="请输提交任务数，为空则上限为主账号上限~"
-                  min="1"
-                  :max="deployGoodsForm.otherInfo.maxNumExecute"
-                />
-              </a-form-item>
-            </a-col>
-          </a-row>
-        </a-form>
-      </a-card>
+      <a-spin :spinning="globalLoading" tip="内容过多，需要的时间稍长。请耐心等待！">
+        <a-row style="padding: 0 10px">
+          <div
+              v-if="storyForm.storyLoading"
+              style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 53px;
+              "
+            >
+              <Icon icon="svg-spinners:bars-fade" size="40" />
+              <span style=" color: red;font-size: 10px;">内容较多，生成时间稍长，请耐心等候</span>
+            </div>  
+            <a-textarea
+            v-else
+            :bordered="true"
+            v-model:value="storyForm.text"
+            :rows="2"
+            placeholder="请输入你要生成的故事主题，比如：“一只猫大战老虎的悲伤故事” 100字以内"
+            :maxlength="100"
+          />
+        </a-row>
+        
+        <a-row style=" margin-top: 20px;padding: 0 10px;" v-if="storyForm.aiStory && storyForm.aiStory.length > 0 && storyForm.storyLoading === false">
+          <div
+          justify="start"
+          align="top"
+          style="
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background-color: #fff7e8;
+          "
+        >
+          <span style="padding: 3px 10px; color: rgb(0 0 0 / 70%); font-size: 10px;">
+            <Icon icon="flat-color-icons:idea" color="#91C8E4" />
+            这是一个大纲内容，如果生成的内容不理想，你可以手动修改下。大体结构不变就好。</span
+          >
+        </div>
+          <a-textarea
+              :bordered="true"
+              v-model:value="storyForm.aiStory"
+              :rows="10"
+              placeholder="一只猫大战老虎的悲伤故事2"
+              :maxlength="100"
+            />
+        </a-row>
+        </a-spin>
     </a-modal>
 
-    <!-- 激活授权账号 -->
+    <!-- AI分镜故事 -->
     <a-modal
-      v-model:open="activeData.isActiveVisible"
-      title="Midjouney授权激活"
-      ok-text="提交"
-      @ok="onActiveAccount"
-      :confirmLoading="activeData.loading"
+      v-model:open="storySplitForm.viewFlag"
+      title="AI分镜"
+      @cancel="closeStorySplitForm"
+      :bodyStyle="{padding : 0}"
+      width="80%"
     >
-      <a-card>
-        <a-form layout="vertical">
-          <a-row gutter="24">
-            <a-col :span="24">
-              <a-form-item label="账号授权码">
-                <a-input v-model:value="activeData.activeCode" placeholder="输入授权码" />
-              </a-form-item>
-            </a-col>
-          </a-row>
-        </a-form>
-      </a-card>
-    </a-modal>
-
-    <!-- 授权列表 -->
-    <a-modal v-model:open="authListForm.isAuthModalVisible" width="85%">
-      <template #title>
-        <Icon
-          icon="streamline-emojis:beaming-face-with-smiling-eyes"
-          class="vel-icon icon"
-          aria-hidden="true"
-        />
-        授权列表
+    <template #footer>
+      <a-button  @click="closeStoryForm"
+          >取消</a-button
+        >
+        
+        <a-button type="primary" target="" @click="doGenStorySplit"
+          >提交分镜</a-button
+        >
+       
       </template>
-      <template #footer>
-        <a-button key="submit" type="primary" @click="closeAuthModal">已知晓</a-button>
-      </template>
-      <Loading :loading="authListForm.loading" :absolute="true" tip="数加载中..." />
-
-      <div style="width: 100%; padding: 10px; overflow-x: auto">
-        <a-tabs ref="formRef" v-model:activeKey="authListForm.tabKey" @change="changeBillingCount">
-          <a-tab-pane key="TIMES">
-            <template #tab>
-              <span
-                ><Icon
-                  icon="fluent:calendar-arrow-counterclockwise-20-regular"
-                  class="vel-icon icon"
-                  aria-hidden="true"
-                  style="margin-right: 2px"
-                  size="16"
-                />次数计费
-              </span>
+      <a-spin :spinning="globalLoading">
+        <!-- 提示区域 -->
+        <a-row style=" margin-top: 20px;padding: 0 10px;" >
+          <div
+          justify="start"
+          align="top"
+          style="
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background-color: #fff7e8;
+          "
+        >
+          <span style="padding: 3px 10px; color: rgb(0 0 0 / 70%); font-size: 10px;">
+            <Icon icon="flat-color-icons:idea" color="#91C8E4" />
+            这是一个AI联想的分镜内容，如果生成的内容不理想，你可以手动修改下。</span
+          >
+        </div>
+        </a-row>
+        <!-- 故事主体 -->
+        <div style=" margin-top: 20px;padding: 0 20px;" >
+          <a-descriptions bordered title="故事主题" size="small">
+            <template #extra>
             </template>
-            <a-table :dataSource="authListTableData" class="a-table" :scroll="{ x: 'max-content' }">
-              <a-table-column
-                key="authCode"
-                title="授权码"
-                data-index="authCode"
-                align="center"
-                :width="80"
-              >
-                <template #default="{ record }">
-                  <span v-if="record.useWay === 'GOODS'"> ********* </span>
-                  <span v-else> {{ record.authCode }} </span>
-                </template>
-              </a-table-column>
-              <a-table-column
-                v-for="column in timeAuthColumns"
-                :v-if="!column.hidden"
-                :key="column.key"
-                :title="column.title"
-                :dataIndex="column.dataIndex"
-              />
+            <a-descriptions-item label="故事标题" :span="3" :style="{ width: '180px' }">{{storySplitForm.item?.title}}</a-descriptions-item>
+            <a-descriptions-item label="故事背景" :span="3" :style="{ width: '180px' }">{{storySplitForm.item?.background}}</a-descriptions-item>
+          </a-descriptions>
+        </div>
+        <!-- 故事角色 -->
+        <div style=" margin-top: 20px;padding: 0 20px;" >
+          <a-button  @click="showStoryRoleForm(null)" type="primary" style="margin-bottom: 5px" size="small">添加角色</a-button>
+          <a-table 
+            :dataSource="storySplitForm.item.storyRoleList"
+            rowKey="id"
+            :loading="globalLoading"
+            :pagination="false"
 
-              <a-table-column title="操作" align="center" key="actions" fixed="right" :width="80">
+          >
+            <a-table-column title="角色记录id" dataIndex="id" key="id" v-if="false" align="center" />
+            <a-table-column
+              title="角色名"
+              dataIndex="roleName"
+              key="roleName"
+              align="center"
+              width="100px"
+            />
+            <a-table-column width="250px" title="角色描述" dataIndex="description" key="description" align="center" />
+
+            <a-table-column title="角色图片" dataIndex="imageUrl" key="imageUrl" align="center">
+              <template #default="{ record }">
+                <div v-if="record.imageInfo?.url">
+                  <a-image
+                    :src="record.imageInfo?.url"
+                    :width="150"
+                    :preview="false"
+                  />
+                </div>
+                <div v-else>
+                  <div v-if="record.taskId">
+                    <div v-if="record.imageInfo.taskState !== 'FINISHED'">
+                      {{ record.taskState }}
+                    </div>
+                  </div>
+                  <div v-else>
+                    <span>暂未指定，请编辑选择MJ生成或者手动上传</span>
+                    
+                  </div>
+
+                </div>
+                  
+              </template>
+
+            </a-table-column>
+            <a-table-column title="操作" align="center" key="actions" fixed="right" :width="80">
                 <template #default="{ record }">
                   <a-button-group>
                     <a-button
                       type="primary"
+                      @click="showStoryRoleForm(record)"
+                      >编辑</a-button
+                    >
+                    <a-button
+                      type="primary"
                       danger
-                      v-if="record.useFlag === 'N'"
-                      @click="doDeleteAuth(record.id, record.accountId)"
+                      @click="removeStoryRoleForm(record)"
                       >删除</a-button
                     >
                   </a-button-group>
                 </template>
               </a-table-column>
-            </a-table>
-          </a-tab-pane>
-          <a-tab-pane key="INTEGRAL">
-            <template #tab>
-              <span>
-                <Icon
-                  icon="material-symbols:money-outline-rounded"
-                  class="vel-icon icon"
-                  style="margin-right: 2px"
-                  aria-hidden="true"
-                  size="16"
-                />积分计费</span
-              >
-            </template>
-            <a-table :dataSource="authListTableData" class="a-table" :scroll="{ x: 'max-content' }">
-              <a-table-column
-                key="authCode"
-                title="授权码"
-                data-index="authCode"
-                align="center"
-                :width="80"
-              >
-                <template #default="{ record }">
-                  <span v-if="record.useWay === 'GOODS'"> ********* </span>
-                  <span v-else> {{ record.authCode }} </span>
-                </template>
-              </a-table-column>
-              <a-table-column
-                v-for="column in integralAuthColumns"
-                :v-if="!column.hidden"
-                :key="column.key"
-                :title="column.title"
-                :dataIndex="column.dataIndex"
-              />
+          </a-table>
+        </div>
 
-              <a-table-column title="操作" align="center" key="actions" fixed="right" :width="80">
-                <template #default="{ record }">
-                  <a-button-group>
-                    <a-button
-                      type="primary"
-                      danger
-                      v-if="record.useFlag === 'N'"
-                      @click="doDeleteAuth(record.id, record.accountId)"
-                      >删除</a-button
-                    >
-                  </a-button-group>
+        <!-- 分镜内容 -->
+        <div style=" margin-top: 0;padding: 0 10px;" >
+          <div v-for="(storyChapter, index) in storySplitForm.item.storyChapterList" :key="index" style="padding: 10px 15px">
+            <!-- 章节内容 -->
+            <a-descriptions bordered :title="storyChapter.title" size="small">
+                <template #extra>
+                  <!-- <a-button type="primary">Edit</a-button> -->
                 </template>
-              </a-table-column>
-            </a-table>
-          </a-tab-pane>
-        </a-tabs>
-      </div>
+                <a-descriptions-item label="章节标题" :span="3" :style="{ width: '180px' }">{{storyChapter.title}}</a-descriptions-item>
+                <a-descriptions-item label="章节描述" :span="3" :style="{ width: '180px' }">{{storyChapter.description}}</a-descriptions-item>
+              </a-descriptions>
+            <!-- 章节的分镜内容 -->
+            <div style="margin-top: 10px">
+              <a-button  @click="showStoryPictureForm(null, index)"   type="primary" style="margin-bottom: 5px" size="small">添加分镜</a-button>
+              <a-table 
+                  :dataSource="storyChapter.storyPictureList"
+                  rowKey="id"
+                  :loading="globalLoading"
+                  :pagination="false"
+                >
+                    
+                  <a-table-column title="分镜id" dataIndex="id" key="id" v-if="false" align="center" />
+                  <a-table-column
+                    title="字幕"
+                    dataIndex="caption"
+                    key="caption"
+                    align="center"
+                    width="200px"
+                  />
+                  <a-table-column title="分镜描述"  width="200px" dataIndex="description" key="description" align="center" />
+
+                  <a-table-column title="分镜图片" dataIndex="imageUrl" key="imageUrl" align="center">
+                    <template #default="{ record }">
+                      <div v-if="record.imageInfo?.url">
+                        <a-image
+                          :src="record.imageInfo?.url"
+                          :width="150"
+                          :preview="false"
+                        />
+                      </div>
+                      <div v-else>
+                        <div v-if="record.taskId">
+                          <div v-if="record.imageInfo.taskState !== 'FINISHED'">
+                            {{ record.taskState }}
+                          </div>
+                        </div>
+                        <div v-else>
+                          <span>暂未指定，请编辑选择MJ生成或者手动上传</span>
+                          
+                        </div>
+
+                      </div>
+                        
+                    </template>
+
+                  </a-table-column>
+                  <a-table-column title="操作" align="center" key="actions" fixed="right" :width="80">
+                    <template #default="{ record }">
+                      <a-button-group>
+                        <a-button
+                          type="primary"
+                          @click="showStoryPictureForm(record, index)"
+                          >编辑</a-button
+                        >
+                        <a-button
+                          type="primary"
+                          danger
+                          @click="removeStoryPictureForm(record, index)"
+                          >删除</a-button
+                        >
+                      </a-button-group>
+                    </template>
+                  </a-table-column>
+                </a-table>
+            </div>
+            
+      
+          </div>
+
+
+        </div>
+        </a-spin>
     </a-modal>
 
-    <!-- 二次出售 -->
+    <!-- 角色modal -->
     <a-modal
-      v-model:open="redeployForm.isActiveVisible"
-      title="再次出售"
-      ok-text="提交"
-      @ok="onRedeploy"
-      :confirmLoading="redeployForm.loading"
+      v-model:open="storyRoleForm.viewFlag"
+      title="角色编辑"
+      @cancel="closeStoryRoleForm"
+      :bodyStyle="{padding : 0}"
     >
-      <a-card>
-        <a-form layout="vertical" :model="redeployForm" ref="redeployFormRef">
-          <a-row gutter="24">
+    <template #footer>
+      <a-button  @click="closeStoryRoleForm"
+          >取消</a-button
+        >
+        
+        <a-button type="primary" target="" @click="saveStoryRoleForm"
+          >保存</a-button
+        >
+       
+      </template>
+      <a-spin :spinning="globalLoading">
+
+        <a-form layout="vertical" :model="storyRoleForm" ref="storyRoleFormRef" style="padding: 10 10px">
+          <a-row style="padding: 0 15px">
             <a-col :span="24">
               <a-form-item
-                label="商品标题"
-                name="goodsTitle"
-                :rules="[{ required: true, message: '请输入商品标题!' }]"
+                label="角色名"
+                :name="['item', 'roleName']"
+                :rules="[{ required: true, message: '请输入角色名!' }]"
               >
-                <a-input
-                  show-count
-                  :maxlength="15"
-                  v-model:value="redeployForm.goodsTitle"
-                  placeholder="请输入商品标题"
-                />
+                <a-input show-count :maxlength="15" v-model:value="storyRoleForm.item.roleName" placeholder="请输入角色名" />
               </a-form-item>
             </a-col>
 
             <a-col :span="24">
               <a-form-item
-                label="商品说明"
-                name="goodsRemark"
-                :rules="[{ required: false, message: '请输入商品说明!' }]"
+                label="角色描述"
+                :name="['item', 'description']"
+                :rules="[{ required: false, message: '请输入角色描述!' }]"
               >
                 <a-textarea
-                  v-model:value="redeployForm.goodsRemark"
+                  v-model:value="storyRoleForm.item.description"
                   placeholder="请输入商品说明"
                   :rows="3"
-                  show-count
-                  :maxlength="60"
+                  show-count :maxlength="60"
                 />
               </a-form-item>
             </a-col>
-
             <a-col :span="24">
-              <a-form-item
-                label="商品售价"
-                name="goodsPrice"
-                :rules="[{ required: true, message: '请输入出售价格!' }]"
-              >
-                <a-input v-model:value="redeployForm.goodsPrice" placeholder="请输入出售价格~" />
-              </a-form-item>
+              <a-tabs ref="formRef" v-model:activeKey="storyRoleForm.item.imageInfo.tabKey" @change="changeBillingCount">
+                <a-tab-pane key="AI">
+                  <template #tab>
+                    <span
+                      ><Icon
+                        icon="fluent:calendar-arrow-counterclockwise-20-regular"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                        style="margin-right: 2px"
+                        size="16"
+                      />AI生成
+                    </span>
+                  </template>
+                  <a-row >
+                    <a-textarea
+                    style="width: 100%"
+                    v-model:value="storyRoleForm.item.imageInfo.prompt"
+                    placeholder="输入生成的prompt,可以输入中文，不填就默认使用描述生成"
+                    :rows="3"
+                    show-count :maxlength="300"
+                  />
+                  </a-row>
+                  <a-row v-if="storyRoleForm.item.imageInfo.taskId">
+                    <div v-if="storyRoleForm.item.imageInfo.imageList">
+                      <a-image
+                        v-for="(url, index) in storyRoleForm.item.imageInfo.imageList"
+                        :key="index"
+                        :src="url"
+                        :width="150"
+                        :preview="false"
+                      />
+                    </div>
+                  </a-row>
+
+                </a-tab-pane>
+                <a-tab-pane key="HANDLE">
+                  <template #tab>
+                    <span>
+                      <Icon
+                        icon="material-symbols:money-outline-rounded"
+                        class="vel-icon icon"
+                        style="margin-right: 2px"
+                        aria-hidden="true"
+                        size="16"
+                      />手动上传</span
+                    >
+                  </template>
+                  <a-upload
+                    v-model:file-list="roleFileList"
+                    :action="uploadInfo.url"
+                    :multiple="false"
+                    :maxCount="1"
+                    :headers="{ Authorization: uploadInfo.token }"
+                    list-type="picture-card"
+                    :before-upload="beforeFileUpload"
+                    @preview="handlePreview"
+                    @change="handleRoleFileChange"
+                    :withCredentials="true"
+                    style="display: flex; align-items: flex-start; justify-content: flex-start"
+                  >
+                    <div v-if="roleFileList.length < 1">
+                      <plus-outlined />
+                      <div style="margin-top: 8px"> 上传图片</div>
+                    </div>
+                  </a-upload>
+                </a-tab-pane>
+              </a-tabs>
             </a-col>
           </a-row>
         </a-form>
-      </a-card>
+
+   
+        </a-spin>
     </a-modal>
 
-    <!-- 详情模态窗口组件 -->
-    <account-details-modal
-      style="top: 80px"
-      :id="selectedAccountId"
-      :visible="isDetailsModalVisible"
-      @update-visible="updateModalVisible"
-    />
+    <!-- 分镜modal -->
+    <a-modal
+      v-model:open="storyPictureForm.viewFlag"
+      title="分镜编辑"
+      @cancel="closeStoryPictureForm"
+      :bodyStyle="{padding : 0}"
+    >
+    <template #footer>
+      <a-button  @click="closeStoryPictureForm"
+          >取消</a-button
+        >
+        
+        <a-button type="primary" target="" @click="savePictureForm"
+          >提交</a-button
+        >
+       
+      </template>
+      <a-spin :spinning="globalLoading">
 
-    <a-tour :open="accountStep.open" :steps="accountStep.steps" @close="accountStepClosed(false)" />
+        <a-form layout="vertical" :model="storyPictureForm" ref="storyPictureFormRef" style="padding: 10 10px">
+          <a-row style="padding: 0 15px">
+            <a-col :span="24">
+              <a-form-item
+                label="字幕"
+                
+                :name="['item', 'caption']"
+                :rules="[{ required: true, message: '请输入字幕!' }]"
+              >
+                <a-input show-count :maxlength="15" v-model:value="storyPictureForm.item.caption" placeholder="请输入字幕" />
+              </a-form-item>
+            </a-col>
+
+            <a-col :span="24">
+              <a-form-item
+                label="分镜描述"
+                :name="['item', 'description']"
+                :rules="[{ required: true, message: '请输入分镜画面描述!' }]"
+              >
+                <a-input show-count :maxlength="15" v-model:value="storyPictureForm.item.description" placeholder="请输入分镜画面描述" />
+              </a-form-item>
+            </a-col>
+            
+            <a-col :span="24">
+              <a-tabs ref="formRef" v-model:activeKey="storyPictureForm.item.imageInfo.tabKey" @change="changeBillingCount">
+                <a-tab-pane key="AI">
+                  <template #tab>
+                    <span
+                      ><Icon
+                        icon="fluent:calendar-arrow-counterclockwise-20-regular"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                        style="margin-right: 2px"
+                        size="16"
+                      />AI生成
+                    </span>
+                  </template>
+                  <a-row >
+                    <a-textarea
+                    style="width: 100%"
+                    v-model:value="storyPictureForm.item.imageInfo.prompt"
+                    placeholder="输入生成的prompt,可以输入中文，不填就默认使用描述生成"
+                    :rows="3"
+                    show-count :maxlength="300"
+                  />
+                  </a-row>
+                  <a-row v-if="storyPictureForm.item.imageInfo.taskId">
+                    <div v-if="storyPictureForm.item.imageInfo.imageList">
+                      <a-image
+                        v-for="(url, index) in storyPictureForm.item.imageInfo.imageList"
+                        :key="index"
+                        :src="url"
+                        :width="150"
+                        :preview="false"
+                      />
+                    </div>
+                  </a-row>
+
+                </a-tab-pane>
+                <a-tab-pane key="HANDLE">
+                  <template #tab>
+                    <span>
+                      <Icon
+                        icon="material-symbols:money-outline-rounded"
+                        class="vel-icon icon"
+                        style="margin-right: 2px"
+                        aria-hidden="true"
+                        size="16"
+                      />手动上传</span
+                    >
+                  </template>
+                  <a-upload
+                    v-model:file-list="pictureFileList"
+                    :action="uploadInfo.url"
+                    :multiple="false"
+                    :maxCount="1"
+                    :headers="{ Authorization: uploadInfo.token }"
+                    list-type="picture-card"
+                    :before-upload="beforeFileUpload"
+                    @preview="handlePreview"
+                    @change="handlePictureFileChange"
+                    :withCredentials="true"
+                    style="display: flex; align-items: flex-start; justify-content: flex-start"
+                  >
+                    <div v-if="pictureFileList.length < 1">
+                      <plus-outlined />
+                      <div style="margin-top: 8px"> 上传图片</div>
+                    </div>
+                  </a-upload>
+                </a-tab-pane>
+              </a-tabs>
+            </a-col>
+          </a-row>
+        </a-form>
+
+   
+        </a-spin>
+    </a-modal>
+
+    <!-- 上传图片预览 -->
+    <a-modal :open="previewVisible" :title="previewTitle" :footer="null" @cancel="handleCancel">
+      <img alt="example" style="width: 100%" :src="previewImage" />
+    </a-modal>
   </div>
 </template>
 
@@ -1133,53 +669,21 @@
   import { ref, onMounted, computed, unref, nextTick } from 'vue';
   import { Loading } from '/@/components/Loading';
   import Icon from '/@/components/Icon/Icon.vue';
-  import {
-    ListQueryParams,
-    AccountListItem,
-    ChangeAuthParams,
-    AccountAuthListResp,
-    AccountStatisticsModel,
-  } from '/@/api/df/model/accountModel';
-  import {
-    queryList,
-    changeAuth,
-    del,
-    deleteAuth,
-    activeAuthAccount,
-    accountAuthList,
-    createAccountAuth,
-    disabledAccount,
-    addOwnerAccount,
-    getAccountStatisticalInfo,
-    appendDiscordAccount,
-    setDefault,
-    getGroupAccounts,
-  } from '/@/api/df/account';
-  import AccountDetailsModal from './accountDetailsModal.vue';
   import { IdReq } from '/@/api/model/baseModel';
-  import Goods from './goods.vue';
-  import AccountGroup from './account_group.vue';
-  import { deployNewGoods, deploySecondHandGoods, cancelSecondHandGoods } from '/@/api/df/goods';
-  import Discord from './discord.vue';
-  import { message } from 'ant-design-vue';
-  import {
-    discordAddToken,
-    discordList,
-    discordInfo,
-    channelList,
-    guildList,
-  } from '/@/api/df/discord';
+  import AccountGroup from './account_group.vue'; 
+  import {genSimpleStory, genStory, storyList, storyRemove,storyInfo,saveStoryRole,genSplitPicture,extractSplitContent,commitSplitContent } from '/@/api/df/story';
+  import { message, UploadProps, Upload } from 'ant-design-vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useContentHeight } from '/@/hooks/web/useContentHeight';
-  import { discordApi } from './discord';
   import { useGo } from '/@/hooks/web/usePage';
   import { func } from 'vue-types';
   import { getCustomLocalCache, setCustomLocalCache } from '/@/utils/custom';
-  import { MJ_ACCOUNT_TOUR } from '/@/enums/cacheEnum';
-  import { userStep } from '/@/api/df/user';
   import { useUserStore } from '/@/store/modules/user';
+  import type { UploadFile } from 'ant-design-vue/es/upload/interface';
+  import { getAppEnvConfig } from '/@/utils/env';
 
   const userStore = useUserStore();
+  const token = userStore.getToken;
   const userInfo = ref(userStore.getUserInfo); // 直接赋值
 
   /** 页面高度计算开始 */
@@ -1198,18 +702,11 @@
     upwardSpace,
     offsetHeightRef,
   );
-
   const { createMessage, createSuccessModal, createErrorModal, createInfoModal } = useMessage();
-  const {
-    accountFormRef,
-    accountForm,
-    onAdd,
-    onSelectDiscordUser,
-    onSelectGuild,
-    queryDiscordList,
-  } = discordApi();
+  const { VITE_GLOB_APP_TITLE, VITE_GLOB_API_URL, VITE_GLOB_API_URL_PREFIX, VITE_GLOB_UPLOAD_URL } =
+    getAppEnvConfig();
 
-  //查询
+  //故事查询
   const search = ref({
     ownerFlag: null,
     accountName: '',
@@ -1253,11 +750,11 @@
   const onSearch = async () => {
     globalLoading.value = true;
     try {
-      const params: ListQueryParams = search.value;
+      const params = search.value;
       params.current = pagination.value.current;
       params.pageSize = pagination.value.pageSize;
       console.log(params);
-      const response = await queryList(params);
+      const response = await storyList(params);
       tableData.value = response.records;
       pagination.value.total = response.total;
     } finally {
@@ -1267,135 +764,337 @@
 
   onMounted(async () => {
     await onSearch();
-    queryDiscordList({});
-    await nextTick();
-    accountStepOpen(true);
   });
 
   // 主table 数据
-  const tableData = ref<AccountListItem[]>([
+  const tableData = ref<any[]>([
     // 更多数据...
   ]);
 
-  //授权列表相关 开始
-  const authListForm = ref({
-    tabKey: 'TIMES',
-    accountId: null,
-    loading: false,
-    isAuthModalVisible: false,
-    authList: {},
-  });
-  const authListTableData = ref<AccountAuthListResp[]>([
-    // 更多数据...
-  ]);
 
-  const timeAuthColumns = [
-    // { title: 'ID', dataIndex: 'id', key: 'id', hidden: true },
-    // { title: '授权码', dataIndex: 'authCode', key: 'authCode', width: 100 },
-    { title: '激活用户', dataIndex: 'activeUserEmail', key: 'activeUserEmail', width: 100 },
-    { title: '激活时间', dataIndex: 'gmtActive', key: 'gmtActive', width: 100 },
-    { title: 'Turbo次数', dataIndex: 'turboTimes', key: 'turboTimes', width: 100 },
-    { title: 'Fast次数', dataIndex: 'fastTimes', key: 'fastTimes', width: 100 },
-    { title: 'Relax次数', dataIndex: 'relaxTimes', key: 'relaxTimes', width: 100 },
-    { title: '提交任务数', dataIndex: 'maxSubmit', key: 'maxSubmit', width: 100 },
-    { title: '并发线程数', dataIndex: 'conExecute', key: 'conExecute', width: 100 },
-    { title: '生成时间', dataIndex: 'gmtCreate', key: 'gmtCreate', width: 100 },
-    { title: '授权方式', dataIndex: 'authWayLabel', key: 'authWayLabel', width: 100 },
-    { title: '天数/效期', dataIndex: 'authDays', key: 'authDays', width: 100 },
-  ];
-  const integralAuthColumns = [
-    // { title: 'ID', dataIndex: 'id', key: 'id', hidden: true },
-    // { title: '授权码', dataIndex: 'authCode', key: 'authCode', width: 100 },
-    { title: '激活用户', dataIndex: 'activeUserEmail', key: 'activeUserEmail', width: 100 },
-    { title: '激活时间', dataIndex: 'gmtActive', key: 'gmtActive', width: 100 },
-    { title: '积分', dataIndex: 'score', key: 'score', width: 100 },
-    { title: '提交任务数', dataIndex: 'maxSubmit', key: 'maxSubmit', width: 100 },
-    { title: '并发线程数', dataIndex: 'conExecute', key: 'conExecute', width: 100 },
-    { title: '生成时间', dataIndex: 'gmtCreate', key: 'gmtCreate', width: 100 },
-    { title: '授权方式', dataIndex: 'authWayLabel', key: 'authWayLabel', width: 100 },
-    { title: '天数/效期', dataIndex: 'authDays', key: 'authDays', width: 100 },
-  ];
+  //************************************** 故事创建 ***********************************//
+  
+  const storyForm = ref({
+    viewFlag: false,
+    text: null,
+    storyLoading : false,
+    mode: "SparkDesk-v3.5",
+    aiStory: null,
+  })
 
-  const changeBillingCount = async (activeKey) => {
-    // 显示授权列表
-    authListForm.value.loading = true;
+  const showStoryForm = async () => {
+    storyForm.value.viewFlag = true;
+  };
+  const closeStoryForm = async () => {
+    storyForm.value = {
+      viewFlag: false,
+      text: null,
+      storyLoading : false,
+      mode: "qwen-plus",
+      aiStory: null,
+    };
+  };
+
+  // 生成故事
+  const doGenStory = async () => {
+    
+    storyForm.value.storyLoading = true;
     try {
-      authListTableData.value = await accountAuthList({
-        accountId: authListForm.value.accountId,
-        source: 'MJ',
-        billingMethod: activeKey,
+      const resp = await genStory({
+        mode: storyForm.value.mode,
+        content:  storyForm.value.text,
       });
+      storyForm.value.aiStory = resp;
+      // onSearch();
     } finally {
-      authListForm.value.loading = false;
+      storyForm.value.storyLoading = false;
     }
   };
-  const showAuthorizationList = async (id) => {
-    // 显示授权列表
-    authListForm.value.loading = true;
-    authListForm.value.accountId = id;
-    authListForm.value.tabKey = 'TIMES';
+
+  // 生成故事分镜
+  const doGenStorySplit = async () => {
+    
+    globalLoading.value = true;
     try {
-      authListForm.value.isAuthModalVisible = true;
-      changeBillingCount(authListForm.value.tabKey);
-    } finally {
-      authListForm.value.loading = false;
-    }
-  };
-  const closeAuthModal = () => {
-    authListForm.value.isAuthModalVisible = false;
-  };
-  //授权列表相关 结束
+      const resp = await genSimpleStory({
+        mode: storyForm.value.mode,
+        content:  storyForm.value.aiStory,
+      });
+     
+      console.log(resp)
+      storyForm.value.viewFlag = false;
 
-  //**************************************新增或者编辑 ****************************************************//
+      //打开明细创建页面
+      showStorySplitForm(resp)
 
-  const onSubmitAdd = async () => {
-    // if (accountForm.value.accountName === '' || accountForm.value.accountName === null) {
-    //   createMessage.error('请输入账号名！');
-    //   return;
-    // }
-    // if (accountForm.value.discordUserId === '' || accountForm.value.discordUserId === null) {
-    //   createMessage.error('请选择执行账号！');
-    //   return;
-    // }
-    // if (accountForm.value.guildId === '' || accountForm.value.guildId === null) {
-    //   createMessage.error('请选择执行服务器！');
-    //   return;
-    // }
-    // if (accountForm.value.channelId === '' || accountForm.value.channelId === null) {
-    //   createMessage.error('请选择执行频道！');
-    //   return;
-    // }
-    // 提交新增账户的数据
-    accountForm.value.loading = true;
-    try {
-      await accountFormRef.value.validate();
-      await addOwnerAccount(accountForm.value);
-      accountForm.value.viewFlag = false;
-      onSearch();
     } finally {
-      accountForm.value.loading = false;
+      globalLoading.value = false;
     }
   };
 
-  const deleteAccount = async (id) => {
-    // 删除账户
+  // 删除sotry
+  const doStoryRemove = async (id) => {
+    
     globalLoading.value = true;
     const param: IdReq = { id: id };
     try {
-      await del(param);
+      await storyRemove(param);
       onSearch();
     } finally {
       globalLoading.value = false;
     }
   };
 
-  const doSetDefault = async (id) => {
-    globalLoading.value = true;
-    try {
-      await setDefault({ id: id });
-    } finally {
-      globalLoading.value = false;
+  //************************************** 故事分镜 ***********************************//
+  
+  const storySplitForm = ref({
+    viewFlag: false,
+    item: null,
+    loading: false
+  })
+
+  const showStorySplitForm = async (item) => {
+    storySplitForm.value.viewFlag = true;
+    storySplitForm.value.item = item;
+  };
+  const closeStorySplitForm = async () => {
+    storySplitForm.value = {
+    viewFlag: false,
+    item: null,
+    loading: false
+  };
+  };
+
+  
+
+ 
+  /*********************************** 角色 ******************************** */
+
+  const storyRoleForm = ref({
+    viewFlag: false,
+    loading: false,
+    item: {
+      roleName: null,
+      description: null,
+      prompt: null
     }
+  })
+
+  const closeStoryRoleForm = () => {
+    storyRoleForm.value.viewFlag = false;
+  }
+  const saveStoryRoleForm = () => {
+    // let index = storyPictureForm.value.chapterIndex;
+    let indexItem = storyRoleForm.value.item.key;
+    if(indexItem) {
+      storySplitForm.value.item.storyRoleList[indexItem] = storyRoleForm.value.item;
+    }else {
+      
+      //新增
+      storySplitForm.value.item.storyRoleList.push(storyRoleForm.value.item);
+    }
+    storyRoleForm.value.viewFlag = false;
+  }
+  const removeStoryRoleForm = (item) => {
+    let index = item.key;
+    storySplitForm.value.item.storyRoleList.splice(index, 1);
+  }
+  const showStoryRoleForm = (item) => {
+    //新增场景
+    if(item === null) {
+      item = {
+        roleName: null,
+        description: null,
+        prompt: null
+      }
+    }
+    if(item.imageInfo === null || item.imageInfo === undefined) {
+      item.imageInfo = {
+        tabKey: 'AI',
+      };
+      //图片清空
+      roleFileList.value = [];
+    }else if(item.imageInfo && item.imageInfo.url){
+      //初始化图片
+      roleFileList.value = [  {
+        uid: '-1',
+        name: 'init.png',
+        status: 'done',
+        url: item.imageInfo.url,
+      }];
+    }
+    console.log("showStoryRoleForm");
+    storyRoleForm.value.item = item;
+
+    storyRoleForm.value.viewFlag = true;
+  }
+
+  const uploadInfo = ref({
+    url: VITE_GLOB_API_URL + '/open/system/upload',
+    token: token,
+    srefUrls: [],
+  });
+  const roleFileList = ref([]);
+
+  
+  const previewVisible = ref(false);
+  const previewImage = ref('');
+  const previewTitle = ref('');
+  const handleCancel = () => {
+    previewVisible.value = false;
+    previewTitle.value = '';
+  };
+  const handlePreview = async (file: UploadProps['fileList'][number]) => {
+    if (!file.url && !file.preview) {
+      file.preview = (await getBase64(file.originFileObj)) as string;
+    }
+    previewImage.value = file.url || file.preview;
+    previewVisible.value = true;
+    previewTitle.value = file.name || file.url.substring(file.url.lastIndexOf('/') + 1);
+  };
+
+  function getBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        console.log('File successfully read as data URL'); // 日志输出
+        resolve(reader.result as string);
+      };
+
+      reader.onerror = (error) => {
+        console.error('Error reading the file:', error); // 错误输出
+        reject(error);
+      };
+    });
+  }
+
+  const beforeFileUpload = async (file: File) => {
+    try {
+      // 判断是否为图片
+      const isImage = file.type.startsWith('image/');
+      if (!isImage) {
+        throw new Error('只能上传图片文件！');
+      }
+      // 获取图片文件的大小
+      const isLt5M = file.size / 1024 / 1024 < 5;
+      if (!isLt5M) {
+        throw new Error('图片大小不能超过5MB！');
+      }
+    } catch (error) {
+      console.error('Error converting to Base64:', error);
+      // 弹出异常消息
+      message.error(error.message);
+      //移除这个文件
+      return Upload.LIST_IGNORE;
+    }
+    return true;
+  };
+
+  const handleRoleFileChange = async (info: { file: UploadFile; fileList: UploadFile[] }) => {
+    console.log('handleChange'); // 日志输出
+    if (info.file.status === 'done') {
+      if (info.file.response.result === null) {
+        info.file.status = 'error';
+      } else {
+        storyRoleForm.value.item.imageInfo.url = info.file.response.result;
+      }
+    } else if (info.file.status === 'removed') {
+      storyRoleForm.value.item.imageInfo.url = getSuccessFileUrlStr(roleFileList.value)[0];
+    }
+  };
+
+  const storyPictureForm = ref({
+    chapterIndex: null,
+    
+    viewFlag: false,
+    loading: false,
+    item: {
+      caption: null,
+      description: null,
+      prompt: null
+    }
+  })
+
+  
+  const savePictureForm = () => {
+    let index = storyPictureForm.value.chapterIndex;
+    let indexItem = storyPictureForm.value.item.key;
+    console.log("savePictureForm...")
+    if(indexItem) {
+     
+      storySplitForm.value.item.storyChapterList[index].storyPictureList[indexItem] = storyPictureForm.value.item;
+    }else {
+       //新增
+       storySplitForm.value.item.storyChapterList[index].storyPictureList.push(storyPictureForm.value.item);
+    }
+    
+    storyPictureForm.value.viewFlag = false;
+  }
+
+  const closeStoryPictureForm = () => {
+    storyPictureForm.value.viewFlag = false;
+  }
+  const removeStoryPictureForm = (item, index) => {
+    let indexItem = item.key;
+    storySplitForm.value.item.storyChapterList[index].storyPictureList.splice(indexItem, 1);
+  }
+  const showStoryPictureForm = (item, index) => {
+    //新增场景
+    if(item === null) {
+      item = {
+        caption: null,
+        description: null,
+      }
+    }
+
+    if(item.imageInfo === null || item.imageInfo === undefined) {
+      item.imageInfo = {
+
+        tabKey: 'AI',
+      };
+       //图片清空
+       pictureFileList.value = [];
+    }else if(item.imageInfo && item.imageInfo.url){
+      //初始化图片
+      pictureFileList.value = [  {
+        uid: '-1',
+        name: 'init.png',
+        status: 'done',
+        url: item.imageInfo.url,
+      }];
+    }
+    console.log("showStoryRoleForm");
+    storyPictureForm.value.chapterIndex = index;
+    storyPictureForm.value.item = item;
+    storyPictureForm.value.viewFlag = true;
+  }
+
+
+  const pictureFileList = ref([]);
+  const handlePictureFileChange = async (info: { file: UploadFile; fileList: UploadFile[] }) => {
+    console.log('handleChange'); // 日志输出
+    if (info.file.status === 'done') {
+      if (info.file.response.result === null) {
+        info.file.status = 'error';
+      } else {
+        storyPictureForm.value.item.imageInfo.url = info.file.response.result;
+      }
+    } else if (info.file.status === 'removed') {
+      storyPictureForm.value.item.imageInfo.url = getSuccessFileUrlStr(roleFileList.value)[0];
+    }
+  };
+
+  const getSuccessFileUrlStr = (list) => {
+    let urls = '';
+    list.forEach((item) => {
+      if (item.iw) {
+        urls = urls + item.response.result + ' ::' + item.iw + ' ';
+      } else {
+        urls = urls + item.response.result + ' ';
+      }
+    });
+    return urls;
   };
 
   const getStateContent = (state) => {
@@ -1412,566 +1111,18 @@
     }
   };
 
-  const getDiscordStateContent = (state) => {
-    if (state === 'NORMAL') {
-      return { text: '正常', color: '#52c41a', status: 'processing' };
-    } else if (state === 'EXPIRED') {
-      return { text: '过期', color: '#ff4d4f', status: 'error' };
-    } else if (state === 'VERIFY_HUMAN') {
-      return { text: '验证人类', color: '#d9d9d9', status: 'warning' };
-    } else {
-      return { text: '未知', color: '#d9d9d9', status: 'default' };
-    }
-  };
-
-  const getMjStateContent = (state) => {
-    console.log('getMjStateContent   ' + state);
-    if (state === 'NORMAL') {
-      return { text: '已订阅', color: '#52c41a', status: 'processing' };
-    } else if (state === 'BAN') {
-      return { text: 'BAN', color: '#ff4d4f', status: 'error' };
-    } else if (state === 'STOP') {
-      return { text: '未订阅', color: '#d9d9d9', status: 'default' };
-    } else {
-      return { text: '未知', color: '#d9d9d9', status: 'default' };
-    }
-  };
-
-  /*****************************追加账户*************************************** */
-  const accountModifiedForm = ref({
-    viewFlag: false,
-    loading: false,
-    id: null,
-    accountName: null,
-    discordUserIds: null as string[] | null,
-    discordFilterUserOptions: [] as { label: string; value: string }[],
-  });
-
-  const showAccountModified = async (record) => {
-    accountModifiedForm.value.accountName = record.accountName;
-    accountModifiedForm.value.id = record.id;
-    accountModifiedForm.value.viewFlag = true;
-    accountModifiedForm.value.loading = true;
-    try {
-      const resp = await getGroupAccounts({ id: record.id });
-      accountModifiedForm.value.discordUserIds = resp;
-      const response = await discordList({ guildId: record.guildId });
-      // 使用 map 方法转换数组
-      const transformedList = response.map((item) => ({
-        label: item.globalName,
-        value: item.id,
-      }));
-      // 如果您想在转换后的数组前面添加一个特定的对象，可以使用以下方法：
-      const finalList = [...transformedList];
-      accountModifiedForm.value.discordFilterUserOptions = finalList;
-    } catch (e) {
-      console.log(e);
-      accountModifiedForm.value.loading = false;
-    } finally {
-      accountModifiedForm.value.loading = false;
-    }
-  };
-
-  const onAppendDiscordAccount = async () => {
-    accountModifiedForm.value.loading = true;
-    try {
-      await appendDiscordAccount(accountModifiedForm.value);
-      accountModifiedForm.value.viewFlag = false;
-      onSearch();
-    } finally {
-      accountModifiedForm.value.loading = false;
-    }
-  };
-
-  //******************************账号统计相关***********************************/
-
-  const statisticsForm = ref({
-    viewFlag: false,
-    loading: false,
-    formData: {} as AccountStatisticsModel,
-  });
-  const isDetailsModalVisible = ref(false);
-  const showDetails = async (id: string) => {
-    console.log('11111');
-    statisticsForm.value.viewFlag = true;
-    statisticsForm.value.loading = true;
-    try {
-      const resp = await getAccountStatisticalInfo({ id: id });
-      statisticsForm.value.formData = resp;
-    } finally {
-      statisticsForm.value.loading = false;
-    }
-  };
-  const closeDetail = () => {
-    statisticsForm.value.viewFlag = false;
-  };
-
-  // 更新模态窗口的可见性，由子组件触发
-  const updateModalVisible = (value: boolean) => {
-    isDetailsModalVisible.value = value;
-  };
-
-  /************************************发布商品********************************* */
-  const deployGoodsFormRef = ref();
-  const deployGoodsForm = ref({
-    loading: false,
-    isActiveVisible: false,
-    goodsTitle: null,
-    goodsRemark: null,
-    goodsPrice: null,
-    oriGoodsPrice: null,
-    stock: null,
-    accountId: null,
-    otherInfo: {
-      authType: 'DAY',
-      authDays: null,
-      maxNumExecute: 300,
-      authExpireTimes: null,
-
-      turboTimes: null,
-      fastTimes: null,
-      relaxTimes: null,
-      maxSubmit: null,
-    },
-  });
-  const showDeployGoods = async (card) => {
-    deployGoodsForm.value.isActiveVisible = true;
-    deployGoodsForm.value.accountId = card.id;
-    deployGoodsForm.value.maxNumExecute = card.maxSubmit;
-
-    deployGoodsForm.value.stock = null;
-    deployGoodsForm.value.otherInfo.turboTimes = null;
-    deployGoodsForm.value.otherInfo.fastTimes = null;
-    deployGoodsForm.value.otherInfo.relaxTimes = null;
-    deployGoodsForm.value.otherInfo.maxSubmit = null;
-    deployGoodsForm.value.authDays = null;
-    deployGoodsForm.value.authExpireTimes = null;
-  };
-
-  const hideDeployGoods = async () => {
-    createAuthForm.value.isActiveVisible = false;
-  };
-  const onDeployGoods = async () => {
-    deployGoodsForm.value.loading = true;
-    try {
-      await deployGoodsFormRef.value.validate();
-      await deployNewGoods(deployGoodsForm.value);
-
-      deployGoodsForm.value.isActiveVisible = false;
-      // onSearch();
-    } finally {
-      deployGoodsForm.value.loading = false;
-    }
-  };
-
-  /************************************发布二手商品********************************* */
-  const redeployFormRef = ref();
-  const redeployForm = ref({
-    loading: false,
-    isActiveVisible: false,
-    goodsTitle: null,
-    goodsRemark: null,
-    goodsPrice: null,
-    accountId: null,
-  });
-
-  const showRedeploy = async (card) => {
-    redeployForm.value.isActiveVisible = true;
-    redeployForm.value.accountId = card.id;
-  };
-
-  const hideRedeploy = async () => {
-    redeployForm.value.isActiveVisible = false;
-  };
-
-  const onRedeploy = async () => {
-    redeployForm.value.loading = true;
-    try {
-      await redeployFormRef.value.validate();
-      await deploySecondHandGoods(redeployForm.value);
-      const foundItem = tableData.value.find((item) => item.id === redeployForm.value.accountId);
-      foundItem.state = 'sale';
-
-      redeployForm.value.isActiveVisible = false;
-      // onSearch();
-    } finally {
-      redeployForm.value.loading = false;
-    }
-  };
-
-  const doCancelSecondHandGoods = async (card) => {
-    globalLoading.value = true;
-    try {
-      const state = await cancelSecondHandGoods({ id: card.id });
-      card.state = state;
-    } finally {
-      globalLoading.value = false;
-    }
-  };
-
-  /************************************生成授权********************************* */
-  //生成账户授权
-  const createAuthFormRef = ref();
-  const createAuthForm = ref({
-    loading: false,
-    isActiveVisible: false,
-    num: null,
-    accountId: null,
-    authType: 'DAY',
-    authDays: null,
-    maxNumExecute: 300,
-    authExpireTimes: null,
-    billingMethod: 'TIMES',
-    otherInfo: {
-      score: 100,
-      turboTimes: null,
-      fastTimes: null,
-      relaxTimes: null,
-      maxSubmit: null,
-      conExecute: null,
-    },
-  });
-  const showCreateAuth = async (card) => {
-    createAuthForm.value.isActiveVisible = true;
-    createAuthForm.value.accountId = card.id;
-    createAuthForm.value.maxNumExecute = card.maxSubmit;
-
-    createAuthForm.value.num = null;
-    createAuthForm.value.otherInfo.turboTimes = null;
-    createAuthForm.value.otherInfo.fastTimes = null;
-    createAuthForm.value.otherInfo.relaxTimes = null;
-    createAuthForm.value.otherInfo.maxSubmit = null;
-    createAuthForm.value.otherInfo.conExecute = null;
-
-    createAuthForm.value.authDays = null;
-    createAuthForm.value.authExpireTimes = null;
-  };
-
-  const onHideCreateAuth = async () => {
-    createAuthForm.value.isActiveVisible = false;
-  };
-  const onCreateAuth = async () => {
-    createAuthForm.value.loading = true;
-    try {
-      await createAuthFormRef.value.validate();
-      await createAccountAuth(createAuthForm.value);
-      createMessage.success('已成功创建授权码~');
-      createAuthForm.value.isActiveVisible = false;
-      // onSearch();
-    } finally {
-      createAuthForm.value.loading = false;
-    }
-  };
-
-  /**
-   * 删除授权
-   */
-  const doDeleteAuth = async (id, accountId) => {
-    globalLoading.value = true;
-    try {
-      await deleteAuth({ id: id });
-      authListForm.value.isAuthModalVisible = true;
-      authListTableData.value = await accountAuthList({ accountId: accountId, source: 'MJ' });
-    } finally {
-      globalLoading.value = false;
-    }
-  };
-
-  const onChangePicker = (value: [Dayjs, Dayjs], dateString: [string, string]) => {
-    createAuthForm.value.authDays = dateString;
-  };
-  const changeAuthWay = () => {
-    if (createAuthForm.value.authWay === 'DAY') {
-      createAuthForm.value.authDays = '1';
-    } else if (createAuthForm.value.authWay === 'TIME') {
-      createAuthForm.value.authDays = '';
-      createAuthForm.value.authExpireTimes = null;
-    }
-  };
-
-  //激活账户相关
-  const activeData = ref({
-    loading: false,
-    isActiveVisible: false,
-    activeCode: '',
-  });
-
-  const onShowActive = async () => {
-    activeData.value.isActiveVisible = true;
-  };
-
-  const onActiveAccount = async () => {
-    activeData.value.loading = true;
-    try {
-      await activeAuthAccount(activeData.value);
-      activeData.value.isActiveVisible = false;
-      message.success('🎉恭喜！你已成功激活一个账户！');
-      onSearch();
-    } finally {
-      activeData.value.loading = false;
-    }
-  };
-
-  /******************* 店铺跳转 ***************** */
-
-  //跳转商品页面
-  const go = useGo();
-  const goThirdShop = async (uri) => {
-    go(uri);
-  };
-  const closeModal = () => {
-    isDetailsModalVisible.value = false;
-  };
-
-  /************************漫游引导********************** */
-  const activeStep = ref(null);
-  const goodsStep = ref(null);
-  const discordStep = ref(null);
-  const accountGroupStep = ref(null);
-
-  const accountStep = ref({
-    open: false,
-    current: 0,
-    steps: [
-      {
-        title: '托管账号',
-        description:
-          '如果有自己的Discord账号，可以先获取Discord的token然后到Discord账号页签进行账号一键托管。',
-        placement: 'center',
-      },
-      {
-        title: '账号组',
-        description:
-          '托管Discord账号后即可点击这里进行创建Discord账号组，账号组是一个Discord的集合，用于突破Midjourney并发上限！',
-        placement: 'right',
-        target: () => accountGroupStep.value && accountGroupStep.value.$el,
-      },
-
-      {
-        title: '激活账号',
-        description:
-          '如果你从集市或者朋友那分享获取到了授权码，可以点这里进行激活。激活后你就可以使用该账号进行作图了~',
-        placement: 'right',
-        target: () => activeStep.value && activeStep.value.$el,
-      },
-      {
-        title: '商品集市',
-        description: '如果你没有自己的账号，并且需要进行作图。可以考虑到这里购买~',
-        placement: 'right',
-        target: () => goodsStep.value && goodsStep.value.$el,
-      },
-    ],
-  });
-
-  const accountStepClosed = async (val) => {
-    accountStep.value.open = val;
-  };
-
-  const accountStepOpen = async (val) => {
-    // if (val === true) {
-    //   const needShow = getCustomLocalCache(MJ_ACCOUNT_TOUR);
-    //   if (needShow && needShow === true) {
-    //     return;
-    //   }
-    //   setCustomLocalCache(MJ_ACCOUNT_TOUR, true);
-    // }
-
-    const userInfo = userStore.getUserInfo; // 直接赋值
-
-    if (userInfo.coursePop === 2 || userInfo.coursePop == 3) {
-      return;
-    }
-    accountStep.value.open = val;
-    const resp = await userStep({ content: 'MJ_ACCOUNT_TOUR' });
-    userInfo.coursePop = resp;
-    userStore.setUserInfo(userInfo);
-    indexStep.value.open = val;
-  };
-
-  defineExpose({
-    closeModal,
-    accountStepOpen,
-  });
+  
 </script>
 
 <style scoped>
-  .quality-tag {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 32px;
-    margin-right: 0;
-    font-size: 15px;
-  }
 
-  .app {
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    height: 100%;
+.pagination {
+  display: flex;
+  align-content: center;
+  align-items: center;
+  height: 53px;
+}
 
-    /* overflow-y: auto; */
-  }
 
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    flex: 1;
-    align-content: start;
-    margin-top: 10px;
-    padding: 10px;
-    overflow: auto;
-    gap: 14px;
-  }
 
-  .card {
-    min-width: 300px;
-    border-radius: 7%;
-  }
-
-  .card >>> .ant-card-extra {
-    margin-left: 0;
-
-    /* height: 150px; */
-  }
-
-  .card >>> img {
-    display: block;
-    width: 100%;
-    height: auto;
-    border-radius: 7%;
-
-    /* height: 150px; */
-  }
-
-  .card >>> .ant-image-mask {
-    border-radius: 7%;
-  }
-
-  .pagination {
-    display: flex;
-    align-content: center;
-    align-items: center; /* 垂直居中 */
-    height: 53px;
-
-    /* padding: 20px; */
-  }
-
-  .card-image img {
-    position: relative;
-    align-content: center;
-    width: 100%;
-    height: 0;
-    padding-bottom: 56.25%; /* 用于控制图片的宽高比 */
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
-    cursor: pointer;
-  }
-
-  .card-tags {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 5px;
-    margin-right: 0;
-    margin-left: 0;
-  }
-
-  .card-actions {
-    display: flex;
-    gap: 0;
-  }
-
-  .image-tag {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    cursor: pointer;
-  }
-
-  .tag-public {
-    background-color: transparent;
-    color: rgb(255 255 255);
-  }
-
-  .card-status {
-    display: flex;
-    align-items: center;
-  }
-
-  .status-tag {
-    margin-right: 10px;
-  }
-
-  .visibility-tag {
-    margin-right: 10px;
-  }
-
-  .icon-public {
-    color: #16c82b;
-  }
-
-  .icon-private {
-    color: #8c8c8c;
-  }
-
-  .card-date-actions {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 5px;
-    margin-right: 5px;
-    margin-left: 5px;
-  }
-
-  .card-date {
-    color: #8c8c8c;
-    font-size: 0.8em;
-  }
-
-  .search-row {
-    margin: 0 !important;
-  }
-
-  .search-button {
-    width: 100%;
-  }
-
-  .a-radio-group {
-    display: flex;
-    justify-content: flex-start;
-  }
-
-  .search-input {
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  :deep(.ant-tooltip-inner) {
-    width: auto !important;
-    min-width: 600px; /* 设置你想要的最大宽度 */
-  }
-
-  .custom-radio-group span.anticon {
-    vertical-align: -0.125em !important;
-  }
-
-  .delete span.anticon {
-    vertical-align: -0.125em !important;
-  }
-
-  .quality-tag {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 32px;
-    margin-right: 0;
-    font-size: 15px;
-  }
-
-  .account-card >>> .ant-card-head {
-    padding: 0 10px;
-  }
 </style>

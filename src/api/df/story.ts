@@ -25,6 +25,7 @@ export function genSimpleStory(params: any, mode: ErrorMessageMode = 'message') 
     {
       url: Api.GenSimpleStory,
       params,
+      timeout: 100000,
     },
     {
       errorMessageMode: mode,
@@ -43,6 +44,7 @@ export function genStory(params: any, mode: ErrorMessageMode = 'message') {
     {
       url: Api.GenStory,
       params,
+      timeout: 100000,
     },
     {
       errorMessageMode: mode,
@@ -135,6 +137,7 @@ export function genSplitPicture(params: any, mode: ErrorMessageMode = 'message')
     {
       url: Api.GenSplitPicture,
       params,
+      timeout: 100000,
     },
     {
       errorMessageMode: mode,
@@ -154,6 +157,7 @@ export function extractSplitContent(params: any, mode: ErrorMessageMode = 'messa
     {
       url: Api.ExtractSplitContent,
       params,
+      timeout: 100000,
     },
     {
       errorMessageMode: mode,
