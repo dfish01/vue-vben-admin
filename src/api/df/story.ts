@@ -12,6 +12,26 @@ enum Api {
   GenSplitPicture = '/open/dfStory/genSplitPicture',
   ExtractSplitContent = '/open/dfStory/extractSplitContent',
   CommitSplitContent = '/open/dfStory/commitSplitContent',
+  StartStoryJob = '/open/dfStory/startStoryJob',
+}
+
+/**
+ * 启动任务
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function startStoryJob(params: IdReq, mode: ErrorMessageMode = 'message') {
+  return defHttp.post(
+    {
+      url: Api.StartStoryJob,
+      params,
+      timeout: 100000,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
 }
 
 /**
