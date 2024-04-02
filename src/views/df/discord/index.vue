@@ -9,49 +9,27 @@
         >
           <a-form layout="inline">
             <a-form-item>
-              <a-input v-model:value="search.accountName" placeholder="输入账号名称" />
+              <a-input v-model:value="search.title" placeholder="输入故事标题" />
             </a-form-item>
-            <a-form-item>
-              <a-select
-                v-model:value="search.ownerFlag"
-                placeholder="账号权限"
-                style="width: 150px"
-              >
-                <a-select-option value="N">授权</a-select-option>
-                <a-select-option value="Y">自有</a-select-option>
-              </a-select>
-            </a-form-item>
-            <!-- <a-form-item>
-              <a-select
-                v-model:value="search.accountStatus"
-                placeholder="账号状态"
-                style="width: 150px"
-              >
-                <a-select-option value="待验证">待验证</a-select-option>
-                <a-select-option value="正常">正 常</a-select-option>
-                <a-select-option value="异常">异 常</a-select-option>
-                <a-select-option value="过期">结 束</a-select-option>
-              </a-select>
-            </a-form-item> -->
+
             <a-form-item>
               <a-space>
                 <a-button-group>
-                  <a-button @click="onSearch">查询</a-button>
+                  <a-button  type="primary" @click="onSearch">查询</a-button>
                   <a-button @click="onReset">重置</a-button>
                 </a-button-group>
                 <a-button-group>
                   <!-- <a-button @click="showDiscordForm">配置Discord账号</a-button> -->
-                  <a-button type="primary" @click="showStoryForm" ref="accountGroupStep"
-                    >新增账户</a-button
-                  >
-                  <a-button @click="onShowActive" ref="activeStep">授权激活</a-button>
+                  <a-button @click="showStoryForm" ref="accountGroupStep">小故事</a-button>
+                  <a-button type="primary" @click="showStoryForm" disabled ref="accountGroupStep">小说分镜</a-button>
+                  <!-- <a-button @click="onShowActive" ref="activeStep">授权激活</a-button> -->
                   <!-- <a-button type="success" @click="openGoodsShop">授权市场</a-button> -->
 
                   <!-- <a-button type="success" @click="openAccountGroup"
                     >账号组管理{{ props.contentHeight }}</a-button
                   > -->
                 </a-button-group>
-                <a-button-group>
+                <!-- <a-button-group>
                   <a-button @click="goThirdShop('/goods/index')" ref="goodsStep">
                     <Icon
                       icon="simple-icons:shopee"
@@ -72,7 +50,7 @@
                     />
                     转售市场
                   </a-button>
-                </a-button-group>
+                </a-button-group> -->
               </a-space>
             </a-form-item>
           </a-form>
@@ -80,6 +58,7 @@
       </a-col>
     </a-row>
 
+    
     <div
       :style="{
         height: `calc(${contentHeight}px  - 77px)`,
@@ -87,34 +66,40 @@
         padding: '0px 10px',
       }"
     >
-      <a-table :dataSource="tableData" rowKey="id" :loading="globalLoading">
-        <a-table-column title="记录id" dataIndex="id" key="id" v-if="false" align="center" />
-        <a-table-column title="标题" dataIndex="title" key="title" align="center" width="250px" />
-        <a-table-column title="描述" dataIndex="description" key="description" align="center" />
+      <a-table 
+      :dataSource="tableData"
+      rowKey="id"
+      :loading="globalLoading"
+     >
+        
+      <a-table-column title="记录id" dataIndex="id" key="id" v-if="false" align="center" />
+      <a-table-column
+        title="故事标题"
+        dataIndex="title"
+        key="title"
+        align="center"
+        width="250px"
+      />
+      <a-table-column title="故事背景" dataIndex="background" key="background" align="center" />
 
-        <a-table-column title="账号状态" dataIndex="state" key="state" align="center">
-          <template #default="{ text }">
-            <a-tag color="#d9d9d9" v-if="text === 'unvalid'">待验证</a-tag>
-            <a-tag color="#52c41a" v-else-if="text === 'normal'">正常</a-tag>
-            <a-tag color="#ff4d4f" v-else-if="text === 'error'">异常</a-tag>
-            <a-tag color="#d9d9d9" v-else>过期</a-tag>
-          </template>
-        </a-table-column>
-        <a-table-column title="创建时间" dataIndex="gmtCreate" key="gmtCreate" align="center" />
+      <!-- <a-table-column title="账号状态" dataIndex="state" key="state" align="center">
+        <template #default="{ text }">
+          <a-tag color="#d9d9d9" v-if="text === 'unvalid'">待验证</a-tag>
+          <a-tag color="#52c41a" v-else-if="text === 'normal'">正常</a-tag>
+          <a-tag color="#ff4d4f" v-else-if="text === 'error'">异常</a-tag>
+          <a-tag color="#d9d9d9" v-else>过期</a-tag>
+        </template>
+      </a-table-column> -->
+      <a-table-column title="创建时间" width="160px" dataIndex="gmtCreate" key="gmtCreate" align="center" />
 
-        <a-table-column title="联想内容" key="actions" width="150px">
-          <template #default="{ record }">
-            <a-button @click="showDetails(record.id)">查看</a-button>
-          </template>
-        </a-table-column>
-        <a-table-column title="操作" key="actions" fixed="right" width="200">
-          <template #default="{ record }">
-            <a-button-group v-if="record.ownerFlag === 'Y'">
-              <a-button type="primary" @click="showAuthorizationList(record.id)">查看</a-button>
-              <a-button type="danger" @click="deleteAccount(record.id)">删除</a-button>
-            </a-button-group>
-          </template>
-        </a-table-column>
+      <a-table-column title="操作" key="actions" fixed="right" width="150px" align="center">
+        <template #default="{ record }">
+          <a-button-group>
+            <a-button type="primary" @click="showAuthorizationList(record.id)">编辑</a-button>
+            <a-button type="primary" danger @click="doStoryRemove(record.id)">删除</a-button>
+          </a-button-group>
+        </template>
+      </a-table-column>
       </a-table>
     </div>
     <div ref="button">
@@ -871,9 +856,7 @@
 
   //故事查询
   const search = ref({
-    ownerFlag: null,
-    accountName: '',
-    accountStatus: null,
+    title: null,
   });
   // 分页
   const pagination = ref({
@@ -891,9 +874,7 @@
 
   const onReset = () => {
     search.value = {
-      ownerFlag: null,
-      accountName: '',
-      accountStatus: null,
+      title: null,
     };
   };
   // 页数改变的方法
@@ -934,6 +915,7 @@
     // 更多数据...
   ]);
 
+
   //************************************** 故事创建 ***********************************//
 
   const storyForm = ref({
@@ -952,13 +934,14 @@
       viewFlag: false,
       text: null,
       storyLoading: false,
-      mode: 'qwen-plus',
+      mode: 'SparkDesk-v3.5',
       aiStory: null,
     };
   };
 
   // 生成故事
   const doGenStory = async () => {
+    
     storyForm.value.storyLoading = true;
     try {
       const resp = await genStory({
@@ -974,14 +957,15 @@
 
   // 生成故事分镜
   const doGenStorySplit = async () => {
+    
     globalLoading.value = true;
     try {
       const resp = await genSimpleStory({
         mode: storyForm.value.mode,
         content: storyForm.value.aiStory,
       });
-
-      console.log(resp);
+     
+      console.log(resp)
       storyForm.value.viewFlag = false;
 
       //打开明细创建页面
@@ -993,6 +977,7 @@
 
   // 删除sotry
   const doStoryRemove = async (id) => {
+    
     globalLoading.value = true;
     const param: IdReq = { id: id };
     try {
@@ -1002,6 +987,8 @@
       globalLoading.value = false;
     }
   };
+
+
 
   //************************************** 故事分镜 ***********************************//
 
@@ -1023,17 +1010,20 @@
     };
   };
 
-  //提交故事&分镜
-  const doCommitSplitContent = async () => {
-    globalLoading.value = true;
-    try {
-      const resp = commitSplitContent(storySplitForm.value.item);
-      storySplitForm.value.viewFlag = false;
-      onSearch();
-    } finally {
-      globalLoading.value = false;
-    }
-  };
+    //提交故事分镜
+    const doCommitSplitContent = async () => {
+
+        globalLoading.value = true;
+        try {
+          const resp = await commitSplitContent(storySplitForm.value.item);
+          console.log(resp)
+          storySplitForm.value.viewFlag = false;
+          //打开明细创建页面
+          onSearch();
+        } finally {
+          globalLoading.value = false;
+        }
+      };
 
   /*********************************** 角色 ******************************** */
 
@@ -1106,6 +1096,7 @@
   });
   const roleFileList = ref([]);
 
+  
   const previewVisible = ref(false);
   const previewImage = ref('');
   const previewTitle = ref('');
@@ -1347,6 +1338,8 @@
       return { text: '过期', color: '#d9d9d9', status: 'default' };
     }
   };
+
+  
 </script>
 
 <style scoped>
