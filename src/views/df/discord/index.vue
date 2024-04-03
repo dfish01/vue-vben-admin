@@ -75,16 +75,34 @@
           align="center"
           width="250px"
         />
+        <a-table-column
+          title="风格参考图"
+          dataIndex="srefUrl"
+          key="srefUrl"
+          align="center"
+          width="160px"
+        >
+          <template #default="{ record }">
+            <div v-if="record.srefUrl">
+              <a-image :src="record.srefUrl" :width="100" :preview="true" />
+            </div>
+            <div v-else>
+              <span>暂未指定</span>
+            </div>
+          </template>
+        </a-table-column>
         <a-table-column title="故事背景" dataIndex="background" key="background" align="center" />
 
-        <!-- <a-table-column title="账号状态" dataIndex="state" key="state" align="center">
-        <template #default="{ text }">
-          <a-tag color="#d9d9d9" v-if="text === 'unvalid'">待验证</a-tag>
-          <a-tag color="#52c41a" v-else-if="text === 'normal'">正常</a-tag>
-          <a-tag color="#ff4d4f" v-else-if="text === 'error'">异常</a-tag>
-          <a-tag color="#d9d9d9" v-else>过期</a-tag>
-        </template>
-      </a-table-column> -->
+        <a-table-column title="账号状态" dataIndex="state" key="state" align="center">
+          <template #default="{ text }">
+            <a-tag color="#d9d9d9" v-if="text === 'await_role'">角色待生成</a-tag>
+            <a-tag color="#FAA300" v-else-if="text === 'role_creating'">角色生成中</a-tag>
+            <a-tag color="#d9d9d9" v-else-if="text === 'await_creating'">分镜待生成</a-tag>
+            <a-tag color="#86469C" v-else-if="text === 'pic_creating'">分镜生成中</a-tag>
+            <a-tag color="#52c41a" v-else-if="text === 'success'">已全部生成</a-tag>
+            <a-tag color="#d9d9d9" v-else>其他</a-tag>
+          </template>
+        </a-table-column>
         <a-table-column
           title="创建时间"
           width="160px"
@@ -104,7 +122,7 @@
                   style="margin-right: 1px"
                   size="16"
               /></a-button>
-              <a-button danger @click="doStoryRemove(record.id)"
+              <a-button @click="doStoryRemove(record.id)"
                 ><Icon
                   icon="fluent:delete-32-regular"
                   class="vel-icon icon"
@@ -112,6 +130,16 @@
                   style="margin-right: 1px"
                   size="16"
               /></a-button>
+              <a-tooltip title="启动AI生成">
+                <a-button @click="doStartStoryJob(record.id)"
+                  ><Icon
+                    icon="codicon:run-all"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                    style="margin-right: 1px"
+                    size="16"
+                /></a-button>
+              </a-tooltip>
             </a-button-group>
           </template>
         </a-table-column>
@@ -241,14 +269,14 @@
         <a-button type="primary" target="" :loading="globalLoading" @click="doCommitSplitContent">
           {{ storySplitForm.item.id ? '保存修改' : '提交分镜' }}</a-button
         >
-        <a-button
+        <!-- <a-button
           type="primary"
           v-if="storySplitForm.item?.process === 'NONE'"
           :loading="globalLoading"
           target=""
-          @click="doStartStoryJob"
+          @click="doStartStoryJob(storySplitForm.value.item.id)"
           >启动任务</a-button
-        >
+        > -->
         <a-button
           v-if="storySplitForm.item?.process === 'SPLIT_PIC_COMPLETED'"
           target=""
@@ -259,7 +287,7 @@
       </template>
       <a-spin :spinning="globalLoading">
         <div style="flex-wrap: wrap; height: 82vh; overflow: auto">
-          <StoryInfo :storySplitForm="storySplitForm" />
+          <StoryInfo ref="storyInfoRef" :storySplitForm="storySplitForm" />
         </div>
       </a-spin>
     </a-modal>
@@ -444,6 +472,7 @@
     const param: IdReq = { id: id };
     try {
       await storyRemove(param);
+      message.success('删除成功');
       onSearch();
     } finally {
       globalLoading.value = false;
@@ -451,13 +480,14 @@
   };
 
   //启动任务
-  const doStartStoryJob = async () => {
+  const doStartStoryJob = async (id) => {
     console.log('doStartStoryJob');
     globalLoading.value = true;
-    const param: IdReq = { id: storySplitForm.value.item.id };
+    const param: IdReq = { id: id };
     try {
       await startStoryJob(param);
       message.success('启动成功，请耐心等待~');
+      onSearch();
     } finally {
       globalLoading.value = false;
     }
@@ -501,12 +531,18 @@
     loading: false,
   });
 
+  const storyInfoRef = ref<InstanceType<typeof StoryInfo> | null>(null);
+
   const editStorySplitForm = async (id) => {
+    console.log('showStorySplitForm');
     globalLoading.value = true;
     try {
       const resp = await storyInfo({ id: id });
       storySplitForm.value.item = resp;
       storySplitForm.value.viewFlag = true;
+      nextTick(() => {
+        storyInfoRef.value.getInitSrefUrl(storySplitForm.value.item.srefUrl);
+      });
     } finally {
       globalLoading.value = false;
     }
@@ -515,6 +551,10 @@
   const showStorySplitForm = async (item) => {
     storySplitForm.value.viewFlag = true;
     storySplitForm.value.item = item;
+    console.log('showStorySplitForm');
+    nextTick(() => {
+      storyInfoRef.value?.getInitSrefUrl(storySplitForm.value.item.srefUrl);
+    });
   };
   const closeStorySplitForm = async () => {
     storySplitForm.value.viewFlag = false;
