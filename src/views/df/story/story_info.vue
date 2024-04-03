@@ -33,6 +33,14 @@
           <a-descriptions-item label="故事标题" :span="3" :style="{ width: '180px' }">{{
             storySplitForm.item?.title
           }}</a-descriptions-item>
+          <a-descriptions-item label="当前进度" :span="3" :style="{ width: '180px' }" v-if="storySplitForm.item?.state">
+            <a-tag color="#d9d9d9" v-if="storySplitForm.item?.state === 'await_role'">角色待生成</a-tag>
+            <a-tag color="#FAA300" v-else-if="storySplitForm.item?.state === 'role_creating'">角色生成中</a-tag>
+            <a-tag color="#d9d9d9" v-else-if="storySplitForm.item?.state === 'await_pic'">分镜待生成</a-tag>
+            <a-tag color="#86469C" v-else-if="storySplitForm.item?.state === 'pic_creating'">分镜生成中</a-tag>
+            <a-tag color="#52c41a" v-else-if="storySplitForm.item?.state === 'success'">已全部生成</a-tag>
+            <a-tag color="#008DDA" v-else-if="storySplitForm.item?.state === 'submitting'">任务提交中</a-tag>
+          </a-descriptions-item>
           <a-descriptions-item label="故事背景" :span="3" :style="{ width: '180px' }">{{
             storySplitForm.item?.background
           }}</a-descriptions-item>
@@ -146,7 +154,7 @@
               >
                 <template #default="{ record }">
                   <div v-if="record.imageInfo?.url">
-                    <a-image :src="record.imageInfo?.url" :width="100" :preview="false" />
+                    <a-image :src="record.imageInfo?.url" :width="100" :preview="true" />
                   </div>
                   <div v-else>
                     <div v-if="record.imageInfo?.taskId">
@@ -166,12 +174,7 @@
                 <template #default="{ record }">
                   <a-button-group>
                     <a-button
-                      v-if="
-                        record.imageInfo.taskState === 'FAILED' ||
-                        record.imageInfo.taskState === 'SUCCESS' ||
-                        record.imageInfo.taskState === '' ||
-                        (record.imageInfo.url && record.imageInfo.taskId === null)
-                      "
+                      
                       type="primary"
                       @click="showStoryRoleForm(record)"
                       ><Icon
@@ -269,7 +272,7 @@
                 align="center"
                 width="200px"
               />
-              <a-table-column
+              <!-- <a-table-column
                 title="状态"
                 dataIndex="taskState"
                 key="taskState"
@@ -279,20 +282,32 @@
                 <template #default="{ record }">
                   <a-tag :color="tagColor(record.taskState)"> {{ record.taskState }} </a-tag>
                 </template>
-              </a-table-column>
+              </a-table-column> -->
 
               <a-table-column
                 title="分镜描述"
-                width="200px"
+                width="250px"
                 dataIndex="description"
                 key="description"
                 align="center"
               />
+              <a-table-column title="执行prompt" dataIndex="prompt" key="prompt" align="center"   width="250px">
+                <template #default="{ record }">
+                  <div v-if="record.imageInfo?.prompt">
+                    {{record.imageInfo?.prompt}}
+                  </div>
+                  
+                    <div v-else>
+                      <span>未指定AI生成</span>
+                    </div>
+                 
+                </template>
+              </a-table-column>
 
-              <a-table-column title="分镜图片" dataIndex="imageUrl" key="imageUrl" align="center">
+              <a-table-column title="分镜图片" dataIndex="imageUrl" key="imageUrl" align="center"   width="160px">
                 <template #default="{ record }">
                   <div v-if="record.imageInfo?.url">
-                    <a-image :src="record.imageInfo?.url" :width="150" :preview="false" />
+                    <a-image :src="record.imageInfo?.url" :width="150" :preview="true" />
                   </div>
                   <div v-else>
                     <div v-if="record.imageInfo?.taskId">
@@ -312,12 +327,6 @@
                 <template #default="{ record }">
                   <a-button-group>
                     <a-button
-                      v-if="
-                        record.imageInfo.taskState === 'FAILED' ||
-                        record.imageInfo.taskState === 'SUCCESS' ||
-                        record.imageInfo.taskState === '' ||
-                        (record.imageInfo.url && record.imageInfo.taskId === null)
-                      "
                       type="primary"
                       @click="showStoryPictureForm(record, index)"
                       ><Icon
@@ -365,7 +374,7 @@
         <a-button type="primary" target="" @click="saveStoryRoleForm">保存</a-button>
         <a-popconfirm
           title="是否确认清空当前关联的图片？"
-          :ok-text="确认"
+          ok-text="确认"
           cancel-text="取消"
           @confirm="resetRoleForm"
         >
@@ -510,7 +519,7 @@
                     </div>
                   </a-row>
                 </a-tab-pane>
-                <a-tab-pane key="HANDLE">
+                <a-tab-pane key="HAND">
                   <template #tab>
                     <span>
                       <Icon
@@ -613,7 +622,15 @@
       <template #footer>
         <a-button @click="closeStoryPictureForm">取消</a-button>
 
-        <a-button type="primary" target="" @click="savePictureForm">提交</a-button>
+        <a-button type="primary" target="" @click="savePictureForm">保存</a-button>
+        <a-popconfirm
+          title="是否确认清空当前关联的图片？"
+          ok-text="确认"
+          cancel-text="取消"
+          @confirm="resetPictureForm"
+        >
+          <a-button type="warning" target="">清空</a-button>
+        </a-popconfirm>
       </template>
       <a-spin :spinning="globalItemLoading">
         <a-form
@@ -629,12 +646,14 @@
                 :name="['item', 'caption']"
                 :rules="[{ required: true, message: '请输入字幕!' }]"
               >
-                <a-input
-                  show-count
-                  :maxlength="15"
-                  v-model:value="storyPictureForm.item.caption"
+              <a-textarea
+              v-model:value="storyPictureForm.item.caption"
                   placeholder="请输入字幕"
+                  :rows="3"
+                  :maxlength="128"
+                  show-count
                 />
+               
               </a-form-item>
             </a-col>
 
@@ -644,19 +663,21 @@
                 :name="['item', 'description']"
                 :rules="[{ required: true, message: '请输入分镜画面描述!' }]"
               >
-                <a-input
-                  show-count
-                  :maxlength="15"
-                  v-model:value="storyPictureForm.item.description"
+              <a-textarea
+              v-model:value="storyPictureForm.item.description"
                   placeholder="请输入分镜画面描述"
+                  :rows="3"
+                  :maxlength="128"
+                  show-count
                 />
+                
               </a-form-item>
             </a-col>
 
             <a-col :span="24">
               <a-form-item label="启用风格一致性（配合故事的风格图片）">
                 <a-switch
-                  v-model:checked="storyRoleForm.item.imageInfo.enableSref"
+                  v-model:checked="storyPictureForm.item.imageInfo.enableSref"
                   checked-children="开"
                   un-checked-children="关"
                 />
@@ -666,13 +687,21 @@
             <a-col :span="24">
               <a-form-item label="启用角色一致性（配合主角的图片）">
                 <a-switch
-                  v-model:checked="storyRoleForm.item.imageInfo.enableCref"
+                  v-model:checked="storyPictureForm.item.imageInfo.enableCref"
                   checked-children="开"
                   un-checked-children="关"
                 />
               </a-form-item>
             </a-col>
-
+            <a-col :span="24" v-if="storyPictureForm.item.imageInfo?.url">
+              <a-form-item
+                label="分镜图片"
+                :name="['item', 'imageInfo', 'url']"
+                :rules="[{ required: false, message: '分镜图片' }]"
+              >
+                <a-image :width="200" :src="storyPictureForm.item.imageInfo?.url" />
+              </a-form-item>
+            </a-col>
             <a-col :span="24">
               <a-tabs
                 ref="formRef"
@@ -712,8 +741,27 @@
                       />
                     </div>
                   </a-row>
+
+                  <a-row v-if="storyPictureForm.item.imageInfo.taskId" style="margin-top: 20px">
+                    <span>可选图片：</span>
+                    <div
+                      v-if="
+                        storyPictureForm.item.imageInfo.mjUrls &&
+                        storyPictureForm.item.imageInfo.mjUrls.length > 1
+                      "
+                    >
+                      <a-image
+                        v-for="(url, index) in storyPictureForm.item.imageInfo.mjUrls"
+                        @click="() => (storyPictureForm.item.imageInfo.url = url)"
+                        :key="index"
+                        :src="url"
+                        :width="120"
+                        :preview="false"
+                      />
+                    </div>
+                  </a-row>
                 </a-tab-pane>
-                <a-tab-pane key="HANDLE">
+                <a-tab-pane key="HAND">
                   <template #tab>
                     <span>
                       <Icon
@@ -1030,9 +1078,9 @@
 
   const savePictureForm = () => {
     let index = storyPictureForm.value.chapterIndex;
-    const indexItem = storySplitForm.value.item.storyChapterList[index].storyPictureList.findIndex(
-      (i) => i.description === item.description,
-    );
+    // const indexItem = storySplitForm.value.item.storyChapterList[index].storyPictureList.findIndex(
+    //   (i) => i.description === storyPictureForm.value.item.description,
+    // );
 
     console.log('savePictureForm...');
     if (storyPictureForm.value.addFlag) {
@@ -1041,13 +1089,18 @@
         storyPictureForm.value.item,
       );
     } else {
-      storySplitForm.value.item.storyChapterList[index].storyPictureList[indexItem] =
-        storyPictureForm.value.item;
+      // storySplitForm.value.item.storyChapterList[index].storyPictureList[indexItem] =
+      //   storyPictureForm.value.item;
     }
 
     storyPictureForm.value.viewFlag = false;
   };
 
+  const resetPictureForm = () => {
+    storyPictureForm.value.item.imageInfo.taskId = null;
+    storyPictureForm.value.item.imageInfo.url = null;
+    storyPictureForm.value.item.imageInfo.mjUrls = [];
+  };
   const closeStoryPictureForm = () => {
     storyPictureForm.value.viewFlag = false;
   };
@@ -1085,25 +1138,24 @@
         description: null,
       };
     }
-
+    pictureFileList.value = [];
     if (item.imageInfo === null || item.imageInfo === undefined) {
       item.imageInfo = {
         tabKey: 'AI',
         enableSref: true,
         enableCref: true,
       };
-      //图片清空
-      pictureFileList.value = [];
+      
     } else if (item.imageInfo && item.imageInfo.url) {
       //初始化图片
-      pictureFileList.value = [
-        {
-          uid: '-1',
-          name: 'init.png',
-          status: 'done',
-          url: item.imageInfo.url,
-        },
-      ];
+      // pictureFileList.value = [
+      //   {
+      //     uid: '-1',
+      //     name: 'init.png',
+      //     status: 'done',
+      //     url: item.imageInfo.url,
+      //   },
+      // ];
     }
     console.log('showStoryRoleForm');
     storyPictureForm.value.chapterIndex = index;
