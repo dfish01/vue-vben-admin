@@ -165,19 +165,21 @@
               <a-table-column title="操作" align="center" key="actions" fixed="right" :width="80">
                 <template #default="{ record }">
                   <a-button-group>
-                    <a-button type="primary" @click="showStoryRoleForm(record)"
+                    <a-button
+                      v-if="
+                        record.imageInfo.taskState === 'FAILED' ||
+                        record.imageInfo.taskState === 'SUCCESS' ||
+                        record.imageInfo.taskState === '' ||
+                        (record.imageInfo.url && record.imageInfo.taskId === null)
+                      "
+                      type="primary"
+                      @click="showStoryRoleForm(record)"
                       ><Icon
                         icon="uil:edit"
                         class="vel-icon icon"
                         aria-hidden="true"
                         style="margin-right: 1px"
                         size="16"
-                        v-if="
-                          record.imageInfo.taskState === 'FAILED' ||
-                          record.imageInfo.taskState === 'SUCCESS' ||
-                          record.imageInfo.taskState === '' ||
-                          record.imageInfo.url
-                        "
                     /></a-button>
                     <a-button type="primary" danger @click="removeStoryRoleForm(record)"
                       ><Icon
@@ -309,18 +311,20 @@
               <a-table-column title="操作" align="center" key="actions" fixed="right" :width="80">
                 <template #default="{ record }">
                   <a-button-group>
-                    <a-button type="primary" @click="showStoryPictureForm(record, index)"
+                    <a-button
+                      v-if="
+                        record.imageInfo.taskState === 'FAILED' ||
+                        record.imageInfo.taskState === 'SUCCESS' ||
+                        record.imageInfo.taskState === '' ||
+                        (record.imageInfo.url && record.imageInfo.taskId === null)
+                      "
+                      type="primary"
+                      @click="showStoryPictureForm(record, index)"
                       ><Icon
                         icon="uil:edit"
                         class="vel-icon icon"
                         aria-hidden="true"
                         style="margin-right: 1px"
-                        v-if="
-                          record.imageInfo.taskState === 'FAILED' ||
-                          record.imageInfo.taskState === 'SUCCESS' ||
-                          record.imageInfo.taskState === '' ||
-                          record.imageInfo.url
-                        "
                         size="16"
                     /></a-button>
                     <a-button type="primary" danger @click="removeStoryPictureForm(record, index)"
