@@ -151,6 +151,16 @@
                     size="16"
                 /></a-button>
               </a-tooltip>
+              <a-tooltip title="分镜字幕拼接复制">
+                <a-button :disabled="record.state !== 'success'" @click="doCopySplitText(record.id)"
+                  ><Icon
+                    icon="solar:copy-bold"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                    style="margin-right: 1px"
+                    size="16"
+                /></a-button>
+              </a-tooltip>
               <a-tooltip title="将分镜字幕进行语音合成">
                 <a-button disabled @click="doDownloadImages(record.id)"
                   ><Icon
@@ -340,6 +350,19 @@
   import { getAppEnvConfig } from '/@/utils/env';
   import StoryInfo from './story_info.vue';
   import { downloadByOnlineUrl } from '/@/utils/file/download';
+  import useClipboard from 'vue-clipboard3';
+
+  const { toClipboard } = useClipboard();
+
+  const copyText = async (prompt) => {
+    try {
+      await toClipboard(prompt);
+      message.success('合并字幕复制成功');
+    } catch (e) {
+      message.error('复制失败!' + e.message);
+    }
+  };
+
 
   const userStore = useUserStore();
   const token = userStore.getToken;
@@ -510,7 +533,7 @@
     }
   };
 
-  //启动任务
+  //下载图片
   const doDownloadImages = async (id) => {
     globalLoading.value = true;
     try {
@@ -541,6 +564,33 @@
       globalLoading.value = false;
     }
   };
+
+  const doCopySplitText = async (id) => {
+    globalLoading.value = true;
+    try {
+      if(id) {
+        //查询详情
+        const resp = await storyInfo({ id: id });
+        storySplitForm.value.item = resp;
+      }
+
+      let chapterList = storySplitForm.value.item.storyChapterList;
+      let allCaption = '';
+      chapterList.forEach((element, index) => {
+        let pictureList = element.storyPictureList;
+        const concatenatedText = pictureList.reduce((accumulator, current) => {
+          return accumulator + current.caption + '。';
+        }, '');
+        allCaption = allCaption + concatenatedText;
+      });
+      copyText(allCaption);
+      console.log("allCaption {}", allCaption)
+      
+    } finally {
+      globalLoading.value = false;
+    }
+  };
+
 
   function getFileExtension(url) {
     return url.split('.').pop();
