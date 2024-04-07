@@ -10,17 +10,32 @@
             <a-form-item>
               <a-input v-model:value="search.title" placeholder="输入故事标题" />
             </a-form-item>
-
+            <a-form-item>
+            <a-select
+              v-model:value="search.genType"
+              placeholder="生成类型"
+              style="width: 100px;"
+            >
+          
+            <a-select-option value="">全部</a-select-option>
+              <a-select-option value="AI">AI故事</a-select-option>
+              <a-select-option value="NOVEL">小说分镜</a-select-option>
+            </a-select>
+          </a-form-item>
             <a-form-item>
               <a-space>
                 <a-button-group>
                   <a-button type="primary" @click="onSearch">查询</a-button>
                   <a-button @click="onReset">重置</a-button>
                 </a-button-group>
-                <a-button-group>
+                <!-- <a-button-group> -->
                   <!-- <a-button @click="showDiscordForm">配置Discord账号</a-button> -->
-                  <a-button @click="showStoryForm" ref="accountGroupStep">小故事</a-button>
-                  <a-button type="primary" @click="showStoryForm" disabled ref="accountGroupStep"
+                  <a-button @click="showStoryForm" style=" background-color: none;
+    background-image: linear-gradient(to right, #e82d81, #3fe0b5); /* 从左到右的渐变 */
+    box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%); color:white" >AI故事</a-button>
+                  <a-button @click="showNovelForm" style=" background-color: none;
+    background-image: linear-gradient(to right, #677af4, #9f3fe0); /* 从左到右的渐变 */
+    box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%); color:white" 
                     >小说分镜</a-button
                   >
                   <!-- <a-button @click="onShowActive" ref="activeStep">授权激活</a-button> -->
@@ -29,7 +44,15 @@
                   <!-- <a-button type="success" @click="openAccountGroup"
                     >账号组管理{{ props.contentHeight }}</a-button
                   > -->
-                </a-button-group>
+                <!-- </a-button-group> -->
+
+                <a-button @click="doTextToVoice('https://ttsmaker.cn/')" > <span><Icon
+                    icon="iconamoon:volume-down"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                    style="margin-right: 1px"
+                    size="16"
+                />文本转语音</span></a-button>
                 <!-- <a-button-group>
                   <a-button @click="goThirdShop('/goods/index')" ref="goodsStep">
                     <Icon
@@ -75,6 +98,22 @@
           align="center"
           width="250px"
         />
+        <a-table-column
+          title="生成类型"
+          dataIndex="genType"
+          key="genType"
+          align="center"
+          width="130px"
+        >
+          <template #default="{ record }">
+            <div v-if="record.genType === 'AI'">
+              <a-tag> AI故事 </a-tag>
+            </div>
+            <div v-else>
+              <a-tag> 小说分镜 </a-tag>
+            </div>
+          </template>
+        </a-table-column>
         <a-table-column
           title="风格参考图"
           dataIndex="srefUrl"
@@ -161,7 +200,7 @@
                     size="16"
                 /></a-button>
               </a-tooltip>
-              <a-tooltip title="将分镜字幕进行语音合成">
+              <!-- <a-tooltip title="将分镜字幕进行语音合成">
                 <a-button disabled @click="doDownloadImages(record.id)"
                   ><Icon
                     icon="iconamoon:volume-down"
@@ -170,7 +209,7 @@
                     style="margin-right: 1px"
                     size="16"
                 /></a-button>
-              </a-tooltip>
+              </a-tooltip> -->
               
             </a-button-group>
           </template>
@@ -204,11 +243,16 @@
     >
       <template #footer>
         <a-button @click="closeStoryForm">取消</a-button>
-        <a-button :loading="storyForm.storyLoading || globalLoading" @click="doGenStory"
+        <a-button :loading="storyForm.storyLoading || globalLoading" @click="doGenStory" style=" background-color: none;
+    background-image: linear-gradient(to right, #e82d81, #3fe0b5); /* 从左到右的渐变 */
+    box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%); color:white" 
           >AI故事生成</a-button
         >
         <a-button
           type="primary"
+          style=" background-color: none;
+    background-image: linear-gradient(to right, #2850bc, #600e96); /* 从左到右的渐变 */
+    box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%); color:white" 
           v-if="
             storyForm.aiStory && storyForm.aiStory.length > 0 && storyForm.storyLoading === false
           "
@@ -271,7 +315,7 @@
             v-model:value="storyForm.aiStory"
             :rows="10"
             placeholder="一只猫大战老虎的悲伤故事2"
-            :maxlength="100"
+            :maxlength="1024"
           />
         </a-row>
       </a-spin>
@@ -293,7 +337,9 @@
 
       <template #footer>
         <a-button @click="closeStorySplitForm">取消</a-button>
-        <a-button type="primary" target="" :loading="globalLoading" @click="doCommitSplitContent">
+        <a-button type="primary" target="" :loading="globalLoading" @click="doCommitSplitContent" style=" background-color: none;
+    background-image: linear-gradient(to right, #2850bc, #600e96); /* 从左到右的渐变 */
+    box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%); color:white" >
           {{ storySplitForm.item.id ? '保存修改' : '提交分镜' }}</a-button
         >
         <!-- <a-button
@@ -318,6 +364,61 @@
         </div>
       </a-spin>
     </a-modal>
+
+    <!-- 小说转分镜 -->
+    <a-modal
+      v-model:open="novelForm.viewFlag"
+      title="小说章节转分镜"
+      @cancel="closeNovelForm"
+      :bodyStyle="{ padding: 0 }"
+    >
+      <template #footer>
+        <a-button @click="closeNovelForm">取消</a-button>
+        <a-button type="primary" :loading="novelForm.loading || globalLoading" @click="doNovelExtract" style=" background-color: none;
+    background-image: linear-gradient(to right, #677af4, #9f3fe0); /* 从左到右的渐变 */
+    box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%); color:white" 
+          >小说转分镜</a-button
+        >
+      </template>
+      <a-spin :spinning="globalLoading" tip="内容过多，需要的时间稍长。请耐心等待！">
+        <a-row style="padding: 0 10px">
+          <div
+            v-if="novelForm.loading"
+            style="
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              width: 100%;
+              height: 53px;
+            "
+          >
+            <Icon icon="svg-spinners:bars-fade" size="40" />
+            <span style="color: red; font-size: 10px">内容较多，生成时间稍长，请耐心等候</span>
+          </div>
+          <a-textarea
+            v-else
+            :bordered="true"
+            v-model:value="novelForm.content"
+            :rows="15"
+            placeholder="复制小说章节到此。如：
+　　第1章矿奴
+　　昏暗潮湿的矿道中，陆叶背着矿篓，手中提着矿镐，一步步朝前行去。
+　　少年的表情有些忧伤，双目聚焦在面前的空处，似在盯着什么东西。
+　　外人看来，陆叶前方空无一物，但实际上在少年的视野中，却能看到一个半透明的影子。
+　　那像是一棵树的影子，灰蒙蒙的，叫人看不真切，枝叶繁茂，树杈从树身三分之一的位置朝左右分开，支撑起一个半圆形的树冠。
+　　来到这个叫九州的世界已经一年多时间，陆叶至今没搞明白这到底是什么东西，他只知道当自己的注意力足够集中的时候，这棵影子树就有几率出现在视野中，而且别人完全不会察觉。
+　　“真是悲催的人生。”少年一声叹息。
+　　一年前，他突兀地在这个陌生的世界醒来，还不等他熟悉下环境，所处的势力便被一伙贼人攻占了，很多人被杀，他与另外一些年轻的男女成了那伙贼人的俘虏，然后被送进了这处矿脉，成为一名低贱的矿奴。
+　　事后他才从旁人的零散交谈中得知，他所处的势力是隶属浩天盟，一个叫做玄天宗的宗门。
+　　这个宗门的名字听起来炫酷狂霸，但实际上只是个不入流的小宗门。
+　　攻占玄天宗的，是万魔岭麾下的邪月谷。
+"
+            :maxlength="5000"
+          />
+        </a-row>
+      </a-spin>
+    </a-modal>
   </div>
 </template>
 
@@ -328,6 +429,7 @@
   import { IdReq } from '/@/api/model/baseModel';
   import AccountGroup from './account_group.vue';
   import {
+    novelExtract,
     genSimpleStory,
     genStory,
     storyList,
@@ -391,6 +493,7 @@
   //故事查询
   const search = ref({
     title: null,
+    genType:null,
   });
   // 分页
   const pagination = ref({
@@ -449,13 +552,17 @@
     // 更多数据...
   ]);
 
+  const doTextToVoice = (url) => {
+    window.open(url, '_blank');
+  };
+
   //************************************** 故事创建 ***********************************//
 
   const storyForm = ref({
     viewFlag: false,
     text: null,
     storyLoading: false,
-    mode: 'SparkDesk-v3.5',
+    mode: 'gpt-4-0125-preview',
     aiStory: null,
   });
 
@@ -467,7 +574,7 @@
       viewFlag: false,
       text: null,
       storyLoading: false,
-      mode: 'SparkDesk-v3.5',
+      mode: 'gpt-4-0125-preview',
       aiStory: null,
     };
   };
@@ -481,6 +588,7 @@
         content: storyForm.value.text,
       });
       storyForm.value.aiStory = resp;
+      message.success("创作成功!");
       // onSearch();
     } finally {
       storyForm.value.storyLoading = false;
@@ -505,6 +613,26 @@
       globalLoading.value = false;
     }
   };
+
+  // ti
+  const doStoryExtract = async () => {
+    globalLoading.value = true;
+    try {
+      const resp = await storyExtract({
+        mode: storyForm.value.mode,
+        content: storyForm.value.aiStory,
+      });
+
+      console.log(resp);
+      storyForm.value.viewFlag = false;
+
+      //打开明细创建页面
+      showStorySplitForm(resp);
+    } finally {
+      globalLoading.value = false;
+    }
+  };
+  
 
   // 删除sotry
   const doStoryRemove = async (id) => {
@@ -597,6 +725,51 @@
   }
 
   //************************************** 故事分镜 ***********************************//
+
+  //SparkDesk-v3.5
+  const novelForm = ref({
+    viewFlag: false,
+    content: '',
+    loading: false,
+    mode: 'gpt-4-0125-preview',
+  });
+
+  const showNovelForm = async () => {
+    novelForm.value.viewFlag = true;
+  };
+  const closeNovelForm = async () => {
+    novelForm.value ={
+      viewFlag: false,
+      content: '',
+      loading: false,
+      mode: 'gpt-4-0125-preview',
+    };
+  };
+
+
+    //执行小说分镜
+  const doNovelExtract = async () => {
+    // globalLoading.value = true;
+    novelForm.value.loading = true;
+    try {
+      const resp = await novelExtract({
+        mode: novelForm.value.mode,
+        content: novelForm.value.content,
+      });
+      
+      novelForm.value.viewFlag = false;
+      console.log(resp);
+      novelForm.value.viewFlag = false;
+
+      //打开明细创建页面
+      showStorySplitForm(resp);
+
+    } finally {
+      // globalLoading.value = false;
+      novelForm.value.loading = false;
+    }
+  };
+
 
   const storySplitForm = ref({
     viewFlag: false,
@@ -973,6 +1146,26 @@
 
   ::-webkit-scrollbar-track {
     background-color: transparent; /* 设置滚动条背景为透明 */
+  }
+
+
+  .color-button {
+    border: none;
+    background-color: none;
+    background-image: linear-gradient(to right, #e82d81, #3fe0b5); /* 从左到右的渐变 */
+    box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%); /* 阴影效果 */
+    color: white;
+  }
+
+  /* 鼠标悬停按钮效果 */
+  .color-button:hover {
+    background-image: linear-gradient(to right,  #e82d81, #3fe0b5); /* 鼠标悬停时的渐变变化 */
+  }
+
+  /* 按钮点击效果 */
+  .color-button2:active {
+    transform: translateY(4px); /* 点击时按钮下沉效果 */
+    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 20%); /* 点击时的阴影变化 */
   }
 </style>
 <style lang="less">

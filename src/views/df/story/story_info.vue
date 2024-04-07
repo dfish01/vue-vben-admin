@@ -20,9 +20,13 @@
             background-color: #fff7e8;
           "
         >
-          <span style="padding: 3px 10px; color: rgb(0 0 0 / 70%); font-size: 10px">
+          <span v-if="storySplitForm.item.genType === 'AI'" style="padding: 3px 10px; color: rgb(0 0 0 / 70%); font-size: 10px">
             <Icon icon="flat-color-icons:idea" color="#91C8E4" />
             这是一个AI联想的分镜内容，如果生成的内容不理想，你可以手动修改下。另外，考虑到有些是购买的账号，所以把任务自动开启改成手动触发了。</span
+          >
+          <span v-else style="padding: 3px 10px; color: rgb(0 0 0 / 70%); font-size: 10px">
+            <Icon icon="flat-color-icons:idea" color="#91C8E4" />
+            这是一个小说通过AI提取的分镜内容，如果提取的内容不理想，你可以手动修改下。另外，考虑到有些是购买的账号，所以把任务自动开启改成手动触发了。</span
           >
         </div>
       </a-row>
@@ -30,9 +34,19 @@
       <div style="margin-top: 20px; padding: 0 20px">
         <a-descriptions bordered title="故事主题" size="small">
           <template #extra> </template>
-          <a-descriptions-item label="故事标题" :span="3" :style="{ width: '180px' }">{{
+          <a-descriptions-item label="故事标题" :span="3" :style="{ width: '180px' }">
+          <a-input-group v-if="storySplitForm.item?.titleEdit && storySplitForm.item?.titleEdit === true" compact style="display: flex">
+           <a-input  v-model:value="storySplitForm.item.title" style="width:150px"></a-input>
+           <a-button @click="() => storySplitForm.item.titleEdit = false"><Icon icon="fluent:save-20-filled"/></a-button>
+          </a-input-group>
+
+          <div v-else>
+          {{
             storySplitForm.item?.title
-          }}</a-descriptions-item>
+          }} <a-button type="link" @click="() => storySplitForm.item.titleEdit = true" style="padding: 0; "><Icon icon="basil:edit-outline" /></a-button>
+          </div>
+
+         </a-descriptions-item>
           <a-descriptions-item label="当前进度" :span="3" :style="{ width: '180px' }" v-if="storySplitForm.item?.state">
             <a-tag color="#d9d9d9" v-if="storySplitForm.item?.state === 'await_role'">角色待生成</a-tag>
             <a-tag color="#FAA300" v-else-if="storySplitForm.item?.state === 'role_creating'">角色生成中</a-tag>
@@ -41,9 +55,20 @@
             <a-tag color="#52c41a" v-else-if="storySplitForm.item?.state === 'success'">已全部生成</a-tag>
             <a-tag color="#008DDA" v-else-if="storySplitForm.item?.state === 'submitting'">任务提交中</a-tag>
           </a-descriptions-item>
-          <a-descriptions-item label="故事背景" :span="3" :style="{ width: '180px' }">{{
-            storySplitForm.item?.background
-          }}</a-descriptions-item>
+          <a-descriptions-item label="故事背景" :span="3" :style="{ width: '180px' }">
+          
+          <a-input-group v-if="storySplitForm.item?.backgroundEdit && storySplitForm.item?.backgroundEdit === true" compact style="display: flex">
+           <a-input  v-model:value="storySplitForm.item.background" style="width: calc(100% - 48px)"></a-input>
+           <a-button @click="() => storySplitForm.item.backgroundEdit = false"><Icon icon="fluent:save-20-filled"/></a-button>
+          </a-input-group>
+
+          <div v-else>
+          {{
+             storySplitForm.item?.background
+          }} <a-button type="link" @click="() => storySplitForm.item.backgroundEdit = true" style="padding: 0; "><Icon icon="basil:edit-outline" /></a-button>
+          </div>
+          
+          </a-descriptions-item>
 
           <a-descriptions-item label="一致性风格图" :span="3" :style="{ width: '180px' }">
             <a-upload

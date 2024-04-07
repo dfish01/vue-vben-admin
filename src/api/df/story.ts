@@ -13,6 +13,8 @@ enum Api {
   ExtractSplitContent = '/open/dfStory/extractSplitContent',
   CommitSplitContent = '/open/dfStory/commitSplitContent',
   StartStoryJob = '/open/dfStory/startStoryJob',
+
+  NovelExtract = '/open/dfStory/novelExtract',
 }
 
 /**
@@ -25,6 +27,27 @@ export function startStoryJob(params: IdReq, mode: ErrorMessageMode = 'message')
   return defHttp.post(
     {
       url: Api.StartStoryJob,
+      params,
+      timeout: 100000,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
+}
+
+
+
+/**
+ * 小说提取
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function novelExtract(params: any, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<any>(
+    {
+      url: Api.NovelExtract,
       params,
       timeout: 100000,
     },
@@ -68,7 +91,6 @@ export function genStory(params: any, mode: ErrorMessageMode = 'message') {
     },
     {
       errorMessageMode: mode,
-      successMessageMode: mode,
     },
   );
 }
