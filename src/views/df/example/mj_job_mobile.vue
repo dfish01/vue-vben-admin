@@ -1195,6 +1195,7 @@
       prompt = searchPrompt.value;
     }
     jobDetailForm.value.viewFlag = false;
+    showQueryViewFlag.value = false;
     try {
       list.value.length = 0;
       feedForm.value.feedStr = '';
@@ -1206,7 +1207,6 @@
       list.value = more;
       feedForm.value.hasMore = false;
     } finally {
-      showQueryViewFlag.value = false;
       doLoading.value = false;
     }
   };
