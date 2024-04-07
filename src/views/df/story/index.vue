@@ -1,6 +1,6 @@
 <template>
-  <div class="app" ref="formRef">
-    <a-row style="height: 55px">
+  <a-layout style="overflow-y: hidden;">
+    <a-row  ref="formRef" style="height: 55px">
       <a-col :span="24">
         <a-card
           style="display: flex; align-items: center; height: 100%"
@@ -84,26 +84,27 @@
 
     <div
       :style="{
-        height: `calc(${contentHeight}px  - 77px)`,
+        height: `calc(${contentHeight}px )`,
         width: '100%',
-        padding: '0px 10px',
+        padding: '0px 5px',
+
       }"
     >
-      <a-table :dataSource="tableData" rowKey="id" :loading="globalLoading">
-        <a-table-column title="记录id" dataIndex="id" key="id" v-if="false" align="center" />
+      <a-table :dataSource="tableData" rowKey="id" :loading="globalLoading" :pagination="false"  :scroll="{ y: contentHeight - 55 }">
+        <a-table-column title="记录id" dataIndex="id" key="id" v-if="false" align="center"  />
         <a-table-column
           title="故事标题"
           dataIndex="title"
           key="title"
           align="center"
-          width="250px"
+          width="200px"
         />
         <a-table-column
           title="生成类型"
           dataIndex="genType"
           key="genType"
           align="center"
-          width="130px"
+          width="90px"
         >
           <template #default="{ record }">
             <div v-if="record.genType === 'AI'">
@@ -119,7 +120,7 @@
           dataIndex="srefUrl"
           key="srefUrl"
           align="center"
-          width="160px"
+          width="120px"
         >
           <template #default="{ record }">
             <div v-if="record.srefUrl">
@@ -130,9 +131,9 @@
             </div>
           </template>
         </a-table-column>
-        <a-table-column title="故事背景" dataIndex="background" key="background" align="center" />
+        <a-table-column title="故事背景" dataIndex="background" width="300px" key="background" align="center" />
 
-        <a-table-column title="账号状态" dataIndex="state" key="state" align="center">
+        <a-table-column title="账号状态" dataIndex="state" key="state" width="120px" align="center">
           <template #default="{ text }">
             <a-tag color="#d9d9d9" v-if="text === 'await_role'">角色待生成</a-tag>
             <a-tag color="#FAA300" v-else-if="text === 'role_creating'">角色生成中</a-tag>
@@ -145,13 +146,13 @@
         </a-table-column>
         <a-table-column
           title="创建时间"
-          width="160px"
+          width="130px"
           dataIndex="gmtCreate"
           key="gmtCreate"
           align="center"
         />
 
-        <a-table-column title="操作" key="actions" fixed="right" width="150px" align="center">
+        <a-table-column title="操作" key="actions" fixed="right" width="300px" align="center">
           <template #default="{ record }">
             <a-button-group>
               <a-button @click="editStorySplitForm(record.id)"
@@ -419,7 +420,7 @@
         </a-row>
       </a-spin>
     </a-modal>
-  </div>
+  </a-layout>
 </template>
 
 <script lang="ts" setup>
@@ -474,7 +475,7 @@
   const button = ref(null);
   const substractSpaceRefs = ref([]);
   const upwardSpace = computed(() => 0);
-  const offsetHeightRef = ref(0);
+  const offsetHeightRef = ref(56);
   const subtractHeightRefs = ref([button]);
   const formRef = ref();
   // 使用hook
