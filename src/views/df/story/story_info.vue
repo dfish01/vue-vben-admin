@@ -1143,6 +1143,7 @@
     const indexItem = storySplitForm.value.item.storyChapterList[index].storyPictureList.findIndex(
       (i) => i.description === item.description,
     );
+    
     // 如果找到了 id 为 1 的记录，并且索引大于 0
     if (indexItem > 0) {
       // 交换记录
