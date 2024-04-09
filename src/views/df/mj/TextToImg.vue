@@ -2574,6 +2574,11 @@
       if (!isImage) {
         throw new Error('只能上传图片文件！');
       }
+      // 判断是否为webp格式
+      const isWebp = file.type === 'image/webp';
+      if (isWebp) {
+        throw new Error('暂时不支持上传webp格式的图片！');
+      }
       // 获取图片文件的大小
       const isLt5M = file.size / 1024 / 1024 < 5;
       if (!isLt5M) {

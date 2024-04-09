@@ -20,16 +20,17 @@
             background-color: #fff7e8;
           "
         >
+          
+          <span v-if="storySplitForm.item?.genType === 'NOVEL'" style="padding: 3px 10px; color: rgb(0 0 0 / 70%); font-size: 10px">
+            <Icon icon="flat-color-icons:idea" color="#91C8E4" />
+            这是一个小说通过AI提取的分镜内容，如果提取的内容不理想，你可以手动修改下。另外，考虑到有些是购买的账号，所以把任务自动开启改成手动触发了。</span
+          >
           <span
-            v-if="storySplitForm.item.genType === 'AI'"
+          v-else
             style="padding: 3px 10px; color: rgb(0 0 0 / 70%); font-size: 10px"
           >
             <Icon icon="flat-color-icons:idea" color="#91C8E4" />
             这是一个AI联想的分镜内容，如果生成的内容不理想，你可以手动修改下。另外，考虑到有些是购买的账号，所以把任务自动开启改成手动触发了。</span
-          >
-          <span v-else style="padding: 3px 10px; color: rgb(0 0 0 / 70%); font-size: 10px">
-            <Icon icon="flat-color-icons:idea" color="#91C8E4" />
-            这是一个小说通过AI提取的分镜内容，如果提取的内容不理想，你可以手动修改下。另外，考虑到有些是购买的账号，所以把任务自动开启改成手动触发了。</span
           >
         </div>
       </a-row>
@@ -255,7 +256,7 @@
       </a-card>
 
       <!-- 分镜内容 -->
-      <a-card :title="章节内容" :bodyStyle="{ padding: 0 }" style="margin-top: 20px">
+      <a-card title="章节内容" :bodyStyle="{ padding: 0 }" style="margin-top: 20px">
         <template #extra>
           <a-tooltip title="根据已有章节进行AI追加">
             <a-button
@@ -266,13 +267,13 @@
                 color: white;
               "
               @click.stop="doAppendChapter()"
-              v-if="storySplitForm.item.storyChapterList.length > 0"
+              v-if="storySplitForm.item?.storyChapterList?.length > 0"
               ><Icon
-                icon="carbon:watsonx-ai"
+                icon="streamline:ai-science-spark"
                 class="vel-icon icon"
                 aria-hidden="true"
                 style="margin-right: 1px"
-                size="16"
+                
             /></a-button>
           </a-tooltip>
 
@@ -283,16 +284,18 @@
                 class="vel-icon icon"
                 aria-hidden="true"
                 style="margin-right: 1px"
-                size="16"
+                
             /></a-button>
           </a-tooltip>
         </template>
         <div style="margin-top: 0; padding: 0 10px">
-          <a-collapse v-model:activeKey="chapterActiveKey" accordion style="margin: 15px 0">
+          <a-collapse v-model:activeKey="chapterActiveKey" accordion style="margin: 10px 0">
             <a-collapse-panel
               :key="index"
               :header="storyChapter.title"
               v-for="(storyChapter, index) in storySplitForm.item.storyChapterList"
+              :bodyStyle="{padding: 0}"
+              style="padding: 5px 10px"
             >
               <template #extra>
                 <a-tooltip title="从章节描述生成AI分镜">
@@ -378,7 +381,7 @@
               <!-- 章节内容 -->
               <a-descriptions bordered size="small">
                 <template #extra> </template>
-                <a-descriptions-item label="章节标题" :span="3" :style="{ width: '180px' }">
+                <a-descriptions-item label="章节标题" :span="3" :style="{ width: '180px'}">
                   <a-input-group
                     v-if="storyChapter.titleEdit && storyChapter.titleEdit === true"
                     compact
@@ -1245,6 +1248,12 @@
       if (!isImage) {
         throw new Error('只能上传图片文件！');
       }
+      // 判断是否为webp格式
+      const isWebp = file.type === 'image/webp';
+      if (isWebp) {
+        throw new Error('暂时不支持上传webp格式的图片！');
+      }
+
       // 获取图片文件的大小
       const isLt5M = file.size / 1024 / 1024 < 5;
       if (!isLt5M) {
@@ -1353,7 +1362,7 @@
     try {
       let storyChapterList = storySplitForm.value.item.storyChapterList;
       const concatenatedText = storyChapterList.reduce((accumulator, current) => {
-        return accumulator + current.caption + '。';
+        return accumulator + current.description + '。';
       }, '');
       if (concatenatedText === undefined || concatenatedText === '' || concatenatedText === null) {
         message.warning('请至少追加一个章节描述');

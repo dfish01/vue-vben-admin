@@ -61,8 +61,8 @@
                     background-color: none;
                     background-image: linear-gradient(
                       to right,
-                      #677af4,
-                      #9f3fe0
+                      #4c71eb,
+                      #31c4b1
                     ); /* 从左到右的渐变 */
 
                     box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
@@ -311,7 +311,9 @@
           "
           style="
             background-color: none;
-            background-image: linear-gradient(to right, #e82d81, #600e96); /* 从左到右的渐变 */
+            background-image: linear-gradient(to right,  #4c71eb,
+                      #31c4b1); /* 从左到右的渐变 */
+
             box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
             color: white;
           "
@@ -405,6 +407,7 @@
       </template>
 
       <template #footer>
+        <div style="height: 32px;">
         <a-button @click="closeStorySplitForm">取消</a-button>
         <a-button
           type="primary"
@@ -418,7 +421,7 @@
             color: white;
           "
         >
-          {{ storySplitForm.item.id ? '保存修改' : '提交分镜' }}</a-button
+          {{ storySplitForm.item?.id ? '保存修改' : '提交分镜' }}</a-button
         >
         <!-- <a-button
           type="primary"
@@ -435,9 +438,10 @@
           @click="doDownloadImages"
           >下载</a-button
         >
+        </div>
       </template>
       <a-spin :spinning="globalLoading">
-        <div style="flex-wrap: wrap; height: 82vh; overflow: auto">
+        <div style="flex-wrap: wrap; height: calc(100vh - 128px); overflow: auto">
           <StoryInfo
             ref="storyInfoRef"
             @call-parent="changeLoading"
@@ -826,6 +830,7 @@
   });
 
   const showNovelForm = async () => {
+    console.log('showNovelForm');
     novelForm.value.viewFlag = true;
   };
   const closeNovelForm = async () => {
@@ -942,318 +947,8 @@
     }
   };
 
-  /*********************************** 角色 ******************************** */
 
-  const storyRoleForm = ref({
-    viewFlag: false,
-    loading: false,
-    item: {
-      roleName: null,
-      description: null,
-      prompt: null,
-    },
-  });
-
-  const closeStoryRoleForm = () => {
-    storyRoleForm.value.viewFlag = false;
-  };
-  const saveStoryRoleForm = () => {
-    // let index = storyPictureForm.value.chapterIndex;
-    let indexItem = storyRoleForm.value.item.key;
-    if (indexItem) {
-      storySplitForm.value.item.storyRoleList[indexItem] = storyRoleForm.value.item;
-    } else {
-      //新增
-      storySplitForm.value.item.storyRoleList.push(storyRoleForm.value.item);
-    }
-    storyRoleForm.value.viewFlag = false;
-  };
-  const removeStoryRoleForm = (item) => {
-    const index = storySplitForm.value.item.storyRoleList.findIndex(
-      (i) => i.roleName === item.roleName,
-    );
-    storySplitForm.value.item.storyRoleList.splice(index, 1);
-  };
-  const showStoryRoleForm = (item) => {
-    //新增场景
-    if (item === null) {
-      item = {
-        roleName: null,
-        description: null,
-        prompt: null,
-      };
-    }
-    if (item.imageInfo === null || item.imageInfo === undefined) {
-      item.imageInfo = {
-        tabKey: 'AI',
-      };
-      //图片清空
-      roleFileList.value = [];
-    } else if (item.imageInfo && item.imageInfo.url) {
-      //初始化图片
-      roleFileList.value = [
-        {
-          uid: '-1',
-          name: 'init.png',
-          status: 'done',
-          url: item.imageInfo.url,
-        },
-      ];
-    }
-    console.log('showStoryRoleForm');
-    storyRoleForm.value.item = item;
-
-    storyRoleForm.value.viewFlag = true;
-  };
-
-  const uploadInfo = ref({
-    url: VITE_GLOB_API_URL + '/open/system/upload',
-    token: token,
-    srefUrls: [],
-  });
-  const roleFileList = ref([]);
-
-  const previewVisible = ref(false);
-  const previewImage = ref('');
-  const previewTitle = ref('');
-  const handleCancel = () => {
-    previewVisible.value = false;
-    previewTitle.value = '';
-  };
-  const handlePreview = async (file: UploadProps['fileList'][number]) => {
-    if (!file.url && !file.preview) {
-      file.preview = (await getBase64(file.originFileObj)) as string;
-    }
-    previewImage.value = file.url || file.preview;
-    previewVisible.value = true;
-    previewTitle.value = file.name || file.url.substring(file.url.lastIndexOf('/') + 1);
-  };
-
-  function getBase64(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        console.log('File successfully read as data URL'); // 日志输出
-        resolve(reader.result as string);
-      };
-
-      reader.onerror = (error) => {
-        console.error('Error reading the file:', error); // 错误输出
-        reject(error);
-      };
-    });
-  }
-
-  const beforeFileUpload = async (file: File) => {
-    try {
-      // 判断是否为图片
-      const isImage = file.type.startsWith('image/');
-      if (!isImage) {
-        throw new Error('只能上传图片文件！');
-      }
-      // 获取图片文件的大小
-      const isLt5M = file.size / 1024 / 1024 < 5;
-      if (!isLt5M) {
-        throw new Error('图片大小不能超过5MB！');
-      }
-    } catch (error) {
-      console.error('Error converting to Base64:', error);
-      // 弹出异常消息
-      message.error(error.message);
-      //移除这个文件
-      return Upload.LIST_IGNORE;
-    }
-    return true;
-  };
-
-  const handleRoleFileChange = async (info: { file: UploadFile; fileList: UploadFile[] }) => {
-    console.log('handleChange'); // 日志输出
-    if (info.file.status === 'done') {
-      if (info.file.response.result === null) {
-        info.file.status = 'error';
-      } else {
-        storyRoleForm.value.item.imageInfo.url = info.file.response.result;
-      }
-    } else if (info.file.status === 'removed') {
-      storyRoleForm.value.item.imageInfo.url = getSuccessFileUrlStr(roleFileList.value)[0];
-    }
-  };
-
-  const storyPictureForm = ref({
-    chapterIndex: null,
-
-    viewFlag: false,
-    loading: false,
-    item: {
-      caption: null,
-      description: null,
-      prompt: null,
-    },
-  });
-
-  const savePictureForm = () => {
-    let index = storyPictureForm.value.chapterIndex;
-    let indexItem = storyPictureForm.value.item.key;
-    console.log('savePictureForm...');
-    if (indexItem) {
-      storySplitForm.value.item.storyChapterList[index].storyPictureList[indexItem] =
-        storyPictureForm.value.item;
-    } else {
-      //新增
-      storySplitForm.value.item.storyChapterList[index].storyPictureList.push(
-        storyPictureForm.value.item,
-      );
-    }
-
-    storyPictureForm.value.viewFlag = false;
-  };
-
-  const closeStoryPictureForm = () => {
-    storyPictureForm.value.viewFlag = false;
-  };
-  const removeStoryPictureForm = (item, index) => {
-    const indexItem = storySplitForm.value.item.storyChapterList[index].storyPictureList.findIndex(
-      (i) => i.description === item.description,
-    );
-
-    console.log('removeStoryPictureForm');
-    storySplitForm.value.item.storyChapterList[index].storyPictureList.splice(indexItem, 1);
-  };
-
-  const storyPictureMoveUp = (item, index) => {
-    console.log('storyPictureMoveUp');
-
-    const indexItem = storySplitForm.value.item.storyChapterList[index].storyPictureList.findIndex(
-      (i) => i.description === item.description,
-    );
-    // 如果找到了 id 为 1 的记录，并且索引大于 0
-    if (indexItem > 0) {
-      // 交换记录
-      const temp =
-        storySplitForm.value.item.storyChapterList[index].storyPictureList[indexItem - 1];
-      storySplitForm.value.item.storyChapterList[index].storyPictureList[indexItem - 1] =
-        storySplitForm.value.item.storyChapterList[index].storyPictureList[indexItem];
-      storySplitForm.value.item.storyChapterList[index].storyPictureList[indexItem] = temp;
-    }
-  };
-  const showStoryPictureForm = (item, index) => {
-    //新增场景
-    if (item === null) {
-      item = {
-        caption: null,
-        description: null,
-      };
-    }
-
-    if (item.imageInfo === null || item.imageInfo === undefined) {
-      item.imageInfo = {
-        tabKey: 'AI',
-      };
-      //图片清空
-      pictureFileList.value = [];
-    } else if (item.imageInfo && item.imageInfo.url) {
-      //初始化图片
-      pictureFileList.value = [
-        {
-          uid: '-1',
-          name: 'init.png',
-          status: 'done',
-          url: item.imageInfo.url,
-        },
-      ];
-    }
-    console.log('showStoryRoleForm');
-    storyPictureForm.value.chapterIndex = index;
-    storyPictureForm.value.item = item;
-    storyPictureForm.value.viewFlag = true;
-  };
-
-  const pictureFileList = ref([]);
-  const handlePictureFileChange = async (info: { file: UploadFile; fileList: UploadFile[] }) => {
-    console.log('handleChange'); // 日志输出
-    if (info.file.status === 'done') {
-      if (info.file.response.result === null) {
-        info.file.status = 'error';
-      } else {
-        storyPictureForm.value.item.imageInfo.url = info.file.response.result;
-      }
-    } else if (info.file.status === 'removed') {
-      storyPictureForm.value.item.imageInfo.url = getSuccessFileUrlStr(roleFileList.value)[0];
-    }
-  };
-
-  /********************************* 章节 **************************** */
-  const storyChapterForm = ref({
-    chapterIndex: null,
-    viewFlag: false,
-    loading: false,
-    item: {},
-  });
-
-  const showChapterForm = (item, index) => {
-    if (item === null) {
-      item = {};
-    }
-    storyChapterForm.value.chapterIndex = index;
-    storyChapterForm.value.item = item;
-    storyChapterForm.value.viewFlag = true;
-  };
-
-  const closeChapterForm = () => {
-    storyChapterForm.value.viewFlag = false;
-  };
-
-  const saveChapterForm = () => {
-    console.log('saveChapterForm');
-    if (storyChapterForm.value.chapterIndex === null) {
-      //新增
-      storyChapterForm.value.item.storyPictureList = [];
-      storySplitForm.value.item.storyChapterList.push(storyChapterForm.value.item);
-    } else {
-      storySplitForm.value.item.storyChapterList[storyChapterForm.value.chapterIndex] =
-        storyChapterForm.value.item;
-    }
-    storyChapterForm.value.viewFlag = false;
-  };
-
-  const chapterMoveUp = (index) => {
-    if (index > 0) {
-      const temp = storySplitForm.value.item.storyChapterList[index - 1];
-      storySplitForm.value.item.storyChapterList[index - 1] =
-        storySplitForm.value.item.storyChapterList[index];
-      storySplitForm.value.item.storyChapterList[index] = temp;
-    }
-  };
-  const removeChapter = (index) => {
-    storySplitForm.value.item.storyChapterList.splice(index, 1);
-  };
-
-  const getSuccessFileUrlStr = (list) => {
-    let urls = '';
-    list.forEach((item) => {
-      if (item.iw) {
-        urls = urls + item.response.result + ' ::' + item.iw + ' ';
-      } else {
-        urls = urls + item.response.result + ' ';
-      }
-    });
-    return urls;
-  };
-
-  const getProcessColor = (processLabel) => {
-    if (processLabel === '分镜已完成') {
-      return { text: '分镜任务完成', color: '#52c41a', status: 'processing' };
-    } else if (processLabel === '角色生成中') {
-      return { text: '角色生成中', color: '#ff4d4f', status: 'error' };
-    } else if (processLabel === '分镜生成中') {
-      return { text: '分镜生成中', color: '#ff4d4f', status: 'warning' };
-    } else if (processLabel === '角色任务未启动') {
-      return { text: '角色任务未启动', color: '#d9d9d9', status: 'warning' };
-    } else {
-      return { text: '分镜任务未启动', color: '#d9d9d9', status: 'default' };
-    }
-  };
+  
 </script>
 
 <style scoped>
@@ -1268,24 +963,6 @@
     background-color: transparent; /* 设置滚动条背景为透明 */
   }
 
-  .color-button {
-    border: none;
-    background-color: none;
-    background-image: linear-gradient(to right, #e82d81, #3fe0b5); /* 从左到右的渐变 */
-    box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%); /* 阴影效果 */
-    color: white;
-  }
-
-  /* 鼠标悬停按钮效果 */
-  .color-button:hover {
-    background-image: linear-gradient(to right, #e82d81, #3fe0b5); /* 鼠标悬停时的渐变变化 */
-  }
-
-  /* 按钮点击效果 */
-  .color-button2:active {
-    transform: translateY(4px); /* 点击时按钮下沉效果 */
-    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 20%); /* 点击时的阴影变化 */
-  }
 </style>
 <style lang="less">
   .full-modal {
@@ -1296,6 +973,14 @@
       height: calc(100vh);
       margin: 0;
       padding-bottom: 0;
+    }
+
+    .ant-modal-header {
+      height:56px
+    }
+
+    .ant-modal-footer {
+      height:52px
     }
 
     .ant-modal-content {
