@@ -15,6 +15,67 @@ enum Api {
   StartStoryJob = '/open/dfStory/startStoryJob',
 
   NovelExtract = '/open/dfStory/novelExtract',
+
+  GenStoryPic = '/open/dfStory/genStoryPic',
+  AppendStoryPic = '/open/dfStory/appendStoryPic',
+  AppendChapter = '/open/dfStory/appendChapter',
+}
+
+/**
+ * 根据已有内容生成章节分镜
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function genStoryPic(params: any, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<any>(
+    {
+      url: Api.GenStoryPic,
+      params,
+      timeout: 100000,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
+}
+
+/**
+ * 根据已有内容追加分镜画面
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function appendStoryPic(params: any, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<any>(
+    {
+      url: Api.AppendStoryPic,
+      params,
+      timeout: 100000,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
+}
+
+/**
+ * 根据已有内容追加章节
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function appendChapter(params: any, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<any>(
+    {
+      url: Api.AppendChapter,
+      params,
+      timeout: 100000,
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
 }
 
 /**
@@ -35,8 +96,6 @@ export function startStoryJob(params: IdReq, mode: ErrorMessageMode = 'message')
     },
   );
 }
-
-
 
 /**
  * 小说提取

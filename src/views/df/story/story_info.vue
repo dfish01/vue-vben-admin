@@ -20,7 +20,10 @@
             background-color: #fff7e8;
           "
         >
-          <span v-if="storySplitForm.item.genType === 'AI'" style="padding: 3px 10px; color: rgb(0 0 0 / 70%); font-size: 10px">
+          <span
+            v-if="storySplitForm.item.genType === 'AI'"
+            style="padding: 3px 10px; color: rgb(0 0 0 / 70%); font-size: 10px"
+          >
             <Icon icon="flat-color-icons:idea" color="#91C8E4" />
             这是一个AI联想的分镜内容，如果生成的内容不理想，你可以手动修改下。另外，考虑到有些是购买的账号，所以把任务自动开启改成手动触发了。</span
           >
@@ -30,44 +33,84 @@
           >
         </div>
       </a-row>
+
       <!-- 故事主体 -->
-      <div style="margin-top: 20px; padding: 0 20px">
-        <a-descriptions bordered title="故事主题" size="small">
+      <a-card title="故事背景&角色" style="margin-top: 20px" :bodyStyle="{ padding: '0 10px' }">
+        <a-descriptions bordered size="small">
           <template #extra> </template>
           <a-descriptions-item label="故事标题" :span="3" :style="{ width: '180px' }">
-          <a-input-group v-if="storySplitForm.item?.titleEdit && storySplitForm.item?.titleEdit === true" compact style="display: flex">
-           <a-input  v-model:value="storySplitForm.item.title" style="width:150px"></a-input>
-           <a-button @click="() => storySplitForm.item.titleEdit = false"><Icon icon="fluent:save-20-filled"/></a-button>
-          </a-input-group>
+            <a-input-group
+              v-if="storySplitForm.item?.titleEdit && storySplitForm.item?.titleEdit === true"
+              compact
+              style="display: flex"
+            >
+              <a-input v-model:value="storySplitForm.item.title" style="width: 150px" />
+              <a-button @click="() => (storySplitForm.item.titleEdit = false)"
+                ><Icon icon="fluent:save-20-filled"
+              /></a-button>
+            </a-input-group>
 
-          <div v-else>
-          {{
-            storySplitForm.item?.title
-          }} <a-button type="link" @click="() => storySplitForm.item.titleEdit = true" style="padding: 0; "><Icon icon="basil:edit-outline" /></a-button>
-          </div>
-
-         </a-descriptions-item>
-          <a-descriptions-item label="当前进度" :span="3" :style="{ width: '180px' }" v-if="storySplitForm.item?.state">
-            <a-tag color="#d9d9d9" v-if="storySplitForm.item?.state === 'await_role'">角色待生成</a-tag>
-            <a-tag color="#FAA300" v-else-if="storySplitForm.item?.state === 'role_creating'">角色生成中</a-tag>
-            <a-tag color="#d9d9d9" v-else-if="storySplitForm.item?.state === 'await_pic'">分镜待生成</a-tag>
-            <a-tag color="#86469C" v-else-if="storySplitForm.item?.state === 'pic_creating'">分镜生成中</a-tag>
-            <a-tag color="#52c41a" v-else-if="storySplitForm.item?.state === 'success'">已全部生成</a-tag>
-            <a-tag color="#008DDA" v-else-if="storySplitForm.item?.state === 'submitting'">任务提交中</a-tag>
+            <div v-else>
+              {{ storySplitForm.item?.title }}
+              <a-button
+                type="link"
+                @click="() => (storySplitForm.item.titleEdit = true)"
+                style="padding: 0"
+                ><Icon icon="basil:edit-outline"
+              /></a-button>
+            </div>
+          </a-descriptions-item>
+          <a-descriptions-item
+            label="当前进度"
+            :span="3"
+            :style="{ width: '180px' }"
+            v-if="storySplitForm.item?.state"
+          >
+            <a-tag color="#d9d9d9" v-if="storySplitForm.item?.state === 'await_role'"
+              >角色待生成</a-tag
+            >
+            <a-tag color="#FAA300" v-else-if="storySplitForm.item?.state === 'role_creating'"
+              >角色生成中</a-tag
+            >
+            <a-tag color="#d9d9d9" v-else-if="storySplitForm.item?.state === 'await_pic'"
+              >分镜待生成</a-tag
+            >
+            <a-tag color="#86469C" v-else-if="storySplitForm.item?.state === 'pic_creating'"
+              >分镜生成中</a-tag
+            >
+            <a-tag color="#52c41a" v-else-if="storySplitForm.item?.state === 'success'"
+              >已全部生成</a-tag
+            >
+            <a-tag color="#008DDA" v-else-if="storySplitForm.item?.state === 'submitting'"
+              >任务提交中</a-tag
+            >
           </a-descriptions-item>
           <a-descriptions-item label="故事背景" :span="3" :style="{ width: '180px' }">
-          
-          <a-input-group v-if="storySplitForm.item?.backgroundEdit && storySplitForm.item?.backgroundEdit === true" compact style="display: flex">
-           <a-input  v-model:value="storySplitForm.item.background" style="width: calc(100% - 48px)"></a-input>
-           <a-button @click="() => storySplitForm.item.backgroundEdit = false"><Icon icon="fluent:save-20-filled"/></a-button>
-          </a-input-group>
+            <a-input-group
+              v-if="
+                storySplitForm.item?.backgroundEdit && storySplitForm.item?.backgroundEdit === true
+              "
+              compact
+              style="display: flex"
+            >
+              <a-input
+                v-model:value="storySplitForm.item.background"
+                style="width: calc(100% - 48px)"
+              />
+              <a-button @click="() => (storySplitForm.item.backgroundEdit = false)"
+                ><Icon icon="fluent:save-20-filled"
+              /></a-button>
+            </a-input-group>
 
-          <div v-else>
-          {{
-             storySplitForm.item?.background
-          }} <a-button type="link" @click="() => storySplitForm.item.backgroundEdit = true" style="padding: 0; "><Icon icon="basil:edit-outline" /></a-button>
-          </div>
-          
+            <div v-else>
+              {{ storySplitForm.item?.background }}
+              <a-button
+                type="link"
+                @click="() => (storySplitForm.item.backgroundEdit = true)"
+                style="padding: 0"
+                ><Icon icon="basil:edit-outline"
+              /></a-button>
+            </div>
           </a-descriptions-item>
 
           <a-descriptions-item label="一致性风格图" :span="3" :style="{ width: '180px' }">
@@ -91,74 +134,62 @@
             </a-upload>
           </a-descriptions-item>
         </a-descriptions>
-      </div>
-      <!-- 故事角色 -->
-      <div style="margin-top: 20px; padding: 0 20px">
-        <a-collapse v-model:activeKey="activeKey" accordion>
-          <a-collapse-panel key="1" header="故事角色定义">
-            <a-button-group>
-              <a-button
-                @click="showStoryRoleForm(null)"
-                type="primary"
-                style="margin-bottom: 5px"
-                size="small"
-                ><Icon
-                  icon="gg:add"
-                  class="vel-icon icon"
-                  aria-hidden="true"
-                  style="margin-right: 1px"
-                  size="16"
-                />添加角色</a-button
-              ><a-button
-                @click="showChapterForm(null, null)"
-                style="margin-bottom: 5px"
-                size="small"
-              >
-                <Icon
-                  icon="gg:add"
-                  class="vel-icon icon"
-                  aria-hidden="true"
-                  style="margin-right: 1px"
-                  size="16"
-                />追加章节</a-button
-              >
-            </a-button-group>
 
-            <a-table
-              :dataSource="storySplitForm.item.storyRoleList"
-              rowKey="id"
-              :loading="globalItemLoading"
-              :pagination="false"
-            >
-              <a-table-column
-                title="角色记录id"
-                dataIndex="id"
-                key="id"
-                v-if="false"
-                align="center"
-              />
-              <a-table-column
-                title="角色名"
-                dataIndex="roleName"
-                key="roleName"
-                align="center"
-                width="100px"
-              />
-              <a-table-column
-                width="250px"
-                title="角色描述"
-                dataIndex="description"
-                key="description"
-                align="center"
-              />
-              <a-table-column
-                title="角色别名（分镜上下文替换）"
-                width="200px"
-                dataIndex="alias"
-                key="description"
-                align="center"
-              />
-              <!-- <a-table-column
+        <!-- 故事角色 -->
+        <div style="margin: 10px 0; padding: 0">
+          <a-collapse v-model:activeKey="roleActiveKey" accordion>
+            <a-collapse-panel key="1" header="故事角色定义">
+              <a-button-group>
+                <a-button
+                  @click="showStoryRoleForm(null)"
+                  type="primary"
+                  style="margin-bottom: 5px"
+                  size="small"
+                  ><Icon
+                    icon="gg:add"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                    style="margin-right: 1px"
+                    size="16"
+                  />添加角色</a-button
+                >
+              </a-button-group>
+
+              <a-table
+                :dataSource="storySplitForm.item.storyRoleList"
+                rowKey="id"
+                :loading="globalItemLoading"
+                :pagination="false"
+              >
+                <a-table-column
+                  title="角色记录id"
+                  dataIndex="id"
+                  key="id"
+                  v-if="false"
+                  align="center"
+                />
+                <a-table-column
+                  title="角色名"
+                  dataIndex="roleName"
+                  key="roleName"
+                  align="center"
+                  width="100px"
+                />
+                <a-table-column
+                  width="250px"
+                  title="角色描述"
+                  dataIndex="description"
+                  key="description"
+                  align="center"
+                />
+                <a-table-column
+                  title="角色别名（分镜上下文替换）"
+                  width="200px"
+                  dataIndex="alias"
+                  key="description"
+                  align="center"
+                />
+                <!-- <a-table-column
                 title="状态"
                 dataIndex="taskState"
                 key="taskState"
@@ -170,134 +201,267 @@
                 </template>
               </a-table-column> -->
 
-              <a-table-column
-                title="角色图片(一致性)"
-                dataIndex="imageUrl"
-                key="imageUrl"
-                align="center"
-                width="200px"
-              >
-                <template #default="{ record }">
-                  <div v-if="record.imageInfo?.url">
-                    <a-image :src="record.imageInfo?.url" :width="100" :preview="true" />
-                  </div>
-                  <div v-else>
-                    <div v-if="record.imageInfo?.taskId">
-                      <div v-if="record.imageInfo?.taskState !== 'FINISHED'">
-                        <a-tag :color="tagColor(record.imageInfo.taskState)">
-                          {{ record.imageInfo.taskState }}
-                        </a-tag>
-                      </div>
+                <a-table-column
+                  title="角色图片(一致性)"
+                  dataIndex="imageUrl"
+                  key="imageUrl"
+                  align="center"
+                  width="200px"
+                >
+                  <template #default="{ record }">
+                    <div v-if="record.imageInfo?.url">
+                      <a-image :src="record.imageInfo?.url" :width="100" :preview="true" />
                     </div>
                     <div v-else>
-                      <span>暂未指定，请编辑选择MJ生成或者手动上传</span>
+                      <div v-if="record.imageInfo?.taskId">
+                        <div v-if="record.imageInfo?.taskState !== 'FINISHED'">
+                          <a-tag :color="tagColor(record.imageInfo.taskState)">
+                            {{ record.imageInfo.taskState }}
+                          </a-tag>
+                        </div>
+                      </div>
+                      <div v-else>
+                        <span>暂未指定，请编辑选择MJ生成或者手动上传</span>
+                      </div>
                     </div>
-                  </div>
-                </template>
-              </a-table-column>
-              <a-table-column title="操作" align="center" key="actions" fixed="right" :width="80">
-                <template #default="{ record }">
-                  <a-button-group>
-                    <a-button
-                      
-                      type="primary"
-                      @click="showStoryRoleForm(record)"
-                      ><Icon
-                        icon="uil:edit"
-                        class="vel-icon icon"
-                        aria-hidden="true"
-                        style="margin-right: 1px"
-                        size="16"
-                    /></a-button>
-                    <a-button type="primary" danger @click="removeStoryRoleForm(record)"
-                      ><Icon
-                        icon="fluent:delete-32-regular"
-                        class="vel-icon icon"
-                        aria-hidden="true"
-                        style="margin-right: 1px"
-                        size="16"
-                    /></a-button>
-                  </a-button-group>
-                </template>
-              </a-table-column>
-            </a-table>
-          </a-collapse-panel>
-        </a-collapse>
-      </div>
+                  </template>
+                </a-table-column>
+                <a-table-column title="操作" align="center" key="actions" fixed="right" :width="80">
+                  <template #default="{ record }">
+                    <a-button-group>
+                      <a-button type="primary" @click="showStoryRoleForm(record)"
+                        ><Icon
+                          icon="uil:edit"
+                          class="vel-icon icon"
+                          aria-hidden="true"
+                          style="margin-right: 1px"
+                          size="16"
+                      /></a-button>
+                      <a-button type="primary" danger @click="removeStoryRoleForm(record)"
+                        ><Icon
+                          icon="fluent:delete-32-regular"
+                          class="vel-icon icon"
+                          aria-hidden="true"
+                          style="margin-right: 1px"
+                          size="16"
+                      /></a-button>
+                    </a-button-group>
+                  </template>
+                </a-table-column>
+              </a-table>
+            </a-collapse-panel>
+          </a-collapse>
+        </div>
+      </a-card>
+
       <!-- 分镜内容 -->
-      <div style="margin-top: 0; padding: 0 10px">
-        <div
-          v-for="(storyChapter, index) in storySplitForm.item.storyChapterList"
-          :key="index"
-          style="padding: 10px 15px"
-        >
-          <!-- 章节内容 -->
-          <a-descriptions bordered :title="storyChapter.title" size="small">
-            <template #extra>
-              <a-button-group>
-                <a-button @click="showChapterForm(storyChapter, index)"
-                  ><Icon
-                    icon="uil:edit"
-                    class="vel-icon icon"
-                    aria-hidden="true"
-                    style="margin-right: 1px"
-                    size="16"
-                /></a-button>
-                <a-button @click="removeChapter(index)"
-                  ><Icon
-                    icon="fluent:delete-32-regular"
-                    class="vel-icon icon"
-                    aria-hidden="true"
-                    style="margin-right: 1px"
-                    size="16"
-                /></a-button>
-                <a-button v-if="index > 0" @click="chapterMoveUp(index)"
-                  ><Icon
-                    icon="octicon:move-to-top-24"
-                    class="vel-icon icon"
-                    aria-hidden="true"
-                    style="margin-right: 1px"
-                    size="16"
-                /></a-button>
-              </a-button-group>
-            </template>
-            <a-descriptions-item label="章节标题" :span="3" :style="{ width: '180px' }">{{
-              storyChapter.title
-            }}</a-descriptions-item>
-            <a-descriptions-item label="章节描述" :span="3" :style="{ width: '180px' }">{{
-              storyChapter.description
-            }}</a-descriptions-item>
-          </a-descriptions>
-          <!-- 章节的分镜内容 -->
-          <div style="margin-top: 15px">
+      <a-card :title="章节内容" :bodyStyle="{ padding: 0 }" style="margin-top: 20px">
+        <template #extra>
+          <a-tooltip title="根据已有章节进行AI追加">
             <a-button
-              @click="showStoryPictureForm(null, index)"
-              style="margin-bottom: 5px"
-              size="small"
-            >
-              <Icon
-                icon="gg:add"
+              style="
+                background-color: none;
+                background-image: linear-gradient(to right, #137af4, #5f3fe0); /* 从左到右的渐变 */
+                box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
+                color: white;
+              "
+              @click.stop="doAppendChapter()"
+              v-if="storySplitForm.item.storyChapterList.length > 0"
+              ><Icon
+                icon="carbon:watsonx-ai"
                 class="vel-icon icon"
                 aria-hidden="true"
                 style="margin-right: 1px"
                 size="16"
-              />添加分镜</a-button
+            /></a-button>
+          </a-tooltip>
+
+          <a-tooltip title="手动添加章节">
+            <a-button @click.stop="showChapterForm(null, null)" style="margin-left: 10px"
+              ><Icon
+                icon="basil:add-outline"
+                class="vel-icon icon"
+                aria-hidden="true"
+                style="margin-right: 1px"
+                size="16"
+            /></a-button>
+          </a-tooltip>
+        </template>
+        <div style="margin-top: 0; padding: 0 10px">
+          <a-collapse v-model:activeKey="chapterActiveKey" accordion style="margin: 15px 0">
+            <a-collapse-panel
+              :key="index"
+              :header="storyChapter.title"
+              v-for="(storyChapter, index) in storySplitForm.item.storyChapterList"
             >
-            <a-table
-              :dataSource="storyChapter.storyPictureList"
-              rowKey="id"
-              :loading="globalItemLoading"
-              :pagination="false"
-            >
-              <a-table-column title="分镜id" dataIndex="id" key="id" v-if="false" align="center" />
-              <a-table-column
-                title="字幕"
-                dataIndex="caption"
-                key="caption"
-                align="center"
-                width="200px"
-              />
-              <!-- <a-table-column
+              <template #extra>
+                <a-tooltip title="从章节描述生成AI分镜">
+                  <a-button
+                    style="
+                      background-color: none;
+                      background-image: linear-gradient(
+                        to right,
+                        #677af4,
+                        #9f3fe0
+                      ); /* 从左到右的渐变 */
+
+                      box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
+                      color: white;
+                    "
+                    v-if="storyChapter.storyPictureList.length == 0"
+                    @click.stop="doGenStoryPic(index)"
+                  >
+                    <Icon
+                      icon="eos-icons:ai"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                      style="margin-right: 1px"
+                      size="16"
+                  /></a-button>
+                </a-tooltip>
+                <a-tooltip title="从已有的分镜追加AI分镜">
+                  <a-button
+                    style="
+                      background-color: none;
+                      background-image: linear-gradient(
+                        to right,
+                        #677af4,
+                        #9f3fe0
+                      ); /* 从左到右的渐变 */
+
+                      box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
+                      color: white;
+                    "
+                    v-if="storyChapter.storyPictureList.length > 0"
+                    @click.stop="doAppendStoryPic(index)"
+                  >
+                    <Icon
+                      icon="carbon:watsonx-ai"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                      style="margin-right: 1px"
+                      size="16"
+                    />
+                  </a-button>
+                </a-tooltip>
+                <a-button-group style="margin-left: 10px">
+                  <a-tooltip title="手动添加分镜">
+                    <a-button @click.stop="showStoryPictureForm(null, index)"
+                      ><Icon
+                        icon="basil:add-outline"
+                        class="vel-icon icon"
+                        aria-hidden="true"
+                        style="margin-right: 1px"
+                        size="16"
+                    /></a-button>
+                  </a-tooltip>
+
+                  <a-button @click.stop="removeChapter(index)"
+                    ><Icon
+                      icon="fluent:delete-32-regular"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                      style="margin-right: 1px"
+                      size="16"
+                  /></a-button>
+                  <a-button :disabled="index === 0" @click.stop="chapterMoveUp(index)"
+                    ><Icon
+                      icon="octicon:move-to-top-24"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                      style="margin-right: 1px"
+                      size="16"
+                  /></a-button>
+                </a-button-group>
+              </template>
+
+              <!-- 章节内容 -->
+              <a-descriptions bordered size="small">
+                <template #extra> </template>
+                <a-descriptions-item label="章节标题" :span="3" :style="{ width: '180px' }">
+                  <a-input-group
+                    v-if="storyChapter.titleEdit && storyChapter.titleEdit === true"
+                    compact
+                    style="display: flex"
+                  >
+                    <a-input v-model:value="storyChapter.title" style="width: 150px" />
+                    <a-button @click="() => (storyChapter.titleEdit = false)"
+                      ><Icon icon="fluent:save-20-filled"
+                    /></a-button>
+                  </a-input-group>
+
+                  <div v-else>
+                    {{ storyChapter.title }}
+                    <a-button
+                      type="link"
+                      @click="() => (storyChapter.titleEdit = true)"
+                      style="padding: 0"
+                      ><Icon icon="basil:edit-outline"
+                    /></a-button>
+                  </div>
+                </a-descriptions-item>
+                <a-descriptions-item label="章节描述" :span="3" :style="{ width: '180px' }">
+                  <a-input-group
+                    v-if="storyChapter.descriptionEdit && storyChapter.descriptionEdit === true"
+                    compact
+                    style="display: flex"
+                  >
+                    <a-input
+                      v-model:value="storyChapter.description"
+                      style="width: calc(100% - 48px)"
+                    />
+                    <a-button @click="() => (storyChapter.descriptionEdit = false)"
+                      ><Icon icon="fluent:save-20-filled"
+                    /></a-button>
+                  </a-input-group>
+
+                  <div v-else>
+                    {{ storyChapter.description }}
+                    <a-button
+                      type="link"
+                      @click="() => (storyChapter.descriptionEdit = true)"
+                      style="padding: 0"
+                      ><Icon icon="basil:edit-outline"
+                    /></a-button>
+                  </div>
+                </a-descriptions-item>
+              </a-descriptions>
+              <!-- 章节的分镜内容 -->
+              <div style="margin-top: 15px">
+                <!-- <a-button
+                  @click="showStoryPictureForm(null, index)"
+                  style="margin-bottom: 5px"
+                  size="small"
+                >
+                  <Icon
+                    icon="gg:add"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                    style="margin-right: 1px"
+                    size="16"
+                  />添加分镜</a-button
+                > -->
+                <a-table
+                  :dataSource="storyChapter.storyPictureList"
+                  rowKey="id"
+                  :loading="globalItemLoading"
+                  :pagination="false"
+                >
+                  <a-table-column
+                    title="分镜id"
+                    dataIndex="id"
+                    key="id"
+                    v-if="false"
+                    align="center"
+                  />
+                  <a-table-column
+                    title="字幕"
+                    dataIndex="caption"
+                    key="caption"
+                    align="center"
+                    width="200px"
+                  />
+                  <!-- <a-table-column
                 title="状态"
                 dataIndex="taskState"
                 key="taskState"
@@ -309,81 +473,101 @@
                 </template>
               </a-table-column> -->
 
-              <a-table-column
-                title="分镜描述"
-                width="250px"
-                dataIndex="description"
-                key="description"
-                align="center"
-              />
-              <a-table-column title="执行prompt" dataIndex="prompt" key="prompt" align="center"   width="250px">
-                <template #default="{ record }">
-                  <div v-if="record.imageInfo?.prompt">
-                    {{record.imageInfo?.prompt}}
-                  </div>
-                  
-                    <div v-else>
-                      <span>未指定AI生成</span>
-                    </div>
-                 
-                </template>
-              </a-table-column>
-
-              <a-table-column title="分镜图片" dataIndex="imageUrl" key="imageUrl" align="center"   width="160px">
-                <template #default="{ record }">
-                  <div v-if="record.imageInfo?.url">
-                    <a-image :src="record.imageInfo?.url" :width="150" :preview="true" />
-                  </div>
-                  <div v-else>
-                    <div v-if="record.imageInfo?.taskId">
-                      <div v-if="record.imageInfo?.taskState !== 'FINISHED'">
-                        <a-tag :color="tagColor(record.imageInfo.taskState)">
-                          {{ record.imageInfo.taskState }}
-                        </a-tag>
+                  <a-table-column
+                    title="分镜描述"
+                    width="250px"
+                    dataIndex="description"
+                    key="description"
+                    align="center"
+                  />
+                  <a-table-column
+                    title="执行prompt"
+                    dataIndex="prompt"
+                    key="prompt"
+                    align="center"
+                    width="250px"
+                  >
+                    <template #default="{ record }">
+                      <div v-if="record.imageInfo?.prompt">
+                        {{ record.imageInfo?.prompt }}
                       </div>
-                    </div>
-                    <div v-else>
-                      <span>暂未指定，请编辑选择MJ生成或者手动上传</span>
-                    </div>
-                  </div>
-                </template>
-              </a-table-column>
-              <a-table-column title="操作" align="center" key="actions" fixed="right" :width="80">
-                <template #default="{ record }">
-                  <a-button-group>
-                    <a-button
-                      type="primary"
-                      @click="showStoryPictureForm(record, index)"
-                      ><Icon
-                        icon="uil:edit"
-                        class="vel-icon icon"
-                        aria-hidden="true"
-                        style="margin-right: 1px"
-                        size="16"
-                    /></a-button>
-                    <a-button type="primary" danger @click="removeStoryPictureForm(record, index)"
-                      ><Icon
-                        icon="fluent:delete-32-regular"
-                        class="vel-icon icon"
-                        aria-hidden="true"
-                        style="margin-right: 1px"
-                        size="16"
-                    /></a-button>
-                    <a-button type="primary" @click="storyPictureMoveUp(record, index)"
-                      ><Icon
-                        icon="octicon:move-to-top-24"
-                        class="vel-icon icon"
-                        aria-hidden="true"
-                        style="margin-right: 1px"
-                        size="16"
-                    /></a-button>
-                  </a-button-group>
-                </template>
-              </a-table-column>
-            </a-table>
-          </div>
+
+                      <div v-else>
+                        <span>未指定AI生成</span>
+                      </div>
+                    </template>
+                  </a-table-column>
+
+                  <a-table-column
+                    title="分镜图片"
+                    dataIndex="imageUrl"
+                    key="imageUrl"
+                    align="center"
+                    width="160px"
+                  >
+                    <template #default="{ record }">
+                      <div v-if="record.imageInfo?.url">
+                        <a-image :src="record.imageInfo?.url" :width="150" :preview="true" />
+                      </div>
+                      <div v-else>
+                        <div v-if="record.imageInfo?.taskId">
+                          <div v-if="record.imageInfo?.taskState !== 'FINISHED'">
+                            <a-tag :color="tagColor(record.imageInfo.taskState)">
+                              {{ record.imageInfo.taskState }}
+                            </a-tag>
+                          </div>
+                        </div>
+                        <div v-else>
+                          <span>暂未指定，请编辑选择MJ生成或者手动上传</span>
+                        </div>
+                      </div>
+                    </template>
+                  </a-table-column>
+                  <a-table-column
+                    title="操作"
+                    align="center"
+                    key="actions"
+                    fixed="right"
+                    :width="80"
+                  >
+                    <template #default="{ record }">
+                      <a-button-group>
+                        <a-button type="primary" @click="showStoryPictureForm(record, index)"
+                          ><Icon
+                            icon="uil:edit"
+                            class="vel-icon icon"
+                            aria-hidden="true"
+                            style="margin-right: 1px"
+                            size="16"
+                        /></a-button>
+                        <a-button
+                          type="primary"
+                          danger
+                          @click="removeStoryPictureForm(record, index)"
+                          ><Icon
+                            icon="fluent:delete-32-regular"
+                            class="vel-icon icon"
+                            aria-hidden="true"
+                            style="margin-right: 1px"
+                            size="16"
+                        /></a-button>
+                        <a-button type="primary" @click="storyPictureMoveUp(record, index)"
+                          ><Icon
+                            icon="octicon:move-to-top-24"
+                            class="vel-icon icon"
+                            aria-hidden="true"
+                            style="margin-right: 1px"
+                            size="16"
+                        /></a-button>
+                      </a-button-group>
+                    </template>
+                  </a-table-column>
+                </a-table>
+              </div>
+            </a-collapse-panel>
+          </a-collapse>
         </div>
-      </div>
+      </a-card>
     </div>
 
     <!-- 角色modal -->
@@ -671,14 +855,13 @@
                 :name="['item', 'caption']"
                 :rules="[{ required: true, message: '请输入字幕!' }]"
               >
-              <a-textarea
-              v-model:value="storyPictureForm.item.caption"
+                <a-textarea
+                  v-model:value="storyPictureForm.item.caption"
                   placeholder="请输入字幕"
                   :rows="3"
                   :maxlength="128"
                   show-count
                 />
-               
               </a-form-item>
             </a-col>
 
@@ -688,14 +871,13 @@
                 :name="['item', 'description']"
                 :rules="[{ required: true, message: '请输入分镜画面描述!' }]"
               >
-              <a-textarea
-              v-model:value="storyPictureForm.item.description"
+                <a-textarea
+                  v-model:value="storyPictureForm.item.description"
                   placeholder="请输入分镜画面描述"
                   :rows="3"
                   :maxlength="128"
                   show-count
                 />
-                
               </a-form-item>
             </a-col>
 
@@ -832,7 +1014,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, defineProps, defineExpose, computed, onMounted, unref, nextTick } from 'vue';
+  import { ref, defineProps, defineExpose, defineEmits, onMounted, unref, nextTick } from 'vue';
   import { Loading } from '/@/components/Loading';
   import Icon from '/@/components/Icon/Icon.vue';
   import { IdReq } from '/@/api/model/baseModel';
@@ -847,6 +1029,9 @@
     genSplitPicture,
     extractSplitContent,
     commitSplitContent,
+    genStoryPic,
+    appendStoryPic,
+    appendChapter,
   } from '/@/api/df/story';
   import { message, UploadProps, Upload } from 'ant-design-vue';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -867,12 +1052,13 @@
     getAppEnvConfig();
 
   //************************************** 故事分镜 ***********************************//
-
+  const chapterActiveKey = ref(0);
+  const roleActiveKey = ref(0);
   // 定义从父组件接收的属性
   const props = defineProps<{
     storySplitForm: any;
   }>();
-
+  const emit = defineEmits(['call-parent']);
   const globalItemLoading = ref(false);
   const storySplitForm = ref(props.storySplitForm);
 
@@ -1101,6 +1287,97 @@
     },
   });
 
+  //根据章节描述生成分镜画面
+  const doGenStoryPic = async (index) => {
+    emit('call-parent', true);
+    try {
+      let storyChapter = storySplitForm.value.item.storyChapterList[index];
+      let concatenatedText = storyChapter.description;
+      if (concatenatedText === undefined || concatenatedText === '' || concatenatedText === null) {
+        message.warning('请确认存在章节描述');
+        return;
+      }
+
+      const resp = await genStoryPic({
+        mode: 'gpt-4-0125-preview',
+        content: storyChapter.description,
+      });
+      if (resp && resp.length > 0) {
+        storySplitForm.value.item.storyChapterList[index].storyPictureList =
+          storySplitForm.value.item.storyChapterList[index].storyPictureList.concat(resp);
+      } else {
+        message.warning('生成的内容为空，请重试或者再次追加。');
+      }
+      message.success('成功生成分镜');
+    } finally {
+      emit('call-parent', false);
+    }
+  };
+
+  //根据章节与分镜画面追加分镜画面
+  const doAppendStoryPic = async (index) => {
+    emit('call-parent', true);
+    try {
+      let storyChapter = storySplitForm.value.item.storyChapterList[index];
+      let picList = storyChapter.storyPictureList;
+      const concatenatedText = picList.reduce((accumulator, current) => {
+        return accumulator + current.caption + '。';
+      }, '');
+
+      if (concatenatedText === undefined || concatenatedText === '' || concatenatedText === null) {
+        message.warning('请至少追加一个分镜描述');
+        return;
+      }
+
+      const resp = await appendStoryPic({
+        mode: 'gpt-4-0125-preview',
+        content: storyChapter.description,
+        currentContent: concatenatedText,
+      });
+
+      if (resp && resp.length > 0) {
+        storySplitForm.value.item.storyChapterList[index].storyPictureList =
+          storySplitForm.value.item.storyChapterList[index].storyPictureList.concat(resp);
+      } else {
+        message.warning('生成的内容为空，请重试或者手动追加。');
+      }
+      message.success('成功追加分镜');
+    } finally {
+      emit('call-parent', false);
+    }
+  };
+
+  //根据已有章节追加章节
+  const doAppendChapter = async () => {
+    emit('call-parent', true);
+    try {
+      let storyChapterList = storySplitForm.value.item.storyChapterList;
+      const concatenatedText = storyChapterList.reduce((accumulator, current) => {
+        return accumulator + current.caption + '。';
+      }, '');
+      if (concatenatedText === undefined || concatenatedText === '' || concatenatedText === null) {
+        message.warning('请至少追加一个章节描述');
+        return;
+      }
+      console.log('doAppendChapter1');
+      const resp = await appendChapter({
+        mode: 'gpt-4-0125-preview',
+        content: concatenatedText,
+      });
+      console.log('doAppendChapter');
+      if (resp && resp.length > 0) {
+        storySplitForm.value.item.storyChapterList =
+          storySplitForm.value.item.storyChapterList.concat(resp);
+      } else {
+        message.warning('生成的内容为空，请重试或者手动追加。');
+      }
+      console.log(storySplitForm.value.item.storyChapterList);
+      message.success('成功追加章节');
+    } finally {
+      emit('call-parent', false);
+    }
+  };
+
   const savePictureForm = () => {
     let index = storyPictureForm.value.chapterIndex;
     // const indexItem = storySplitForm.value.item.storyChapterList[index].storyPictureList.findIndex(
@@ -1143,7 +1420,7 @@
     const indexItem = storySplitForm.value.item.storyChapterList[index].storyPictureList.findIndex(
       (i) => i.description === item.description,
     );
-    
+
     // 如果找到了 id 为 1 的记录，并且索引大于 0
     if (indexItem > 0) {
       // 交换记录
@@ -1171,7 +1448,6 @@
         enableSref: true,
         enableCref: true,
       };
-      
     } else if (item.imageInfo && item.imageInfo.url) {
       //初始化图片
       // pictureFileList.value = [

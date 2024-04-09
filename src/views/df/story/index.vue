@@ -1,6 +1,6 @@
 <template>
-  <a-layout style="overflow-y: hidden;">
-    <a-row  ref="formRef" style="height: 55px">
+  <a-layout style="overflow-y: hidden">
+    <a-row ref="formRef" style="height: 55px">
       <a-col :span="24">
         <a-card
           style="display: flex; align-items: center; height: 100%"
@@ -11,17 +11,12 @@
               <a-input v-model:value="search.title" placeholder="输入故事标题" />
             </a-form-item>
             <a-form-item>
-            <a-select
-              v-model:value="search.genType"
-              placeholder="生成类型"
-              style="width: 100px;"
-            >
-          
-            <a-select-option value="">全部</a-select-option>
-              <a-select-option value="AI">AI故事</a-select-option>
-              <a-select-option value="NOVEL">小说分镜</a-select-option>
-            </a-select>
-          </a-form-item>
+              <a-select v-model:value="search.genType" placeholder="生成类型" style="width: 100px">
+                <a-select-option value="">全部</a-select-option>
+                <a-select-option value="AI">AI故事</a-select-option>
+                <a-select-option value="NOVEL">小说分镜</a-select-option>
+              </a-select>
+            </a-form-item>
             <a-form-item>
               <a-space>
                 <a-button-group>
@@ -29,30 +24,71 @@
                   <a-button @click="onReset">重置</a-button>
                 </a-button-group>
                 <!-- <a-button-group> -->
-                  <!-- <a-button @click="showDiscordForm">配置Discord账号</a-button> -->
-                  <a-button @click="showStoryForm" style=" background-color: none;
-    background-image: linear-gradient(to right, #e82d81, #3fe0b5); /* 从左到右的渐变 */
-    box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%); color:white" >AI故事</a-button>
-                  <a-button @click="showNovelForm" style=" background-color: none;
-    background-image: linear-gradient(to right, #677af4, #9f3fe0); /* 从左到右的渐变 */
-    box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%); color:white" 
-                    >小说分镜</a-button
-                  >
-                  <!-- <a-button @click="onShowActive" ref="activeStep">授权激活</a-button> -->
-                  <!-- <a-button type="success" @click="openGoodsShop">授权市场</a-button> -->
+                <!-- <a-button @click="showDiscordForm">配置Discord账号</a-button> -->
+                <a-button
+                  @click="showStoryForm"
+                  style="
+                    background-color: none;
+                    background-image: linear-gradient(
+                      to right,
+                      #e82d81,
+                      #3fe0b5
+                    ); /* 从左到右的渐变 */
 
-                  <!-- <a-button type="success" @click="openAccountGroup"
+                    box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
+                    color: white;
+                  "
+                  >AI故事</a-button
+                >
+                <a-button
+                  @click="showNovelForm"
+                  style="
+                    background-color: none;
+                    background-image: linear-gradient(
+                      to right,
+                      #677af4,
+                      #9f3fe0
+                    ); /* 从左到右的渐变 */
+
+                    box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
+                    color: white;
+                  "
+                  >小说分镜</a-button
+                >
+                <a-button
+                  @click="storySplitFormByHand"
+                  style="
+                    background-color: none;
+                    background-image: linear-gradient(
+                      to right,
+                      #677af4,
+                      #9f3fe0
+                    ); /* 从左到右的渐变 */
+
+                    box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
+                    color: white;
+                  "
+                  >手动设计</a-button
+                >
+                <!-- <a-button @click="onShowActive" ref="activeStep">授权激活</a-button> -->
+                <!-- <a-button type="success" @click="openGoodsShop">授权市场</a-button> -->
+
+                <!-- <a-button type="success" @click="openAccountGroup"
                     >账号组管理{{ props.contentHeight }}</a-button
                   > -->
                 <!-- </a-button-group> -->
 
-                <a-button @click="doTextToVoice('https://ttsmaker.cn/')" > <span><Icon
-                    icon="iconamoon:volume-down"
-                    class="vel-icon icon"
-                    aria-hidden="true"
-                    style="margin-right: 1px"
-                    size="16"
-                />文本转语音</span></a-button>
+                <a-button @click="doTextToVoice('https://ttsmaker.cn/')">
+                  <span
+                    ><Icon
+                      icon="iconamoon:volume-down"
+                      class="vel-icon icon"
+                      aria-hidden="true"
+                      style="margin-right: 1px"
+                      size="16"
+                    />文本转语音</span
+                  ></a-button
+                >
                 <!-- <a-button-group>
                   <a-button @click="goThirdShop('/goods/index')" ref="goodsStep">
                     <Icon
@@ -87,11 +123,16 @@
         height: `calc(${contentHeight}px )`,
         width: '100%',
         padding: '0px 5px',
-
       }"
     >
-      <a-table :dataSource="tableData" rowKey="id" :loading="globalLoading" :pagination="false"  :scroll="{ y: contentHeight - 55 }">
-        <a-table-column title="记录id" dataIndex="id" key="id" v-if="false" align="center"  />
+      <a-table
+        :dataSource="tableData"
+        rowKey="id"
+        :loading="globalLoading"
+        :pagination="false"
+        :scroll="{ y: contentHeight - 55 }"
+      >
+        <a-table-column title="记录id" dataIndex="id" key="id" v-if="false" align="center" />
         <a-table-column
           title="故事标题"
           dataIndex="title"
@@ -131,7 +172,13 @@
             </div>
           </template>
         </a-table-column>
-        <a-table-column title="故事背景" dataIndex="background" width="300px" key="background" align="center" />
+        <a-table-column
+          title="故事背景"
+          dataIndex="background"
+          width="300px"
+          key="background"
+          align="center"
+        />
 
         <a-table-column title="账号状态" dataIndex="state" key="state" width="120px" align="center">
           <template #default="{ text }">
@@ -182,7 +229,9 @@
                 /></a-button>
               </a-tooltip>
               <a-tooltip title="分镜图片下载">
-                <a-button :disabled="record.state !== 'success'" @click="doDownloadImages(record.id)"
+                <a-button
+                  :disabled="record.state !== 'success'"
+                  @click="doDownloadImages(record.id)"
                   ><Icon
                     icon="icon-park-outline:down-picture"
                     class="vel-icon icon"
@@ -211,7 +260,6 @@
                     size="16"
                 /></a-button>
               </a-tooltip> -->
-              
             </a-button-group>
           </template>
         </a-table-column>
@@ -244,16 +292,39 @@
     >
       <template #footer>
         <a-button @click="closeStoryForm">取消</a-button>
-        <a-button :loading="storyForm.storyLoading || globalLoading" @click="doGenStory" style=" background-color: none;
-    background-image: linear-gradient(to right, #e82d81, #3fe0b5); /* 从左到右的渐变 */
-    box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%); color:white" 
+        <a-button
+          :loading="storyForm.storyLoading || globalLoading"
+          @click="doGenStory"
+          style="
+            background-color: none;
+            background-image: linear-gradient(to right, #e82d81, #3fe0b5); /* 从左到右的渐变 */
+            box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
+            color: white;
+          "
           >AI故事生成</a-button
         >
         <a-button
+          :loading="storyForm.storyLoading || globalLoading"
+          @click="doGenStorySplitByHand"
+          v-if="
+            storyForm.aiStory && storyForm.aiStory.length > 0 && storyForm.storyLoading === false
+          "
+          style="
+            background-color: none;
+            background-image: linear-gradient(to right, #e82d81, #600e96); /* 从左到右的渐变 */
+            box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
+            color: white;
+          "
+          >手动分镜</a-button
+        >
+        <a-button
           type="primary"
-          style=" background-color: none;
-    background-image: linear-gradient(to right, #2850bc, #600e96); /* 从左到右的渐变 */
-    box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%); color:white" 
+          style="
+            background-color: none;
+            background-image: linear-gradient(to right, #2850bc, #600e96); /* 从左到右的渐变 */
+            box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
+            color: white;
+          "
           v-if="
             storyForm.aiStory && storyForm.aiStory.length > 0 && storyForm.storyLoading === false
           "
@@ -330,17 +401,23 @@
       wrap-class-name="full-modal"
     >
       <template #title>
-        <span
-          >AI故事分镜
-          </span
-        >
+        <span>AI故事分镜 </span>
       </template>
 
       <template #footer>
         <a-button @click="closeStorySplitForm">取消</a-button>
-        <a-button type="primary" target="" :loading="globalLoading" @click="doCommitSplitContent" style=" background-color: none;
-    background-image: linear-gradient(to right, #2850bc, #600e96); /* 从左到右的渐变 */
-    box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%); color:white" >
+        <a-button
+          type="primary"
+          target=""
+          :loading="globalLoading"
+          @click="doCommitSplitContent"
+          style="
+            background-color: none;
+            background-image: linear-gradient(to right, #2850bc, #600e96); /* 从左到右的渐变 */
+            box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
+            color: white;
+          "
+        >
           {{ storySplitForm.item.id ? '保存修改' : '提交分镜' }}</a-button
         >
         <!-- <a-button
@@ -361,7 +438,11 @@
       </template>
       <a-spin :spinning="globalLoading">
         <div style="flex-wrap: wrap; height: 82vh; overflow: auto">
-          <StoryInfo ref="storyInfoRef" :storySplitForm="storySplitForm" />
+          <StoryInfo
+            ref="storyInfoRef"
+            @call-parent="changeLoading"
+            :storySplitForm="storySplitForm"
+          />
         </div>
       </a-spin>
     </a-modal>
@@ -375,9 +456,16 @@
     >
       <template #footer>
         <a-button @click="closeNovelForm">取消</a-button>
-        <a-button type="primary" :loading="novelForm.loading || globalLoading" @click="doNovelExtract" style=" background-color: none;
-    background-image: linear-gradient(to right, #677af4, #9f3fe0); /* 从左到右的渐变 */
-    box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%); color:white" 
+        <a-button
+          type="primary"
+          :loading="novelForm.loading || globalLoading"
+          @click="doNovelExtract"
+          style="
+            background-color: none;
+            background-image: linear-gradient(to right, #677af4, #9f3fe0); /* 从左到右的渐变 */
+            box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
+            color: white;
+          "
           >小说转分镜</a-button
         >
       </template>
@@ -454,6 +542,7 @@
   import StoryInfo from './story_info.vue';
   import { downloadByOnlineUrl } from '/@/utils/file/download';
   import useClipboard from 'vue-clipboard3';
+  import { extractAndTransformText } from './text_extract';
 
   const { toClipboard } = useClipboard();
 
@@ -465,7 +554,6 @@
       message.error('复制失败!' + e.message);
     }
   };
-
 
   const userStore = useUserStore();
   const token = userStore.getToken;
@@ -494,7 +582,7 @@
   //故事查询
   const search = ref({
     title: null,
-    genType:null,
+    genType: null,
   });
   // 分页
   const pagination = ref({
@@ -529,6 +617,11 @@
   }
 
   const globalLoading = ref(false);
+
+  const changeLoading = (isTrue: boolean) => {
+    globalLoading.value = isTrue;
+  };
+
   const onSearch = async () => {
     globalLoading.value = true;
     try {
@@ -589,7 +682,7 @@
         content: storyForm.value.text,
       });
       storyForm.value.aiStory = resp;
-      message.success("创作成功!");
+      message.success('创作成功!');
       // onSearch();
     } finally {
       storyForm.value.storyLoading = false;
@@ -633,7 +726,6 @@
       globalLoading.value = false;
     }
   };
-  
 
   // 删除sotry
   const doStoryRemove = async (id) => {
@@ -666,7 +758,7 @@
   const doDownloadImages = async (id) => {
     globalLoading.value = true;
     try {
-      if(id) {
+      if (id) {
         //查询详情
         const resp = await storyInfo({ id: id });
         storySplitForm.value.item = resp;
@@ -697,7 +789,7 @@
   const doCopySplitText = async (id) => {
     globalLoading.value = true;
     try {
-      if(id) {
+      if (id) {
         //查询详情
         const resp = await storyInfo({ id: id });
         storySplitForm.value.item = resp;
@@ -713,13 +805,11 @@
         allCaption = allCaption + concatenatedText;
       });
       copyText(allCaption);
-      console.log("allCaption {}", allCaption)
-      
+      console.log('allCaption {}', allCaption);
     } finally {
       globalLoading.value = false;
     }
   };
-
 
   function getFileExtension(url) {
     return url.split('.').pop();
@@ -739,7 +829,7 @@
     novelForm.value.viewFlag = true;
   };
   const closeNovelForm = async () => {
-    novelForm.value ={
+    novelForm.value = {
       viewFlag: false,
       content: '',
       loading: false,
@@ -747,8 +837,7 @@
     };
   };
 
-
-    //执行小说分镜
+  //执行小说分镜
   const doNovelExtract = async () => {
     // globalLoading.value = true;
     novelForm.value.loading = true;
@@ -757,20 +846,50 @@
         mode: novelForm.value.mode,
         content: novelForm.value.content,
       });
-      
+
       novelForm.value.viewFlag = false;
       console.log(resp);
       novelForm.value.viewFlag = false;
 
       //打开明细创建页面
       showStorySplitForm(resp);
-
     } finally {
       // globalLoading.value = false;
       novelForm.value.loading = false;
     }
   };
 
+  // js故事分镜
+  const doGenStorySplitByHand = async () => {
+    globalLoading.value = true;
+    try {
+      const resp = await extractAndTransformText(storyForm.value.aiStory);
+      console.log('doGenStorySplitByHand resp:' + resp);
+      storyForm.value.viewFlag = false;
+      //打开明细创建页面
+      showStorySplitForm(resp);
+    } finally {
+      globalLoading.value = false;
+    }
+  };
+
+  const storySplitFormByHand = async () => {
+    console.log('storySplitFormByHand');
+    globalLoading.value = true;
+    try {
+      storySplitForm.value.item = {
+        title: '',
+        storyRoleList: [],
+        storyChapterList: [],
+      };
+      storySplitForm.value.viewFlag = true;
+      nextTick(() => {
+        storyInfoRef.value.getInitSrefUrl(storySplitForm.value.item.srefUrl);
+      });
+    } finally {
+      globalLoading.value = false;
+    }
+  };
 
   const storySplitForm = ref({
     viewFlag: false,
@@ -1149,7 +1268,6 @@
     background-color: transparent; /* 设置滚动条背景为透明 */
   }
 
-
   .color-button {
     border: none;
     background-color: none;
@@ -1160,7 +1278,7 @@
 
   /* 鼠标悬停按钮效果 */
   .color-button:hover {
-    background-image: linear-gradient(to right,  #e82d81, #3fe0b5); /* 鼠标悬停时的渐变变化 */
+    background-image: linear-gradient(to right, #e82d81, #3fe0b5); /* 鼠标悬停时的渐变变化 */
   }
 
   /* 按钮点击效果 */
