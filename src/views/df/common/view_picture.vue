@@ -1,5 +1,5 @@
 <template>
-  <div v-if="userSetting.showMode === 'full'">
+  <div v-if="userSetting.showMode === 'full'" style="display: flex; justify-content: center">
     <div v-if="card.state === 'QUEUED'" class="mask-queued label-front">
       <div
         style="display: flex; flex-direction: column; align-items: center; justify-content: center"
@@ -44,22 +44,6 @@
               </span>
             </span>
           </div>
-        </div>
-        <div v-if="card.process">
-          <span>
-            {{ '绘画进度：' + card.process }}
-          </span>
-        </div>
-        <div v-else>
-          <span v-if="card.mode === 'turbo'">
-            {{ 'turbo模式预计30秒内完成...' }}
-          </span>
-          <span v-if="card.mode === 'fast'">
-            {{ 'fast模式预计1分30秒内完成...' }}
-          </span>
-          <span v-if="card.mode === 'relax'">
-            {{ 'relax模式预计3~6分钟完成...' }}
-          </span>
         </div>
       </div>
     </div>
@@ -213,7 +197,7 @@
       </div>
     </div>
   </div>
-  <div v-else>
+  <div v-else style="display: flex; justify-content: center">
     <div v-if="card.state === 'QUEUED'" class="mask-queued label-front">
       <div
         style="display: flex; flex-direction: column; align-items: center; justify-content: center"

@@ -311,9 +311,7 @@
           "
           style="
             background-color: none;
-            background-image: linear-gradient(to right,  #4c71eb,
-                      #31c4b1); /* 从左到右的渐变 */
-
+            background-image: linear-gradient(to right, #4c71eb, #31c4b1); /* 从左到右的渐变 */
             box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
             color: white;
           "
@@ -407,23 +405,23 @@
       </template>
 
       <template #footer>
-        <div style="height: 32px;">
-        <a-button @click="closeStorySplitForm">取消</a-button>
-        <a-button
-          type="primary"
-          target=""
-          :loading="globalLoading"
-          @click="doCommitSplitContent"
-          style="
-            background-color: none;
-            background-image: linear-gradient(to right, #2850bc, #600e96); /* 从左到右的渐变 */
-            box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
-            color: white;
-          "
-        >
-          {{ storySplitForm.item?.id ? '保存修改' : '提交分镜' }}</a-button
-        >
-        <!-- <a-button
+        <div style="height: 32px">
+          <a-button @click="closeStorySplitForm">取消</a-button>
+          <a-button
+            type="primary"
+            target=""
+            :loading="globalLoading"
+            @click="doCommitSplitContent"
+            style="
+              background-color: none;
+              background-image: linear-gradient(to right, #2850bc, #600e96); /* 从左到右的渐变 */
+              box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
+              color: white;
+            "
+          >
+            {{ storySplitForm.item?.id ? '保存修改' : '提交分镜' }}</a-button
+          >
+          <!-- <a-button
           type="primary"
           v-if="storySplitForm.item?.process === 'NONE'"
           :loading="globalLoading"
@@ -431,13 +429,13 @@
           @click="doStartStoryJob(storySplitForm.value.item.id)"
           >启动任务</a-button
         > -->
-        <a-button
-          v-if="storySplitForm.item?.process === 'SPLIT_PIC_COMPLETED'"
-          target=""
-          :loading="globalLoading"
-          @click="doDownloadImages"
-          >下载</a-button
-        >
+          <a-button
+            v-if="storySplitForm.item?.process === 'SPLIT_PIC_COMPLETED'"
+            target=""
+            :loading="globalLoading"
+            @click="doDownloadImages"
+            >下载</a-button
+          >
         </div>
       </template>
       <a-spin :spinning="globalLoading">
@@ -773,11 +771,14 @@
         let pictureList = element.storyPictureList;
 
         pictureList.forEach((e, j) => {
+          console.log(
+            storySplitForm.value.item.title + '-' + element.title + '-' + index + '-' + j,
+          );
           downloadByOnlineUrl(
             e.imageInfo.url,
             storySplitForm.value.item.title +
               '-' +
-              index +
+              element.title +
               '-' +
               j +
               '.' +
@@ -946,9 +947,6 @@
       globalLoading.value = false;
     }
   };
-
-
-  
 </script>
 
 <style scoped>
@@ -962,7 +960,6 @@
   ::-webkit-scrollbar-track {
     background-color: transparent; /* 设置滚动条背景为透明 */
   }
-
 </style>
 <style lang="less">
   .full-modal {
@@ -976,11 +973,11 @@
     }
 
     .ant-modal-header {
-      height:56px
+      height: 56px;
     }
 
     .ant-modal-footer {
-      height:52px
+      height: 52px;
     }
 
     .ant-modal-content {
