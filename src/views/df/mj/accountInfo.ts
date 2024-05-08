@@ -74,6 +74,7 @@ export function accountInfoApi() {
     mode: 'relax' as string | undefined,
     currentSpaceId: null,
     currentSpaceTitle: null,
+
   });
 
   const accountViewForm = reactive({
@@ -90,6 +91,7 @@ export function accountInfoApi() {
     channelSelector: {
       size: 'default',
       options: [{ label: '默认', value: '' }],
+      loading: false,
     },
     spaceOptions: [{ label: '默认', value: '' }],
     drawingSampleCategory: [],
@@ -162,6 +164,7 @@ export function accountInfoApi() {
       return;
     }
     accountViewForm.loading = true;
+    accountViewForm.channelSelector.loading = true;
     try {
       const response = await getChannelsByGroup({ id: id });
       // 使用 map 方法转换数组
@@ -170,10 +173,11 @@ export function accountInfoApi() {
         value: item.id,
       }));
       // 如果您想在转换后的数组前面添加一个特定的对象，可以使用以下方法：
-      const finalList = [{ label: '默认频道', value: '' }, ...transformedList];
+      const finalList = [ ...transformedList];
       accountViewForm.channelSelector.options = finalList;
     } finally {
       accountViewForm.loading = false;
+      accountViewForm.channelSelector.loading = false;
     }
   };
 

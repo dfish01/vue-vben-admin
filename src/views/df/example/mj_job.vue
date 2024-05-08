@@ -11,24 +11,24 @@
               <a-button
                 :class="'no-border-button'"
                 style="padding: 0 10px; font-weight: 600"
-                :style="{ color: feedForm.feedStr === 'random_recent_jobs' ? '#0766AD' : '' }"
-                @click="selectCategory('random_recent_jobs')"
+                :style="{ color: feedForm.feedStr === 'random' ? '#0766AD' : '' }"
+                @click="selectCategory('random')"
                 ><span> <Icon class="vel-icon icon" icon="noto-v1:shooting-star" />随机推荐 </span>
               </a-button>
 
               <a-button
                 :class="'no-border-button'"
                 style="padding: 0 10px; font-weight: 600"
-                :style="{ color: feedForm.feedStr === 'hot_recent_jobs' ? '#0766AD' : '' }"
-                @click="selectCategory('hot_recent_jobs')"
+                :style="{ color: feedForm.feedStr === 'hot' ? '#0766AD' : '' }"
+                @click="selectCategory('hot')"
                 ><span> <Icon class="vel-icon icon" icon="streamline-emojis:fire" />热门 </span>
               </a-button>
 
               <a-button
                 :class="'no-border-button'"
                 style="padding: 0 10px; font-weight: 600"
-                :style="{ color: feedForm.feedStr === 'top_day' ? '#0766AD' : '' }"
-                @click="selectCategory('top_day')"
+                :style="{ color: feedForm.feedStr === 'top' ? '#0766AD' : '' }"
+                @click="selectCategory('top')"
                 ><span> <Icon class="vel-icon icon" icon="noto:glowing-star" />每日精选 </span>
               </a-button>
 
@@ -556,7 +556,7 @@
   const { copyText } = useDrawCard();
 
   const feedForm = ref({
-    feedStr: 'hot_recent_jobs',
+    feedStr: 'hot',
     page: 1,
     hasMore: true,
     cacheList: [],

@@ -504,21 +504,26 @@
           </a-row>
 
           <a-row style="margin-top: 5px" v-if="accountForm.useAccountId">
-            <a-input-group compact style="display: flex">
-              <a-tooltip
+           
+           
+            <a-input-group compact style="display: flex; height:32px">
+             <a-tooltip
                 title="不指定频道的话，默认账户组中的频道。这里会进行会话缓存，会应用任务列表、收藏里面。退出后失效！！！"
               >
                 <a-tag class="line-label tag-no-right-border" color="default">执行频道</a-tag>
               </a-tooltip>
-
-              <a-select
+              <div v-if="accountViewForm.channelSelector.loading" style="display: flex; align-items: center; justify-content: center" class="line-input tag-no-right-border">
+                <Icon   icon="svg-spinners:bars-fade" size="32px" />
+              </div>
+             
+              <a-select v-else
                 class="line-input tag-no-right-border"
                 @change="handleChannelSetting"
                 placeholder="请选择ChannelId"
                 v-model:value="accountForm.useChannelId"
                 :size="accountViewForm.accountSelector.size"
                 :options="accountViewForm.channelSelector.options"
-              />
+              /> 
             </a-input-group>
           </a-row>
           <!-- <a-row :gutter="2" class="row-wapper">
