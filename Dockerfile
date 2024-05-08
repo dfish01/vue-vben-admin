@@ -11,7 +11,7 @@ RUN npm config set registry https://registry.npmjs.org/
 # 设置--max-old-space-size
 ENV NODE_OPTIONS=--max-old-space-size=16384
 # 设置阿里镜像、pnpm、依赖、编译
-RUN npm install pnpm -g && \
+RUN npm install pnpm@8.1.0 -g && \
     pnpm install --frozen-lockfile && \
     pnpm build:docker
 # node部分结束
