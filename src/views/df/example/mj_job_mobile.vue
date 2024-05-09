@@ -44,10 +44,10 @@
               :class="'no-border-button'"
               style="height: 20px; padding: 0 5px; font-size: 10px"
               :style="{
-                color: feedForm.feedStr === 'random_recent_jobs' ? '#0766AD' : '',
-                'font-weight': feedForm.feedStr === 'random_recent_jobs' ? '600' : '',
+                color: feedForm.feedStr === 'random' ? '#0766AD' : '',
+                'font-weight': feedForm.feedStr === 'random' ? '600' : '',
               }"
-              @click="selectCategory('random_recent_jobs')"
+              @click="selectCategory('random')"
             >
               <span> <Icon class="vel-icon icon" icon="noto-v1:shooting-star" />随机 </span>
             </a-button>
@@ -56,10 +56,10 @@
               :class="'no-border-button'"
               style="height: 20px; padding: 0 5px; font-size: 10px"
               :style="{
-                color: feedForm.feedStr === 'hot_recent_jobs' ? '#0766AD' : '',
-                'font-weight': feedForm.feedStr === 'hot_recent_jobs' ? '600' : '',
+                color: feedForm.feedStr === 'hot' ? '#0766AD' : '',
+                'font-weight': feedForm.feedStr === 'hot' ? '600' : '',
               }"
-              @click="selectCategory('hot_recent_jobs')"
+              @click="selectCategory('hot')"
             >
               <span> <Icon class="vel-icon icon" icon="streamline-emojis:fire" />热门 </span>
             </a-button>
@@ -68,10 +68,10 @@
               :class="'no-border-button'"
               style="height: 20px; padding: 0 5px; font-size: 10px"
               :style="{
-                color: feedForm.feedStr === 'top_day' ? '#0766AD' : '',
-                'font-weight': feedForm.feedStr === 'top_day' ? '600' : '',
+                color: feedForm.feedStr === 'top' ? '#0766AD' : '',
+                'font-weight': feedForm.feedStr === 'top' ? '600' : '',
               }"
-              @click="selectCategory('top_day')"
+              @click="selectCategory('top')"
             >
               <span> <Icon class="vel-icon icon" icon="noto:glowing-star" />每天 </span>
             </a-button>
@@ -630,7 +630,7 @@
   const { copyText } = useDrawCard();
 
   const feedForm = ref({
-    feedStr: 'hot_recent_jobs',
+    feedStr: 'hot',
     page: 1,
     hasMore: true,
     cacheList: [],
