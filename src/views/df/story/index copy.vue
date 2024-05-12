@@ -335,8 +335,22 @@
       </template>
       <a-spin :spinning="globalLoading" tip="内容过多，需要的时间稍长。请耐心等待！">
         <a-row style="padding: 0 10px">
+          <div
+            v-if="storyForm.storyLoading"
+            style="
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              width: 100%;
+              height: 53px;
+            "
+          >
+            <Icon icon="svg-spinners:bars-fade" size="40" />
+            <span style="color: red; font-size: 10px">内容较多，生成时间稍长，请耐心等候</span>
+          </div>
           <a-textarea
-          
+            v-else
             :bordered="true"
             v-model:value="storyForm.text"
             :rows="2"
@@ -348,7 +362,7 @@
         <a-row
           style="margin-top: 20px; padding: 0 10px"
           v-if="
-            storyForm.aiStory && storyForm.aiStory.length > 0
+            storyForm.aiStory && storyForm.aiStory.length > 0 && storyForm.storyLoading === false
           "
         >
           <div
@@ -506,7 +520,6 @@
   import { IdReq } from '/@/api/model/baseModel';
   import AccountGroup from './account_group.vue';
   import {
-    chat,
     novelExtract,
     genSimpleStory,
     genStory,
@@ -531,11 +544,9 @@
   import StoryInfo from './story_info.vue';
   import { downloadByOnlineUrl } from '/@/utils/file/download';
   import useClipboard from 'vue-clipboard3';
-  import { extractAndTransformText, parseStoryData } from './text_extract';
+  import { extractAndTransformText } from './text_extract';
   import { useUserStoreWithOut } from '/@/store/modules/user';
-  import { buildShortUUID } from '/@/utils/uuid';
-  import { EventSourcePolyfill } from 'event-source-polyfill';
-
+  
   const { toClipboard } = useClipboard();
 
   const copyText = async (prompt) => {
@@ -649,7 +660,7 @@
     text: null,
     storyLoading: false,
     mode: 'gpt-4-0125-preview',
-    aiStory: '--',
+    aiStory: null,
   });
 
   const showStoryForm = async () => {
@@ -666,31 +677,16 @@
   };
 
   // 生成故事
-  const uid = ref("");
   const doGenStory = async () => {
     // 初始连接到SSE
-    executeChat(() => {
-      storyForm.value.storyLoading = false;
-    });
-    storyForm.value.storyLoading = true;
-    
-    try{
-      const resp = await chat({
-        mode: storyForm.value.mode,
-        msg: storyForm.value.text,
-        chatEnum: 'STORY',
-      }, uid.value);
-    }catch (error) {
-      console.error("An error occurred:", error);
-      storyForm.value.storyLoading = false;
-    }
-    
+    connectWebSocket();
+    // storyForm.value.storyLoading = true;
     
     // try {
-      // const resp = await genStory({
-      //   mode: storyForm.value.mode,
-      //   content: storyForm.value.text,
-      // });
+    //   const resp = await genStory({
+    //     mode: storyForm.value.mode,
+    //     content: storyForm.value.text,
+    //   });
     //   storyForm.value.aiStory = resp;
     //   message.success('创作成功!');
     //   // onSearch();
@@ -699,177 +695,77 @@
     // }
   };
 
-  const executeChat = async (setLoadingCallback) => {
-    let sse;
-    let text = '';
-    uid.value = buildShortUUID('chatData');
-    const eventSource = new EventSourcePolyfill('http://localhost:7099/sse/createSse', {
-      headers: {
-        'Accept': 'text/event-stream',
-        'Authorization': token,
-        'uid': uid.value,
-        // 如果有其他需要的 headers，可以在这里添加
-      },
-    });
+  let socket: WebSocket | null = null;
+let timeoutId: number | null = null;
 
-    eventSource.onopen = (event) => {
-        console.log("开始输出后端返回值");
-        sse = event.target;
-    };
-    eventSource.onmessage = (event) => {
-        console.log("event:" + event);
-        if (event.lastEventId == "[TOKENS]") {
-            text = text + event.data;
-            storyForm.value.aiStory = text;
-            text = ''
-            return;
-        }
-        if (event.data == "[DONE]") {
-            if (sse) {
-                sse.close();
-            }
-            setLoadingCallback();
-            return;
-        }
-        let json_data = JSON.parse(event.data)
-        if (json_data.content == null || json_data.content == 'null') {
-            return;
-        }
-        text = text + json_data.content;
-        storyForm.value.aiStory = text;
-    };
-    eventSource.onerror = (event) => {
-        console.log("onerror", event);
-        alert("服务异常请重试并联系开发者！")
-        if (event.readyState === EventSource.CLOSED) {
-            console.log('connection is closed');
-            setLoadingCallback();
-        } else {
-            console.log("Error occured", event);
-        }
-        event.target.close();
-    };
-    eventSource.addEventListener("customEventName", (event) => {
-        console.log("Message id is " + event.lastEventId);
-    });
-    eventSource.addEventListener("customEventName", (event) => {
-        console.log("Message id is " + event.lastEventId);
-    });
+const connectWebSocket = () => {
+  // 建立WebSocket连接
+  socket = new WebSocket('ws://127.0.0.1:7099/open/dfStory');
+  socket.onopen = (event) => {
+    console.log('WebSocket连接已打开:', event);
 
-  }
-  const executeChat2 = async (setLoadingCallback) => {
-    let sse;
-    let text = '';
-    uid.value = buildShortUUID('chatData');
-    const eventSource = new EventSourcePolyfill('http://localhost:7099/sse/createSse', {
-      headers: {
-        'Accept': 'text/event-stream',
-        'Authorization': token,
-        'uid': uid.value,
-        // 如果有其他需要的 headers，可以在这里添加
-      },
-    });
-
-    eventSource.onopen = (event) => {
-        console.log("开始输出后端返回值");
-        sse = event.target;
-    };
-    let currentLine = ''; // 用于累积当前行的内容
-
-    eventSource.onmessage = (event) => {
-        
-        if (event.data == "[DONE]") {
-            if (sse) {
-                sse.close();
-            }
-            setLoadingCallback();
-            return;
-        }
-        let json_data = JSON.parse(event.data);
-        if (json_data.content == null || json_data.content == 'null') {
-            return;
-        }
-        text = text + json_data.content;
-        storyForm.value.aiStory = text;
-
-        console.log("event:" + json_data.content);
-      // 使用正则表达式匹配每一行的结束
-      const linesFlag = json_data.content.endsWith('\n');
-      if(linesFlag) {
-          if (currentLine.trim().startsWith("章节标题:")) {
-            console.log(currentLine);
-          }else if(currentLine.trim().startsWith(">>分镜画面")) {
-            console.log(currentLine);
-          }
-          currentLine = ''; // 重置当前行
-      }else {
-        currentLine += ' ' + json_data.content; 
+    // 设置一个10秒的定时器，如果在这段时间内没有收到消息，则关闭连接
+    timeoutId = window.setTimeout(() => {
+      if (socket) {
+        socket.close();
       }
+      console.log('10秒内无响应，已关闭连接');
+    }, 10000);
+  };
+
+  socket.onmessage = (event) => {
+    // 当收到消息时，更新文本框的内容
+    storyForm.value.aiStory += event.data;
+
+    // 如果消息内容包含"done"或10秒内无响应，关闭连接
+    if (event.data.includes('done') || !timeoutId) {
+      if (socket) {
+        socket.close();
+      }
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+      console.log('遇到"done"或10秒内无响应，已关闭连接');
+    } else {
+      // 如果还有响应，重置定时器
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+      timeoutId = window.setTimeout(() => {
+        if (socket) {
+          socket.close();
+        }
+        console.log('10秒内无响应，已关闭连接');
+      }, 10000);
     }
-    eventSource.onerror = (event) => {
-        console.log("onerror", event);
-        alert("服务异常请重试并联系开发者！")
-        if (event.readyState === EventSource.CLOSED) {
-            console.log('connection is closed');
-            setLoadingCallback();
-        } else {
-            console.log("Error occured", event);
-        }
-        event.target.close();
+  };
 
-        if (currentLine.trim() !== '') {
-            console.log(currentLine);
-        }
-    };
-    eventSource.addEventListener("customEventName", (event) => {
-        console.log("Message id is " + event.lastEventId);
-    });
-    eventSource.addEventListener("customEventName", (event) => {
-        console.log("Message id is " + event.lastEventId);
-    });
+  socket.onclose = (event) => {
+    console.log('WebSocket连接已关闭:', event);
+  };
 
-  }
+  socket.onerror = (error) => {
+    console.error('WebSocket发生错误:', error);
+  };
+  
 
   // 生成故事分镜
   const doGenStorySplit = async () => {
-
-    //先手动分镜
-    doGenStorySplitByHand();
-
-    // 初始连接到SSE
-    executeChat2(() => {
-      globalLoading.value = false;
-    });
     globalLoading.value = true;
-    
-    try{
-      const resp = await chat({
+    try {
+      const resp = await genSimpleStory({
         mode: storyForm.value.mode,
-        msg: storyForm.value.aiStory,
-        chatEnum: 'STORY_SPLIT',
-      }, uid.value);
-    }catch (error) {
-      console.error("An error occurred:", error);
-      storyForm.value.storyLoading = false;
+        content: storyForm.value.aiStory,
+      });
+
+      console.log(resp);
+      storyForm.value.viewFlag = false;
+
+      //打开明细创建页面
+      showStorySplitForm(resp);
+    } finally {
+      globalLoading.value = false;
     }
-    
-    
-
-    // globalLoading.value = true;
-    // try {
-    //   const resp = await genSimpleStory({
-    //     mode: storyForm.value.mode,
-    //     content: storyForm.value.aiStory,
-    //   });
-
-    //   console.log(resp);
-    //   storyForm.value.viewFlag = false;
-
-    //   //打开明细创建页面
-    //   showStorySplitForm(resp);
-    // } finally {
-    //   globalLoading.value = false;
-    // }
   };
 
   // ti
@@ -1031,7 +927,7 @@
   const doGenStorySplitByHand = async () => {
     globalLoading.value = true;
     try {
-      const resp = await parseStoryData(storyForm.value.aiStory);
+      const resp = await extractAndTransformText(storyForm.value.aiStory);
       console.log('doGenStorySplitByHand resp:' + resp);
       storyForm.value.viewFlag = false;
       //打开明细创建页面

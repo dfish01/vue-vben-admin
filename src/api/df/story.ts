@@ -19,6 +19,30 @@ enum Api {
   GenStoryPic = '/open/dfStory/genStoryPic',
   AppendStoryPic = '/open/dfStory/appendStoryPic',
   AppendChapter = '/open/dfStory/appendChapter',
+
+  Chat = '/sse/chat',
+}
+
+/**
+ * chat
+ * @param params
+ * @param mode
+ * @returns
+ */
+export function chat(params: any, uid:string, mode: ErrorMessageMode = 'message') {
+  return defHttp.post<string>(
+    {
+      url: Api.Chat,
+      params,
+      timeout: 100000,
+      headers:{
+        uid:uid
+      }
+    },
+    {
+      errorMessageMode: mode,
+    },
+  );
 }
 
 /**
