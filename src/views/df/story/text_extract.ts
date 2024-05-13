@@ -1,10 +1,9 @@
-
 export function parseStoryData(data) {
   const lines = data.split('\n');
   let title = '';
-  let storyRoleList = [];
+  const storyRoleList = [];
   let background = '';
-  let storyChapterList = [];
+  const storyChapterList = [];
   let currentRole = null;
   let currentChapter = null;
 
@@ -27,7 +26,7 @@ export function parseStoryData(data) {
       if (currentChapter) {
         storyChapterList.push(currentChapter);
       }
-      currentChapter = { title: '', description: '', storyPictureList:[],};
+      currentChapter = { title: '', description: '', storyPictureList: [] };
       currentChapter.title = line.replace('>>', '').trim();
     } else if (line.startsWith('画面描述:')) {
       currentChapter.description = line.replace('画面描述:', '').trim();
@@ -49,6 +48,58 @@ export function parseStoryData(data) {
   };
 }
 
+export function parseNovelData(data) {
+  const lines = data.split('\n');
+  let title = '';
+  const storyRoleList = [];
+  const background = '小说提取暂无提供';
+  const storyChapterList = [];
+  let currentRole = null;
+  const currentChapter = { title: '', description: '', storyPictureList: [] };
+  const storyPictureList = [];
+  let currentStoryPicture = null;
+  console.log('提取内容');
+  for (let line of lines) {
+    line = line.trim();
+    if (line.startsWith('标题:')) {
+      title = line.replace('标题:', '');
+      currentChapter.title = title;
+      currentChapter.description = '默认章节';
+    } else if (line.startsWith(' >>角色名:')) {
+      if (currentRole) {
+        storyRoleList.push(currentRole);
+      }
+      currentRole = { roleName: '', description: '' };
+      currentRole.roleName = line.replace(' >>角色名:', '').trim();
+    } else if (line.startsWith(' >>角色描述:')) {
+      currentRole.description = line.replace(' >>角色描述:', '').trim();
+    } else if (line.startsWith('>>分镜画面')) {
+      if (currentStoryPicture) {
+        storyPictureList.push(currentStoryPicture);
+      }
+      currentStoryPicture = { description: '', caption: '' };
+      currentStoryPicture.description = line.substring('>>分镜画面'.length + 2).trim();
+    } else if (line.startsWith('>>原文内容')) {
+      currentStoryPicture.caption = line.substring('>>原文内容'.length + 2).trim();
+    }
+  }
+
+  if (currentRole) {
+    storyRoleList.push(currentRole);
+  }
+  if (currentStoryPicture) {
+    storyPictureList.push(currentStoryPicture);
+  }
+  currentChapter.storyPictureList = storyPictureList;
+  storyChapterList.push(currentChapter);
+
+  return {
+    title,
+    storyRoleList,
+    background,
+    storyChapterList,
+  };
+}
 
 export function extractAndTransformText(text) {
   // 提取标题
@@ -68,7 +119,11 @@ export function extractAndTransformText(text) {
 
   // 提取背景
   const backgroundMatch = text.match(/背景：\n(.*?)\n/gs);
-  const background = backgroundMatch ? (backgroundMatch[1] ? backgroundMatch[1].trim() : backgroundMatch[0].trim()) : '';
+  const background = backgroundMatch
+    ? backgroundMatch[1]
+      ? backgroundMatch[1].trim()
+      : backgroundMatch[0].trim()
+    : '';
 
   // 提取章节信息
   const chapterRegex = /章节(一|二|三|四|五)：\s*(.*?)\n\s*画面描述：\s*(.*?)\n/gs;
@@ -78,10 +133,10 @@ export function extractAndTransformText(text) {
     chapters.push({
       title: `${chapterMatch[2]}`,
       description: chapterMatch[3].trim(),
-      storyPictureList:[],
+      storyPictureList: [],
     });
   }
- 
+
   // 构造最终JSON对象
   const result = {
     title,
@@ -94,8 +149,3 @@ export function extractAndTransformText(text) {
   // 返回JSON格式的字符串
   return result;
 }
-
-
-
-
-

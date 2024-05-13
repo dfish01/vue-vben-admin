@@ -336,7 +336,6 @@
       <a-spin :spinning="globalLoading" tip="内容过多，需要的时间稍长。请耐心等待！">
         <a-row style="padding: 0 10px">
           <a-textarea
-          
             :bordered="true"
             v-model:value="storyForm.text"
             :rows="2"
@@ -347,9 +346,7 @@
 
         <a-row
           style="margin-top: 20px; padding: 0 10px"
-          v-if="
-            storyForm.aiStory && storyForm.aiStory.length > 0
-          "
+          v-if="storyForm.aiStory && storyForm.aiStory.length > 0"
         >
           <div
             justify="start"
@@ -387,7 +384,12 @@
       wrap-class-name="full-modal"
     >
       <template #title>
-        <span>AI故事分镜 </span>
+        <span v-if="storySplitForm.loading">
+          <span style="color: red"
+            >分镜内容正在生成中 <Icon icon="svg-spinners:bars-fade" coler="red"
+          /></span>
+        </span>
+        <span v-else>AI故事分镜 <Icon icon="fluent-mdl2:completed-solid" color="#14c832" /> </span>
       </template>
 
       <template #footer>
@@ -396,7 +398,7 @@
           <a-button
             type="primary"
             target=""
-            :loading="globalLoading"
+            :loading="globalLoading || storySplitForm.loading"
             @click="doCommitSplitContent"
             style="
               background-color: none;
@@ -418,7 +420,7 @@
           <a-button
             v-if="storySplitForm.item?.process === 'SPLIT_PIC_COMPLETED'"
             target=""
-            :loading="globalLoading"
+            :loading="globalLoading || storySplitForm.loading"
             @click="doDownloadImages"
             >下载</a-button
           >
@@ -438,10 +440,26 @@
     <!-- 小说转分镜 -->
     <a-modal
       v-model:open="novelForm.viewFlag"
-      title="小说章节转分镜"
+      style="width: 80%; max-width: 1200px"
       @cancel="closeNovelForm"
       :bodyStyle="{ padding: 0 }"
     >
+      <template #title>
+        <span v-if="novelForm.loading">
+          <span style="color: red"
+            >内容正在生成中 <Icon icon="svg-spinners:bars-fade" coler="red"
+          /></span>
+        </span>
+        <span v-else
+          >小说章节转分镜
+          <Icon
+            v-if="novelForm.aiContent && novelForm.aiContent.length > 0"
+            icon="fluent-mdl2:completed-solid"
+            color="#14c832"
+          />
+        </span>
+      </template>
+
       <template #footer>
         <a-button @click="closeNovelForm">取消</a-button>
         <a-button
@@ -454,12 +472,25 @@
             box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
             color: white;
           "
+          >小说内容提取</a-button
+        >
+        <a-button
+          type="primary"
+          :loading="novelForm.loading || globalLoading"
+          v-if="novelForm.aiContent && novelForm.aiContent.length > 0"
+          @click="doGenNovelSplit"
+          style="
+            background-color: none;
+            background-image: linear-gradient(to right, #2850bc, #600e96); /* 从左到右的渐变 */
+            box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%);
+            color: white;
+          "
           >小说转分镜</a-button
         >
       </template>
       <a-spin :spinning="globalLoading" tip="内容过多，需要的时间稍长。请耐心等待！">
         <a-row style="padding: 0 10px">
-          <div
+          <!-- <div
             v-if="novelForm.loading"
             style="
               display: flex;
@@ -472,12 +503,11 @@
           >
             <Icon icon="svg-spinners:bars-fade" size="40" />
             <span style="color: red; font-size: 10px">内容较多，生成时间稍长，请耐心等候</span>
-          </div>
+          </div> -->
           <a-textarea
-            v-else
             :bordered="true"
             v-model:value="novelForm.content"
-            :rows="15"
+            :rows="13"
             placeholder="复制小说章节到此。如：
 　　第1章矿奴
 　　昏暗潮湿的矿道中，陆叶背着矿篓，手中提着矿镐，一步步朝前行去。
@@ -494,13 +524,43 @@
             :maxlength="5000"
           />
         </a-row>
+
+        <a-row
+          style="margin-top: 20px; padding: 0 10px"
+          v-if="novelForm.aiContent && novelForm.aiContent.length > 0"
+        >
+          <div
+            justify="start"
+            align="top"
+            style="
+              width: 100%;
+              margin-bottom: 10px;
+              padding: 8px;
+              border: 1px solid transparent;
+              border-radius: 8px;
+              background-color: #fff7e8;
+            "
+          >
+            <span style="padding: 3px 10px; color: rgb(0 0 0 / 70%); font-size: 10px">
+              <Icon icon="flat-color-icons:idea" color="#91C8E4" />
+              这是一个大纲内容，如果生成的内容不理想，你可以手动修改下。大体结构不变就好。</span
+            >
+          </div>
+          <a-textarea
+            :bordered="true"
+            v-model:value="novelForm.aiContent"
+            :rows="13"
+            placeholder="一只猫大战老虎的悲伤故事2"
+            :maxlength="4096"
+          />
+        </a-row>
       </a-spin>
     </a-modal>
   </a-layout>
 </template>
 
 <script lang="ts" setup>
-  import { ref, onMounted,onUnmounted, computed, unref, nextTick } from 'vue';
+  import { ref, onMounted, onUnmounted, computed, unref, nextTick } from 'vue';
   import { Loading } from '/@/components/Loading';
   import Icon from '/@/components/Icon/Icon.vue';
   import { IdReq } from '/@/api/model/baseModel';
@@ -525,14 +585,13 @@
   import { useGo } from '/@/hooks/web/usePage';
   import { func } from 'vue-types';
   import { getCustomLocalCache, setCustomLocalCache } from '/@/utils/custom';
-  import { useUserStore } from '/@/store/modules/user';
+  import { useUserStore, useUserStoreWithOut } from '/@/store/modules/user';
   import type { UploadFile } from 'ant-design-vue/es/upload/interface';
   import { getAppEnvConfig } from '/@/utils/env';
   import StoryInfo from './story_info.vue';
   import { downloadByOnlineUrl } from '/@/utils/file/download';
   import useClipboard from 'vue-clipboard3';
-  import { extractAndTransformText, parseStoryData } from './text_extract';
-  import { useUserStoreWithOut } from '/@/store/modules/user';
+  import { extractAndTransformText, parseStoryData, parseNovelData } from './text_extract';
   import { buildShortUUID } from '/@/utils/uuid';
   import { EventSourcePolyfill } from 'event-source-polyfill';
 
@@ -611,7 +670,8 @@
   const globalLoading = ref(false);
 
   const changeLoading = (isTrue: boolean) => {
-    globalLoading.value = isTrue;
+    storySplitForm.value.loading = isTrue;
+    // globalLoading.value = isTrue;
   };
 
   const onSearch = async () => {
@@ -649,7 +709,7 @@
     text: null,
     storyLoading: false,
     mode: 'gpt-4-0125-preview',
-    aiStory: '--',
+    aiStory: '',
   });
 
   const showStoryForm = async () => {
@@ -666,31 +726,38 @@
   };
 
   // 生成故事
-  const uid = ref("");
+  const uid = ref('');
   const doGenStory = async () => {
     // 初始连接到SSE
-    executeChat(() => {
-      storyForm.value.storyLoading = false;
-    });
+    executeChat(
+      () => {
+        storyForm.value.storyLoading = false;
+      },
+      (text) => {
+        storyForm.value.aiStory = text;
+      },
+    );
     storyForm.value.storyLoading = true;
-    
-    try{
-      const resp = await chat({
-        mode: storyForm.value.mode,
-        msg: storyForm.value.text,
-        chatEnum: 'STORY',
-      }, uid.value);
-    }catch (error) {
-      console.error("An error occurred:", error);
+
+    try {
+      const resp = await chat(
+        {
+          mode: storyForm.value.mode,
+          msg: storyForm.value.text,
+          chatEnum: 'STORY',
+        },
+        uid.value,
+      );
+    } catch (error) {
+      console.error('An error occurred:', error);
       storyForm.value.storyLoading = false;
     }
-    
-    
+
     // try {
-      // const resp = await genStory({
-      //   mode: storyForm.value.mode,
-      //   content: storyForm.value.text,
-      // });
+    // const resp = await genStory({
+    //   mode: storyForm.value.mode,
+    //   content: storyForm.value.text,
+    // });
     //   storyForm.value.aiStory = resp;
     //   message.success('创作成功!');
     //   // onSearch();
@@ -699,161 +766,186 @@
     // }
   };
 
-  const executeChat = async (setLoadingCallback) => {
+  const executeChat = async (setLoadingCallback, setContentCallback) => {
     let sse;
     let text = '';
     uid.value = buildShortUUID('chatData');
     const eventSource = new EventSourcePolyfill('http://localhost:7099/sse/createSse', {
       headers: {
-        'Accept': 'text/event-stream',
-        'Authorization': token,
-        'uid': uid.value,
+        Accept: 'text/event-stream',
+        Authorization: token,
+        uid: uid.value,
         // 如果有其他需要的 headers，可以在这里添加
       },
     });
 
     eventSource.onopen = (event) => {
-        console.log("开始输出后端返回值");
-        sse = event.target;
+      console.log('开始输出后端返回值');
+      sse = event.target;
     };
     eventSource.onmessage = (event) => {
-        console.log("event:" + event);
-        if (event.lastEventId == "[TOKENS]") {
-            text = text + event.data;
-            storyForm.value.aiStory = text;
-            text = ''
-            return;
-        }
-        if (event.data == "[DONE]") {
-            if (sse) {
-                sse.close();
-            }
-            setLoadingCallback();
-            return;
-        }
-        let json_data = JSON.parse(event.data)
-        if (json_data.content == null || json_data.content == 'null') {
-            return;
-        }
-        text = text + json_data.content;
+      console.log('event:' + event);
+      if (event.lastEventId == '[TOKENS]') {
+        text = text + event.data;
         storyForm.value.aiStory = text;
+        text = '';
+        return;
+      }
+      if (event.data == '[DONE]') {
+        if (sse) {
+          sse.close();
+        }
+        setLoadingCallback();
+        return;
+      }
+      let json_data = JSON.parse(event.data);
+      if (json_data.content == null || json_data.content == 'null') {
+        return;
+      }
+      text = text + json_data.content;
+      setContentCallback(text);
     };
     eventSource.onerror = (event) => {
-        console.log("onerror", event);
-        alert("服务异常请重试并联系开发者！")
-        if (event.readyState === EventSource.CLOSED) {
-            console.log('connection is closed');
-            setLoadingCallback();
-        } else {
-            console.log("Error occured", event);
-        }
-        event.target.close();
+      console.log('onerror', event);
+      alert('服务异常请重试并联系开发者！');
+      if (event.readyState === EventSource.CLOSED) {
+        console.log('connection is closed');
+        setLoadingCallback();
+      } else {
+        console.log('Error occured', event);
+      }
+      event.target.close();
     };
-    eventSource.addEventListener("customEventName", (event) => {
-        console.log("Message id is " + event.lastEventId);
+    eventSource.addEventListener('customEventName', (event) => {
+      console.log('Message id is ' + event.lastEventId);
     });
-    eventSource.addEventListener("customEventName", (event) => {
-        console.log("Message id is " + event.lastEventId);
+    eventSource.addEventListener('customEventName', (event) => {
+      console.log('Message id is ' + event.lastEventId);
     });
-
-  }
+  };
   const executeChat2 = async (setLoadingCallback) => {
     let sse;
     let text = '';
     uid.value = buildShortUUID('chatData');
     const eventSource = new EventSourcePolyfill('http://localhost:7099/sse/createSse', {
       headers: {
-        'Accept': 'text/event-stream',
-        'Authorization': token,
-        'uid': uid.value,
+        Accept: 'text/event-stream',
+        Authorization: token,
+        uid: uid.value,
         // 如果有其他需要的 headers，可以在这里添加
       },
     });
 
     eventSource.onopen = (event) => {
-        console.log("开始输出后端返回值");
-        sse = event.target;
+      console.log('开始输出后端返回值');
+      sse = event.target;
     };
+
     let currentLine = ''; // 用于累积当前行的内容
+    let recentChapterTitle = '';
 
     eventSource.onmessage = (event) => {
-        
-        if (event.data == "[DONE]") {
-            if (sse) {
-                sse.close();
-            }
-            setLoadingCallback();
-            return;
+      if (event.data == '[DONE]') {
+        if (sse) {
+          sse.close();
         }
-        let json_data = JSON.parse(event.data);
-        if (json_data.content == null || json_data.content == 'null') {
-            return;
-        }
-        text = text + json_data.content;
-        storyForm.value.aiStory = text;
+        setLoadingCallback();
+        return;
+      }
+      let json_data = JSON.parse(event.data);
+      if (json_data.content == null || json_data.content == 'null') {
+        return;
+      }
+      text = text + json_data.content;
+      // storyForm.value.aiStory = text;
 
-        console.log("event:" + json_data.content);
+      // console.log('event:' + json_data.content);
       // 使用正则表达式匹配每一行的结束
       const linesFlag = json_data.content.endsWith('\n');
-      if(linesFlag) {
-          if (currentLine.trim().startsWith("章节标题:")) {
-            console.log(currentLine);
-          }else if(currentLine.trim().startsWith(">>分镜画面")) {
-            console.log(currentLine);
+      if (linesFlag) {
+        console.log('当前行：' + currentLine);
+        if (currentLine.startsWith('>>章节')) {
+          recentChapterTitle = currentLine.substring('>>'.length).trim();
+          // 在 storyChapterList 中找到匹配的章节标题并添加新的 storyPictureList 项
+          // const chapter = storySplitForm.value.item.storyChapterList.find(
+          //   (ch) => ch.title === recentChapterTitle,
+          // );
+          // if (chapter) {
+          //   chapter.storyPictureList.push({ caption: '', description: '' });
+          // }
+        } else if (currentLine.startsWith('>>分镜画面')) {
+          // 获取最近的章节标题对应的 storyPictureList 项并设置 description
+          const chapter = storySplitForm.value.item.storyChapterList.find(
+            (ch) => ch.title === recentChapterTitle,
+          );
+          if (chapter) {
+            chapter.storyPictureList.push({ caption: '', description: '' });
           }
-          currentLine = ''; // 重置当前行
-      }else {
-        currentLine += ' ' + json_data.content; 
+          if (chapter && chapter.storyPictureList.length > 0) {
+            const lastPicture = chapter.storyPictureList[chapter.storyPictureList.length - 1];
+            lastPicture.description = currentLine.substring('>>分镜画面'.length + 2).trim();
+          }
+        } else if (currentLine.startsWith('>>字幕内容')) {
+          // 获取最近的章节标题对应的 storyPictureList 项并设置 caption
+          const chapter = storySplitForm.value.item.storyChapterList.find(
+            (ch) => ch.title === recentChapterTitle,
+          );
+          if (chapter && chapter.storyPictureList.length > 0) {
+            const lastPicture = chapter.storyPictureList[chapter.storyPictureList.length - 1];
+            lastPicture.caption = currentLine.substring('>>字幕内容'.length + 1).trim();
+          }
+        }
+
+        currentLine = ''; // 重置当前行
+      } else {
+        currentLine += json_data.content.trim();
       }
-    }
-    eventSource.onerror = (event) => {
-        console.log("onerror", event);
-        alert("服务异常请重试并联系开发者！")
-        if (event.readyState === EventSource.CLOSED) {
-            console.log('connection is closed');
-            setLoadingCallback();
-        } else {
-            console.log("Error occured", event);
-        }
-        event.target.close();
-
-        if (currentLine.trim() !== '') {
-            console.log(currentLine);
-        }
     };
-    eventSource.addEventListener("customEventName", (event) => {
-        console.log("Message id is " + event.lastEventId);
+    eventSource.onerror = (event) => {
+      console.log('onerror', event);
+      alert('服务异常请重试并联系开发者！');
+      if (event.readyState === EventSource.CLOSED) {
+        console.log('connection is closed');
+        setLoadingCallback();
+      } else {
+        console.log('Error occured', event);
+      }
+      event.target.close();
+      setLoadingCallback();
+    };
+    eventSource.addEventListener('customEventName', (event) => {
+      console.log('Message id is ' + event.lastEventId);
     });
-    eventSource.addEventListener("customEventName", (event) => {
-        console.log("Message id is " + event.lastEventId);
+    eventSource.addEventListener('customEventName', (event) => {
+      console.log('Message id is ' + event.lastEventId);
     });
-
-  }
+  };
 
   // 生成故事分镜
   const doGenStorySplit = async () => {
-
     //先手动分镜
     doGenStorySplitByHand();
 
     // 初始连接到SSE
     executeChat2(() => {
-      globalLoading.value = false;
+      storySplitForm.value.loading = false;
     });
-    globalLoading.value = true;
-    
-    try{
-      const resp = await chat({
-        mode: storyForm.value.mode,
-        msg: storyForm.value.aiStory,
-        chatEnum: 'STORY_SPLIT',
-      }, uid.value);
-    }catch (error) {
-      console.error("An error occurred:", error);
-      storyForm.value.storyLoading = false;
+    storySplitForm.value.loading = true;
+    // globalLoading.value = true;
+
+    try {
+      const resp = await chat(
+        {
+          mode: storyForm.value.mode,
+          msg: storyForm.value.aiStory,
+          chatEnum: 'STORY_SPLIT',
+        },
+        uid.value,
+      );
+    } catch (error) {
+      console.error('An error occurred:', error);
+      storySplitForm.value.loading = false;
     }
-    
-    
 
     // globalLoading.value = true;
     // try {
@@ -988,6 +1080,7 @@
   const novelForm = ref({
     viewFlag: false,
     content: '',
+    aiContent: '',
     loading: false,
     mode: 'gpt-4-0125-preview',
   });
@@ -1000,6 +1093,7 @@
     novelForm.value = {
       viewFlag: false,
       content: '',
+      aiContent: '',
       loading: false,
       mode: 'gpt-4-0125-preview',
     };
@@ -1007,24 +1101,75 @@
 
   //执行小说分镜
   const doNovelExtract = async () => {
-    // globalLoading.value = true;
+    executeChat(
+      () => {
+        novelForm.value.loading = false;
+      },
+      (text) => {
+        novelForm.value.aiContent = text;
+      },
+    );
+
     novelForm.value.loading = true;
+
     try {
-      const resp = await novelExtract({
-        mode: novelForm.value.mode,
-        content: novelForm.value.content,
-      });
-
-      novelForm.value.viewFlag = false;
-      console.log(resp);
-      novelForm.value.viewFlag = false;
-
-      //打开明细创建页面
-      showStorySplitForm(resp);
-    } finally {
-      // globalLoading.value = false;
+      const resp = await chat(
+        {
+          mode: novelForm.value.mode,
+          msg: novelForm.value.content,
+          chatEnum: 'NOVEL_CONVERT',
+        },
+        uid.value,
+      );
+    } catch (error) {
+      console.error('An error occurred:', error);
       novelForm.value.loading = false;
     }
+
+    // globalLoading.value = true;
+    // novelForm.value.loading = true;
+    // try {
+    //   const resp = await novelExtract({
+    //     mode: novelForm.value.mode,
+    //     content: novelForm.value.content,
+    //   });
+
+    //   novelForm.value.viewFlag = false;
+    //   console.log(resp);
+    //   novelForm.value.viewFlag = false;
+
+    //   //打开明细创建页面
+    //   showStorySplitForm(resp);
+    // } finally {
+    //   // globalLoading.value = false;
+    //   novelForm.value.loading = false;
+    // }
+  };
+
+  //执行小说分镜
+  const doGenNovelSplit = async () => {
+    const resp = await parseNovelData(novelForm.value.aiContent);
+    console.log('doGenNovelSplit resp:' + resp);
+    novelForm.value.viewFlag = false;
+    showStorySplitForm(resp);
+    // globalLoading.value = true;
+    // novelForm.value.loading = true;
+    // try {
+    //   const resp = await novelExtract({
+    //     mode: novelForm.value.mode,
+    //     content: novelForm.value.content,
+    //   });
+
+    //   novelForm.value.viewFlag = false;
+    //   console.log(resp);
+    //   novelForm.value.viewFlag = false;
+
+    //   //打开明细创建页面
+    //   showStorySplitForm(resp);
+    // } finally {
+    //   // globalLoading.value = false;
+    //   novelForm.value.loading = false;
+    // }
   };
 
   // js故事分镜

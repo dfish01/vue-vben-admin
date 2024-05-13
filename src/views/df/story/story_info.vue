@@ -20,15 +20,14 @@
             background-color: #fff7e8;
           "
         >
-          
-          <span v-if="storySplitForm.item?.genType === 'NOVEL'" style="padding: 3px 10px; color: rgb(0 0 0 / 70%); font-size: 10px">
+          <span
+            v-if="storySplitForm.item?.genType === 'NOVEL'"
+            style="padding: 3px 10px; color: rgb(0 0 0 / 70%); font-size: 10px"
+          >
             <Icon icon="flat-color-icons:idea" color="#91C8E4" />
             这是一个小说通过AI提取的分镜内容，如果提取的内容不理想，你可以手动修改下。另外，考虑到有些是购买的账号，所以把任务自动开启改成手动触发了。</span
           >
-          <span
-          v-else
-            style="padding: 3px 10px; color: rgb(0 0 0 / 70%); font-size: 10px"
-          >
+          <span v-else style="padding: 3px 10px; color: rgb(0 0 0 / 70%); font-size: 10px">
             <Icon icon="flat-color-icons:idea" color="#91C8E4" />
             这是一个AI联想的分镜内容，如果生成的内容不理想，你可以手动修改下。另外，考虑到有些是购买的账号，所以把任务自动开启改成手动触发了。</span
           >
@@ -273,7 +272,6 @@
                 class="vel-icon icon"
                 aria-hidden="true"
                 style="margin-right: 1px"
-                
             /></a-button>
           </a-tooltip>
 
@@ -284,7 +282,6 @@
                 class="vel-icon icon"
                 aria-hidden="true"
                 style="margin-right: 1px"
-                
             /></a-button>
           </a-tooltip>
         </template>
@@ -294,7 +291,7 @@
               :key="index"
               :header="storyChapter.title"
               v-for="(storyChapter, index) in storySplitForm.item.storyChapterList"
-              :bodyStyle="{padding: 0}"
+              :bodyStyle="{ padding: 0 }"
               style="padding: 5px 10px"
             >
               <template #extra>
@@ -381,7 +378,7 @@
               <!-- 章节内容 -->
               <a-descriptions bordered size="small">
                 <template #extra> </template>
-                <a-descriptions-item label="章节标题" :span="3" :style="{ width: '180px'}">
+                <a-descriptions-item label="章节标题" :span="3" :style="{ width: '180px' }">
                   <a-input-group
                     v-if="storyChapter.titleEdit && storyChapter.titleEdit === true"
                     compact
@@ -457,13 +454,7 @@
                     v-if="false"
                     align="center"
                   />
-                  <a-table-column
-                    title="字幕"
-                    dataIndex="caption"
-                    key="caption"
-                    align="center"
-                    width="200px"
-                  />
+
                   <!-- <a-table-column
                 title="状态"
                 dataIndex="taskState"
@@ -482,6 +473,13 @@
                     dataIndex="description"
                     key="description"
                     align="center"
+                  />
+                  <a-table-column
+                    title="字幕"
+                    dataIndex="caption"
+                    key="caption"
+                    align="center"
+                    width="200px"
                   />
                   <a-table-column
                     title="执行prompt"
