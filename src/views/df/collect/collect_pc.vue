@@ -434,8 +434,7 @@
                         card.commandType === 'BLEND' ||
                         card.commandType === 'ZOOM' ||
                         card.commandType === 'PAN' ||
-                        card.commandType === 'VARIATION') &&
-                      card.commandType != 'PAN'
+                        card.commandType === 'VARIATION')
                     "
                   >
                     <template #overlay>

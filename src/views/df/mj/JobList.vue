@@ -1,323 +1,323 @@
 <template>
   <div class="jobList-app" ref="formRef">
     <Loading :loading="loadingRef" :absolute="false" tip="数据加载中..." />
-    <a-card  :bordered="false" :bodyStyle="{padding: 0}">
-    <a-card class="search-card no-radius">
-      <a-space>
-        <a-select
-          v-model:value="searchForm.state"
-          style="width: 100px; height: 32px"
-          class="mobile-select"
-          placeholder="任务状态"
-          @change="onSearch(1)"
-        >
-          <a-select-option value="QUEUED">排队中</a-select-option>
-          <a-select-option value="RUNNING">执行中</a-select-option>
-          <a-select-option value="SUCCESS">已完成</a-select-option>
-          <a-select-option value="FAILED">已失败</a-select-option>
-        </a-select>
-        <a-select
-          v-model:value="searchForm.commandType"
-          class="mobile-select"
-          style="width: 100px; height: 32px"
-          placeholder="任务类型"
-          @change="onSearch(1)"
-        >
-          <a-select-option value="IMAGINE">文生图</a-select-option>
-          <a-select-option value="BLEND">混图</a-select-option>
-          <a-select-option value="DESCRIBE">解析图</a-select-option>
-          <a-select-option value="UPSCALE">放大</a-select-option>
-          <a-select-option value="VARIATION">变化</a-select-option>
-          <a-select-option value="PAN">填充</a-select-option>
-          <a-select-option value="ZOOM">缩放</a-select-option>
-        </a-select>
-
-        <a-mentions
-          v-model:value="searchForm.tagName"
-          autofocus
-          placeholder="标签查询，可使用@提示~"
-          :options="drawTagForm.tagNameOptions"
-          @select="onChangeSearchLabel"
-          style="width: 220px"
-        />
-        <a-select
-          v-model:value="searchForm.sortWay"
-          class="mobile-select"
-          style="width: 120px; height: 32px"
-          placeholder="排序方式"
-          @change="onSearch(1)"
-        >
-          <a-select-option value="space">按空间时间</a-select-option>
-          <a-select-option value="task">按任务时间</a-select-option>
-        </a-select>
-
-        <a-button-group>
-          <a-button type="primary" @click="onSearch(null)">
-            <Icon icon="lucide:scan-search" class="vel-icon icon" aria-hidden="true" />查询
-          </a-button>
-
-          <a-button @click="onReset">
-            <Icon icon="tdesign:clear-formatting" class="vel-icon icon" aria-hidden="true" />
-            重置
-          </a-button>
-        </a-button-group>
-        <a-button-group>
-          <a-dropdown :trigger="['click']">
-            <a-button type="primary" danger>
-              <Icon
-                icon="material-symbols:contract-delete-outline-rounded"
-                class="vel-icon icon"
-                aria-hidden="true"
-              />
-              删除
-            </a-button>
-            <template #overlay>
-              <a-menu>
-                <a-menu-item key="1">
-                  <a-popconfirm
-                    title="将永久删除该空间下的全部排队记录，是否确认删除?"
-                    ok-text="确认删除"
-                    cancel-text="取消"
-                    @confirm="deleteBatchHandle('QUEUED')"
-                  >
-                    <a>❌排队</a>
-                  </a-popconfirm>
-                </a-menu-item>
-
-                <a-menu-item key="2">
-                  <a-popconfirm
-                    title="将永久删除该空间下的全部失败记录，是否确认删除?"
-                    ok-text="确认删除"
-                    cancel-text="取消"
-                    @confirm="deleteBatchHandle('FAILED')"
-                  >
-                    <a>❌失败</a>
-                  </a-popconfirm>
-                </a-menu-item>
-              </a-menu>
-            </template>
-          </a-dropdown>
-          <a-dropdown :trigger="['click']">
-            <a-button type="warning">
-              <Icon
-                icon="icon-park-solid:setting-computer"
-                class="vel-icon icon"
-                aria-hidden="true"
-              />配置
-            </a-button>
-            <template #overlay>
-              <a-menu>
-                <a-menu-item key="1" class="delete">
-                  <a-popconfirm
-                    title="请确认相关账号的remix状态，这里只是控制弹窗而已（暂时未接入实时控制Remix）。如果remix状态不匹配，会导致任务失败!"
-                    :ok-text="remix.enable_flag ? '关闭Remix' : '开启Remix'"
-                    cancel-text="取消"
-                    @confirm="changeRemix()"
-                  >
-                    📝{{ remix.enable_flag ? '关闭Remix' : '开启Remix' }}
-                  </a-popconfirm>
-                </a-menu-item>
-
-                <a-menu-item key="2">
-                  <a-popconfirm
-                    title="提交任务自动刷新！！！"
-                    :ok-text="userSetting.taskRefresh ? '关闭刷新' : '开启刷新'"
-                    cancel-text="取消"
-                    @confirm="setTaskRefresh()"
-                  >
-                    💫{{ userSetting.taskRefresh ? '关闭刷新' : '开启刷新' }}
-                  </a-popconfirm>
-                </a-menu-item>
-                <a-menu-divider />
-                <a-menu-item key="11">
-                  <a-popconfirm
-                    :title="
-                      userSetting.cardShow === 'SINGLE'
-                        ? '开启后，列表显示4图，点击可放大。明细页在右键列表~'
-                        : '开启后，列表显示单图，点击出现明细页~'
-                    "
-                    :ok-text="userSetting.cardShow === 'SINGLE' ? '立即开启' : '立即开启'"
-                    cancel-text="取消"
-                    @confirm="setCardShow()"
-                  >
-                    ✨{{ userSetting.cardShow === 'SINGLE' ? '列表4图模式' : '列表单图模式' }}
-                  </a-popconfirm>
-                </a-menu-item>
-                <a-menu-item key="12">
-                  <a-popconfirm
-                    :title="
-                      userSetting.showMode === 'fixed'
-                        ? '开启后，图片按原始比例显示~'
-                        : '开启后，图片按统一比例显示~~'
-                    "
-                    :ok-text="立即开启"
-                    cancel-text="取消"
-                    @confirm="setShowMode(userSetting.showMode === 'full' ?  'fixed' : 'full')"
-                  >
-                    ✨{{ userSetting.showMode === 'full' ? '固定比例显示' : '原比例显示' }}
-                  </a-popconfirm>
-                </a-menu-item>
-                <a-menu-item key="3">
-                  <a-popconfirm
-                    title="⚠️以卡片的方式进行预览，建议配合原图模式。"
-                    ok-text="立即预览"
-                    cancel-text="取消"
-                    @confirm="showAllImage(true)"
-                  >
-                    📺全量高清预览
-                  </a-popconfirm>
-                </a-menu-item>
-                <a-menu-divider />
-                <a-menu-item key="4" disabled>
-                  <a-popconfirm
-                    title="⚠️以卡片的方式进行预览，建议配合原图模式。"
-                    ok-text="立即预览"
-                    cancel-text="取消"
-                    @confirm="showAllImage(false)"
-                  >
-                    📺全量清晰预览
-                  </a-popconfirm>
-                </a-menu-item>
-                <a-menu-item key="5" disabled>
-                  <a-popconfirm
-                    title="⚠️要切割当前页所有4格图，页面会加载很久。"
-                    ok-text="确定切割"
-                    cancel-text="取消"
-                    @confirm="() => {}"
-                    disabled
-                  >
-                    ⚠️✂️全量切割
-                  </a-popconfirm>
-                </a-menu-item>
-
-                <a-menu-divider />
-                <a-menu-item key="6" disabled>
-                  <a-popconfirm
-                    title="该选项默认暂时未作存储，默认关闭状态，刷新就失效了！分割图场景适用~"
-                    :ok-text="userSetting.useUpImage ? '确认关闭' : '确认开启'"
-                    cancel-text="取消"
-                    @confirm="setUseUpImage()"
-                  >
-                    <!-- 🍝{{ userSetting.useUpImage ? '开启缩略图' : '开启原图' }} -->
-                    🍝开启缩略图
-                  </a-popconfirm>
-                </a-menu-item>
-
-                <a-menu-item key="7" disabled>
-                  <a-popconfirm
-                    title="我的网速无懈可击！！！"
-                    :ok-text="userSetting.usePersonNet ? '还是加速吧' : '就是要原连接'"
-                    cancel-text="取消"
-                    @confirm="setUsePersonNet()"
-                  >
-                    🏄{{ userSetting.usePersonNet ? '加速连接' : '使用原连接' }}
-                  </a-popconfirm>
-                </a-menu-item>
-              </a-menu>
-            </template>
-          </a-dropdown>
-        </a-button-group>
-      </a-space>
-    </a-card>
-
-    <div
-      v-if="cards.length === 0"
-      style="display: flex; align-items: center; justify-content: center"
-      :style="{ height: `calc(${contentHeight}px - 64px)`, overflow: 'auto' }"
-    >
-      <a-empty :image="simpleImage" />
-    </div>
-    <div
-      v-else
-      class="cards"
-      :style="{ height: `calc(${contentHeight}px - 58px)`, overflow: 'auto' }"
-    >
-      <div ref="cardListRef" v-for="card in cards" :key="card.id">
-        <a-card :bodyStyle="{ padding: '0px' }" class="card" :hoverable="false">
-          <ViewPicture :card ="card" :userSetting="userSetting" ></ViewPicture>
-
-          <div
-            v-if="card.state != 'SUCCESS'"
-            style="
-              display: flex;
-              position: absolute;
-              bottom: 35px;
-              flex-direction: row;
-              justify-content: center;
-              width: 100%;
-            "
+    <a-card :bordered="false" :bodyStyle="{ padding: 0 }">
+      <a-card class="search-card no-radius">
+        <a-space>
+          <a-select
+            v-model:value="searchForm.state"
+            style="width: 100px; height: 32px"
+            class="mobile-select"
+            placeholder="任务状态"
+            @change="onSearch(1)"
           >
-            <a-button-group size="small" buttonStyle="solid">
-              <a-tooltip
-                title=""
-                v-if="
-                  card.state === 'FAILED' &&
-                  card.commandType !== 'BLEND' &&
-                  card.commandType !== 'DESCRIBE'
-                "
-              >
-                <a-popconfirm
-                  title="是否重新提交该任务?"
-                  ok-text="重新提交"
-                  cancel-text="取消"
-                  @confirm="doRetryDrawTask(card)"
-                >
-                  <a-button class="card-icon-button">
-                    <Icon icon="bx:revision" size="14px" color="#4F709C" />
-                  </a-button>
-                </a-popconfirm>
-              </a-tooltip>
-              <a-tooltip v-if="card.prompt" :overlayStyle="{ maxWidth: '500px' }" trigger="click">
-                <template #title>
-                  <p v-for="(part, index) in card.prompt.split('\n\n')" :key="index">{{
-                    part.trim()
-                  }}</p>
-                </template>
-                <a-button class="card-icon-button">
-                  <Icon icon="ic:outline-info" size="14" color="#FFCC70" />
-                </a-button>
-              </a-tooltip>
-              <a-tooltip>
-                <template #title>
-                  <p
-                    style="margin: 5px; font-size: 12px; line-height: 1"
-                    v-for="(part, index) in generateTooltipText(card)"
-                    :key="index"
-                  >
-                    {{ part.trim() }}
-                  </p>
-                </template>
-                <a-button class="card-icon-button">
-                  <Icon icon="ic:baseline-add-alarm" size="14" color="#EE9322" />
-                </a-button>
-              </a-tooltip>
-              <a-tooltip title="删除">
-                <a-popconfirm
-                  :title="
-                    card.secState === 'SUBMITTED' || card.secState === 'IN_PROGRESS'
-                      ? '是否确认移除任务？注意：该状态不会退还资源！请等待任务完成或者自动超时失败退还资源！'
-                      : '是否确认移除任务？'
+            <a-select-option value="QUEUED">排队中</a-select-option>
+            <a-select-option value="RUNNING">执行中</a-select-option>
+            <a-select-option value="SUCCESS">已完成</a-select-option>
+            <a-select-option value="FAILED">已失败</a-select-option>
+          </a-select>
+          <a-select
+            v-model:value="searchForm.commandType"
+            class="mobile-select"
+            style="width: 100px; height: 32px"
+            placeholder="任务类型"
+            @change="onSearch(1)"
+          >
+            <a-select-option value="IMAGINE">文生图</a-select-option>
+            <a-select-option value="BLEND">混图</a-select-option>
+            <a-select-option value="DESCRIBE">解析图</a-select-option>
+            <a-select-option value="UPSCALE">放大</a-select-option>
+            <a-select-option value="VARIATION">变化</a-select-option>
+            <a-select-option value="PAN">填充</a-select-option>
+            <a-select-option value="ZOOM">缩放</a-select-option>
+          </a-select>
+
+          <a-mentions
+            v-model:value="searchForm.tagName"
+            autofocus
+            placeholder="标签查询，可使用@提示~"
+            :options="drawTagForm.tagNameOptions"
+            @select="onChangeSearchLabel"
+            style="width: 220px"
+          />
+          <a-select
+            v-model:value="searchForm.sortWay"
+            class="mobile-select"
+            style="width: 120px; height: 32px"
+            placeholder="排序方式"
+            @change="onSearch(1)"
+          >
+            <a-select-option value="space">按空间时间</a-select-option>
+            <a-select-option value="task">按任务时间</a-select-option>
+          </a-select>
+
+          <a-button-group>
+            <a-button type="primary" @click="onSearch(null)">
+              <Icon icon="lucide:scan-search" class="vel-icon icon" aria-hidden="true" />查询
+            </a-button>
+
+            <a-button @click="onReset">
+              <Icon icon="tdesign:clear-formatting" class="vel-icon icon" aria-hidden="true" />
+              重置
+            </a-button>
+          </a-button-group>
+          <a-button-group>
+            <a-dropdown :trigger="['click']">
+              <a-button type="primary" danger>
+                <Icon
+                  icon="material-symbols:contract-delete-outline-rounded"
+                  class="vel-icon icon"
+                  aria-hidden="true"
+                />
+                删除
+              </a-button>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item key="1">
+                    <a-popconfirm
+                      title="将永久删除该空间下的全部排队记录，是否确认删除?"
+                      ok-text="确认删除"
+                      cancel-text="取消"
+                      @confirm="deleteBatchHandle('QUEUED')"
+                    >
+                      <a>❌排队</a>
+                    </a-popconfirm>
+                  </a-menu-item>
+
+                  <a-menu-item key="2">
+                    <a-popconfirm
+                      title="将永久删除该空间下的全部失败记录，是否确认删除?"
+                      ok-text="确认删除"
+                      cancel-text="取消"
+                      @confirm="deleteBatchHandle('FAILED')"
+                    >
+                      <a>❌失败</a>
+                    </a-popconfirm>
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+            <a-dropdown :trigger="['click']">
+              <a-button type="warning">
+                <Icon
+                  icon="icon-park-solid:setting-computer"
+                  class="vel-icon icon"
+                  aria-hidden="true"
+                />配置
+              </a-button>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item key="1" class="delete">
+                    <a-popconfirm
+                      title="请确认相关账号的remix状态，这里只是控制弹窗而已（暂时未接入实时控制Remix）。如果remix状态不匹配，会导致任务失败!"
+                      :ok-text="remix.enable_flag ? '关闭Remix' : '开启Remix'"
+                      cancel-text="取消"
+                      @confirm="changeRemix()"
+                    >
+                      📝{{ remix.enable_flag ? '关闭Remix' : '开启Remix' }}
+                    </a-popconfirm>
+                  </a-menu-item>
+
+                  <a-menu-item key="2">
+                    <a-popconfirm
+                      title="提交任务自动刷新！！！"
+                      :ok-text="userSetting.taskRefresh ? '关闭刷新' : '开启刷新'"
+                      cancel-text="取消"
+                      @confirm="setTaskRefresh()"
+                    >
+                      💫{{ userSetting.taskRefresh ? '关闭刷新' : '开启刷新' }}
+                    </a-popconfirm>
+                  </a-menu-item>
+                  <a-menu-divider />
+                  <a-menu-item key="11">
+                    <a-popconfirm
+                      :title="
+                        userSetting.cardShow === 'SINGLE'
+                          ? '开启后，列表显示4图，点击可放大。明细页在右键列表~'
+                          : '开启后，列表显示单图，点击出现明细页~'
+                      "
+                      :ok-text="userSetting.cardShow === 'SINGLE' ? '立即开启' : '立即开启'"
+                      cancel-text="取消"
+                      @confirm="setCardShow()"
+                    >
+                      ✨{{ userSetting.cardShow === 'SINGLE' ? '列表4图模式' : '列表单图模式' }}
+                    </a-popconfirm>
+                  </a-menu-item>
+                  <a-menu-item key="12">
+                    <a-popconfirm
+                      :title="
+                        userSetting.showMode === 'fixed'
+                          ? '开启后，图片按原始比例显示~'
+                          : '开启后，图片按统一比例显示~~'
+                      "
+                      :ok-text="立即开启"
+                      cancel-text="取消"
+                      @confirm="setShowMode(userSetting.showMode === 'full' ? 'fixed' : 'full')"
+                    >
+                      ✨{{ userSetting.showMode === 'full' ? '固定比例显示' : '原比例显示' }}
+                    </a-popconfirm>
+                  </a-menu-item>
+                  <a-menu-item key="3">
+                    <a-popconfirm
+                      title="⚠️以卡片的方式进行预览，建议配合原图模式。"
+                      ok-text="立即预览"
+                      cancel-text="取消"
+                      @confirm="showAllImage(true)"
+                    >
+                      📺全量高清预览
+                    </a-popconfirm>
+                  </a-menu-item>
+                  <a-menu-divider />
+                  <a-menu-item key="4" disabled>
+                    <a-popconfirm
+                      title="⚠️以卡片的方式进行预览，建议配合原图模式。"
+                      ok-text="立即预览"
+                      cancel-text="取消"
+                      @confirm="showAllImage(false)"
+                    >
+                      📺全量清晰预览
+                    </a-popconfirm>
+                  </a-menu-item>
+                  <a-menu-item key="5" disabled>
+                    <a-popconfirm
+                      title="⚠️要切割当前页所有4格图，页面会加载很久。"
+                      ok-text="确定切割"
+                      cancel-text="取消"
+                      @confirm="() => {}"
+                      disabled
+                    >
+                      ⚠️✂️全量切割
+                    </a-popconfirm>
+                  </a-menu-item>
+
+                  <a-menu-divider />
+                  <a-menu-item key="6" disabled>
+                    <a-popconfirm
+                      title="该选项默认暂时未作存储，默认关闭状态，刷新就失效了！分割图场景适用~"
+                      :ok-text="userSetting.useUpImage ? '确认关闭' : '确认开启'"
+                      cancel-text="取消"
+                      @confirm="setUseUpImage()"
+                    >
+                      <!-- 🍝{{ userSetting.useUpImage ? '开启缩略图' : '开启原图' }} -->
+                      🍝开启缩略图
+                    </a-popconfirm>
+                  </a-menu-item>
+
+                  <a-menu-item key="7" disabled>
+                    <a-popconfirm
+                      title="我的网速无懈可击！！！"
+                      :ok-text="userSetting.usePersonNet ? '还是加速吧' : '就是要原连接'"
+                      cancel-text="取消"
+                      @confirm="setUsePersonNet()"
+                    >
+                      🏄{{ userSetting.usePersonNet ? '加速连接' : '使用原连接' }}
+                    </a-popconfirm>
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+          </a-button-group>
+        </a-space>
+      </a-card>
+
+      <div
+        v-if="cards.length === 0"
+        style="display: flex; align-items: center; justify-content: center"
+        :style="{ height: `calc(${contentHeight}px - 64px)`, overflow: 'auto' }"
+      >
+        <a-empty :image="simpleImage" />
+      </div>
+      <div
+        v-else
+        class="cards"
+        :style="{ height: `calc(${contentHeight}px - 58px)`, overflow: 'auto' }"
+      >
+        <div ref="cardListRef" v-for="card in cards" :key="card.id">
+          <a-card :bodyStyle="{ padding: '0px' }" class="card" :hoverable="false">
+            <ViewPicture :card="card" :userSetting="userSetting" />
+
+            <div
+              v-if="card.state != 'SUCCESS'"
+              style="
+                display: flex;
+                position: absolute;
+                bottom: 35px;
+                flex-direction: row;
+                justify-content: center;
+                width: 100%;
+              "
+            >
+              <a-button-group size="small" buttonStyle="solid">
+                <a-tooltip
+                  title=""
+                  v-if="
+                    card.state === 'FAILED' &&
+                    card.commandType !== 'BLEND' &&
+                    card.commandType !== 'DESCRIBE'
                   "
-                  ok-text="确认删除"
-                  cancel-text="取消"
-                  @confirm="deleteCard(card)"
                 >
+                  <a-popconfirm
+                    title="是否重新提交该任务?"
+                    ok-text="重新提交"
+                    cancel-text="取消"
+                    @confirm="doRetryDrawTask(card)"
+                  >
+                    <a-button class="card-icon-button">
+                      <Icon icon="bx:revision" size="14px" color="#4F709C" />
+                    </a-button>
+                  </a-popconfirm>
+                </a-tooltip>
+                <a-tooltip v-if="card.prompt" :overlayStyle="{ maxWidth: '500px' }" trigger="click">
+                  <template #title>
+                    <p v-for="(part, index) in card.prompt.split('\n\n')" :key="index">{{
+                      part.trim()
+                    }}</p>
+                  </template>
                   <a-button class="card-icon-button">
-                    <Icon icon="ic:baseline-delete-forever" size="14" color="#FF6969" />
+                    <Icon icon="ic:outline-info" size="14" color="#FFCC70" />
                   </a-button>
-                </a-popconfirm>
-              </a-tooltip>
-            </a-button-group>
-          </div>
+                </a-tooltip>
+                <a-tooltip>
+                  <template #title>
+                    <p
+                      style="margin: 5px; font-size: 12px; line-height: 1"
+                      v-for="(part, index) in generateTooltipText(card)"
+                      :key="index"
+                    >
+                      {{ part.trim() }}
+                    </p>
+                  </template>
+                  <a-button class="card-icon-button">
+                    <Icon icon="ic:baseline-add-alarm" size="14" color="#EE9322" />
+                  </a-button>
+                </a-tooltip>
+                <a-tooltip title="删除">
+                  <a-popconfirm
+                    :title="
+                      card.secState === 'SUBMITTED' || card.secState === 'IN_PROGRESS'
+                        ? '是否确认移除任务？注意：该状态不会退还资源！请等待任务完成或者自动超时失败退还资源！'
+                        : '是否确认移除任务？'
+                    "
+                    ok-text="确认删除"
+                    cancel-text="取消"
+                    @confirm="deleteCard(card)"
+                  >
+                    <a-button class="card-icon-button">
+                      <Icon icon="ic:baseline-delete-forever" size="14" color="#FF6969" />
+                    </a-button>
+                  </a-popconfirm>
+                </a-tooltip>
+              </a-button-group>
+            </div>
 
-          <div
-            v-else
-            style="display: flex; flex-direction: column; padding-right: 4px; padding-bottom: 5px"
-          >
-            <div class="card-tags">
-              <div class="custom-radio-group">
-                <a-button-group size="small" buttonStyle="solid">
-                  <!-- <a-tooltip
+            <div
+              v-else
+              style="display: flex; flex-direction: column; padding-right: 4px; padding-bottom: 5px"
+            >
+              <div class="card-tags">
+                <div class="custom-radio-group">
+                  <a-button-group size="small" buttonStyle="solid">
+                    <!-- <a-tooltip
                     :title="
                       card.privacyMode === 'Y' ? '点击公开图片' : '当前公开图片，点击将关闭公开'
                     "
@@ -332,73 +332,87 @@
                       </span>
                     </a-button>
                   </a-tooltip> -->
-                  <a-tooltip title="任务概况">
-                    <a-button class="card-icon-button" @click="() => showTaskInfo(card)">
-                      <Icon icon="streamline-emojis:television" size="14" />
-                    </a-button>
-                  </a-tooltip>
-
-                  <!-- prompt 相关 -->
-                  <a-tooltip title="Prompt操作">
-                    <a-dropdown trigger="click">
-                      <a-button class="card-icon-button">
-                        <Icon icon="streamline-emojis:bell" size="14" color="#FFCC70" />
+                    <a-tooltip title="任务概况">
+                      <a-button class="card-icon-button" @click="() => showTaskInfo(card)">
+                        <Icon icon="streamline-emojis:television" size="14" />
                       </a-button>
-                      <template #overlay>
-                        <a-menu>
-                          <a-menu-item key="5" @click="() => setPrompt(card.prompt)"
-                            ><Icon icon="streamline-emojis:artist-palette" color="grey" />
-                            画同款</a-menu-item
-                          >
-                          <a-menu-item key="5" @click="() => copyText(card.prompt)"
-                            ><Icon icon="streamline-emojis:baseball" color="grey" />
-                            复制Prompt</a-menu-item
-                          >
-                          <a-menu-item key="4" @click="() => copyText(card.messageHash)"
-                            ><Icon icon="fluent-emoji-flat:id-button" color="grey" />
-                            复制 Job ID</a-menu-item
-                          >
-                          <a-menu-item key="6" @click="() => copyText(card.id)"
-                            ><Icon icon="fluent-emoji-flat:id-button" color="grey" />
-                            复制系统任务ID</a-menu-item
-                          >
-                          <a-menu-item v-if="card.taskImage.infoImageList.length === 1" key="7" @click="() => copyText(card.taskImage.infoImageList[0].url)"
-                            ><Icon icon="fluent-emoji-flat:keycap-1" color="grey" />
-                            复制图片链接</a-menu-item
-                          >
-                          <a-menu-item v-if="card.taskImage.infoImageList.length > 1" key="7" @click="() => copyText(card.taskImage.infoImageList[0].url)"
-                            ><Icon icon="fluent-emoji-flat:keycap-1" color="grey" />
-                            复制图片1链接</a-menu-item
-                          >
-                          <a-menu-item v-if="card.taskImage.infoImageList.length > 1" key="8" @click="() => copyText(card.taskImage.infoImageList[1].url)"
-                            ><Icon icon="fluent-emoji-flat:keycap-2" color="grey" />
-                            复制图片2链接</a-menu-item
-                          >
-                          <a-menu-item v-if="card.taskImage.infoImageList.length > 1" key="9" @click="() => copyText(card.taskImage.infoImageList[2].url)"
-                            ><Icon icon="fluent-emoji-flat:keycap-3" color="grey" />
-                            复制图片3链接</a-menu-item
-                          >
-                          <a-menu-item v-if="card.taskImage.infoImageList.length > 1" key="10" @click="() => copyText(card.taskImage.infoImageList[3].url)"
-                            ><Icon icon="fluent-emoji-flat:keycap-4" color="grey" />
-                            复制图片4链接</a-menu-item
-                          >
-                          
-                        </a-menu>
-                      </template>
-                    </a-dropdown>
-                  </a-tooltip>
+                    </a-tooltip>
 
-                  <!-- 添加到收藏 -->
-                  <a-tooltip title="添加到收藏">
-                    <a-button
-                      class="card-icon-button"
-                      @click="() => showAddCollectCategoryModel(card)"
-                    >
-                      <Icon icon="streamline-emojis:heart-with-arrow" size="14" color="#4F709C" />
-                    </a-button>
-                  </a-tooltip>
+                    <!-- prompt 相关 -->
+                    <a-tooltip title="Prompt操作">
+                      <a-dropdown trigger="click">
+                        <a-button class="card-icon-button">
+                          <Icon icon="streamline-emojis:bell" size="14" color="#FFCC70" />
+                        </a-button>
+                        <template #overlay>
+                          <a-menu>
+                            <a-menu-item key="5" @click="() => setPrompt(card.prompt)"
+                              ><Icon icon="streamline-emojis:artist-palette" color="grey" />
+                              画同款</a-menu-item
+                            >
+                            <a-menu-item key="5" @click="() => copyText(card.prompt)"
+                              ><Icon icon="streamline-emojis:baseball" color="grey" />
+                              复制Prompt</a-menu-item
+                            >
+                            <a-menu-item key="4" @click="() => copyText(card.messageHash)"
+                              ><Icon icon="fluent-emoji-flat:id-button" color="grey" /> 复制 Job
+                              ID</a-menu-item
+                            >
+                            <a-menu-item key="6" @click="() => copyText(card.id)"
+                              ><Icon icon="fluent-emoji-flat:id-button" color="grey" />
+                              复制系统任务ID</a-menu-item
+                            >
+                            <a-menu-item
+                              v-if="card.taskImage.infoImageList.length === 1"
+                              key="7"
+                              @click="() => copyText(card.taskImage.infoImageList[0].url)"
+                              ><Icon icon="fluent-emoji-flat:keycap-1" color="grey" />
+                              复制图片链接</a-menu-item
+                            >
+                            <a-menu-item
+                              v-if="card.taskImage.infoImageList.length > 1"
+                              key="7"
+                              @click="() => copyText(card.taskImage.infoImageList[0].url)"
+                              ><Icon icon="fluent-emoji-flat:keycap-1" color="grey" />
+                              复制图片1链接</a-menu-item
+                            >
+                            <a-menu-item
+                              v-if="card.taskImage.infoImageList.length > 1"
+                              key="8"
+                              @click="() => copyText(card.taskImage.infoImageList[1].url)"
+                              ><Icon icon="fluent-emoji-flat:keycap-2" color="grey" />
+                              复制图片2链接</a-menu-item
+                            >
+                            <a-menu-item
+                              v-if="card.taskImage.infoImageList.length > 1"
+                              key="9"
+                              @click="() => copyText(card.taskImage.infoImageList[2].url)"
+                              ><Icon icon="fluent-emoji-flat:keycap-3" color="grey" />
+                              复制图片3链接</a-menu-item
+                            >
+                            <a-menu-item
+                              v-if="card.taskImage.infoImageList.length > 1"
+                              key="10"
+                              @click="() => copyText(card.taskImage.infoImageList[3].url)"
+                              ><Icon icon="fluent-emoji-flat:keycap-4" color="grey" />
+                              复制图片4链接</a-menu-item
+                            >
+                          </a-menu>
+                        </template>
+                      </a-dropdown>
+                    </a-tooltip>
 
-                  <!-- <a-tooltip
+                    <!-- 添加到收藏 -->
+                    <a-tooltip title="添加到收藏">
+                      <a-button
+                        class="card-icon-button"
+                        @click="() => showAddCollectCategoryModel(card)"
+                      >
+                        <Icon icon="streamline-emojis:heart-with-arrow" size="14" color="#4F709C" />
+                      </a-button>
+                    </a-tooltip>
+
+                    <!-- <a-tooltip
                     v-if="card.prompt"
                     :overlayStyle="{ maxWidth: '500px' }"
                     trigger="click"
@@ -412,23 +426,23 @@
                       <Icon icon="ic:outline-info" size="14" color="#FFCC70" />
                     </a-button>
                   </a-tooltip> -->
-                  <a-tooltip>
-                    <template #title>
-                      <p
-                        style="margin: 5px; font-size: 12px; line-height: 1"
-                        v-for="(part, index) in generateTooltipText(card)"
-                        :key="index"
-                      >
-                        {{ part.trim() }}
-                      </p>
-                    </template>
-                    <a-button class="card-icon-button">
-                      <Icon icon="ic:baseline-add-alarm" size="14" color="#EE9322" />
-                    </a-button>
-                  </a-tooltip>
+                    <a-tooltip>
+                      <template #title>
+                        <p
+                          style="margin: 5px; font-size: 12px; line-height: 1"
+                          v-for="(part, index) in generateTooltipText(card)"
+                          :key="index"
+                        >
+                          {{ part.trim() }}
+                        </p>
+                      </template>
+                      <a-button class="card-icon-button">
+                        <Icon icon="ic:baseline-add-alarm" size="14" color="#EE9322" />
+                      </a-button>
+                    </a-tooltip>
 
-                  <a-tooltip title="删除">
-                    <!-- <a-popover trigger="click">
+                    <a-tooltip title="删除">
+                      <!-- <a-popover trigger="click">
                       <a-button class="card-icon-button">
                         <Icon icon="ic:baseline-delete-forever" size="14" color="#FF6969" />
                       </a-button>
@@ -463,61 +477,67 @@
                       </template>
                     </a-popover> -->
 
-                    <a-popconfirm
-                      :title="
-                        card.secState === 'SUBMITTED' ||
-                        card.secState === 'IN_PROGRESS' ||
-                        card.secState === 'SUCCESS'
-                          ? '是否确认移除任务？注意：该状态不会退还资源！请等待任务完成或者自动超时失败退还资源！'
-                          : '是否确认移除任务？'
-                      "
-                      ok-text="确认删除"
-                      cancel-text="取消"
-                      @confirm="deleteCard(card)"
-                    >
-                      <a-button class="card-icon-button">
-                        <SvgIcon name="delete" size="14" />
-                      </a-button>
-                    </a-popconfirm>
-                  </a-tooltip>
+                      <a-popconfirm
+                        :title="
+                          card.secState === 'SUBMITTED' ||
+                          card.secState === 'IN_PROGRESS' ||
+                          card.secState === 'SUCCESS'
+                            ? '是否确认移除任务？注意：该状态不会退还资源！请等待任务完成或者自动超时失败退还资源！'
+                            : '是否确认移除任务？'
+                        "
+                        ok-text="确认删除"
+                        cancel-text="取消"
+                        @confirm="deleteCard(card)"
+                      >
+                        <a-button class="card-icon-button">
+                          <SvgIcon name="delete" size="14" />
+                        </a-button>
+                      </a-popconfirm>
+                    </a-tooltip>
 
-                  <a-tooltip
-                    title="下载"
-                    v-if="card.state === 'SUCCESS' && card.commandType != 'DESCRIBE'"
-                  >
-                    <a-button class="card-icon-button" @click="doDownload(card)">
-                      <Icon icon="bx:bxs-cloud-download" size="14" color="#4F709C" />
-                    </a-button>
-                  </a-tooltip>
-                  <!-- 其他设置 -->
-                  <a-dropdown trigger="click">
-                    <a-button class="card-icon-button"><SvgIcon name="menu" size="14" /></a-button>
-                    <template #overlay>
-                      <a-menu>
-                        <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)"
-                          ><Icon icon="streamline-emojis:blossom" /> 添加标签</a-menu-item
-                        >
-                        <a-menu-item key="3" @click="() => showSampleView(card)"
-                          ><Icon icon="streamline-emojis:globe-showing-europe-africa" />
-                          添加到官方案例</a-menu-item
-                        >
-                        <a-menu-item key="8" @click="() => getSeed(card.id, false)"
-                          ><Icon icon="streamline-emojis:rocket" /> 获取Seed</a-menu-item
-                        >
-                      </a-menu>
-                    </template>
-                  </a-dropdown>
-                </a-button-group>
+                    <a-tooltip
+                      title="下载"
+                      v-if="card.state === 'SUCCESS' && card.commandType != 'DESCRIBE'"
+                    >
+                      <a-button class="card-icon-button" @click="doDownload(card)">
+                        <Icon icon="bx:bxs-cloud-download" size="14" color="#4F709C" />
+                      </a-button>
+                    </a-tooltip>
+                    <!-- 其他设置 -->
+                    <a-dropdown trigger="click">
+                      <a-button class="card-icon-button"
+                        ><SvgIcon name="menu" size="14"
+                      /></a-button>
+                      <template #overlay>
+                        <a-menu>
+                          <a-menu-item key="2" @click="() => showDrawTaskTagModel(card)"
+                            ><Icon icon="streamline-emojis:blossom" /> 添加标签</a-menu-item
+                          >
+                          <a-menu-item key="3" @click="() => showSampleView(card)"
+                            ><Icon icon="streamline-emojis:globe-showing-europe-africa" />
+                            添加到官方案例</a-menu-item
+                          >
+                          <a-menu-item key="8" @click="() => getSeed(card.id, false)"
+                            ><Icon icon="streamline-emojis:rocket" /> 获取Seed</a-menu-item
+                          >
+                        </a-menu>
+                      </template>
+                    </a-dropdown>
+                  </a-button-group>
+                </div>
               </div>
-            </div>
-            <div class="card-date-actions">
+              <div class="card-date-actions">
                 <a-button-group>
-                  <a-dropdown v-if="card.state === 'SUCCESS' &&
-                    (card.commandType === 'IMAGINE' ||
-                      card.commandType === 'BLEND' ||
-                      card.commandType === 'ZOOM' ||
-                      card.commandType === 'PAN' ||
-                      card.commandType === 'VARIATION')">
+                  <a-dropdown
+                    v-if="
+                      card.state === 'SUCCESS' &&
+                      (card.commandType === 'IMAGINE' ||
+                        card.commandType === 'BLEND' ||
+                        card.commandType === 'ZOOM' ||
+                        card.commandType === 'PAN' ||
+                        card.commandType === 'VARIATION')
+                    "
+                  >
                     <template #overlay>
                       <a-menu>
                         <a-menu-item
@@ -569,12 +589,16 @@
                     </a-button>
                   </a-dropdown>
 
-                  <a-dropdown v-if="card.state === 'SUCCESS' &&
-                    (card.commandType === 'IMAGINE' ||
-                      card.commandType === 'BLEND' ||
-                      card.commandType === 'ZOOM' ||
-                      card.commandType === 'PAN' ||
-                      card.commandType === 'VARIATION') && card.commandType != 'PAN'">
+                  <a-dropdown
+                    v-if="
+                      card.state === 'SUCCESS' &&
+                      (card.commandType === 'IMAGINE' ||
+                        card.commandType === 'BLEND' ||
+                        card.commandType === 'ZOOM' ||
+                        card.commandType === 'PAN' ||
+                        card.commandType === 'VARIATION')
+                    "
+                  >
                     <template #overlay>
                       <a-menu>
                         <a-menu-item
@@ -631,14 +655,15 @@
                       <DownOutlined />
                     </a-button>
                   </a-dropdown>
-              
+
                   <a-dropdown
                     v-if="
-                    (card.state === 'SUCCESS' && card.commandType === 'UPSCALE') &&
+                      card.state === 'SUCCESS' &&
+                      card.commandType === 'UPSCALE' &&
                       (card.buttonMap['⬆️'] ||
-                      card.buttonMap['⬅️'] ||
-                      card.buttonMap['⬇️'] ||
-                      card.buttonMap['➡️'])
+                        card.buttonMap['⬅️'] ||
+                        card.buttonMap['⬇️'] ||
+                        card.buttonMap['➡️'])
                     "
                   >
                     <template #overlay>
@@ -647,18 +672,10 @@
                           ><Icon icon="mdi:pan-up" size="14px" style="margin: 0" />上</a-menu-item
                         >
                         <a-menu-item key="down" v-if="card.buttonMap['⬇️']"
-                          ><Icon
-                            icon="mdi:pan-down"
-                            size="14px"
-                            style="margin: 0"
-                          />下</a-menu-item
+                          ><Icon icon="mdi:pan-down" size="14px" style="margin: 0" />下</a-menu-item
                         >
                         <a-menu-item key="left" v-if="card.buttonMap['⬅️']"
-                          ><Icon
-                            icon="mdi:pan-left"
-                            size="14px"
-                            style="margin: 0"
-                          />左</a-menu-item
+                          ><Icon icon="mdi:pan-left" size="14px" style="margin: 0" />左</a-menu-item
                         >
                         <a-menu-item key="right" v-if="card.buttonMap['➡️']"
                           ><Icon
@@ -675,7 +692,13 @@
                       <DownOutlined />
                     </a-button>
                   </a-dropdown>
-                  <a-dropdown v-if="(card.state === 'SUCCESS' && card.commandType === 'UPSCALE') && card.buttonMap['Zoom Out 1.5x']">
+                  <a-dropdown
+                    v-if="
+                      card.state === 'SUCCESS' &&
+                      card.commandType === 'UPSCALE' &&
+                      card.buttonMap['Zoom Out 1.5x']
+                    "
+                  >
                     <template #overlay>
                       <a-menu @click="($event) => handleZoom(card, 'ZOOM', $event)">
                         <a-menu-item key="Zoom Out 1.5x" v-if="card.buttonMap['Zoom Out 1.5x']"
@@ -686,11 +709,8 @@
                           />1.5倍</a-menu-item
                         >
                         <a-menu-item key="Zoom Out 2x" v-if="card.buttonMap['Zoom Out 2x']"
-                          ><Icon
-                            icon="fluent:zoom-fit-16-regular"
-                            size="14px"
-                            style="margin: 0"
-                          />2 倍</a-menu-item
+                          ><Icon icon="fluent:zoom-fit-16-regular" size="14px" style="margin: 0" />2
+                          倍</a-menu-item
                         >
                         <a-menu-item key="Custom Zoom" v-if="card.buttonMap['Custom Zoom']"
                           ><Icon
@@ -716,15 +736,17 @@
                   </a-dropdown>
 
                   <a-dropdown
-                    v-if="(card.state === 'SUCCESS' && card.commandType === 'UPSCALE') &&
+                    v-if="
+                      card.state === 'SUCCESS' &&
+                      card.commandType === 'UPSCALE' &&
                       (card.buttonMap['Vary (Strong)'] ||
-                      card.buttonMap['Vary (Subtle)'] ||
-                      card.buttonMap['Upscale (2x)'] ||
-                      card.buttonMap['Upscale (4x)'] ||
-                      card.buttonMap['Redo Upscale (Subtle)'] ||
-                      card.buttonMap['Redo Upscale (Creative)'] ||
-                      card.buttonMap['Upscale (Subtle)'] ||
-                      card.buttonMap['Upscale (Creative)'])
+                        card.buttonMap['Vary (Subtle)'] ||
+                        card.buttonMap['Upscale (2x)'] ||
+                        card.buttonMap['Upscale (4x)'] ||
+                        card.buttonMap['Redo Upscale (Subtle)'] ||
+                        card.buttonMap['Redo Upscale (Creative)'] ||
+                        card.buttonMap['Upscale (Subtle)'] ||
+                        card.buttonMap['Upscale (Creative)'])
                     "
                   >
                     <template #overlay>
@@ -803,9 +825,7 @@
                         <a-menu-item
                           key="Redo Upscale (Creative)"
                           v-if="card.buttonMap['Redo Upscale (Creative)']"
-                          @click="
-                            ($event) => handleU(card, 'Redo Upscale (Creative)', 'creative')
-                          "
+                          @click="($event) => handleU(card, 'Redo Upscale (Creative)', 'creative')"
                           ><Icon
                             icon="fluent:scale-fill-24-regular"
                             size="14px"
@@ -832,8 +852,10 @@
                     </a-button>
                   </a-dropdown>
                   <a-dropdown
-                    v-if=" (card.state === 'SUCCESS' && card.commandType === 'UPSCALE') && (
-                      card.buttonMap['Redo Upscale (4x)'] || card.buttonMap['Redo Upscale (2x)'])
+                    v-if="
+                      card.state === 'SUCCESS' &&
+                      card.commandType === 'UPSCALE' &&
+                      (card.buttonMap['Redo Upscale (4x)'] || card.buttonMap['Redo Upscale (2x)'])
                     "
                   >
                     <template #overlay>
@@ -865,224 +887,224 @@
                   </a-dropdown>
                 </a-button-group>
                 <div v-if="card.state === 'SUCCESS' && card.commandType === 'DESCRIBE'">
-                    <a-row>
-                      <a-dropdown>
-                        <template #overlay>
-                          <a-menu @click="($event) => handleDraw(card, $event)">
-                            <a-menu-item key="0"
-                              ><Icon
-                                icon="tabler:square-number-1"
-                                size="14px"
-                                style="margin: 0"
-                              />Prompt</a-menu-item
-                            >
-                            <a-menu-item key="1"
-                              ><Icon icon="tabler:square-number-2" size="14px" style="margin: 0" />
-                              Prompt</a-menu-item
-                            >
-                            <a-menu-item key="2"
-                              ><Icon icon="tabler:square-number-3" size="14px" style="margin: 0" />
-                              Prompt</a-menu-item
-                            >
-                            <a-menu-item key="3"
-                              ><Icon icon="tabler:square-number-4" size="14px" style="margin: 0" />
-                              Prompt</a-menu-item
-                            >
-                            <a-menu-item key="4">全部 Prompt</a-menu-item>
-                          </a-menu>
-                        </template>
-                        <a-button size="small" class="card-button">
-                          <Icon icon="fluent:slide-text-24-regular" size="14px" style="margin: 0" />
-                          <span style="margin: 0">提示词</span>
-                        </a-button>
-                      </a-dropdown>
-                      <a-radio
-                        class="check"
-                        v-if="needShow(card)"
-                        style="margin-left: 5px"
-                        v-model:value="describeInfo.autoReferImage"
-                        >垫图</a-radio
-                      >
-                    </a-row>
+                  <a-row>
+                    <a-dropdown>
+                      <template #overlay>
+                        <a-menu @click="($event) => handleDraw(card, $event)">
+                          <a-menu-item key="0"
+                            ><Icon
+                              icon="tabler:square-number-1"
+                              size="14px"
+                              style="margin: 0"
+                            />Prompt</a-menu-item
+                          >
+                          <a-menu-item key="1"
+                            ><Icon icon="tabler:square-number-2" size="14px" style="margin: 0" />
+                            Prompt</a-menu-item
+                          >
+                          <a-menu-item key="2"
+                            ><Icon icon="tabler:square-number-3" size="14px" style="margin: 0" />
+                            Prompt</a-menu-item
+                          >
+                          <a-menu-item key="3"
+                            ><Icon icon="tabler:square-number-4" size="14px" style="margin: 0" />
+                            Prompt</a-menu-item
+                          >
+                          <a-menu-item key="4">全部 Prompt</a-menu-item>
+                        </a-menu>
+                      </template>
+                      <a-button size="small" class="card-button">
+                        <Icon icon="fluent:slide-text-24-regular" size="14px" style="margin: 0" />
+                        <span style="margin: 0">提示词</span>
+                      </a-button>
+                    </a-dropdown>
+                    <a-radio
+                      class="check"
+                      v-if="needShow(card)"
+                      style="margin-left: 5px"
+                      v-model:value="describeInfo.autoReferImage"
+                      >垫图</a-radio
+                    >
+                  </a-row>
                 </div>
               </div>
-          </div>
-          <!-- 更多卡片内容 -->
-        </a-card>
-      </div>
-      <!-- 灯箱-->
-      <vue-easy-lightbox
-        :visible="lightBoxOptions.visibleRef"
-        :imgs="lightBoxOptions.imgsRef"
-        :index="lightBoxOptions.indexRef"
-        @hide="onHide"
-        @on-next-click="onNextClick"
-        @on-prev-click="onPrevClick"
-      >
-        <template #prev-btn="{ prev }">
-          <div
-            v-if="lightBoxOptions.imgsRef.length > 1"
-            @click="prev"
-            role="button"
-            aria-label="previous image button"
-            class="btn__prev disable"
-            ><svg class="vel-icon icon" aria-hidden="true"><use xlink:href="#icon-prev" /></svg
-          ></div>
-        </template>
-
-        <template #next-btn="{ next }">
-          <div
-            v-if="lightBoxOptions.imgsRef.length > 1"
-            @click="next"
-            role="button"
-            aria-label="next image button"
-            class="btn__next"
-            ><svg class="vel-icon icon" aria-hidden="true"><use xlink:href="#icon-next" /></svg
-          ></div>
-        </template>
-
-        <template #close-btn="{ close }">
-          <div
-            @click="close"
-            role="button"
-            aria-label="close image preview button"
-            class="btn__close"
-            ><svg class="vel-icon icon" aria-hidden="true"><use xlink:href="#icon-close" /></svg
-          ></div>
-        </template>
-        <!-- 相关操作按钮 -->
-        <template #toolbar="{ toolbarMethods }">
-          <div class="vel-toolbar" v-if="lightBoxOptions.currentItem.state === 'SUCCESS'">
-            <div
-              @click="addDrawCollect(lightBoxOptions.currentItem)"
-              role="button"
-              aria-label="zoom in button"
-              class="toolbar-btn toolbar-btn__zoomin"
-              :color="lightBoxOptions.currentItem.collectFlag === 'Y' ? 'red' : 'default'"
-            >
-              <Icon
-                class="vel-icon icon"
-                v-if="lightBoxOptions.currentItem.collectFlag === 'N'"
-                icon="material-symbols:heart-plus-outline"
-                size="20"
-              />
-              <Icon
-                class="vel-icon icon"
-                v-else
-                icon="material-symbols:heart-plus"
-                color="#c85762"
-                size="20"
-              />
             </div>
+            <!-- 更多卡片内容 -->
+          </a-card>
+        </div>
+        <!-- 灯箱-->
+        <vue-easy-lightbox
+          :visible="lightBoxOptions.visibleRef"
+          :imgs="lightBoxOptions.imgsRef"
+          :index="lightBoxOptions.indexRef"
+          @hide="onHide"
+          @on-next-click="onNextClick"
+          @on-prev-click="onPrevClick"
+        >
+          <template #prev-btn="{ prev }">
             <div
-              @click="doDownload(lightBoxOptions.currentItem)"
+              v-if="lightBoxOptions.imgsRef.length > 1"
+              @click="prev"
               role="button"
-              aria-label="zoom in button"
-              class="toolbar-btn toolbar-btn__zoomin"
-            >
-              <a-tooltip
-                title="下载"
-                v-if="
-                  lightBoxOptions.currentItem.state === 'SUCCESS' &&
-                  lightBoxOptions.currentItem.commandType != 'DESCRIBE'
-                "
+              aria-label="previous image button"
+              class="btn__prev disable"
+              ><svg class="vel-icon icon" aria-hidden="true"><use xlink:href="#icon-prev" /></svg
+            ></div>
+          </template>
+
+          <template #next-btn="{ next }">
+            <div
+              v-if="lightBoxOptions.imgsRef.length > 1"
+              @click="next"
+              role="button"
+              aria-label="next image button"
+              class="btn__next"
+              ><svg class="vel-icon icon" aria-hidden="true"><use xlink:href="#icon-next" /></svg
+            ></div>
+          </template>
+
+          <template #close-btn="{ close }">
+            <div
+              @click="close"
+              role="button"
+              aria-label="close image preview button"
+              class="btn__close"
+              ><svg class="vel-icon icon" aria-hidden="true"><use xlink:href="#icon-close" /></svg
+            ></div>
+          </template>
+          <!-- 相关操作按钮 -->
+          <template #toolbar="{ toolbarMethods }">
+            <div class="vel-toolbar" v-if="lightBoxOptions.currentItem.state === 'SUCCESS'">
+              <div
+                @click="addDrawCollect(lightBoxOptions.currentItem)"
+                role="button"
+                aria-label="zoom in button"
+                class="toolbar-btn toolbar-btn__zoomin"
+                :color="lightBoxOptions.currentItem.collectFlag === 'Y' ? 'red' : 'default'"
               >
                 <Icon
-                  icon="bx:bxs-cloud-download"
                   class="vel-icon icon"
-                  aria-hidden="true"
+                  v-if="lightBoxOptions.currentItem.collectFlag === 'N'"
+                  icon="material-symbols:heart-plus-outline"
                   size="20"
                 />
-              </a-tooltip>
-            </div>
-            <div
-              @click="splitAndDownloadImage(lightBoxOptions.currentItem)"
-              role="button"
-              aria-label="zoom in button"
-              class="toolbar-btn toolbar-btn__zoomin"
-            >
-              <a-tooltip
-                title="分割下载"
-                v-if="
-                  lightBoxOptions.currentItem.state === 'SUCCESS' &&
-                  lightBoxOptions.currentItem.commandType != 'DESCRIBE'
-                "
-              >
                 <Icon
-                  icon="ri:scissors-cut-fill"
                   class="vel-icon icon"
-                  aria-hidden="true"
+                  v-else
+                  icon="material-symbols:heart-plus"
+                  color="#c85762"
                   size="20"
                 />
-              </a-tooltip>
-            </div>
-
-            <div
-              @click="copyText(lightBoxOptions.currentItem.prompt)"
-              role="button"
-              aria-label="zoom in button"
-              class="toolbar-btn toolbar-btn__zoomin"
-            >
-              <a-tooltip
-                title="复制prompt"
-                v-if="
-                  lightBoxOptions.currentItem.state === 'SUCCESS' &&
-                  lightBoxOptions.currentItem.commandType != 'DESCRIBE'
-                "
+              </div>
+              <div
+                @click="doDownload(lightBoxOptions.currentItem)"
+                role="button"
+                aria-label="zoom in button"
+                class="toolbar-btn toolbar-btn__zoomin"
               >
-                <Icon
-                  icon="material-symbols:file-copy-rounded"
-                  class="vel-icon icon"
-                  aria-hidden="true"
-                  size="18"
-                />
-              </a-tooltip>
-            </div>
-            <div
-              @click="handleU(lightBoxOptions.currentItem, 'U1', 'image')"
-              role="button"
-              aria-label="zoom out button"
-              class="toolbar-btn toolbar-btn__zoomout"
-              v-if="lightBoxOptions.currentItem.buttonMap['U1']"
-            >
-              <a-tooltip title="第1张大图">
-                <SearchOutlined class="vel-icon icon" aria-hidden="true" />U1
-              </a-tooltip>
-            </div>
-            <div
-              @click="handleU(lightBoxOptions.currentItem, 'U2', 'image')"
-              role="button"
-              aria-label="zoom out button"
-              class="toolbar-btn toolbar-btn__zoomout"
-              v-if="lightBoxOptions.currentItem.buttonMap['U2']"
-            >
-              <a-tooltip title="第2张大图">
-                <SearchOutlined class="vel-icon icon" aria-hidden="true" />U2
-              </a-tooltip>
-            </div>
-            <div
-              @click="handleU(lightBoxOptions.currentItem, 'U3', 'image')"
-              role="button"
-              aria-label="zoom out button"
-              class="toolbar-btn toolbar-btn__zoomout"
-              v-if="lightBoxOptions.currentItem.buttonMap['U3']"
-            >
-              <a-tooltip title="第3张大图">
-                <SearchOutlined class="vel-icon icon" aria-hidden="true" />U3
-              </a-tooltip>
-            </div>
-            <div
-              @click="handleU(lightBoxOptions.currentItem, 'U4', 'image')"
-              role="button"
-              aria-label="zoom out button"
-              class="toolbar-btn toolbar-btn__zoomout"
-              v-if="lightBoxOptions.currentItem.buttonMap['U4']"
-            >
-              <a-tooltip title="第4张大图">
-                <SearchOutlined class="vel-icon icon" aria-hidden="true" />U4
-              </a-tooltip>
-            </div>
-            <!-- <div
+                <a-tooltip
+                  title="下载"
+                  v-if="
+                    lightBoxOptions.currentItem.state === 'SUCCESS' &&
+                    lightBoxOptions.currentItem.commandType != 'DESCRIBE'
+                  "
+                >
+                  <Icon
+                    icon="bx:bxs-cloud-download"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                    size="20"
+                  />
+                </a-tooltip>
+              </div>
+              <div
+                @click="splitAndDownloadImage(lightBoxOptions.currentItem)"
+                role="button"
+                aria-label="zoom in button"
+                class="toolbar-btn toolbar-btn__zoomin"
+              >
+                <a-tooltip
+                  title="分割下载"
+                  v-if="
+                    lightBoxOptions.currentItem.state === 'SUCCESS' &&
+                    lightBoxOptions.currentItem.commandType != 'DESCRIBE'
+                  "
+                >
+                  <Icon
+                    icon="ri:scissors-cut-fill"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                    size="20"
+                  />
+                </a-tooltip>
+              </div>
+
+              <div
+                @click="copyText(lightBoxOptions.currentItem.prompt)"
+                role="button"
+                aria-label="zoom in button"
+                class="toolbar-btn toolbar-btn__zoomin"
+              >
+                <a-tooltip
+                  title="复制prompt"
+                  v-if="
+                    lightBoxOptions.currentItem.state === 'SUCCESS' &&
+                    lightBoxOptions.currentItem.commandType != 'DESCRIBE'
+                  "
+                >
+                  <Icon
+                    icon="material-symbols:file-copy-rounded"
+                    class="vel-icon icon"
+                    aria-hidden="true"
+                    size="18"
+                  />
+                </a-tooltip>
+              </div>
+              <div
+                @click="handleU(lightBoxOptions.currentItem, 'U1', 'image')"
+                role="button"
+                aria-label="zoom out button"
+                class="toolbar-btn toolbar-btn__zoomout"
+                v-if="lightBoxOptions.currentItem.buttonMap['U1']"
+              >
+                <a-tooltip title="第1张大图">
+                  <SearchOutlined class="vel-icon icon" aria-hidden="true" />U1
+                </a-tooltip>
+              </div>
+              <div
+                @click="handleU(lightBoxOptions.currentItem, 'U2', 'image')"
+                role="button"
+                aria-label="zoom out button"
+                class="toolbar-btn toolbar-btn__zoomout"
+                v-if="lightBoxOptions.currentItem.buttonMap['U2']"
+              >
+                <a-tooltip title="第2张大图">
+                  <SearchOutlined class="vel-icon icon" aria-hidden="true" />U2
+                </a-tooltip>
+              </div>
+              <div
+                @click="handleU(lightBoxOptions.currentItem, 'U3', 'image')"
+                role="button"
+                aria-label="zoom out button"
+                class="toolbar-btn toolbar-btn__zoomout"
+                v-if="lightBoxOptions.currentItem.buttonMap['U3']"
+              >
+                <a-tooltip title="第3张大图">
+                  <SearchOutlined class="vel-icon icon" aria-hidden="true" />U3
+                </a-tooltip>
+              </div>
+              <div
+                @click="handleU(lightBoxOptions.currentItem, 'U4', 'image')"
+                role="button"
+                aria-label="zoom out button"
+                class="toolbar-btn toolbar-btn__zoomout"
+                v-if="lightBoxOptions.currentItem.buttonMap['U4']"
+              >
+                <a-tooltip title="第4张大图">
+                  <SearchOutlined class="vel-icon icon" aria-hidden="true" />U4
+                </a-tooltip>
+              </div>
+              <!-- <div
               @click="
                 handleV(
                   lightBoxOptions.currentItem,
@@ -1096,75 +1118,75 @@
             >
               <span class="vel-icon icon"> V1 </span> </div
             > -->
-          </div>
+            </div>
 
-          <!-- 顶部居中 -->
-          <div class="opt-top-center">
-            <div class="vel-toolbar">
-              <div
-                @click="toolbarMethods.zoomIn"
-                role="button"
-                aria-label="zoom in button"
-                class="toolbar-btn toolbar-btn__zoomin"
-                ><svg class="vel-icon icon" aria-hidden="true">
-                  <use xlink:href="#icon-zoomin" /></svg></div
-              ><div
-                @click="toolbarMethods.zoomOut"
-                role="button"
-                aria-label="zoom out button"
-                class="toolbar-btn toolbar-btn__zoomout"
-                ><svg class="vel-icon icon" aria-hidden="true">
-                  <use xlink:href="#icon-zoomout" /></svg></div
-              ><div
-                @click="toolbarMethods.resize"
-                role="button"
-                aria-label="resize image button"
-                class="toolbar-btn toolbar-btn__resize"
-                ><svg class="vel-icon icon" aria-hidden="true">
-                  <use xlink:href="#icon-resize" /></svg></div
-              ><div
-                @click="toolbarMethods.rotateLeft"
-                role="button"
-                aria-label="image rotate left button"
-                class="toolbar-btn toolbar-btn__rotate"
-                ><svg class="vel-icon icon" aria-hidden="true">
-                  <use xlink:href="#icon-rotate-left" /></svg></div
-              ><div
-                @click="toolbarMethods.rotateRight"
-                role="button"
-                aria-label="image rotate right button"
-                class="toolbar-btn toolbar-btn__rotate"
-                ><svg class="vel-icon icon" aria-hidden="true">
-                  <use xlink:href="#icon-rotate-right" />
-                </svg>
+            <!-- 顶部居中 -->
+            <div class="opt-top-center">
+              <div class="vel-toolbar">
+                <div
+                  @click="toolbarMethods.zoomIn"
+                  role="button"
+                  aria-label="zoom in button"
+                  class="toolbar-btn toolbar-btn__zoomin"
+                  ><svg class="vel-icon icon" aria-hidden="true">
+                    <use xlink:href="#icon-zoomin" /></svg></div
+                ><div
+                  @click="toolbarMethods.zoomOut"
+                  role="button"
+                  aria-label="zoom out button"
+                  class="toolbar-btn toolbar-btn__zoomout"
+                  ><svg class="vel-icon icon" aria-hidden="true">
+                    <use xlink:href="#icon-zoomout" /></svg></div
+                ><div
+                  @click="toolbarMethods.resize"
+                  role="button"
+                  aria-label="resize image button"
+                  class="toolbar-btn toolbar-btn__resize"
+                  ><svg class="vel-icon icon" aria-hidden="true">
+                    <use xlink:href="#icon-resize" /></svg></div
+                ><div
+                  @click="toolbarMethods.rotateLeft"
+                  role="button"
+                  aria-label="image rotate left button"
+                  class="toolbar-btn toolbar-btn__rotate"
+                  ><svg class="vel-icon icon" aria-hidden="true">
+                    <use xlink:href="#icon-rotate-left" /></svg></div
+                ><div
+                  @click="toolbarMethods.rotateRight"
+                  role="button"
+                  aria-label="image rotate right button"
+                  class="toolbar-btn toolbar-btn__rotate"
+                  ><svg class="vel-icon icon" aria-hidden="true">
+                    <use xlink:href="#icon-rotate-right" />
+                  </svg>
+                </div>
               </div>
             </div>
-          </div>
-          <!-- prompt -->
-          <div class="vel-img-title">
-            {{ lightBoxOptions.currentItem.prompt }}
-          </div>
-        </template>
-      </vue-easy-lightbox>
-    </div>
+            <!-- prompt -->
+            <div class="vel-img-title">
+              {{ lightBoxOptions.currentItem.prompt }}
+            </div>
+          </template>
+        </vue-easy-lightbox>
+      </div>
 
-    <div ref="button">
-      <a-card class="pagination no-radius">
-        <a-pagination
-          size="small"
-          :current="pagination.current"
-          :pageSize="pagination.pageSize"
-          :pageSizeOptions="pagination.pageSizeOptions"
-          :total="pagination.total"
-          :showSizeChanger="pagination.showSizeChanger"
-          :showTotal="pagination.showTotal"
-          @change="pageChange"
-          @showSizeChange="pageSizeChange"
-          style="margin-left: 10px"
-        />
-      </a-card>
-    </div>
-  </a-card>
+      <div ref="button">
+        <a-card class="pagination no-radius">
+          <a-pagination
+            size="small"
+            :current="pagination.current"
+            :pageSize="pagination.pageSize"
+            :pageSizeOptions="pagination.pageSizeOptions"
+            :total="pagination.total"
+            :showSizeChanger="pagination.showSizeChanger"
+            :showTotal="pagination.showTotal"
+            @change="pageChange"
+            @showSizeChange="pageSizeChange"
+            style="margin-left: 10px"
+          />
+        </a-card>
+      </div>
+    </a-card>
   </div>
 
   <!-- remix弹窗-->
@@ -1885,7 +1907,6 @@
       pagination.value.pageSize = 30;
     }
     window.addEventListener('message', handleMessage, false);
-
   });
 
   onBeforeUnmount(() => {
@@ -2018,12 +2039,10 @@
       } else {
         exampleForm.value.drawingSampleCategory = accountViewForm.drawingSampleCategory;
       }
-    }finally {
+    } finally {
       exampleForm.value.loading = false;
     }
-
   };
-  
 
   /*************************************** 相关包装方法 ********************************************* */
 
